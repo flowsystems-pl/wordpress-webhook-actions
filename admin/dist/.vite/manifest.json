@@ -1,0 +1,12 @@
+{
+  "src/main.js": {
+    "file": "assets/main-CaFatvFm.js",
+    "name": "main",
+    "src": "src/main.js",
+    "isEntry": true
+  },
+  "style.css": {
+    "file": "assets/style-Bfi0_pVC.css",
+    "src": "style.css"
+  }
+}

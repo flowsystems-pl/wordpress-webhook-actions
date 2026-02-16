@@ -1,0 +1,14 @@
+{
+  "autoload": {
+    "psr-4": {
+      "FlowSystems\\WebhookActions\\": "src/"
+    }
+  },
+  "config": {
+    "php": ">7.4",
+    "platform-check": false,
+    "platform": {
+      "php": "8.2.15"
+    }
+  }
+}

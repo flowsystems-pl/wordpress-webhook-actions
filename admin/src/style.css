@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    --font-mono:
+      ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+      'Liberation Mono', monospace;
+  }
+
+  /* Light mode */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 157 100% 40%;
+    --primary-foreground: 240 22% 5%;
+    --secondary: 240 10% 94%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 240 10% 94%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 191 100% 45%;
+    --accent-foreground: 240 22% 5%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 157 100% 40%;
+  }
+
+  /* Dark mode (default) */
+  .dark {
+    --background: 240 22% 5%;
+    --foreground: 240 11% 92%;
+    --card: 240 17% 10%;
+    --card-foreground: 240 11% 92%;
+    --popover: 240 17% 10%;
+    --popover-foreground: 240 11% 92%;
+    --primary: 157 100% 50%;
+    --primary-foreground: 240 22% 5%;
+    --secondary: 240 17% 14%;
+    --secondary-foreground: 240 11% 92%;
+    --muted: 240 17% 14%;
+    --muted-foreground: 240 4% 56%;
+    --accent: 191 100% 50%;
+    --accent-foreground: 240 22% 5%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 240 11% 92%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 157 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+/* Apply theme to #fswa-app container */
+#fswa-app {
+  @apply bg-background text-foreground;
+}
+
+/* Apply theme to #wpcontent when our plugin is active */
+#wpcontent.fswa-theme {
+  @apply bg-background;
+}
+
+/* WordPress admin overrides */
+#fswa-app {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+#fswa-app h1,
+#fswa-app h2,
+#fswa-app h3,
+#fswa-app h4,
+#fswa-app h5,
+#fswa-app h6 {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  @apply text-foreground;
+}
+
+#fswa-app *,
+#fswa-app *::before,
+#fswa-app *::after {
+  box-sizing: border-box;
+}
+
+/* Reset WordPress admin styles */
+#fswa-app a {
+  text-decoration: none;
+}
+
+#fswa-app button {
+  cursor: pointer;
+}
+
+#fswa-app input:focus,
+#fswa-app button:focus,
+#fswa-app select:focus,
+#fswa-app textarea:focus,
+#fswa-app a:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+#fswa-app a:focus .gravatar,
+#fswa-app a:focus .media-icon img,
+#fswa-app a:focus .plugin-icon {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+input[type='color'],
+input[type='date'],
+input[type='datetime-local'],
+input[type='datetime'],
+input[type='email'],
+input[type='month'],
+input[type='number'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='text'],
+input[type='time'],
+input[type='url'],
+input[type='week'],
+select,
+textarea {
+  color: inherit;
+}
+
+/* Button hover effect */
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-primary-foreground transition-all duration-200;
+  }
+
+  .btn-primary:hover {
+    @apply bg-accent text-accent-foreground;
+  }
+}
+
+/* Logo animation */
+.flow-logo {
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.flow-logo .cursor {
+  animation: blink 1s step-end infinite;
+  color: hsl(var(--primary));
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
