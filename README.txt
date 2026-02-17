@@ -1,6 +1,6 @@
 === Flow Systems Webhook Actions ===
 Contributors: mateuszflowsystems
-Tags: webhook, automation, n8n, zapier, make, woocommerce
+Tags: webhook, woocommerce, automation, hooks, n8n
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
@@ -8,7 +8,7 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Trigger HTTP webhooks from any WordPress or WooCommerce action. Send structured data to n8n, Zapier, Make, or custom automation workflows.
+WordPress webhook plugin for developers. Trigger HTTP webhooks from any WordPress or WooCommerce action with async retries and payload mapping.
 
 == Description ==
 
