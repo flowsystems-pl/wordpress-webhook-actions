@@ -108,11 +108,12 @@ class Dispatcher {
         $mappingApplied
       );
 
-      // Enqueue to database queue with log_id for later update
       $this->queueService->enqueue($webhookId, $trigger, [
         'webhook' => $webhook,
         'payload' => $transformedPayload,
         'log_id' => $logId,
+        'mapping_applied' => $mappingApplied,
+        'original_payload' => $originalPayload,
       ]);
     }
   }
@@ -193,6 +194,24 @@ class Dispatcher {
     $payload = $jobData['payload'];
     $trigger = $job['trigger_name'];
     $logId = !empty($jobData['log_id']) ? (int) $jobData['log_id'] : null;
+    $mappingApplied = (bool) ($jobData['mapping_applied'] ?? false);
+    $originalPayload = $jobData['original_payload'] ?? null;
+
+    if ($logId === null) {
+      $webhookId = isset($webhook['id']) ? (int) $webhook['id'] : 0;
+      if ($webhookId > 0) {
+        $recoveredId = $this->logService->logPending(
+          $webhookId,
+          $trigger,
+          $payload,
+          $originalPayload ?: null,
+          $mappingApplied
+        );
+        if ($recoveredId) {
+          $logId = $recoveredId;
+        }
+      }
+    }
 
     return $this->sendToWebhook($webhook, $payload, $trigger, $logId);
   }
@@ -273,24 +292,51 @@ class Dispatcher {
    * @return array<string, mixed> Normalized arguments
    */
   private function normalizeArgs(array $args): array {
-    return array_map(function ($arg) {
-      if (is_scalar($arg) || $arg === null) {
-        return $arg;
+    return array_map([$this, 'normalizeValue'], $args);
+  }
+
+  /**
+   * Recursively normalize a single value for payload serialization
+   *
+   * @param mixed $value Value to normalize
+   * @return mixed Normalized value
+   */
+  private function normalizeValue(mixed $value): mixed {
+    if (is_scalar($value) || $value === null) {
+      return $value;
+    }
+
+    if (is_array($value)) {
+      return array_map([$this, 'normalizeValue'], $value);
+    }
+
+    if (is_object($value)) {
+      if ($value instanceof \Closure) {
+        return null;
       }
 
-      if (is_array($arg)) {
-        return $arg;
+      if ($value instanceof \DateTimeInterface) {
+        return $value->format(\DateTime::ATOM);
       }
 
-      if (is_object($arg)) {
-        return [
-          '__type' => get_class($arg),
-          'id' => $arg->ID ?? null,
-        ];
+      if ($value instanceof \Traversable) {
+        return array_map([$this, 'normalizeValue'], iterator_to_array($value, false));
       }
 
-      return null;
-    }, $args);
+      if (method_exists($value, 'get_data')) {
+        $data = $value->get_data();
+      } elseif ($value instanceof \JsonSerializable) {
+        $data = $value->jsonSerialize();
+      } else {
+        $data = get_object_vars($value);
+      }
+
+      $data = is_array($data) ? array_map([$this, 'normalizeValue'], $data) : ['value' => (string) $value];
+
+      return array_merge(['__type' => get_class($value)], $data);
+    }
+
+    return null;
   }
 
   /**
