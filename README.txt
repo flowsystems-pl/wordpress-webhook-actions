@@ -4,7 +4,7 @@ Tags: webhook, woocommerce, automation, hooks, n8n
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -137,6 +137,13 @@ Yes. The plugin is completely free and licensed under GPL.
 7. Settings configuration screen
 
 == Changelog ==
+
+= 1.0.1 =
+- Fixed preview freezing when mapping fields from objects with numeric string keys (e.g. WooCommerce line_items)
+- Fixed orphaned pending log entries caused by logPending() silently failing — queue jobs now carry mapping metadata and recover a proper log entry if the original ID was lost
+- Enhanced normalizeValue to handle Closure, DateTimeInterface, and Traversable types
+- Removed unnecessary WooCommerce hook patterns from trigger exclusions
+- Improved log details display with word break for long trigger names and dates
 
 = 1.0.0 =
 - Initial release
