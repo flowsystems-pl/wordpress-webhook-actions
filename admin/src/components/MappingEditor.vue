@@ -408,23 +408,51 @@ const isValidSourcePath = (path) => {
 };
 
 // Set value by dot-notation path
-const setValueByPath = (obj, path, value) => {
+// ref: optional reference object (e.g. the original payload) used to determine
+// whether intermediate containers should be arrays or plain objects.
+// Without ref, large numeric-keyed objects like WC line_items { "303962": {...} }
+// would be mis-created as sparse arrays with 303k empty slots.
+const setValueByPath = (obj, path, value, ref = null) => {
   const keys = path.split('.');
   let current = obj;
+  let currentRef = ref;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
     const nextKey = keys[i + 1];
-    const isNextNumeric = /^\d+$/.test(nextKey);
 
-    // If the key doesn't exist or is a primitive, create the appropriate structure
     if (
       current[key] === undefined ||
       current[key] === null ||
       typeof current[key] !== 'object'
     ) {
-      current[key] = isNextNumeric ? [] : {};
+      let isNextArray = false;
+      if (currentRef !== null && currentRef !== undefined && typeof currentRef === 'object') {
+        // Look at what the ref holds at `key` to decide the container type
+        const refVal = Array.isArray(currentRef)
+          ? currentRef[parseInt(key, 10)]
+          : currentRef[key];
+        if (refVal !== undefined && refVal !== null) {
+          isNextArray = Array.isArray(refVal);
+        } else {
+          // Path doesn't exist in ref — fall back to numeric heuristic
+          isNextArray = /^\d+$/.test(nextKey);
+        }
+      } else {
+        isNextArray = /^\d+$/.test(nextKey);
+      }
+      current[key] = isNextArray ? [] : {};
     }
+
+    // Advance the reference pointer in parallel with current
+    if (currentRef !== null && currentRef !== undefined && typeof currentRef === 'object') {
+      currentRef = Array.isArray(currentRef)
+        ? currentRef[parseInt(key, 10)]
+        : currentRef[key];
+    } else {
+      currentRef = null;
+    }
+
     current = current[key];
   }
 
@@ -491,7 +519,7 @@ const transformedPreview = computed(() => {
   for (const map of mappings) {
     const value = getValueByPath(effectivePayload.value, map.source);
     if (value !== undefined) {
-      setValueByPath(result, map.target, value);
+      setValueByPath(result, map.target, value, effectivePayload.value);
     }
   }
 
@@ -505,7 +533,7 @@ const transformedPreview = computed(() => {
       if (isPathExcluded(path, excluded)) continue;
 
       // Include this field at its original path
-      setValueByPath(result, path, value);
+      setValueByPath(result, path, value, effectivePayload.value);
     }
   }
 
@@ -522,9 +550,8 @@ const formatJsonWithHighlight = (obj, indent = 0) => {
 
   if (typeof obj === 'string') {
     const escaped = obj.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-    const truncated =
-      escaped.length > 50 ? escaped.substring(0, 50) + '...' : escaped;
-    return `<span class="text-green-600 dark:text-green-400">"${truncated}"</span>`;
+
+    return `<span class="text-green-600 dark:text-green-400">"${escaped}"</span>`;
   }
 
   if (typeof obj === 'number') {
@@ -538,29 +565,22 @@ const formatJsonWithHighlight = (obj, indent = 0) => {
   if (Array.isArray(obj)) {
     if (obj.length === 0) return '[]';
     const items = obj
-      .slice(0, 10)
       .map(
         (item) => `${nextIndent}${formatJsonWithHighlight(item, indent + 1)}`,
       );
-    const suffix =
-      obj.length > 10
-        ? `,\n${nextIndent}<span class="text-gray-400">... ${obj.length - 10} more</span>`
-        : '';
-    return `[\n${items.join(',\n')}${suffix}\n${indentStr}]`;
+
+    return `[\n${items.join(',\n')}\n${indentStr}]`;
   }
 
   if (typeof obj === 'object') {
     const keys = Object.keys(obj);
     if (keys.length === 0) return '{}';
-    const entries = keys.slice(0, 20).map((key) => {
+    const entries = keys.map((key) => {
       const value = formatJsonWithHighlight(obj[key], indent + 1);
       return `${nextIndent}<span class="text-red-600 dark:text-red-400">"${key}"</span>: ${value}`;
     });
-    const suffix =
-      keys.length > 20
-        ? `,\n${nextIndent}<span class="text-gray-400">... ${keys.length - 20} more</span>`
-        : '';
-    return `{\n${entries.join(',\n')}${suffix}\n${indentStr}}`;
+
+    return `{\n${entries.join(',\n')}\n${indentStr}}`;
   }
 
   return String(obj);
