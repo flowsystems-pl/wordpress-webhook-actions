@@ -368,8 +368,6 @@ class TriggersController extends WP_REST_Controller {
       '/^wp_/',
       '/^woocommerce_before/',
       '/^woocommerce_after/',
-      '/^woocommerce_checkout_/',
-      '/^woocommerce_cart_/',
       // Filter hooks (usually not useful as triggers)
       '/_filter$/',
       '/_filters$/',
