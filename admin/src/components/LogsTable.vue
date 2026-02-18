@@ -244,11 +244,11 @@ const nextPage = () => {
           </div>
           <div>
             <div class="font-medium">Trigger</div>
-            <div class="text-muted-foreground font-mono">{{ selectedLog.trigger_name }}</div>
+            <div class="text-muted-foreground break-all">{{ selectedLog.trigger_name }}</div>
           </div>
           <div>
             <div class="font-medium">Created</div>
-            <div class="text-muted-foreground">{{ formatDate(selectedLog.created_at) }}</div>
+            <div class="text-muted-foreground break-all">{{ formatDate(selectedLog.created_at) }}</div>
           </div>
         </div>
       </div>
