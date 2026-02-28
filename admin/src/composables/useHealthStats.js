@@ -61,6 +61,13 @@ export function useHealthStats() {
     avg_duration_ms: 0,
   })
 
+  const observability = computed(() => stats.value?.observability ?? {
+    avg_attempts_per_event: 0,
+    oldest_pending_age_seconds: null,
+    queue_stuck: false,
+    wp_cron_only: false,
+  })
+
   onMounted(() => {
     if (!stats.value) {
       fetchStats()
@@ -85,5 +92,6 @@ export function useHealthStats() {
     logs,
     queue,
     velocity,
+    observability,
   }
 }

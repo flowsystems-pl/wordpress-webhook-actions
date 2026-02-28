@@ -1,75 +1,122 @@
 === Flow Systems Webhook Actions ===
 Contributors: mateuszflowsystems
-Tags: webhook, woocommerce, automation, hooks, n8n
+Tags: webhook, woocommerce, automation, n8n, integration
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-WordPress webhook plugin for developers. Trigger HTTP webhooks from any WordPress or WooCommerce action with async retries and payload mapping.
+Production-safe WordPress webhooks with retries, event IDs, queue processing, and full delivery observability.
 
 == Description ==
 
-Flow Systems Webhook Actions is a WordPress webhook plugin that lets you trigger HTTP webhooks from any WordPress or WooCommerce action (`do_action`).
+Flow Systems Webhook Actions is a developer-focused WordPress webhook delivery layer designed for reliable automation workflows.
 
-Instead of writing custom integration code, you can configure webhook endpoints directly from the admin panel and send structured JSON payloads to automation tools or external APIs.
+Trigger HTTP webhooks from any WordPress or WooCommerce action (`do_action`) and dispatch them asynchronously through a persistent queue with smart retries, event identity, and full delivery visibility.
 
-Webhooks are dispatched asynchronously with background processing, retry logic, and delivery logging to ensure reliable and non-blocking execution.
+Unlike basic “fire-and-forget” webhook implementations, this plugin ensures:
 
-= Typical use cases =
+- Delivery attempts are tracked
+- Failures are visible
+- Retries are automatic and intelligent
+- Events include stable identity metadata for idempotency
 
-- Send WooCommerce order data to n8n
-- Sync new WordPress users to a CRM
-- Trigger Slack notifications when a post is published
-- Send form submissions to an external API
-- Automate membership or subscription workflows
-- Connect WordPress events to internal backend systems
+Built for production environments where losing events is not acceptable.
 
-= Webhook Triggering =
+= Typical Use Cases =
 
-- Trigger webhooks from any WordPress action (`do_action`)
-- Support for core, custom, and WooCommerce hooks
-- JSON payload including hook name, arguments, timestamp, and site URL
-- Configurable webhook URL and optional Authorization header
-- HTTPS enforcement by default (configurable via filter)
+- Send WooCommerce orders to n8n with retry protection
+- Sync WordPress users to external CRMs safely
+- Trigger backend microservices from WP hooks
+- Send event-driven data to internal APIs
+- Replace fragile custom `wp_remote_post()` integrations
+- Build idempotent WordPress automation pipelines
 
-= Queue System =
+= Event Identity & Idempotency =
 
-- Asynchronous background processing via WP-Cron
-- Non-blocking execution to avoid slowing down user requests
-- Automatic retry with exponential backoff
+Every dispatched webhook includes:
+
+- Unique UUID (v4) per event
+- ISO 8601 UTC timestamp
+- Embedded `event.id`, `event.timestamp`, `event.version` in the payload
+- HTTP headers: `X-Event-Id`, `X-Event-Timestamp`
+
+This enables downstream deduplication, idempotent workflow design, and reliable debugging across systems.
+
+= Reliable Queue & Smart Retry =
+
+Webhooks are never sent directly from request execution. Instead:
+
+- Events are stored in a persistent database queue
+- Processed asynchronously via background jobs
+- Dispatched in batches to avoid performance impact
+
+Smart retry routing:
+
+- 5xx and 429 responses → automatic exponential backoff retry
+- 4xx and 3xx responses → immediately marked as `permanently_failed`
+- Configurable maximum retry attempts
+- Full attempt history stored per event
+
+No silent failures.
+
+= Delivery Observability =
+
+Operational visibility built into the admin panel:
+
+Status states: `pending`, `processing`, `success`, `failed` (retrying), `permanently_failed`
+
+- Attempt timeline per event
+- HTTP status codes and response bodies
+- Manual retry (single or bulk)
+
+Filter by: event UUID, target URL, date range, status
+
+Queue health metrics:
+
+- Average attempts per event
+- Oldest pending job age
+- Queue stuck detection
+- WP-Cron-only warning
+
+Designed as an operations console — not just a webhook sender.
 
 = Payload Mapping =
 
-- Transform payload structure before dispatch
+Adapt outgoing JSON payloads to match any external API:
+
 - Rename fields using dot notation
-- Exclude selected fields from webhook payload
-- Restructure payload to match external API requirements
-- Store example payloads to assist configuration
+- Restructure nested objects
+- Exclude sensitive or unnecessary data
+- Store example payloads for configuration
+- Modify via `fswa_payload` filter
 
-= Logging =
-
-- Log webhook delivery attempts
-- Store HTTP status codes and response bodies
-- View delivery history per webhook
-- Automatic cleanup based on retention settings
+Payloads always include stable event metadata for consistency.
 
 = Developer Friendly =
 
-- Internal REST endpoints used by the admin interface
-- Extensible via WordPress filters and actions
-- Clean namespace and unique prefixes to avoid conflicts
-- Built following WordPress.org coding standards
-
-= Why choose Flow Systems Webhook Actions? =
-
 - Works with any WordPress or WooCommerce action
-- Reliable background dispatch with retry logic
-- Payload mapping for adapting data to external systems
-- Transparent logging and delivery tracking
-- Designed for automation builders and developers
+- Internal REST endpoints power the admin interface
+- Fully extensible via filters and actions
+- Clean namespace and unique prefixes
+- Built according to WordPress.org standards
+- Supports system cron for improved reliability
+
+= Why Choose Flow Systems Webhook Actions? =
+
+Most WordPress webhook setups fire once, don't retry intelligently, don't provide delivery visibility, and don't expose event identity.
+
+Flow Systems Webhook Actions provides:
+
+- Persistent queue
+- Smart retry logic
+- Permanent failure state handling
+- Event UUIDs and timestamps
+- Full delivery logging and metrics
+
+Built for developers who need production-grade automation reliability.
 
 = Available Filters =
 
@@ -102,9 +149,9 @@ Webhooks are dispatched asynchronously with background processing, retry logic, 
 
 An action is a WordPress hook triggered at a specific moment, such as when a user is created, a post is saved, or an order is completed.
 
-= Can I use this plugin with n8n? =
+= Can I use this plugin with n8n or other automation tools? =
 
-Yes. This plugin works seamlessly with n8n webhook triggers and is designed with automation workflows in mind.
+This plugin works seamlessly with n8n webhook triggers and can be used with any automation platform or external API that accepts HTTP webhooks.
 
 = Does this plugin support WooCommerce hooks? =
 
@@ -138,6 +185,19 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
+= 1.1.0 =
+- Added event identity: each trigger dispatch generates a shared UUID and timestamp sent as `X-Event-Id` / `X-Event-Timestamp` headers and embedded in the payload under `event.{id,timestamp,version}`
+- Added smart retry routing: 5xx and 429 responses trigger an automatic retry with exponential backoff; 4xx and 3xx responses are immediately marked as permanently failed
+- Added `permanently_failed` status for non-retryable delivery failures
+- Added attempt history: each delivery attempt is recorded as a JSON array on the log entry, visible in the admin timeline view
+- Added per-log retry and bulk retry REST endpoints (`POST /logs/{id}/retry`, `POST /logs/bulk-retry`)
+- Added `event_uuid` and `target_url` filter parameters to logs and queue REST endpoints
+- Added date range filtering (`date_from`, `date_to`) to logs and queue list views with a shadcn-style calendar date/time picker
+- Added health observability metrics: average attempts per event, oldest pending age, queue stuck detection, WP-Cron-only warning
+- Added `queue.log_id` column linking queue jobs to their log entries
+- Updated admin UI: permanently failed badge, attempt timeline, per-row retry button, bulk retry, observability warning banners, new filter inputs
+- Updated footer with a review prompt linking to WordPress.org
+
 = 1.0.1 =
 - Fixed preview freezing when mapping fields from objects with numeric string keys (e.g. WooCommerce line_items)
 - Fixed orphaned pending log entries caused by logPending() silently failing — queue jobs now carry mapping metadata and recover a proper log entry if the original ID was lost
@@ -153,6 +213,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+This release adds new database columns (`event_uuid`, `event_timestamp`, `attempt_history`, `next_attempt_at` on logs; `log_id` on queue). The migration runs automatically on plugin activation or update. No manual steps required.
 
 = 1.0.0 =
 Initial stable release.

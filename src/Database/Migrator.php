@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.0.0';
+  private const CURRENT_VERSION = '1.1.0';
 
   /**
    * Run pending migrations
@@ -64,6 +64,7 @@ class Migrator {
   private static function getMigrations(): array {
     return [
       '1.0.0' => [self::class, 'migration_1_0_0'],
+      '1.1.0' => [self::class, 'migration_1_1_0'],
     ];
   }
 
@@ -170,6 +171,54 @@ class Migrator {
         ) {$charsetCollate};";
 
     dbDelta($sqlSchemas);
+  }
+
+  /**
+   * Migration 1.1.0 - Add event identity and attempt history columns
+   */
+  public static function migration_1_1_0(): void {
+    global $wpdb;
+
+    $logsTable = $wpdb->prefix . 'fswa_logs';
+    $queueTable = $wpdb->prefix . 'fswa_queue';
+
+    // Columns to add to fswa_logs
+    $logsColumns = [
+      'event_uuid'      => "ALTER TABLE {$logsTable} ADD COLUMN event_uuid VARCHAR(36) DEFAULT NULL",
+      'event_timestamp' => "ALTER TABLE {$logsTable} ADD COLUMN event_timestamp DATETIME DEFAULT NULL",
+      'attempt_history' => "ALTER TABLE {$logsTable} ADD COLUMN attempt_history LONGTEXT DEFAULT NULL",
+      'next_attempt_at' => "ALTER TABLE {$logsTable} ADD COLUMN next_attempt_at DATETIME DEFAULT NULL",
+    ];
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    foreach ($logsColumns as $column => $sql) {
+      $exists = $wpdb->get_var($wpdb->prepare(
+        "SHOW COLUMNS FROM {$logsTable} LIKE %s",
+        $column
+      ));
+      if (!$exists) {
+        $wpdb->query($sql);
+      }
+    }
+
+    // Add index on event_uuid if not exists
+    $indexExists = $wpdb->get_var(
+      "SHOW INDEX FROM {$logsTable} WHERE Key_name = 'idx_event_uuid'"
+    );
+    if (!$indexExists) {
+      $wpdb->query("ALTER TABLE {$logsTable} ADD KEY idx_event_uuid (event_uuid)");
+    }
+
+    // Add log_id column to fswa_queue
+    $logIdExists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$queueTable} LIKE %s",
+      'log_id'
+    ));
+    if (!$logIdExists) {
+      $wpdb->query("ALTER TABLE {$queueTable} ADD COLUMN log_id BIGINT UNSIGNED DEFAULT NULL");
+      $wpdb->query("ALTER TABLE {$queueTable} ADD KEY idx_log_id (log_id)");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
 
   /**

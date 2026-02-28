@@ -84,7 +84,12 @@ const isActive = (path) => {
         >
           Flow_Systems<span class="cursor">█</span>
         </a>
-        <span>Automation & Integration</span>
+        <span class="text-muted-foreground">⭐ Love the plugin? <a
+          href="https://wordpress.org/support/plugin/flowsystems-webhook-actions/reviews/#new-post"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="underline underline-offset-2 hover:text-foreground transition-colors"
+        >Leave a review on WordPress.org</a></span>
       </div>
     </footer>
   </div>

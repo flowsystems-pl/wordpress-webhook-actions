@@ -22,9 +22,10 @@ class QueueService {
    * @param string $trigger
    * @param array $payload
    * @param DateTime|null $scheduledAt When to process (null = now)
+   * @param int|null $logId Associated log ID
    * @return int Job ID
    */
-  public function enqueue(int $webhookId, string $trigger, array $payload, ?DateTime $scheduledAt = null): int {
+  public function enqueue(int $webhookId, string $trigger, array $payload, ?DateTime $scheduledAt = null, ?int $logId = null): int {
     if ($scheduledAt === null) {
       $scheduledAt = new DateTime('now', new DateTimeZone('UTC'));
     }
@@ -36,7 +37,7 @@ class QueueService {
      */
     $maxAttempts = (int) apply_filters('fswa_max_attempts', 5);
 
-    return $this->repository->insert([
+    $data = [
       'webhook_id' => $webhookId,
       'trigger_name' => $trigger,
       'payload' => wp_json_encode($payload),
@@ -45,7 +46,13 @@ class QueueService {
       'max_attempts' => $maxAttempts,
       'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
       'created_at' => current_time('mysql', true),
-    ]);
+    ];
+
+    if ($logId !== null) {
+      $data['log_id'] = $logId;
+    }
+
+    return $this->repository->insert($data);
   }
 
   /**
@@ -111,40 +118,53 @@ class QueueService {
   }
 
   /**
+   * Mark a job as permanently failed (non-retryable or max attempts exceeded)
+   *
+   * @param int $jobId
+   */
+  public function markPermanentlyFailed(int $jobId): void {
+    $this->repository->update($jobId, [
+      'status' => 'permanently_failed',
+      'locked_at' => null,
+      'locked_by' => null,
+    ]);
+  }
+
+  /**
    * Reschedule a job with exponential backoff
    *
    * @param int $jobId
-   * @return bool True if rescheduled, false if max attempts reached
+   * @return array{rescheduled: bool, scheduled_at: string|null}
    */
-  public function rescheduleWithBackoff(int $jobId): bool {
+  public function rescheduleWithBackoff(int $jobId): array {
     $job = $this->repository->find($jobId);
 
     if (!$job) {
-      return false;
+      return ['rescheduled' => false, 'scheduled_at' => null];
     }
 
     $newAttempts = (int) $job['attempts'] + 1;
     $maxAttempts = (int) $job['max_attempts'];
 
     if ($newAttempts >= $maxAttempts) {
-      $this->markFailed($jobId, 'Max retry attempts exceeded');
-      return false;
+      return ['rescheduled' => false, 'scheduled_at' => null];
     }
 
     // Calculate backoff delay: min(2^attempts * 30, 3600) seconds
     $delaySeconds = min(pow(2, $newAttempts) * 30, 3600);
     $scheduledAt = new DateTime('now', new DateTimeZone('UTC'));
     $scheduledAt->modify("+{$delaySeconds} seconds");
+    $scheduledAtStr = $scheduledAt->format('Y-m-d H:i:s');
 
     $this->repository->update($jobId, [
       'attempts' => $newAttempts,
       'status' => 'pending',
       'locked_at' => null,
       'locked_by' => null,
-      'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
+      'scheduled_at' => $scheduledAtStr,
     ]);
 
-    return true;
+    return ['rescheduled' => true, 'scheduled_at' => $scheduledAtStr];
   }
 
   /**
@@ -173,11 +193,14 @@ class QueueService {
       'processing' => 0,
       'completed' => 0,
       'failed' => 0,
+      'permanently_failed' => 0,
       'total' => 0,
     ];
 
     foreach ($stats as $row) {
-      $result[$row['status']] = (int) $row['count'];
+      if (array_key_exists($row['status'], $result)) {
+        $result[$row['status']] = (int) $row['count'];
+      }
       $result['total'] += (int) $row['count'];
     }
 
@@ -243,7 +266,7 @@ class QueueService {
   }
 
   /**
-   * Force retry a failed job immediately
+   * Force retry a failed or permanently failed job immediately
    *
    * @param int $jobId
    * @return bool
@@ -251,7 +274,7 @@ class QueueService {
   public function forceRetry(int $jobId): bool {
     $job = $this->repository->find($jobId);
 
-    if (!$job || $job['status'] !== 'failed') {
+    if (!$job || !in_array($job['status'], ['failed', 'permanently_failed'], true)) {
       return false;
     }
 
@@ -264,5 +287,14 @@ class QueueService {
       'locked_at' => null,
       'locked_by' => null,
     ]);
+  }
+
+  /**
+   * Get the repository instance
+   *
+   * @return QueueRepository
+   */
+  public function getRepository(): QueueRepository {
+    return $this->repository;
   }
 }

@@ -63,15 +63,22 @@ class Activation {
             status VARCHAR(20) NOT NULL DEFAULT 'pending',
             http_code SMALLINT UNSIGNED DEFAULT NULL,
             request_payload LONGTEXT,
+            original_payload LONGTEXT DEFAULT NULL,
+            mapping_applied TINYINT(1) NOT NULL DEFAULT 0,
             response_body LONGTEXT,
             error_message TEXT,
             duration_ms INT UNSIGNED DEFAULT NULL,
+            event_uuid VARCHAR(36) DEFAULT NULL,
+            event_timestamp DATETIME DEFAULT NULL,
+            attempt_history LONGTEXT DEFAULT NULL,
+            next_attempt_at DATETIME DEFAULT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY idx_webhook (webhook_id),
             KEY idx_status (status),
             KEY idx_created (created_at),
-            KEY idx_webhook_created (webhook_id, created_at)
+            KEY idx_webhook_created (webhook_id, created_at),
+            KEY idx_event_uuid (event_uuid)
         ) {$charsetCollate};";
 
     dbDelta($sqlLogs);
@@ -88,17 +95,18 @@ class Activation {
             locked_at DATETIME DEFAULT NULL,
             locked_by VARCHAR(64) DEFAULT NULL,
             scheduled_at DATETIME NOT NULL,
+            log_id BIGINT UNSIGNED DEFAULT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY idx_status_scheduled (status, scheduled_at),
             KEY idx_locked (locked_at, locked_by),
-            KEY idx_webhook (webhook_id)
+            KEY idx_webhook (webhook_id),
+            KEY idx_log_id (log_id)
         ) {$charsetCollate};";
 
     dbDelta($sqlQueue);
 
-
-    update_option('fswa_db_version', '1.0.0');
+    update_option('fswa_db_version', '1.1.0');
   }
 
   /**

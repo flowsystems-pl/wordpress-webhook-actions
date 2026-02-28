@@ -34,10 +34,22 @@ class QueueController extends WP_REST_Controller {
         'args' => [
           'status' => [
             'type' => 'string',
-            'enum' => ['pending', 'processing', 'completed', 'failed'],
+            'enum' => ['pending', 'processing', 'completed', 'failed', 'permanently_failed'],
           ],
           'webhook_id' => [
             'type' => 'integer',
+          ],
+          'event_uuid' => [
+            'type' => 'string',
+          ],
+          'target_url' => [
+            'type' => 'string',
+          ],
+          'date_from' => [
+            'type' => 'string',
+          ],
+          'date_to' => [
+            'type' => 'string',
           ],
           'per_page' => [
             'type' => 'integer',
@@ -109,7 +121,7 @@ class QueueController extends WP_REST_Controller {
     ]);
   }
 
-  public function permissionsCheck(WP_REST_Request $request): bool {
+  public function permissionsCheck(WP_REST_Request $_request): bool {
     return current_user_can('manage_options');
   }
 
@@ -129,6 +141,22 @@ class QueueController extends WP_REST_Controller {
 
     if ($request->get_param('webhook_id')) {
       $filters['webhook_id'] = (int) $request->get_param('webhook_id');
+    }
+
+    if ($request->get_param('event_uuid')) {
+      $filters['event_uuid'] = sanitize_text_field($request->get_param('event_uuid'));
+    }
+
+    if ($request->get_param('target_url')) {
+      $filters['target_url'] = sanitize_text_field($request->get_param('target_url'));
+    }
+
+    if ($request->get_param('date_from')) {
+      $filters['date_from'] = sanitize_text_field($request->get_param('date_from'));
+    }
+
+    if ($request->get_param('date_to')) {
+      $filters['date_to'] = sanitize_text_field($request->get_param('date_to'));
     }
 
     $jobs = $this->queueService->getJobs($filters, $perPage, $offset);
@@ -151,7 +179,8 @@ class QueueController extends WP_REST_Controller {
   /**
    * Get queue statistics
    */
-  public function getStats($request): WP_REST_Response {
+  /** @noinspection PhpUnusedParameterInspection */
+  public function getStats(WP_REST_Request $_request): WP_REST_Response {
     $stats = $this->queueService->getStats();
 
     return rest_ensure_response($stats);
@@ -189,7 +218,17 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
-    // Lock and process the job
+    // Decode payload
+    $jobData = json_decode($job['payload'], true);
+    if (!$jobData || !isset($jobData['webhook']) || !isset($jobData['payload'])) {
+      return new WP_Error(
+        'rest_job_invalid',
+        __('Job has invalid payload data.', 'flowsystems-webhook-actions'),
+        ['status' => 500]
+      );
+    }
+
+    // Lock the job
     $lockId = wp_generate_uuid4();
     if (!$this->queueService->lockJob($jobId, $lockId)) {
       return new WP_Error(
@@ -199,49 +238,44 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
-    // Process the job
-    $jobData = json_decode($job['payload'], true);
-    if (!$jobData || !isset($jobData['webhook']) || !isset($jobData['payload'])) {
-      $this->queueService->unlockJob($jobId);
-      return new WP_Error(
-        'rest_job_invalid',
-        __('Job has invalid payload data.', 'flowsystems-webhook-actions'),
-        ['status' => 500]
-      );
-    }
-
     $webhook = $jobData['webhook'];
     $payload = $jobData['payload'];
     $trigger = $job['trigger_name'];
+    $logId = !empty($job['log_id']) ? (int) $job['log_id'] : (!empty($jobData['log_id']) ? (int) $jobData['log_id'] : null);
+    $attempts = (int) ($job['attempts'] ?? 0);
 
     $transport = new WPHttpTransport();
-    $queueService = new QueueService();
-    $dispatcher = new Dispatcher($transport, $queueService);
+    $dispatcher = new Dispatcher($transport, $this->queueService);
 
-    $success = $dispatcher->sendToWebhook($webhook, $payload, $trigger);
+    $result = $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, $attempts);
 
-    if ($success) {
+    if ($result['success']) {
       $this->queueService->markCompleted($jobId);
       return rest_ensure_response([
         'success' => true,
         'message' => __('Job executed successfully.', 'flowsystems-webhook-actions'),
       ]);
-    } else {
-      // Check if we should reschedule or mark as failed
-      if ($this->queueService->rescheduleWithBackoff($jobId)) {
-        return rest_ensure_response([
-          'success' => false,
-          'message' => __('Job failed and has been rescheduled for retry.', 'flowsystems-webhook-actions'),
-          'rescheduled' => true,
-        ]);
-      } else {
-        return rest_ensure_response([
-          'success' => false,
-          'message' => __('Job failed and has exceeded maximum retry attempts.', 'flowsystems-webhook-actions'),
-          'rescheduled' => false,
-        ]);
-      }
     }
+
+    if ($result['shouldRetry']) {
+      $reschedule = $this->queueService->rescheduleWithBackoff($jobId);
+      return rest_ensure_response([
+        'success' => false,
+        'rescheduled' => $reschedule['rescheduled'],
+        'message' => $reschedule['rescheduled']
+          ? __('Job failed and has been rescheduled for retry.', 'flowsystems-webhook-actions')
+          : __('Job failed and has exceeded maximum retry attempts.', 'flowsystems-webhook-actions'),
+      ]);
+    }
+
+    // Non-retryable failure (4xx, bad config, etc.)
+    $this->queueService->markPermanentlyFailed($jobId);
+    return rest_ensure_response([
+      'success' => false,
+      'rescheduled' => false,
+      'permanently_failed' => true,
+      'message' => __('Job failed with a non-retryable error.', 'flowsystems-webhook-actions'),
+    ]);
   }
 
   /**
@@ -300,10 +334,10 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
-    if ($job['status'] !== 'failed') {
+    if (!in_array($job['status'], ['failed', 'permanently_failed'], true)) {
       return new WP_Error(
-        'rest_job_not_failed',
-        __('Only failed jobs can be retried.', 'flowsystems-webhook-actions'),
+        'rest_job_not_retryable',
+        __('Only failed or permanently failed jobs can be retried.', 'flowsystems-webhook-actions'),
         ['status' => 409]
       );
     }
@@ -330,12 +364,15 @@ class QueueController extends WP_REST_Controller {
   private function formatJob(array $job): array {
     $jobData = json_decode($job['payload'], true);
     $webhook = $jobData['webhook'] ?? [];
+    $eventPayload = $jobData['payload'] ?? [];
 
     $scheduledTimestamp = strtotime($job['scheduled_at']);
     $createdTimestamp = strtotime($job['created_at']);
 
     return [
       'id' => (int) $job['id'],
+      'log_id' => isset($job['log_id']) ? (int) $job['log_id'] : null,
+      'event_uuid' => $eventPayload['event']['id'] ?? null,
       'webhook_id' => (int) $job['webhook_id'],
       'webhook_name' => $webhook['name'] ?? null,
       'webhook_url' => $webhook['endpoint_url'] ?? null,
