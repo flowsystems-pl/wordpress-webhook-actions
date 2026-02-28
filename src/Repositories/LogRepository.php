@@ -387,8 +387,8 @@ class LogRepository {
       }
     }
 
-    // Total only counts completed deliveries (success + error)
-    $result['total'] = $result['success'] + $result['error'];
+    // Total counts completed deliveries (success + error + permanently_failed)
+    $result['total'] = $result['success'] + $result['error'] + $result['permanently_failed'];
 
     return $result;
   }
@@ -417,7 +417,7 @@ class LogRepository {
     $stats = $wpdb->get_results(
       "SELECT status, COUNT(*) as count
        FROM {$this->logsTable}
-       WHERE status IN ('success', 'error')
+       WHERE status IN ('success', 'error', 'permanently_failed')
        GROUP BY status",
       ARRAY_A
     );
@@ -433,8 +433,8 @@ class LogRepository {
       $count = (int) $stat['count'];
       if ($stat['status'] === 'success') {
         $result['total_success'] = $count;
-      } elseif ($stat['status'] === 'error') {
-        $result['total_error'] = $count;
+      } elseif ($stat['status'] === 'error' || $stat['status'] === 'permanently_failed') {
+        $result['total_error'] += $count;
       }
       $result['total_sent'] += $count;
     }

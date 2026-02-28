@@ -105,7 +105,7 @@ class LogArchiver {
       $wpdb->prepare(
         "SELECT status, COUNT(*) as count
          FROM {$logsTable}
-         WHERE created_at < %s AND status IN ('success', 'error')
+         WHERE created_at < %s AND status IN ('success', 'error', 'permanently_failed')
          GROUP BY status",
         $date
       ),
@@ -119,8 +119,8 @@ class LogArchiver {
     foreach ($stats as $stat) {
       if ($stat['status'] === 'success') {
         $success = (int) $stat['count'];
-      } elseif ($stat['status'] === 'error') {
-        $error = (int) $stat['count'];
+      } elseif ($stat['status'] === 'error' || $stat['status'] === 'permanently_failed') {
+        $error += (int) $stat['count'];
       }
     }
 
