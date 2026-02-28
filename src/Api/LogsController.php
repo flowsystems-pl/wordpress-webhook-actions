@@ -10,15 +10,21 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
+use FlowSystems\WebhookActions\Repositories\QueueRepository;
+use FlowSystems\WebhookActions\Services\QueueService;
 
 class LogsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
   protected $rest_base = 'logs';
 
   private LogRepository $repository;
+  private QueueRepository $queueRepository;
+  private QueueService $queueService;
 
   public function __construct() {
     $this->repository = new LogRepository();
+    $this->queueRepository = new QueueRepository();
+    $this->queueService = new QueueService($this->queueRepository);
   }
 
   /**
@@ -58,6 +64,33 @@ class LogsController extends WP_REST_Controller {
         'methods' => WP_REST_Server::DELETABLE,
         'callback' => [$this, 'deleteItem'],
         'permission_callback' => [$this, 'deleteItemPermissionsCheck'],
+      ],
+    ]);
+
+    // Retry the queue job associated with a single log
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/retry', [
+      [
+        'methods' => WP_REST_Server::CREATABLE,
+        'callback' => [$this, 'retryItem'],
+        'permission_callback' => [$this, 'getItemPermissionsCheck'],
+      ],
+    ]);
+
+    // Bulk retry queue jobs associated with multiple logs
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/bulk-retry', [
+      [
+        'methods' => WP_REST_Server::CREATABLE,
+        'callback' => [$this, 'bulkRetry'],
+        'permission_callback' => [$this, 'getItemsPermissionsCheck'],
+        'args' => [
+          'ids' => [
+            'description' => __('Array of log IDs to retry.', 'flowsystems-webhook-actions'),
+            'type' => 'array',
+            'items' => ['type' => 'integer'],
+            'required' => true,
+            'minItems' => 1,
+          ],
+        ],
       ],
     ]);
 
@@ -144,6 +177,14 @@ class LogsController extends WP_REST_Controller {
       $filters['date_to'] = sanitize_text_field($request->get_param('date_to'));
     }
 
+    if ($request->get_param('event_uuid')) {
+      $filters['event_uuid'] = sanitize_text_field($request->get_param('event_uuid'));
+    }
+
+    if ($request->get_param('target_url')) {
+      $filters['target_url'] = sanitize_text_field($request->get_param('target_url'));
+    }
+
     $page = (int) ($request->get_param('page') ?: 1);
     $perPage = (int) ($request->get_param('per_page') ?: 20);
 
@@ -227,6 +268,86 @@ class LogsController extends WP_REST_Controller {
   }
 
   /**
+   * Retry the queue job associated with a log entry
+   */
+  public function retryItem($request): WP_REST_Response|WP_Error {
+    $logId = (int) $request->get_param('id');
+
+    $log = $this->repository->find($logId);
+
+    if (!$log) {
+      return new WP_Error(
+        'rest_log_not_found',
+        __('Log not found.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    $job = $this->queueRepository->findByLogId($logId);
+
+    if (!$job) {
+      return new WP_Error(
+        'rest_job_not_found',
+        __('No queue job found for this log entry.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    if (!in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+      return new WP_Error(
+        'rest_job_not_retryable',
+        __('Only failed or permanently failed jobs can be retried.', 'flowsystems-webhook-actions'),
+        ['status' => 409]
+      );
+    }
+
+    $result = $this->queueService->forceRetry((int) $job['id']);
+
+    if (!$result) {
+      return new WP_Error(
+        'rest_retry_failed',
+        __('Failed to retry job.', 'flowsystems-webhook-actions'),
+        ['status' => 500]
+      );
+    }
+
+    return rest_ensure_response([
+      'success' => true,
+      'job_id' => (int) $job['id'],
+    ]);
+  }
+
+  /**
+   * Bulk retry queue jobs for multiple log entries
+   */
+  public function bulkRetry($request): WP_REST_Response {
+    $ids = (array) $request->get_param('ids');
+    $retried = 0;
+    $skipped = 0;
+
+    foreach ($ids as $logId) {
+      $logId = (int) $logId;
+      $job = $this->queueRepository->findByLogId($logId);
+
+      if (!$job || !in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+        $skipped++;
+        continue;
+      }
+
+      if ($this->queueService->forceRetry((int) $job['id'])) {
+        $retried++;
+      } else {
+        $skipped++;
+      }
+    }
+
+    return rest_ensure_response([
+      'retried' => $retried,
+      'skipped' => $skipped,
+    ]);
+  }
+
+  /**
    * Get logs for a specific webhook
    */
   public function getWebhookLogs($request): WP_REST_Response {
@@ -281,7 +402,7 @@ class LogsController extends WP_REST_Controller {
       'status' => [
         'description' => __('Filter by status.', 'flowsystems-webhook-actions'),
         'type' => 'string',
-        'enum' => ['success', 'error', 'retry', 'pending'],
+        'enum' => ['success', 'error', 'retry', 'pending', 'permanently_failed'],
       ],
       'trigger_name' => [
         'description' => __('Filter by trigger name.', 'flowsystems-webhook-actions'),
@@ -296,6 +417,14 @@ class LogsController extends WP_REST_Controller {
         'description' => __('Filter logs until this date.', 'flowsystems-webhook-actions'),
         'type' => 'string',
         'format' => 'date-time',
+      ],
+      'event_uuid' => [
+        'description' => __('Filter by event UUID (exact match).', 'flowsystems-webhook-actions'),
+        'type' => 'string',
+      ],
+      'target_url' => [
+        'description' => __('Filter by target URL (partial match).', 'flowsystems-webhook-actions'),
+        'type' => 'string',
       ],
     ];
   }

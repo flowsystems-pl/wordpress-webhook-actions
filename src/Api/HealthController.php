@@ -83,6 +83,8 @@ class HealthController extends WP_REST_Controller {
     // Get velocity stats
     $velocityStats = $this->logRepository->getVelocityStats();
 
+    $oldestPendingAge = $this->logRepository->getOldestPendingAgeSeconds();
+
     return rest_ensure_response([
       'success_rate' => $successRate,
       'has_data' => $hasData,
@@ -97,12 +99,14 @@ class HealthController extends WP_REST_Controller {
         'error' => $recentLogStats['error'],
         'pending' => $recentLogStats['pending'],
         'retry' => $recentLogStats['retry'],
+        'permanently_failed' => $recentLogStats['permanently_failed'] ?? 0,
       ],
       'queue' => [
         'pending' => $queueStats['pending'],
         'processing' => $queueStats['processing'],
         'completed' => $queueStats['completed'],
         'failed' => $queueStats['failed'],
+        'permanently_failed' => $queueStats['permanently_failed'] ?? 0,
         'total' => $queueStats['total'],
         'due_now' => $queueStats['due_now'],
       ],
@@ -110,6 +114,12 @@ class HealthController extends WP_REST_Controller {
         'last_hour' => $velocityStats['last_hour'],
         'last_day' => $velocityStats['last_day'],
         'avg_duration_ms' => $velocityStats['avg_duration_ms'],
+      ],
+      'observability' => [
+        'avg_attempts_per_event' => $this->logRepository->getAvgAttemptsPerEvent(),
+        'oldest_pending_age_seconds' => $oldestPendingAge,
+        'queue_stuck' => ($oldestPendingAge ?? 0) > 600,
+        'wp_cron_only' => (int) get_option('fswa_last_cron_run', 0) === 0,
       ],
     ]);
   }
