@@ -149,9 +149,9 @@ Built for developers who need production-grade automation reliability.
 
 An action is a WordPress hook triggered at a specific moment, such as when a user is created, a post is saved, or an order is completed.
 
-= Can I use this plugin with n8n? =
+= Can I use this plugin with n8n or other automation tools? =
 
-Yes. This plugin works seamlessly with n8n webhook triggers and is designed with automation workflows in mind.
+This plugin works seamlessly with n8n webhook triggers and can be used with any automation platform or external API that accepts HTTP webhooks.
 
 = Does this plugin support WooCommerce hooks? =
 
