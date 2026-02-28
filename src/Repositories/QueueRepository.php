@@ -270,6 +270,16 @@ class QueueRepository {
       $params[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
     }
 
+    if (!empty($filters['date_from'])) {
+      $where[] = 'created_at >= %s';
+      $params[] = $filters['date_from'];
+    }
+
+    if (!empty($filters['date_to'])) {
+      $where[] = 'created_at <= %s';
+      $params[] = $filters['date_to'];
+    }
+
     $whereClause = implode(' AND ', $where);
 
     $params[] = $limit;
@@ -319,6 +329,16 @@ class QueueRepository {
     if (!empty($filters['target_url'])) {
       $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.webhook.endpoint_url')) LIKE %s";
       $params[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
+    }
+
+    if (!empty($filters['date_from'])) {
+      $where[] = 'created_at >= %s';
+      $params[] = $filters['date_from'];
+    }
+
+    if (!empty($filters['date_to'])) {
+      $where[] = 'created_at <= %s';
+      $params[] = $filters['date_to'];
     }
 
     $whereClause = implode(' AND ', $where);

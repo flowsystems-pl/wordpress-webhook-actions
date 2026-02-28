@@ -411,12 +411,10 @@ class LogsController extends WP_REST_Controller {
       'date_from' => [
         'description' => __('Filter logs from this date.', 'flowsystems-webhook-actions'),
         'type' => 'string',
-        'format' => 'date-time',
       ],
       'date_to' => [
         'description' => __('Filter logs until this date.', 'flowsystems-webhook-actions'),
         'type' => 'string',
-        'format' => 'date-time',
       ],
       'event_uuid' => [
         'description' => __('Filter by event UUID (exact match).', 'flowsystems-webhook-actions'),

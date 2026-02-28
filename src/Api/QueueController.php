@@ -45,6 +45,12 @@ class QueueController extends WP_REST_Controller {
           'target_url' => [
             'type' => 'string',
           ],
+          'date_from' => [
+            'type' => 'string',
+          ],
+          'date_to' => [
+            'type' => 'string',
+          ],
           'per_page' => [
             'type' => 'integer',
             'default' => 50,
@@ -115,7 +121,7 @@ class QueueController extends WP_REST_Controller {
     ]);
   }
 
-  public function permissionsCheck(WP_REST_Request $request): bool {
+  public function permissionsCheck(WP_REST_Request $_request): bool {
     return current_user_can('manage_options');
   }
 
@@ -145,6 +151,14 @@ class QueueController extends WP_REST_Controller {
       $filters['target_url'] = sanitize_text_field($request->get_param('target_url'));
     }
 
+    if ($request->get_param('date_from')) {
+      $filters['date_from'] = sanitize_text_field($request->get_param('date_from'));
+    }
+
+    if ($request->get_param('date_to')) {
+      $filters['date_to'] = sanitize_text_field($request->get_param('date_to'));
+    }
+
     $jobs = $this->queueService->getJobs($filters, $perPage, $offset);
     $total = $this->queueService->countJobs($filters);
 
@@ -165,7 +179,8 @@ class QueueController extends WP_REST_Controller {
   /**
    * Get queue statistics
    */
-  public function getStats($request): WP_REST_Response {
+  /** @noinspection PhpUnusedParameterInspection */
+  public function getStats(WP_REST_Request $_request): WP_REST_Response {
     $stats = $this->queueService->getStats();
 
     return rest_ensure_response($stats);
