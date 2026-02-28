@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { Card, Button, Badge, Alert, Input } from '@/components/ui'
+import { Card, Button, Badge, Alert, Input, DateTimePicker } from '@/components/ui'
 import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-vue-next'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
@@ -13,6 +13,8 @@ const page = ref(1)
 const perPage = ref(20)
 const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
+const dateFromFilter = ref('')
+const dateToFilter = ref('')
 const stats = ref({ pending: 0, processing: 0, completed: 0, failed: 0, total: 0, due_now: 0 })
 const loading = ref(true)
 const statsLoading = ref(false)
@@ -44,6 +46,8 @@ const loadQueue = async () => {
     const params = { page: page.value, per_page: perPage.value }
     if (eventUuidFilter.value) params.event_uuid = eventUuidFilter.value
     if (targetUrlFilter.value) params.target_url = targetUrlFilter.value
+    if (dateFromFilter.value) params.date_from = dateFromFilter.value
+    if (dateToFilter.value) params.date_to = dateToFilter.value
 
     const queueResponse = await api.queue.list(params)
     items.value = queueResponse.items || queueResponse || []
@@ -144,6 +148,8 @@ const resetPage = () => {
 watch(page, loadQueue)
 watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
+watch(dateFromFilter, resetPage)
+watch(dateToFilter, resetPage)
 
 onMounted(() => {
   loadQueue()
@@ -211,6 +217,16 @@ onMounted(() => {
         v-model="targetUrlFilter"
         placeholder="Filter by target URL..."
         class="w-full sm:w-64"
+      />
+      <DateTimePicker
+        v-model="dateFromFilter"
+        placeholder="From date & time"
+        class="w-full sm:w-52"
+      />
+      <DateTimePicker
+        v-model="dateToFilter"
+        placeholder="To date & time"
+        class="w-full sm:w-52"
       />
       <Loader2 v-if="loading" class="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
     </div>

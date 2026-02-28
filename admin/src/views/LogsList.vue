@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { Card, Select, Alert, Input, Button } from '@/components/ui'
+import { Card, Select, Alert, Input, Button, DateTimePicker } from '@/components/ui'
 import { Loader2 } from 'lucide-vue-next'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
@@ -25,6 +25,8 @@ const statusOptions = [
 
 const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
+const dateFromFilter = ref('')
+const dateToFilter = ref('')
 
 const selectedIds = ref([])
 const bulkRetrying = ref(false)
@@ -49,6 +51,14 @@ const loadLogs = async () => {
 
     if (targetUrlFilter.value) {
       params.target_url = targetUrlFilter.value
+    }
+
+    if (dateFromFilter.value) {
+      params.date_from = dateFromFilter.value
+    }
+
+    if (dateToFilter.value) {
+      params.date_to = dateToFilter.value
     }
 
     const result = await api.logs.list(params)
@@ -125,6 +135,8 @@ watch(page, () => {
 watch(statusFilter, resetPage)
 watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
+watch(dateFromFilter, resetPage)
+watch(dateToFilter, resetPage)
 
 onMounted(() => {
   loadLogs()
@@ -176,6 +188,16 @@ onMounted(() => {
         v-model="targetUrlFilter"
         placeholder="Filter by target URL..."
         class="w-full sm:w-64"
+      />
+      <DateTimePicker
+        v-model="dateFromFilter"
+        placeholder="From date & time"
+        class="w-full sm:w-52"
+      />
+      <DateTimePicker
+        v-model="dateToFilter"
+        placeholder="To date & time"
+        class="w-full sm:w-52"
       />
       <Loader2 v-if="loading" class="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
     </div>
