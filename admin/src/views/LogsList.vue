@@ -185,7 +185,7 @@ onMounted(() => {
       <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
       <Button
         size="sm"
-        variant="outline"
+        variant="default"
         :disabled="bulkRetrying"
         @click="handleBulkRetry"
       >

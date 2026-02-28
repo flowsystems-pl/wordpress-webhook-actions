@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { ChevronLeft, ChevronRight, Eye, Trash2, ArrowRight, RotateCcw, CheckCircle2, XCircle, Loader2 } from 'lucide-vue-next'
-import { Badge, Button, Dialog } from '@/components/ui'
+import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 
 const props = defineProps({
   logs: {
@@ -141,11 +141,9 @@ const allOnPageSelected = computed(() => {
         <thead class="bg-muted/50">
           <tr>
             <th class="px-3 py-3 w-8">
-              <input
-                type="checkbox"
-                :checked="allOnPageSelected"
-                @change="toggleSelectAll"
-                class="rounded"
+              <Checkbox
+                :model-value="allOnPageSelected"
+                @update:model-value="toggleSelectAll"
               />
             </th>
             <th class="px-4 py-3 text-left text-sm font-medium">Status</th>
@@ -171,11 +169,9 @@ const allOnPageSelected = computed(() => {
           </tr>
           <tr v-for="log in logs" :key="log.id" :class="['hover:bg-muted/50', isSelected(log.id) ? 'bg-muted/30' : '']">
             <td class="px-3 py-3">
-              <input
-                type="checkbox"
-                :checked="isSelected(log.id)"
-                @change="toggleSelect(log.id)"
-                class="rounded"
+              <Checkbox
+                :model-value="isSelected(log.id)"
+                @update:model-value="() => toggleSelect(log.id)"
               />
             </td>
             <td class="px-4 py-3">

@@ -2,7 +2,7 @@
 import { Check } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 
-defineProps({
+const props = defineProps({
   modelValue: Boolean,
   disabled: Boolean,
   id: String,
