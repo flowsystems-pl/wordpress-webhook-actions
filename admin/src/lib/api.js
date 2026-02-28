@@ -125,6 +125,8 @@ export const api = {
     delete: (id) => del(`logs/${id}`),
     deleteOld: (days) => del('logs', { older_than_days: days }),
     stats: (params) => get('logs/stats', params),
+    retry: (id) => post(`logs/${id}/retry`),
+    bulkRetry: (ids) => post('logs/bulk-retry', { ids }),
   },
   triggers: {
     list: () => get('triggers'),

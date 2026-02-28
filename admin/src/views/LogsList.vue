@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { Card, Select, Alert } from '@/components/ui'
+import { Card, Select, Alert, Input, Button } from '@/components/ui'
+import { Loader2 } from 'lucide-vue-next'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
 
@@ -19,7 +20,14 @@ const statusOptions = [
   { value: 'error', label: 'Error' },
   { value: 'retry', label: 'Retry' },
   { value: 'pending', label: 'Pending' },
+  { value: 'permanently_failed', label: 'Permanently Failed' },
 ]
+
+const eventUuidFilter = ref('')
+const targetUrlFilter = ref('')
+
+const selectedIds = ref([])
+const bulkRetrying = ref(false)
 
 const loadLogs = async () => {
   loading.value = true
@@ -33,6 +41,14 @@ const loadLogs = async () => {
 
     if (statusFilter.value) {
       params.status = statusFilter.value
+    }
+
+    if (eventUuidFilter.value) {
+      params.event_uuid = eventUuidFilter.value
+    }
+
+    if (targetUrlFilter.value) {
+      params.target_url = targetUrlFilter.value
     }
 
     const result = await api.logs.list(params)
@@ -68,17 +84,47 @@ const handleDelete = async (id) => {
   }
 }
 
-watch(page, () => {
-  loadLogs()
-})
+const handleRetry = async (id) => {
+  try {
+    await api.logs.retry(id)
+    await loadLogs()
+  } catch (e) {
+    console.error('Failed to retry log:', e)
+    error.value = e.message
+  }
+}
 
-watch(statusFilter, () => {
+const handleBulkRetry = async () => {
+  if (!selectedIds.value.length) return
+  bulkRetrying.value = true
+  error.value = null
+  try {
+    await api.logs.bulkRetry(selectedIds.value)
+    selectedIds.value = []
+    await loadLogs()
+  } catch (e) {
+    console.error('Failed to bulk retry:', e)
+    error.value = e.message
+  } finally {
+    bulkRetrying.value = false
+  }
+}
+
+const resetPage = () => {
   if (page.value === 1) {
     loadLogs()
   } else {
     page.value = 1
   }
+}
+
+watch(page, () => {
+  loadLogs()
 })
+
+watch(statusFilter, resetPage)
+watch(eventUuidFilter, resetPage)
+watch(targetUrlFilter, resetPage)
 
 onMounted(() => {
   loadLogs()
@@ -115,12 +161,43 @@ onMounted(() => {
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-4 mb-4">
+    <div class="flex flex-wrap items-center gap-3 mb-4">
       <Select
         v-model="statusFilter"
         :options="statusOptions"
         class="w-full sm:w-48"
       />
+      <Input
+        v-model="eventUuidFilter"
+        placeholder="Filter by event UUID..."
+        class="w-full sm:w-72"
+      />
+      <Input
+        v-model="targetUrlFilter"
+        placeholder="Filter by target URL..."
+        class="w-full sm:w-64"
+      />
+      <Loader2 v-if="loading" class="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
+    </div>
+
+    <!-- Bulk actions -->
+    <div v-if="selectedIds.length > 0" class="flex items-center gap-3 mb-4 p-2 bg-muted/50 rounded-md">
+      <span class="text-sm text-muted-foreground">{{ selectedIds.length }} selected</span>
+      <Button
+        size="sm"
+        variant="outline"
+        :disabled="bulkRetrying"
+        @click="handleBulkRetry"
+      >
+        {{ bulkRetrying ? 'Retrying...' : `Retry ${selectedIds.length} selected` }}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        @click="selectedIds = []"
+      >
+        Clear selection
+      </Button>
     </div>
 
     <!-- Error -->
@@ -135,8 +212,11 @@ onMounted(() => {
       :page="page"
       :per-page="perPage"
       :loading="loading"
+      :selected-ids="selectedIds"
       @page-change="handlePageChange"
       @delete="handleDelete"
+      @retry="handleRetry"
+      @update:selected-ids="selectedIds = $event"
     />
   </div>
 </template>

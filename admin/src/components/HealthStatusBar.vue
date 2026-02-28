@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useHealthStats } from '../composables/useHealthStats';
 import {
   Activity,
+  AlertTriangle,
   CheckCircle,
   XCircle,
   Clock,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-vue-next';
 
 const route = useRoute();
-const { loading, successRate, hasData, webhooks, logs, queue, velocity } =
+const { stats, loading, successRate, hasData, webhooks, logs, queue, velocity, observability } =
   useHealthStats();
 
 const currentContext = computed(() => {
@@ -60,9 +61,26 @@ const formatDuration = (ms) => {
 </script>
 
 <template>
-  <div class="mb-4 p-2 sm:p-3 rounded-lg border border-border bg-card">
-    <!-- Skeleton loader -->
-    <div v-if="loading && !logs.total" class="flex items-center gap-3 sm:gap-6">
+  <div class="mb-4 space-y-2">
+    <!-- Warning banners -->
+    <div
+      v-if="observability.queue_stuck"
+      class="flex items-center gap-2 px-3 py-2 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-xs text-yellow-700 dark:text-yellow-400"
+    >
+      <AlertTriangle class="w-3.5 h-3.5 shrink-0" />
+      <span>Queue appears stuck — there are pending deliveries older than 10 minutes. Check your cron setup.</span>
+    </div>
+    <div
+      v-if="observability.wp_cron_only"
+      class="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-500/10 border border-blue-500/20 text-xs text-blue-700 dark:text-blue-400"
+    >
+      <AlertTriangle class="w-3.5 h-3.5 shrink-0" />
+      <span>Queue processor has never run. Ensure WP-Cron is active or configure an external cron job for reliable delivery.</span>
+    </div>
+
+  <div class="p-2 sm:p-3 rounded-lg border border-border bg-card">
+    <!-- Skeleton loader — only on first load, not on subsequent refreshes -->
+    <div v-if="stats === null" class="flex items-center gap-3 sm:gap-6">
       <div
         class="animate-pulse flex items-center gap-3 sm:gap-6 w-full flex-wrap"
       >
@@ -107,26 +125,26 @@ const formatDuration = (ms) => {
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Webhook class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Active/Total</span>
-          <span class="font-medium">
+          <span class="font-medium tabular-nums">
             {{ webhooks.active }}/{{ webhooks.total }}
           </span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Zap class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Sent today</span>
-          <span class="font-medium">{{ formatNumber(velocity.last_day) }}</span>
+          <span class="font-medium tabular-nums">{{ formatNumber(velocity.last_day) }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Share2 class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Total sent</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatNumber(logs.total_all_time)
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Timer class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Avg response</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatDuration(velocity.avg_duration_ms)
           }}</span>
         </div>
@@ -151,19 +169,19 @@ const formatDuration = (ms) => {
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Activity class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Total (7d)</span>
-          <span class="font-medium">{{ formatNumber(logs.total) }}</span>
+          <span class="font-medium tabular-nums">{{ formatNumber(logs.total) }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Share2 class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Total sent</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatNumber(logs.total_all_time)
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Timer class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Avg response</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatDuration(velocity.avg_duration_ms)
           }}</span>
         </div>
@@ -174,14 +192,14 @@ const formatDuration = (ms) => {
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Zap class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Last hour</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatNumber(velocity.last_hour)
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Activity class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Today</span>
-          <span class="font-medium">{{ formatNumber(velocity.last_day) }}</span>
+          <span class="font-medium tabular-nums">{{ formatNumber(velocity.last_day) }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Clock class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-500" />
@@ -191,11 +209,19 @@ const formatDuration = (ms) => {
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
           <Share2 class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
           <span class="text-muted-foreground">Total sent</span>
-          <span class="font-medium">{{
+          <span class="font-medium tabular-nums">{{
             formatNumber(logs.total_all_time)
           }}</span>
         </div>
+        <div v-if="observability.avg_attempts_per_event > 0" class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+          <Activity class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+          <span class="text-muted-foreground">Avg attempts</span>
+          <span :class="['font-medium', observability.avg_attempts_per_event > 2 ? 'text-yellow-500' : '']">
+            {{ observability.avg_attempts_per_event }}
+          </span>
+        </div>
       </template>
     </div>
+  </div>
   </div>
 </template>
