@@ -4,7 +4,7 @@ Tags: webhook, woocommerce, automation, hooks, n8n
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -138,6 +138,19 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
+= 1.1.0 =
+- Added event identity: each trigger dispatch generates a shared UUID and timestamp sent as `X-Event-Id` / `X-Event-Timestamp` headers and embedded in the payload under `event.{id,timestamp,version}`
+- Added smart retry routing: 5xx and 429 responses trigger an automatic retry with exponential backoff; 4xx and 3xx responses are immediately marked as permanently failed
+- Added `permanently_failed` status for non-retryable delivery failures
+- Added attempt history: each delivery attempt is recorded as a JSON array on the log entry, visible in the admin timeline view
+- Added per-log retry and bulk retry REST endpoints (`POST /logs/{id}/retry`, `POST /logs/bulk-retry`)
+- Added `event_uuid` and `target_url` filter parameters to logs and queue REST endpoints
+- Added date range filtering (`date_from`, `date_to`) to logs and queue list views with a shadcn-style calendar date/time picker
+- Added health observability metrics: average attempts per event, oldest pending age, queue stuck detection, WP-Cron-only warning
+- Added `queue.log_id` column linking queue jobs to their log entries
+- Updated admin UI: permanently failed badge, attempt timeline, per-row retry button, bulk retry, observability warning banners, new filter inputs
+- Updated footer with a review prompt linking to WordPress.org
+
 = 1.0.1 =
 - Fixed preview freezing when mapping fields from objects with numeric string keys (e.g. WooCommerce line_items)
 - Fixed orphaned pending log entries caused by logPending() silently failing — queue jobs now carry mapping metadata and recover a proper log entry if the original ID was lost
@@ -153,6 +166,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+This release adds new database columns (`event_uuid`, `event_timestamp`, `attempt_history`, `next_attempt_at` on logs; `log_id` on queue). The migration runs automatically on plugin activation or update. No manual steps required.
 
 = 1.0.0 =
 Initial stable release.
