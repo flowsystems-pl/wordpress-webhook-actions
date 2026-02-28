@@ -260,6 +260,16 @@ class QueueRepository {
       $params[] = $filters['trigger_name'];
     }
 
+    if (!empty($filters['event_uuid'])) {
+      $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.payload.event.id')) LIKE %s";
+      $params[] = '%' . $wpdb->esc_like($filters['event_uuid']) . '%';
+    }
+
+    if (!empty($filters['target_url'])) {
+      $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.webhook.endpoint_url')) LIKE %s";
+      $params[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
+    }
+
     $whereClause = implode(' AND ', $where);
 
     $params[] = $limit;
@@ -301,6 +311,16 @@ class QueueRepository {
       $params[] = (int) $filters['webhook_id'];
     }
 
+    if (!empty($filters['event_uuid'])) {
+      $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.payload.event.id')) LIKE %s";
+      $params[] = '%' . $wpdb->esc_like($filters['event_uuid']) . '%';
+    }
+
+    if (!empty($filters['target_url'])) {
+      $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.webhook.endpoint_url')) LIKE %s";
+      $params[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
+    }
+
     $whereClause = implode(' AND ', $where);
 
     // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
@@ -319,6 +339,28 @@ class QueueRepository {
     // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     return (int) $count;
+  }
+
+  /**
+   * Find a queue job by its associated log ID
+   *
+   * @param int $logId
+   * @return array|null
+   */
+  public function findByLogId(int $logId): ?array {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $job = $wpdb->get_row(
+      $wpdb->prepare(
+        "SELECT * FROM {$this->table} WHERE log_id = %d LIMIT 1",
+        $logId
+      ),
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+    return $job ?: null;
   }
 
   /**

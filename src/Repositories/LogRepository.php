@@ -53,12 +53,25 @@ class LogRepository {
       $whereValues[] = $filters['date_to'];
     }
 
+    if (!empty($filters['event_uuid'])) {
+      $whereClauses[] = "l.event_uuid LIKE %s";
+      $whereValues[] = '%' . $wpdb->esc_like($filters['event_uuid']) . '%';
+    }
+
+    if (!empty($filters['target_url'])) {
+      $whereClauses[] = "w.endpoint_url LIKE %s";
+      $whereValues[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
+    }
+
     $whereSql = !empty($whereClauses)
       ? "WHERE " . implode(' AND ', $whereClauses)
       : "";
 
+    // Always join so target_url filter works in both count and items queries
+    $joinSql = "LEFT JOIN {$this->webhooksTable} w ON l.webhook_id = w.id";
+
     // Count total
-    $countQuery = "SELECT COUNT(*) FROM {$this->logsTable} l {$whereSql}";
+    $countQuery = "SELECT COUNT(*) FROM {$this->logsTable} l {$joinSql} {$whereSql}";
     if (!empty($whereValues)) {
       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
       $countQuery = $wpdb->prepare($countQuery, ...$whereValues);
@@ -72,9 +85,9 @@ class LogRepository {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $items = $wpdb->get_results(
       $wpdb->prepare(
-        "SELECT l.*, w.name as webhook_name
+        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url
                   FROM {$this->logsTable} l
-                  LEFT JOIN {$this->webhooksTable} w ON l.webhook_id = w.id
+                  {$joinSql}
                   {$whereSql}
                   ORDER BY l.created_at DESC
                   LIMIT %d OFFSET %d",
@@ -94,6 +107,10 @@ class LogRepository {
       if (!empty($item['response_body'])) {
         $decoded = json_decode($item['response_body'], true);
         $item['response_body'] = $decoded !== null ? $decoded : $item['response_body'];
+      }
+      if (!empty($item['attempt_history'])) {
+        $decoded = json_decode($item['attempt_history'], true);
+        $item['attempt_history'] = $decoded !== null ? $decoded : [];
       }
       $item['mapping_applied'] = (bool) ($item['mapping_applied'] ?? false);
     }
@@ -119,7 +136,7 @@ class LogRepository {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $log = $wpdb->get_row(
       $wpdb->prepare(
-        "SELECT l.*, w.name as webhook_name
+        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url
                  FROM {$this->logsTable} l
                  LEFT JOIN {$this->webhooksTable} w ON l.webhook_id = w.id
                  WHERE l.id = %d",
@@ -142,6 +159,10 @@ class LogRepository {
     if (!empty($log['response_body'])) {
       $decoded = json_decode($log['response_body'], true);
       $log['response_body'] = $decoded !== null ? $decoded : $log['response_body'];
+    }
+    if (!empty($log['attempt_history'])) {
+      $decoded = json_decode($log['attempt_history'], true);
+      $log['attempt_history'] = $decoded !== null ? $decoded : [];
     }
     $log['mapping_applied'] = (bool) ($log['mapping_applied'] ?? false);
 
@@ -175,8 +196,14 @@ class LogRepository {
         'response_body' => $data['response_body'] ?? null,
         'error_message' => $data['error_message'] ?? null,
         'duration_ms' => $data['duration_ms'] ?? null,
+        'event_uuid' => $data['event_uuid'] ?? null,
+        'event_timestamp' => $data['event_timestamp'] ?? null,
+        'attempt_history' => isset($data['attempt_history'])
+          ? (is_array($data['attempt_history']) ? wp_json_encode($data['attempt_history']) : $data['attempt_history'])
+          : null,
+        'next_attempt_at' => $data['next_attempt_at'] ?? null,
       ],
-      ['%d', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%d']
+      ['%d', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%d', '%s', '%s', '%s', '%s']
     );
 
     return $result ? $wpdb->insert_id : false;
@@ -218,6 +245,18 @@ class LogRepository {
     if (isset($data['duration_ms'])) {
       $updateData['duration_ms'] = $data['duration_ms'];
       $format[] = '%d';
+    }
+
+    if (isset($data['attempt_history'])) {
+      $updateData['attempt_history'] = is_array($data['attempt_history'])
+        ? wp_json_encode($data['attempt_history'])
+        : $data['attempt_history'];
+      $format[] = '%s';
+    }
+
+    if (array_key_exists('next_attempt_at', $data)) {
+      $updateData['next_attempt_at'] = $data['next_attempt_at'];
+      $format[] = '%s';
     }
 
     if (empty($updateData)) {
@@ -339,10 +378,13 @@ class LogRepository {
       'error' => 0,
       'pending' => 0,
       'retry' => 0,
+      'permanently_failed' => 0,
     ];
 
     foreach ($stats as $stat) {
-      $result[$stat['status']] = (int) $stat['count'];
+      if (array_key_exists($stat['status'], $result)) {
+        $result[$stat['status']] = (int) $stat['count'];
+      }
     }
 
     // Total only counts completed deliveries (success + error)
@@ -460,5 +502,81 @@ class LogRepository {
       'last_day' => $lastDay,
       'avg_duration_ms' => $avgDuration !== null ? (int) round((float) $avgDuration) : 0,
     ];
+  }
+
+  /**
+   * Get average number of attempts per event (last 7 days)
+   *
+   * @return float
+   */
+  public function getAvgAttemptsPerEvent(): float {
+    global $wpdb;
+
+    $queueTable = $wpdb->prefix . 'fswa_queue';
+    $sevenDaysAgo = gmdate('Y-m-d H:i:s', strtotime('-7 days'));
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $avg = $wpdb->get_var(
+      $wpdb->prepare(
+        "SELECT AVG(q.attempts + 1)
+         FROM {$this->logsTable} l
+         INNER JOIN {$queueTable} q ON q.log_id = l.id
+         WHERE l.status IN ('success', 'error', 'permanently_failed')
+         AND l.created_at >= %s",
+        $sevenDaysAgo
+      )
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    return $avg !== null ? round((float) $avg, 2) : 0.0;
+  }
+
+  /**
+   * Get age in seconds of the oldest pending log
+   *
+   * @return int|null Null if no pending logs
+   */
+  public function getOldestPendingAgeSeconds(): ?int {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $oldest = $wpdb->get_var(
+      "SELECT MIN(created_at) FROM {$this->logsTable} WHERE status = 'pending'"
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    if ($oldest === null) {
+      return null;
+    }
+
+    return (int) (time() - strtotime($oldest));
+  }
+
+  /**
+   * Find log IDs by status (for bulk operations)
+   *
+   * @param array $statuses
+   * @param int $limit
+   * @return int[]
+   */
+  public function findIdsByStatus(array $statuses, int $limit = 100): array {
+    global $wpdb;
+
+    if (empty($statuses)) {
+      return [];
+    }
+
+    $placeholders = implode(', ', array_fill(0, count($statuses), '%s'));
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $ids = $wpdb->get_col(
+      $wpdb->prepare(
+        "SELECT id FROM {$this->logsTable} WHERE status IN ({$placeholders}) ORDER BY id ASC LIMIT %d",
+        array_merge($statuses, [$limit])
+      )
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    return array_map('intval', $ids ?: []);
   }
 }
