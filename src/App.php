@@ -11,7 +11,7 @@ use FlowSystems\WebhookActions\Services\LogArchiver;
 use FlowSystems\WebhookActions\Services\QueueService;
 
 class App {
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
   const SLUG = 'flowsystems-webhook-actions';
 
   public static string $path = '';

@@ -3,7 +3,7 @@
  * Plugin Name: Flow Systems Webhook Actions
  * Plugin URI: https://flowsystems.pl/wordpress-webhook-actions
  * Description: Trigger HTTP webhooks from WordPress actions (do_action). Easily connect WordPress with n8n, Zapier, Make, or custom workflows.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
  * License: GPLv2 or later
@@ -16,7 +16,7 @@ use FlowSystems\WebhookActions\Activation;
 
 defined('ABSPATH') || exit;
 
-define('FSWA_VERSION', '1.0.1');
+define('FSWA_VERSION', '1.1.0');
 define('FSWA_FILE', __FILE__);
 
 require_once __DIR__ . '/vendor/autoload.php';
