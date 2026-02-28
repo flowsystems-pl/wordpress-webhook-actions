@@ -21,6 +21,8 @@ class LogService {
    * @param array $payload The transformed payload (sent to webhook)
    * @param array|null $originalPayload The original payload before transformation (null if no mapping)
    * @param bool $mappingApplied Whether field mapping was applied
+   * @param string|null $eventUuid UUID shared across all webhooks for this trigger event
+   * @param string|null $eventTimestamp ISO 8601 UTC timestamp of the event
    * @return int|false Log ID or false on failure
    */
   public function logPending(
@@ -28,7 +30,9 @@ class LogService {
     string $triggerName,
     array $payload,
     ?array $originalPayload = null,
-    bool $mappingApplied = false
+    bool $mappingApplied = false,
+    ?string $eventUuid = null,
+    ?string $eventTimestamp = null
   ) {
     return $this->repository->create([
       'webhook_id' => $webhookId,
@@ -37,6 +41,8 @@ class LogService {
       'request_payload' => $payload,
       'original_payload' => $originalPayload,
       'mapping_applied' => $mappingApplied,
+      'event_uuid' => $eventUuid,
+      'event_timestamp' => $eventTimestamp,
     ]);
   }
 
@@ -136,6 +142,32 @@ class LogService {
    */
   public function updateLog(int $logId, array $data): bool {
     return $this->repository->update($logId, $data);
+  }
+
+  /**
+   * Append an attempt entry to the log's attempt history
+   *
+   * Caps history at fswa_max_attempts entries to prevent unbounded growth.
+   *
+   * @param int $logId
+   * @param array $attemptData
+   * @return bool
+   */
+  public function appendAttemptHistory(int $logId, array $attemptData): bool {
+    $log = $this->repository->find($logId);
+    if (!$log) {
+      return false;
+    }
+
+    $history = is_array($log['attempt_history']) ? $log['attempt_history'] : [];
+    $history[] = $attemptData;
+
+    $maxAttempts = (int) apply_filters('fswa_max_attempts', 5);
+    if (count($history) > $maxAttempts) {
+      $history = array_slice($history, -$maxAttempts);
+    }
+
+    return $this->repository->update($logId, ['attempt_history' => $history]);
   }
 
   /**
