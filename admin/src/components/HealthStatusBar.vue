@@ -163,7 +163,7 @@ const formatDuration = (ms) => {
           <XCircle class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
           <span class="text-muted-foreground">Errors</span>
           <span class="font-medium text-red-500">{{
-            formatNumber(logs.error)
+            formatNumber(logs.error + (logs.permanently_failed ?? 0))
           }}</span>
         </div>
         <div class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
