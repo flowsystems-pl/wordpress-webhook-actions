@@ -163,7 +163,7 @@ onMounted(() => {
         <div class="text-xs sm:text-sm text-muted-foreground">Success</div>
       </Card>
       <Card class="p-2 sm:p-4">
-        <div class="text-lg sm:text-2xl font-bold text-red-600">{{ stats.error }}</div>
+        <div class="text-lg sm:text-2xl font-bold text-red-600">{{ stats.error + (stats.permanently_failed ?? 0) }}</div>
         <div class="text-xs sm:text-sm text-muted-foreground">Errors</div>
       </Card>
       <Card class="p-2 sm:p-4">
