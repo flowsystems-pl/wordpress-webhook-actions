@@ -5,12 +5,15 @@ namespace FlowSystems\WebhookActions\Services;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Repositories\LogRepository;
+use FlowSystems\WebhookActions\Repositories\StatsRepository;
 
 class LogService {
-  private LogRepository $repository;
+  private LogRepository   $repository;
+  private StatsRepository $statsRepository;
 
   public function __construct() {
-    $this->repository = new LogRepository();
+    $this->repository      = new LogRepository();
+    $this->statsRepository = new StatsRepository();
   }
 
   /**
@@ -65,15 +68,29 @@ class LogService {
     string $responseBody,
     int $durationMs
   ) {
-    return $this->repository->create([
-      'webhook_id' => $webhookId,
-      'trigger_name' => $triggerName,
-      'status' => 'success',
-      'http_code' => $httpCode,
+    $logId = $this->repository->create([
+      'webhook_id'      => $webhookId,
+      'trigger_name'    => $triggerName,
+      'status'          => 'success',
+      'http_code'       => $httpCode,
       'request_payload' => $payload,
-      'response_body' => $responseBody,
-      'duration_ms' => $durationMs,
+      'response_body'   => $responseBody,
+      'duration_ms'     => $durationMs,
+      'stats_recorded'  => 1,
     ]);
+
+    if ($logId) {
+      $this->statsRepository->record(
+        gmdate('Y-m-d'),
+        $webhookId,
+        $triggerName,
+        'success',
+        $durationMs,
+        $httpCode
+      );
+    }
+
+    return $logId;
   }
 
   /**
@@ -141,7 +158,26 @@ class LogService {
    * @return bool
    */
   public function updateLog(int $logId, array $data): bool {
-    return $this->repository->update($logId, $data);
+    $result = $this->repository->update($logId, $data);
+
+    // Record terminal outcome in persistent stats the first time only.
+    // stats_recorded=1 gates replays and duplicate updates.
+    if ($result && isset($data['status']) && in_array($data['status'], ['success', 'permanently_failed'], true)) {
+      $log = $this->repository->find($logId);
+      if ($log && !(bool) ($log['stats_recorded'] ?? false)) {
+        $this->statsRepository->record(
+          gmdate('Y-m-d', strtotime($log['created_at'])),
+          (int) $log['webhook_id'],
+          (string) $log['trigger_name'],
+          $data['status'],
+          isset($data['duration_ms']) ? (int) $data['duration_ms'] : null,
+          isset($data['http_code'])   ? (int) $data['http_code']   : null
+        );
+        $this->repository->update($logId, ['stats_recorded' => 1]);
+      }
+    }
+
+    return $result;
   }
 
   /**

@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.1.0';
+  private const CURRENT_VERSION = '1.2.0';
 
   /**
    * Run pending migrations
@@ -43,6 +43,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_logs',
       $wpdb->prefix . 'fswa_queue',
       $wpdb->prefix . 'fswa_trigger_schemas',
+      $wpdb->prefix . 'fswa_stats',
     ];
 
     foreach ($requiredTables as $table) {
@@ -65,6 +66,7 @@ class Migrator {
     return [
       '1.0.0' => [self::class, 'migration_1_0_0'],
       '1.1.0' => [self::class, 'migration_1_1_0'],
+      '1.2.0' => [self::class, 'migration_1_2_0'],
     ];
   }
 
@@ -219,6 +221,46 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$queueTable} ADD KEY idx_log_id (log_id)");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.2.0 - Add persistent stats table and stats_recorded flag on logs
+   */
+  public static function migration_1_2_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+    $statsTable     = $wpdb->prefix . 'fswa_stats';
+    $logsTable      = $wpdb->prefix . 'fswa_logs';
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $sqlStats = "CREATE TABLE {$statsTable} (
+            `date`                DATE         NOT NULL,
+            `webhook_id`          BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            `trigger_name`        VARCHAR(255) NOT NULL DEFAULT '',
+            `success`             INT UNSIGNED NOT NULL DEFAULT 0,
+            `permanently_failed`  INT UNSIGNED NOT NULL DEFAULT 0,
+            `sum_duration_ms`     BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            `count_with_duration` INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_2xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_4xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_5xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            PRIMARY KEY (`date`, `webhook_id`, `trigger_name`)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlStats);
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$logsTable} LIKE %s",
+      'stats_recorded'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$logsTable} ADD COLUMN stats_recorded TINYINT(1) NOT NULL DEFAULT 0");
+      $wpdb->query("ALTER TABLE {$logsTable} ADD KEY idx_stats_recorded (stats_recorded)");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
 
   /**

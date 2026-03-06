@@ -8,6 +8,7 @@ use WP_REST_Controller;
 use WP_REST_Server;
 use WP_REST_Response;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
+use FlowSystems\WebhookActions\Repositories\StatsRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\StatsService;
@@ -16,16 +17,18 @@ class HealthController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
   protected $rest_base = 'health';
 
-  private LogRepository $logRepository;
+  private LogRepository   $logRepository;
   private WebhookRepository $webhookRepository;
-  private QueueService $queueService;
-  private StatsService $statsService;
+  private QueueService    $queueService;
+  private StatsService    $statsService;
+  private StatsRepository $statsRepository;
 
   public function __construct() {
-    $this->logRepository = new LogRepository();
+    $this->logRepository   = new LogRepository();
     $this->webhookRepository = new WebhookRepository();
-    $this->queueService = new QueueService();
-    $this->statsService = new StatsService();
+    $this->queueService    = new QueueService();
+    $this->statsService    = new StatsService();
+    $this->statsRepository = new StatsRepository();
   }
 
   /**
@@ -52,16 +55,15 @@ class HealthController extends WP_REST_Controller {
    * Get health statistics
    */
   public function getStats($request): WP_REST_Response {
-    // Get current log stats (what's in the database)
-    $currentLogStats = $this->logRepository->getAllTimeStats();
+    // Get persistent stats (fswa_stats — not affected by log deletion or replay)
+    $persistentStats = $this->statsRepository->getAllTimeStats();
 
-    // Get archived stats (from logs that were deleted during retention)
+    // Add legacy archived stats (pre-v1.2.0 logs deleted before the new table existed)
     $archivedStats = $this->statsService->getArchivedStats();
 
-    // Calculate totals: current logs + archived
-    $totalSent = $currentLogStats['total_sent'] + $archivedStats['total_sent'];
-    $totalSuccess = $currentLogStats['total_success'] + $archivedStats['total_success'];
-    $totalError = $currentLogStats['total_error'] + $archivedStats['total_error'];
+    $totalSent    = $persistentStats['total_sent']    + $archivedStats['total_sent'];
+    $totalSuccess = $persistentStats['total_success'] + $archivedStats['total_success'];
+    $totalError   = $persistentStats['total_error']   + $archivedStats['total_error'];
 
     // Calculate success rate from all-time data
     $totalDeliveries = $totalSuccess + $totalError;
@@ -70,8 +72,17 @@ class HealthController extends WP_REST_Controller {
       ? round(($totalSuccess / $totalDeliveries) * 100, 1)
       : 0.0;
 
-    // Get recent log stats (last 7 days) for the logs view
-    $recentLogStats = $this->logRepository->getStats(null, 7);
+    // Get recent stats (persistent + transient) for the logs view
+    $recentPersistent = $this->statsRepository->getPeriodStats(null, 7);
+    $recentTransient  = $this->logRepository->getTransientStats(null, 7);
+    $recentLogStats   = [
+      'success'            => $recentPersistent['success'],
+      'permanently_failed' => $recentPersistent['permanently_failed'],
+      'error'              => $recentTransient['error'],
+      'retry'              => $recentTransient['retry'],
+      'pending'            => $recentTransient['pending'],
+      'total'              => $recentPersistent['success'] + $recentTransient['error'] + $recentPersistent['permanently_failed'],
+    ];
 
     // Get webhook counts
     $totalWebhooks = $this->webhookRepository->count(false);

@@ -23,8 +23,9 @@ class Activation {
     $charsetCollate = $wpdb->get_charset_collate();
     $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
     $triggersTable = $wpdb->prefix . 'fswa_webhook_triggers';
-    $logsTable = $wpdb->prefix . 'fswa_logs';
-    $queueTable = $wpdb->prefix . 'fswa_queue';
+    $logsTable     = $wpdb->prefix . 'fswa_logs';
+    $queueTable    = $wpdb->prefix . 'fswa_queue';
+    $statsTable    = $wpdb->prefix . 'fswa_stats';
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -72,13 +73,15 @@ class Activation {
             event_timestamp DATETIME DEFAULT NULL,
             attempt_history LONGTEXT DEFAULT NULL,
             next_attempt_at DATETIME DEFAULT NULL,
+            stats_recorded TINYINT(1) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY idx_webhook (webhook_id),
             KEY idx_status (status),
             KEY idx_created (created_at),
             KEY idx_webhook_created (webhook_id, created_at),
-            KEY idx_event_uuid (event_uuid)
+            KEY idx_event_uuid (event_uuid),
+            KEY idx_stats_recorded (stats_recorded)
         ) {$charsetCollate};";
 
     dbDelta($sqlLogs);
@@ -106,7 +109,24 @@ class Activation {
 
     dbDelta($sqlQueue);
 
-    update_option('fswa_db_version', '1.1.0');
+    // Persistent delivery stats table
+    $sqlStats = "CREATE TABLE {$statsTable} (
+            `date`                DATE NOT NULL,
+            `webhook_id`          BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            `trigger_name`        VARCHAR(255) NOT NULL DEFAULT '',
+            `success`             INT UNSIGNED NOT NULL DEFAULT 0,
+            `permanently_failed`  INT UNSIGNED NOT NULL DEFAULT 0,
+            `sum_duration_ms`     BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            `count_with_duration` INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_2xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_4xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            `http_5xx`            INT UNSIGNED NOT NULL DEFAULT 0,
+            PRIMARY KEY (`date`, `webhook_id`, `trigger_name`)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlStats);
+
+    update_option('fswa_db_version', '1.2.0');
   }
 
   /**
@@ -155,6 +175,7 @@ class Activation {
 
     // Drop tables (order matters for foreign key constraints)
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_stats");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_queue");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_trigger_schemas");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_webhook_triggers");

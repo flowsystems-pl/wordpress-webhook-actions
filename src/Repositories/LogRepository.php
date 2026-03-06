@@ -259,6 +259,11 @@ class LogRepository {
       $format[] = '%s';
     }
 
+    if (isset($data['stats_recorded'])) {
+      $updateData['stats_recorded'] = (int) $data['stats_recorded'];
+      $format[] = '%d';
+    }
+
     if (empty($updateData)) {
       return true;
     }
@@ -389,6 +394,46 @@ class LogRepository {
 
     // Total counts completed deliveries (success + error + permanently_failed)
     $result['total'] = $result['success'] + $result['error'] + $result['permanently_failed'];
+
+    return $result;
+  }
+
+  /**
+   * Get counts of transient (non-terminal) statuses from the live log table.
+   * Used alongside StatsRepository for the full stats picture.
+   *
+   * @param int|null $webhookId
+   * @param int      $days
+   * @return array{error: int, retry: int, pending: int}
+   */
+  public function getTransientStats(?int $webhookId = null, int $days = 7): array {
+    global $wpdb;
+
+    $dateFrom     = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
+    $whereWebhook = $webhookId
+      ? $wpdb->prepare('AND webhook_id = %d', $webhookId)
+      : '';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+      $wpdb->prepare(
+        "SELECT status, COUNT(*) as count
+         FROM {$this->logsTable}
+         WHERE status IN ('error', 'retry', 'pending')
+           AND created_at >= %s {$whereWebhook}
+         GROUP BY status",
+        $dateFrom
+      ),
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    $result = ['error' => 0, 'retry' => 0, 'pending' => 0];
+    foreach ($rows as $row) {
+      if (array_key_exists($row['status'], $result)) {
+        $result[$row['status']] = (int) $row['count'];
+      }
+    }
 
     return $result;
   }
