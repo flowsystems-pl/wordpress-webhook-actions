@@ -116,7 +116,6 @@ class HealthController extends WP_REST_Controller {
         'pending' => $queueStats['pending'],
         'processing' => $queueStats['processing'],
         'completed' => $queueStats['completed'],
-        'failed' => $queueStats['failed'],
         'permanently_failed' => $queueStats['permanently_failed'] ?? 0,
         'total' => $queueStats['total'],
         'due_now' => $queueStats['due_now'],
