@@ -40,6 +40,9 @@ const dateToFilter = ref('')
 const selectedIds = ref([])
 const bulkRetrying = ref(false)
 const showReplaySuccess = ref(false)
+const replayedJobId = ref(null)
+const replayedLogId = ref(null)
+const logsTable = ref(null)
 
 const loadLogs = async () => {
   loading.value = true
@@ -116,9 +119,24 @@ const handleRetry = async (id) => {
 
 const handleReplay = async (log) => {
   try {
-    await api.logs.replay(log.id)
+    const res = await api.logs.replay(log.id)
+    replayedJobId.value = res?.job_id ?? null
+    replayedLogId.value = log.id
     await loadLogs()
     showReplaySuccess.value = true
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+const executeReplayedJob = async () => {
+  if (!replayedJobId.value) return
+  try {
+    await api.queue.execute({ id: replayedJobId.value })
+    showReplaySuccess.value = false
+    await loadLogs()
+    const log = logs.value.find(l => l.id === replayedLogId.value)
+    if (log) logsTable.value?.openDetails(log)
   } catch (e) {
     error.value = e.message
   }
@@ -141,8 +159,8 @@ const handleBulkRetry = async () => {
     const replayIds = []
     for (const id of selectedIds.value) {
       const status = logs.value.find(l => l.id === id)?.status
-      if (status === 'error') retryIds.push(id)
-      else if (status === 'success' || status === 'permanently_failed') replayIds.push(id)
+      if (status === 'error' || status === 'permanently_failed') retryIds.push(id)
+      else if (status === 'success') replayIds.push(id)
     }
     const calls = []
     if (retryIds.length)  calls.push(api.logs.bulkRetry(retryIds))
@@ -280,7 +298,10 @@ onMounted(() => {
     >
       <template #footer>
         <div class="flex gap-2">
-          <Button @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">
+          <Button @click="executeReplayedJob">
+            Execute Now
+          </Button>
+          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">
             Go to Queue
           </Button>
           <Button variant="outline" @click="showReplaySuccess = false">Close</Button>
@@ -290,6 +311,7 @@ onMounted(() => {
 
     <!-- Table -->
     <LogsTable
+      ref="logsTable"
       :logs="logs"
       :total="total"
       :page="page"
