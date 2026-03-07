@@ -260,7 +260,7 @@ class QueueService {
   public function forceRetry(int $jobId): bool {
     $job = $this->repository->find($jobId);
 
-    if (!$job || !in_array($job['status'], ['pending', 'permanently_failed'], true)) {
+    if (!$job || !in_array($job['status'], ['failed', 'pending', 'permanently_failed'], true)) {
       return false;
     }
 

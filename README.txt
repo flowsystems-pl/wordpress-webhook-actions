@@ -4,7 +4,7 @@ Tags: webhook, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -207,6 +207,10 @@ Yes. The plugin is completely free and licensed under GPL.
 7. Settings configuration screen
 
 == Changelog ==
+
+= 1.2.1 — 2026-03-07 =
+- Fixed retry returning 500 when a log has multiple queue jobs (replay + original) — `findByLogId` now returns the most recent job via `ORDER BY id DESC`
+- Fixed `forceRetry` rejecting jobs with status `failed` — restored `failed` to the allowed status list alongside `pending` and `permanently_failed`
 
 = 1.2.0 — 2026-03-07 =
 - Added persistent delivery stats table (`fswa_stats`) for long-term aggregation
