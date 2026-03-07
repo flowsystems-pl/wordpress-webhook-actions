@@ -373,7 +373,7 @@ class QueueRepository {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     $job = $wpdb->get_row(
       $wpdb->prepare(
-        "SELECT * FROM {$this->table} WHERE log_id = %d LIMIT 1",
+        "SELECT * FROM {$this->table} WHERE log_id = %d ORDER BY id DESC LIMIT 1",
         $logId
       ),
       ARRAY_A
