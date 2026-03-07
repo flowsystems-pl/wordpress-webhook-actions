@@ -105,19 +105,6 @@ class QueueService {
   }
 
   /**
-   * Mark a job as failed
-   *
-   * @param int $jobId
-   */
-  public function markFailed(int $jobId): void {
-    $this->repository->update($jobId, [
-      'status' => 'failed',
-      'locked_at' => null,
-      'locked_by' => null,
-    ]);
-  }
-
-  /**
    * Mark a job as permanently failed (non-retryable or max attempts exceeded)
    *
    * @param int $jobId
@@ -192,7 +179,6 @@ class QueueService {
       'pending' => 0,
       'processing' => 0,
       'completed' => 0,
-      'failed' => 0,
       'permanently_failed' => 0,
       'total' => 0,
     ];
@@ -274,7 +260,7 @@ class QueueService {
   public function forceRetry(int $jobId): bool {
     $job = $this->repository->find($jobId);
 
-    if (!$job || !in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+    if (!$job || !in_array($job['status'], ['pending', 'permanently_failed'], true)) {
       return false;
     }
 

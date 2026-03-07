@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Pencil, Trash2, ScrollText, Power, PowerOff } from 'lucide-vue-next'
-import { Button, Card, Badge, Switch } from '@/components/ui'
+import { Button, Card, Badge, Switch, Dialog } from '@/components/ui'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
 
@@ -13,6 +13,7 @@ const webhooks = ref([])
 const loading = ref(true)
 const error = ref(null)
 const togglingId = ref(null)
+const pendingDeleteWebhook = ref(null)
 
 const loadWebhooks = async () => {
   loading.value = true
@@ -42,11 +43,14 @@ const toggleWebhook = async (webhook) => {
   }
 }
 
-const deleteWebhook = async (webhook) => {
-  if (!confirm(`Are you sure you want to delete "${webhook.name}"?`)) {
-    return
-  }
+const deleteWebhook = (webhook) => {
+  pendingDeleteWebhook.value = webhook
+}
 
+const confirmDeleteWebhook = async () => {
+  const webhook = pendingDeleteWebhook.value
+  if (!webhook) return
+  pendingDeleteWebhook.value = null
   try {
     await api.webhooks.delete(webhook.id)
     webhooks.value = webhooks.value.filter((w) => w.id !== webhook.id)
@@ -61,6 +65,21 @@ onMounted(loadWebhooks)
 
 <template>
   <div>
+    <!-- Delete Confirm Dialog -->
+    <Dialog
+      :open="!!pendingDeleteWebhook"
+      :title="`Delete &quot;${pendingDeleteWebhook?.name}&quot;?`"
+      description="This will permanently delete the webhook and all associated data. This action cannot be undone."
+      @close="pendingDeleteWebhook = null"
+    >
+      <template #footer>
+        <div class="flex gap-2">
+          <Button variant="destructive" @click="confirmDeleteWebhook">Delete</Button>
+          <Button variant="outline" @click="pendingDeleteWebhook = null">Cancel</Button>
+        </div>
+      </template>
+    </Dialog>
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>

@@ -334,10 +334,10 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
-    if (!in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+    if (!in_array($job['status'], ['pending', 'permanently_failed'], true)) {
       return new WP_Error(
         'rest_job_not_retryable',
-        __('Only failed or permanently failed jobs can be retried.', 'flowsystems-webhook-actions'),
+        __('Only pending or permanently failed jobs can be retried.', 'flowsystems-webhook-actions'),
         ['status' => 409]
       );
     }

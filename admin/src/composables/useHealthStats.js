@@ -50,7 +50,7 @@ export function useHealthStats() {
     pending: 0,
     processing: 0,
     completed: 0,
-    failed: 0,
+    permanently_failed: 0,
     total: 0,
     due_now: 0,
   })

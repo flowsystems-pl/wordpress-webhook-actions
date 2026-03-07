@@ -11,20 +11,26 @@ use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
 use FlowSystems\WebhookActions\Repositories\QueueRepository;
+use FlowSystems\WebhookActions\Repositories\StatsRepository;
+use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\QueueService;
 
 class LogsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
   protected $rest_base = 'logs';
 
-  private LogRepository $repository;
+  private LogRepository   $repository;
   private QueueRepository $queueRepository;
-  private QueueService $queueService;
+  private WebhookRepository $webhookRepository;
+  private QueueService    $queueService;
+  private StatsRepository $statsRepository;
 
   public function __construct() {
-    $this->repository = new LogRepository();
+    $this->repository      = new LogRepository();
     $this->queueRepository = new QueueRepository();
-    $this->queueService = new QueueService($this->queueRepository);
+    $this->webhookRepository = new WebhookRepository();
+    $this->queueService    = new QueueService($this->queueRepository);
+    $this->statsRepository = new StatsRepository();
   }
 
   /**
@@ -75,6 +81,13 @@ class LogsController extends WP_REST_Controller {
         'permission_callback' => [$this, 'getItemPermissionsCheck'],
       ],
     ]);
+
+    // Replay a log entry as a fresh queue job
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/replay', [[
+      'methods'             => WP_REST_Server::CREATABLE,
+      'callback'            => [$this, 'replayItem'],
+      'permission_callback' => [$this, 'getItemPermissionsCheck'],
+    ]]);
 
     // Bulk retry queue jobs associated with multiple logs
     register_rest_route($this->namespace, '/' . $this->rest_base . '/bulk-retry', [
@@ -293,10 +306,10 @@ class LogsController extends WP_REST_Controller {
       );
     }
 
-    if (!in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+    if (!in_array($log['status'], ['error', 'permanently_failed'], true)) {
       return new WP_Error(
         'rest_job_not_retryable',
-        __('Only failed or permanently failed jobs can be retried.', 'flowsystems-webhook-actions'),
+        __('Only failed log entries can be retried.', 'flowsystems-webhook-actions'),
         ['status' => 409]
       );
     }
@@ -318,6 +331,58 @@ class LogsController extends WP_REST_Controller {
   }
 
   /**
+   * Replay a log entry as a brand-new queue job
+   */
+  public function replayItem($request): WP_REST_Response|WP_Error {
+    $logId = (int) $request->get_param('id');
+
+    $log = $this->repository->find($logId);
+
+    if (!$log) {
+      return new WP_Error(
+        'rest_log_not_found',
+        __('Log not found.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    if ($log['status'] !== 'success') {
+      return new WP_Error(
+        'rest_log_not_replayable',
+        __('Only successful log entries can be replayed.', 'flowsystems-webhook-actions'),
+        ['status' => 409]
+      );
+    }
+
+    $webhook = $this->webhookRepository->find((int) $log['webhook_id']);
+
+    if (!$webhook) {
+      return new WP_Error(
+        'rest_webhook_not_found',
+        __('Webhook not found.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    $payload = [
+      'webhook'          => $webhook,
+      'payload'          => $log['request_payload'],
+      'log_id'           => $logId,
+      'mapping_applied'  => (bool) $log['mapping_applied'],
+      'original_payload' => $log['original_payload'],
+    ];
+
+    // Pass $logId as both the payload field and the queue log_id column so
+    // processJob() reuses the existing log entry instead of creating a new one.
+    $jobId = $this->queueService->enqueue((int) $log['webhook_id'], $log['trigger_name'], $payload, null, $logId);
+
+    return rest_ensure_response([
+      'success' => true,
+      'job_id'  => $jobId,
+    ]);
+  }
+
+  /**
    * Bulk retry queue jobs for multiple log entries
    */
   public function bulkRetry($request): WP_REST_Response {
@@ -329,7 +394,9 @@ class LogsController extends WP_REST_Controller {
       $logId = (int) $logId;
       $job = $this->queueRepository->findByLogId($logId);
 
-      if (!$job || !in_array($job['status'], ['failed', 'permanently_failed'], true)) {
+      $log = $this->repository->find($logId);
+
+      if (!$log || !in_array($log['status'], ['error', 'permanently_failed'], true) || !$job) {
         $skipped++;
         continue;
       }
@@ -369,12 +436,30 @@ class LogsController extends WP_REST_Controller {
    * Get log statistics
    */
   public function getStats($request): WP_REST_Response {
-    $days = (int) ($request->get_param('days') ?: 7);
+    $days      = (int) ($request->get_param('days') ?: 7);
     $webhookId = $request->get_param('webhook_id') ? (int) $request->get_param('webhook_id') : null;
 
-    $stats = $this->repository->getStats($webhookId, $days);
+    // Terminal outcomes from persistent stats table (not affected by log deletion or replay)
+    $persistent = $this->statsRepository->getPeriodStats($webhookId, $days);
 
-    return rest_ensure_response($stats);
+    // Transient states from live log table (error/retry/pending are short-lived)
+    $transient  = $this->repository->getTransientStats($webhookId, $days);
+
+    $result = [
+      'success'            => $persistent['success'],
+      'permanently_failed' => $persistent['permanently_failed'],
+      'error'              => $transient['error'],
+      'retry'              => $transient['retry'],
+      'pending'            => $transient['pending'],
+      'avg_duration_ms'    => $persistent['avg_duration_ms'],
+      'http_2xx'           => $persistent['http_2xx'],
+      'http_4xx'           => $persistent['http_4xx'],
+      'http_5xx'           => $persistent['http_5xx'],
+    ];
+
+    $result['total'] = $result['success'] + $result['error'] + $result['permanently_failed'];
+
+    return rest_ensure_response($result);
   }
 
   /**

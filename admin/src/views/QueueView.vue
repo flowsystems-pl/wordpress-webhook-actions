@@ -15,7 +15,7 @@ const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
 const dateFromFilter = ref('')
 const dateToFilter = ref('')
-const stats = ref({ pending: 0, processing: 0, completed: 0, failed: 0, total: 0, due_now: 0 })
+const stats = ref({ pending: 0, processing: 0, completed: 0, permanently_failed: 0, total: 0, due_now: 0 })
 const loading = ref(true)
 const statsLoading = ref(false)
 const error = ref(null)
@@ -120,7 +120,7 @@ const getStatusBadgeVariant = (status) => {
     case 'pending': return 'secondary'
     case 'processing': return 'warning'
     case 'completed': return 'success'
-    case 'failed': return 'destructive'
+    case 'permanently_failed': return 'destructive'
     default: return 'secondary'
   }
 }
@@ -200,8 +200,8 @@ onMounted(() => {
           <div class="text-xs sm:text-sm text-muted-foreground">Due Now</div>
         </Card>
         <Card class="p-2 sm:p-4">
-          <div class="text-lg sm:text-2xl font-bold tabular-nums text-red-600">{{ stats.failed }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Failed</div>
+          <div class="text-lg sm:text-2xl font-bold tabular-nums text-red-600">{{ stats.permanently_failed }}</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">Perm. Failed</div>
         </Card>
       </div>
     </div>
@@ -296,7 +296,7 @@ onMounted(() => {
           <div class="flex items-center gap-2 shrink-0">
             <!-- Execute button for pending/failed jobs -->
             <Button
-              v-if="item.status === 'pending' || item.status === 'failed'"
+              v-if="item.status === 'pending'"
               variant="outline"
               size="sm"
               @click="executeItem(item)"
@@ -310,7 +310,7 @@ onMounted(() => {
 
             <!-- Retry button for failed jobs -->
             <Button
-              v-if="item.status === 'failed'"
+              v-if="item.status === 'permanently_failed'"
               variant="outline"
               size="sm"
               @click="retryItem(item)"

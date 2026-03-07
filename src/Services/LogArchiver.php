@@ -106,6 +106,7 @@ class LogArchiver {
         "SELECT status, COUNT(*) as count
          FROM {$logsTable}
          WHERE created_at < %s AND status IN ('success', 'error', 'permanently_failed')
+           AND stats_recorded = 0
          GROUP BY status",
         $date
       ),

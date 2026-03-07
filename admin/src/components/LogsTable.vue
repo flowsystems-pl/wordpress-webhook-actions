@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { ChevronLeft, ChevronRight, Eye, Trash2, ArrowRight, RotateCcw, CheckCircle2, XCircle, Loader2 } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2 } from 'lucide-vue-next'
 import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 
 const props = defineProps({
@@ -31,12 +31,14 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['page-change', 'delete', 'retry', 'update:selectedIds'])
+const emit = defineEmits(['page-change', 'delete', 'retry', 'replay', 'update:selectedIds'])
 
 const totalPages = computed(() => Math.ceil(props.total / props.perPage))
 
 const selectedLog = ref(null)
 const showDetails = ref(false)
+
+const pendingDeleteLog = ref(null)
 
 const statusVariant = (status) => {
   const variants = {
@@ -49,7 +51,8 @@ const statusVariant = (status) => {
   return variants[status] || 'default'
 }
 
-const isRetryable = (status) => status === 'error' || status === 'permanently_failed'
+const isRetryable  = (status) => status === 'error' || status === 'permanently_failed'
+const isReplayable = (status) => status === 'success'
 
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -75,11 +78,29 @@ const openDetails = (log) => {
 const closeDetails = () => {
   showDetails.value = false
   selectedLog.value = null
+  openAttempts.value.clear()
 }
 
+const openAttempts = ref(new Set())
+const toggleAttempt = (index) => {
+  if (openAttempts.value.has(index)) {
+    openAttempts.value.delete(index)
+  } else {
+    openAttempts.value.add(index)
+  }
+  openAttempts.value = new Set(openAttempts.value)
+}
+
+defineExpose({ openDetails })
+
 const handleDelete = (log) => {
-  if (confirm('Are you sure you want to delete this log?')) {
-    emit('delete', log.id)
+  pendingDeleteLog.value = log
+}
+
+const confirmDelete = () => {
+  if (pendingDeleteLog.value) {
+    emit('delete', pendingDeleteLog.value.id)
+    pendingDeleteLog.value = null
   }
 }
 
@@ -220,6 +241,16 @@ const allOnPageSelected = computed(() => {
                 >
                   <RotateCcw class="h-4 w-4" />
                 </Button>
+                <Button
+                  v-if="isReplayable(log.status)"
+                  size="icon"
+                  variant="ghost"
+                  class="text-green-600 hover:text-green-700"
+                  title="Replay"
+                  @click="emit('replay', log)"
+                >
+                  <Play class="h-4 w-4" />
+                </Button>
                 <Button size="icon" variant="ghost" @click="openDetails(log)">
                   <Eye class="h-4 w-4" />
                 </Button>
@@ -259,6 +290,21 @@ const allOnPageSelected = computed(() => {
       </div>
     </div>
 
+    <!-- Delete Confirm Dialog -->
+    <Dialog
+      :open="!!pendingDeleteLog"
+      title="Delete log?"
+      description="This action cannot be undone."
+      @close="pendingDeleteLog = null"
+    >
+      <template #footer>
+        <div class="flex gap-2">
+          <Button variant="destructive" @click="confirmDelete">Delete</Button>
+          <Button variant="outline" @click="pendingDeleteLog = null">Cancel</Button>
+        </div>
+      </template>
+    </Dialog>
+
     <!-- Details Dialog -->
     <Dialog
       :open="showDetails"
@@ -280,6 +326,12 @@ const allOnPageSelected = computed(() => {
           </div>
         </div>
 
+        <!-- Next Attempt -->
+        <div v-if="selectedLog.status === 'retry' && selectedLog.next_attempt_at" class="flex items-center gap-2 text-sm p-3 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 rounded-md">
+          <Loader2 class="h-4 w-4 shrink-0 animate-spin" />
+          Next attempt scheduled for {{ formatDate(selectedLog.next_attempt_at) }}
+        </div>
+
         <!-- Error Message -->
         <div v-if="selectedLog.error_message">
           <div class="text-sm font-medium mb-1">Error Message</div>
@@ -298,26 +350,63 @@ const allOnPageSelected = computed(() => {
 
         <!-- Attempt History -->
         <div v-if="selectedLog.attempt_history && selectedLog.attempt_history.length > 0">
-          <div class="text-sm font-medium mb-2">Attempt History</div>
-          <div class="space-y-2">
+          <div class="text-sm font-medium mb-2">
+            Attempt History
+            <span class="text-muted-foreground font-normal">({{ selectedLog.attempt_history.length }})</span>
+          </div>
+          <div class="border rounded-md divide-y overflow-hidden">
             <div
               v-for="(attempt, index) in selectedLog.attempt_history"
               :key="index"
-              class="flex items-start gap-3 text-xs p-2 rounded-md border"
             >
-              <div class="shrink-0 mt-0.5">
-                <CheckCircle2 v-if="attempt.status === 'success'" class="h-3.5 w-3.5 text-green-500" />
-                <XCircle v-else class="h-3.5 w-3.5 text-red-500" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-medium">#{{ attempt.attempt + 1 }}</span>
-                  <span v-if="attempt.http_code" class="text-muted-foreground">HTTP {{ attempt.http_code }}</span>
-                  <span v-if="attempt.duration_ms" class="text-muted-foreground">{{ attempt.duration_ms }}ms</span>
-                  <span class="text-muted-foreground">{{ attempt.attempted_at }}</span>
+              <!-- Trigger -->
+              <button
+                type="button"
+                class="w-full flex items-center gap-3 px-3 py-2 text-xs text-left hover:bg-muted/50 transition-colors"
+                @click="toggleAttempt(index)"
+              >
+                <CheckCircle2 v-if="attempt.status === 'success'" class="h-3.5 w-3.5 text-green-500 shrink-0" />
+                <XCircle v-else class="h-3.5 w-3.5 text-red-500 shrink-0" />
+                <span class="font-medium">Attempt #{{ attempt.attempt + 1 }}</span>
+                <span v-if="attempt.http_code" class="text-muted-foreground">HTTP {{ attempt.http_code }}</span>
+                <span v-if="attempt.duration_ms != null" class="text-muted-foreground">{{ attempt.duration_ms }}ms</span>
+                <span class="text-muted-foreground ml-auto shrink-0">{{ attempt.attempted_at }}</span>
+                <ChevronDown
+                  class="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform"
+                  :class="{ 'rotate-180': openAttempts.has(index) }"
+                />
+              </button>
+              <!-- Content -->
+              <div v-if="openAttempts.has(index)" class="px-3 py-2 bg-muted/30 text-xs space-y-2 border-t">
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <div>
+                    <span class="text-muted-foreground">Status</span>
+                    <div class="font-medium capitalize">{{ attempt.status }}</div>
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">HTTP Code</span>
+                    <div class="font-medium">{{ attempt.http_code ?? '—' }}</div>
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">Duration</span>
+                    <div class="font-medium">{{ attempt.duration_ms != null ? `${attempt.duration_ms}ms` : '—' }}</div>
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">Will Retry</span>
+                    <div class="font-medium">{{ attempt.should_retry ? 'Yes' : 'No' }}</div>
+                  </div>
+                  <div class="col-span-2">
+                    <span class="text-muted-foreground">Attempted At</span>
+                    <div class="font-medium font-mono">{{ attempt.attempted_at }}</div>
+                  </div>
                 </div>
-                <div v-if="attempt.error_message" class="text-destructive mt-0.5 truncate">
-                  {{ attempt.error_message }}
+                <div v-if="attempt.error_message">
+                  <span class="text-muted-foreground">Error</span>
+                  <div class="mt-0.5 text-destructive font-mono break-all">{{ attempt.error_message }}</div>
+                </div>
+                <div v-if="attempt.response_body != null">
+                  <span class="text-muted-foreground">Response Body</span>
+                  <pre class="mt-0.5 p-2 bg-muted rounded-md overflow-x-auto font-mono break-all whitespace-pre-wrap">{{ formatJson(attempt.response_body) }}</pre>
                 </div>
               </div>
             </div>
@@ -378,6 +467,14 @@ const allOnPageSelected = computed(() => {
           >
             <RotateCcw class="h-4 w-4 mr-1.5" />
             Retry
+          </Button>
+          <Button
+            v-if="isReplayable(selectedLog?.status)"
+            variant="outline"
+            class="text-green-600 border-green-600 hover:bg-green-50"
+            @click="() => { emit('replay', selectedLog); closeDetails() }"
+          >
+            <Play class="h-4 w-4 mr-1.5" /> Replay
           </Button>
           <Button variant="outline" @click="closeDetails">Close</Button>
         </div>

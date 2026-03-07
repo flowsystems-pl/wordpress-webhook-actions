@@ -1,9 +1,12 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Alert, Input, Button, DateTimePicker } from '@/components/ui'
+import { useRouter } from 'vue-router'
+import { Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Alert, Input, Button, DateTimePicker, Dialog } from '@/components/ui'
 import { Loader2 } from 'lucide-vue-next'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
+
+const router = useRouter()
 
 const logs = ref([])
 const total = ref(0)
@@ -36,6 +39,10 @@ const dateToFilter = ref('')
 
 const selectedIds = ref([])
 const bulkRetrying = ref(false)
+const showReplaySuccess = ref(false)
+const replayedJobId = ref(null)
+const replayedLogId = ref(null)
+const logsTable = ref(null)
 
 const loadLogs = async () => {
   loading.value = true
@@ -110,16 +117,60 @@ const handleRetry = async (id) => {
   }
 }
 
+const handleReplay = async (log) => {
+  try {
+    const res = await api.logs.replay(log.id)
+    replayedJobId.value = res?.job_id ?? null
+    replayedLogId.value = log.id
+    await loadLogs()
+    showReplaySuccess.value = true
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+const executeReplayedJob = async () => {
+  if (!replayedJobId.value) return
+  try {
+    await api.queue.execute({ id: replayedJobId.value })
+    showReplaySuccess.value = false
+    await loadLogs()
+    const log = logs.value.find(l => l.id === replayedLogId.value)
+    if (log) logsTable.value?.openDetails(log)
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+const bulkActionLabel = computed(() => {
+  const hasRetry  = selectedIds.value.some(id => logs.value.find(l => l.id === id)?.status === 'error')
+  const hasReplay = selectedIds.value.some(id => ['success', 'permanently_failed'].includes(logs.value.find(l => l.id === id)?.status))
+  if (hasRetry && hasReplay) return `Retry / Replay ${selectedIds.value.length} selected`
+  if (hasReplay) return `Replay ${selectedIds.value.length} selected`
+  return `Retry ${selectedIds.value.length} selected`
+})
+
 const handleBulkRetry = async () => {
   if (!selectedIds.value.length) return
   bulkRetrying.value = true
   error.value = null
   try {
-    await api.logs.bulkRetry(selectedIds.value)
+    const retryIds  = []
+    const replayIds = []
+    for (const id of selectedIds.value) {
+      const status = logs.value.find(l => l.id === id)?.status
+      if (status === 'error' || status === 'permanently_failed') retryIds.push(id)
+      else if (status === 'success') replayIds.push(id)
+    }
+    const calls = []
+    if (retryIds.length)  calls.push(api.logs.bulkRetry(retryIds))
+    for (const id of replayIds) calls.push(api.logs.replay(id))
+    await Promise.all(calls)
     selectedIds.value = []
     await loadLogs()
+    if (replayIds.length) showReplaySuccess.value = true
   } catch (e) {
-    console.error('Failed to bulk retry:', e)
+    console.error('Failed to bulk action:', e)
     error.value = e.message
   } finally {
     bulkRetrying.value = false
@@ -222,7 +273,7 @@ onMounted(() => {
         :disabled="bulkRetrying"
         @click="handleBulkRetry"
       >
-        {{ bulkRetrying ? 'Retrying...' : `Retry ${selectedIds.length} selected` }}
+        {{ bulkRetrying ? 'Processing...' : bulkActionLabel }}
       </Button>
       <Button
         size="sm"
@@ -238,8 +289,29 @@ onMounted(() => {
       {{ error }}
     </Alert>
 
+    <!-- Replay success dialog -->
+    <Dialog
+      :open="showReplaySuccess"
+      title="Event Replayed"
+      description="A new delivery attempt has been queued. The result will appear in this log's attempt history on the next cron run."
+      @close="showReplaySuccess = false"
+    >
+      <template #footer>
+        <div class="flex gap-2">
+          <Button @click="executeReplayedJob">
+            Execute Now
+          </Button>
+          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">
+            Go to Queue
+          </Button>
+          <Button variant="outline" @click="showReplaySuccess = false">Close</Button>
+        </div>
+      </template>
+    </Dialog>
+
     <!-- Table -->
     <LogsTable
+      ref="logsTable"
       :logs="logs"
       :total="total"
       :page="page"
@@ -249,6 +321,7 @@ onMounted(() => {
       @page-change="handlePageChange"
       @delete="handleDelete"
       @retry="handleRetry"
+      @replay="handleReplay"
       @update:selected-ids="selectedIds = $event"
     />
   </div>

@@ -348,6 +348,7 @@ class Dispatcher {
           'http_code'     => null,
           'status'        => 'error',
           'error_message' => (string) $errorMessage,
+          'response_body' => null,
           'duration_ms'   => $durationMs,
           'should_retry'  => true,
         ]);
@@ -379,12 +380,14 @@ class Dispatcher {
     }
 
     if ($logId !== null) {
+      $parsedBody = json_decode($responseBody, true);
       $this->logService->appendAttemptHistory($logId, [
         'attempt'       => $attemptNumber,
         'attempted_at'  => gmdate('Y-m-d\TH:i:s\Z'),
         'http_code'     => $responseCode,
         'status'        => $success ? 'success' : 'error',
         'error_message' => $success ? null : sprintf("HTTP %d", $responseCode),
+        'response_body' => $parsedBody !== null ? $parsedBody : ($responseBody !== '' ? $responseBody : null),
         'duration_ms'   => $durationMs,
         'should_retry'  => $shouldRetry,
       ]);
