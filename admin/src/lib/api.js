@@ -157,6 +157,12 @@ export const api = {
   health: {
     stats: () => get('health'),
   },
+  tokens: {
+    list: () => get('tokens'),
+    create: (data) => post('tokens', data),
+    rotate: (id) => post(`tokens/${id}/rotate`),
+    delete: (id) => del(`tokens/${id}`),
+  },
   schemas: {
     getByWebhook: (webhookId) => get(`schemas/webhook/${webhookId}`),
     get: (webhookId, triggerName) => get(`schemas/webhook/${webhookId}/trigger/${triggerName}`),
