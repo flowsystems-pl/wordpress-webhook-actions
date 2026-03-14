@@ -7,6 +7,7 @@ import TokenCreatedDialog from '@/components/TokenCreatedDialog.vue'
 import RotateTokenDialog from '@/components/RotateTokenDialog.vue'
 import ChangeExpiryDialog from '@/components/ChangeExpiryDialog.vue'
 import api from '@/lib/api'
+import { isUtcExpired, formatUtcDate } from '@/lib/dates'
 
 const tokens = ref([])
 const loading = ref(true)
@@ -33,14 +34,8 @@ const scopeBadgeVariant = (scope) => {
   return 'secondary'
 }
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleString()
-}
-
-const isExpired = (token) => {
-  return token.expires_at !== null && new Date(token.expires_at) <= new Date()
-}
+const formatDate = formatUtcDate
+const isExpired = (token) => isUtcExpired(token.expires_at)
 
 const loadTokens = async () => {
   loading.value = true

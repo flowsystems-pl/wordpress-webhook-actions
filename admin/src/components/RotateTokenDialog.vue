@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Button, Dialog, Label, DateTimePicker, Switch } from '@/components/ui'
+import { isUtcExpired, utcDbToPickerLocal, pickerLocalToUtcDb } from '@/lib/dates'
 
 const props = defineProps({
   open: Boolean,
@@ -14,29 +15,27 @@ const changeExpiry = ref(false)
 const hasExpiry = ref(false)
 const expiresAt = ref(null)
 
-const isExpired = computed(() => {
-  return props.token?.expires_at && new Date(props.token.expires_at) <= new Date()
-})
+const isExpired = computed(() => isUtcExpired(props.token?.expires_at))
 
 const defaultExtendedExpiry = () => {
   const d = new Date()
   d.setDate(d.getDate() + 30)
   d.setSeconds(0, 0)
-  return d.toISOString()
+  // Return local picker format "YYYY-MM-DDTHH:mm"
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 watch(() => props.token, (token) => {
   if (!token) return
   if (isExpired.value) {
-    // Revival flow: auto-expand expiry, default to +30 days
     changeExpiry.value = true
     hasExpiry.value = true
     expiresAt.value = defaultExtendedExpiry()
   } else {
-    // Routine rotation: leave expiry section collapsed
     changeExpiry.value = false
     hasExpiry.value = !!token.expires_at
-    expiresAt.value = token.expires_at ?? null
+    expiresAt.value = utcDbToPickerLocal(token.expires_at)
   }
 }, { immediate: true })
 
@@ -44,7 +43,7 @@ const handleRotate = () => {
   rotating.value = true
   const payload = {}
   if (changeExpiry.value) {
-    payload.expires_at = hasExpiry.value && expiresAt.value ? expiresAt.value : null
+    payload.expires_at = hasExpiry.value && expiresAt.value ? pickerLocalToUtcDb(expiresAt.value) : null
   }
   emit('rotate', props.token, payload)
 }

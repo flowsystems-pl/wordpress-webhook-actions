@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { Button, Dialog, Label, DateTimePicker, Switch } from '@/components/ui'
+import { utcDbToPickerLocal, pickerLocalToUtcDb } from '@/lib/dates'
 
 const props = defineProps({
   open: Boolean,
@@ -17,7 +18,7 @@ const error = ref(null)
 watch(() => props.token, (token) => {
   if (token) {
     hasExpiry.value = !!token.expires_at
-    expiresAt.value = token.expires_at ?? null
+    expiresAt.value = utcDbToPickerLocal(token.expires_at)
   }
 }, { immediate: true })
 
@@ -31,7 +32,7 @@ const handleSubmit = () => {
   error.value = null
   emit('updated', {
     token: props.token,
-    expiresAt: hasExpiry.value && expiresAt.value ? expiresAt.value : null,
+    expiresAt: hasExpiry.value && expiresAt.value ? pickerLocalToUtcDb(expiresAt.value) : null,
   })
 }
 </script>

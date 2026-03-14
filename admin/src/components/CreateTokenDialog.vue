@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Button, Dialog, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, DateTimePicker, Switch } from '@/components/ui'
+import { pickerLocalToUtcDb } from '@/lib/dates'
 
 defineProps({
   open: Boolean,
@@ -47,7 +48,7 @@ const handleSubmit = async () => {
   const data = {
     name: name.value.trim(),
     scope: scope.value,
-    expires_at: hasExpiry.value && expiresAt.value ? expiresAt.value : undefined,
+    expires_at: hasExpiry.value && expiresAt.value ? pickerLocalToUtcDb(expiresAt.value) : undefined,
   }
 
   try {
