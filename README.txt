@@ -1,6 +1,6 @@
 === Flow Systems Webhook Actions ===
 Contributors: mateuszflowsystems
-Tags: webhook, automation, integration, n8n, api
+Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
@@ -208,6 +208,30 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
+= 1.3.0 — 2026-03-14 =
+
+**API Tokens — connect external tools without sharing your WordPress password**
+
+You can now create API tokens to give external systems (like n8n, Make, or your own scripts) controlled access to the plugin's REST API. No WordPress login required on the other end.
+
+Each token has a scope that limits what it can do:
+
+- *Read* — can view webhooks, logs, and queue status
+- *Operational* — can also toggle webhooks on/off, retry failed deliveries
+- *Full* — can also create, edit, and delete webhooks
+
+Tokens can optionally expire. You can rotate a token at any time to issue a new secret without losing any settings — and if a token has expired, rotating it lets you revive it and extend the expiry in one step.
+
+Token management (creating, rotating, deleting) always requires a WordPress admin login and cannot be done with a token itself.
+
+**All timestamps are now shown in your local timezone**
+
+Previously, dates in the delivery logs, queue, and schema panel were displayed in UTC regardless of where you are. They now correctly reflect your local time.
+
+**Improvements to the log details panel**
+
+When viewing the details of a delivery log, the error message, response body, HTTP status code, and duration now show the data from the most recent delivery attempt rather than the first one — which is more useful when diagnosing failures after multiple retries.
+
 = 1.2.1 — 2026-03-07 =
 - Fixed retry returning 500 when a log has multiple queue jobs (replay + original) — `findByLogId` now returns the most recent job via `ORDER BY id DESC`
 - Fixed `forceRetry` rejecting jobs with status `failed` — restored `failed` to the allowed status list alongside `pending` and `permanently_failed`
@@ -253,6 +277,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Adds a new database table for API tokens. The table is created automatically on update — no manual steps needed.
 
 = 1.1.1 =
 Fixes permanently_failed entries being undercounted in delivery statistics. No database changes.
