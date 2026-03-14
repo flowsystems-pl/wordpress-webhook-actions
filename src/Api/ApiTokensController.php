@@ -68,11 +68,30 @@ class ApiTokensController extends WP_REST_Controller {
             'type'     => 'integer',
             'required' => true,
           ],
+          'expires_at' => [
+            'required' => false,
+            'type'     => 'string',
+          ],
         ],
       ],
     ]);
 
     register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', [
+      [
+        'methods'             => WP_REST_Server::EDITABLE,
+        'callback'            => [$this, 'updateToken'],
+        'permission_callback' => [$this, 'permissionsCheck'],
+        'args'                => [
+          'id' => [
+            'type'     => 'integer',
+            'required' => true,
+          ],
+          'expires_at' => [
+            'required' => false,
+            'type'     => ['string', 'null'],
+          ],
+        ],
+      ],
       [
         'methods'             => WP_REST_Server::DELETABLE,
         'callback'            => [$this, 'deleteToken'],
@@ -185,11 +204,42 @@ class ApiTokensController extends WP_REST_Controller {
       );
     }
 
+    // Optionally update expiry at the same time (pass null to clear, omit to keep current)
+    $expiresAtParam = $request->get_param('expires_at');
+    if (array_key_exists('expires_at', $request->get_params())) {
+      $this->repository->updateExpiry($id, $expiresAtParam ?: null);
+    }
+
     $updated = $this->repository->find($id);
 
     return rest_ensure_response(array_merge($updated, [
       'plaintext_token' => $plain,
     ]));
+  }
+
+  /**
+   * PATCH /fswa/v1/tokens/{id}
+   * Currently supports updating expires_at only. Pass null to remove expiry.
+   */
+  public function updateToken(WP_REST_Request $request): WP_REST_Response|WP_Error {
+    $id = (int) $request->get_param('id');
+
+    $token = $this->repository->find($id);
+
+    if (!$token) {
+      return new WP_Error(
+        'rest_token_not_found',
+        __('API token not found.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    if (array_key_exists('expires_at', $request->get_params())) {
+      $expiresAt = $request->get_param('expires_at');
+      $this->repository->updateExpiry($id, $expiresAt ?: null);
+    }
+
+    return rest_ensure_response($this->repository->find($id));
   }
 
   /**

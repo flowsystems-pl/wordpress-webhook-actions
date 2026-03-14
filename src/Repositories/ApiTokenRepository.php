@@ -120,6 +120,24 @@ class ApiTokenRepository {
   }
 
   /**
+   * Update expires_at for a token. Pass null to remove expiry.
+   */
+  public function updateExpiry(int $id, ?string $expiresAt): bool {
+    global $wpdb;
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+    $result = $wpdb->update(
+      $this->table,
+      ['expires_at' => $expiresAt],
+      ['id' => $id],
+      ['%s'],
+      ['%d']
+    );
+
+    return $result !== false;
+  }
+
+  /**
    * Update last_used_at to now
    */
   public function touchLastUsed(int $id): void {
