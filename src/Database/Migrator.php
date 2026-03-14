@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.2.0';
+  private const CURRENT_VERSION = '1.3.0';
 
   /**
    * Run pending migrations
@@ -44,6 +44,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_queue',
       $wpdb->prefix . 'fswa_trigger_schemas',
       $wpdb->prefix . 'fswa_stats',
+      $wpdb->prefix . 'fswa_api_tokens',
     ];
 
     foreach ($requiredTables as $table) {
@@ -67,6 +68,7 @@ class Migrator {
       '1.0.0' => [self::class, 'migration_1_0_0'],
       '1.1.0' => [self::class, 'migration_1_1_0'],
       '1.2.0' => [self::class, 'migration_1_2_0'],
+      '1.3.0' => [self::class, 'migration_1_3_0'],
     ];
   }
 
@@ -261,6 +263,35 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$logsTable} ADD KEY idx_stats_recorded (stats_recorded)");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.3.0 - Add API tokens table
+   */
+  public static function migration_1_3_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+    $tokensTable    = $wpdb->prefix . 'fswa_api_tokens';
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $sql = "CREATE TABLE {$tokensTable} (
+            id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            name         VARCHAR(255) NOT NULL,
+            token_hash   VARCHAR(64) NOT NULL,
+            token_hint   VARCHAR(13) NOT NULL,
+            scope        VARCHAR(20) NOT NULL DEFAULT 'read',
+            expires_at   DATETIME DEFAULT NULL,
+            last_used_at DATETIME DEFAULT NULL,
+            rotated_at   DATETIME DEFAULT NULL,
+            created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_token_hash (token_hash),
+            KEY idx_expires (expires_at)
+        ) {$charsetCollate};";
+
+    dbDelta($sql);
   }
 
   /**
