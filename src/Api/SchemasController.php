@@ -12,6 +12,7 @@ use WP_Error;
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\PayloadTransformer;
+use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class SchemasController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -36,7 +37,7 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getWebhookSchemas'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'readPermissionsCheck'],
         'args' => [
           'id' => [
             'description' => __('Webhook ID.', 'flowsystems-webhook-actions'),
@@ -52,7 +53,7 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getSchema'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'readPermissionsCheck'],
         'args' => [
           'id' => [
             'description' => __('Webhook ID.', 'flowsystems-webhook-actions'),
@@ -69,7 +70,7 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::EDITABLE,
         'callback' => [$this, 'updateSchema'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'fullPermissionsCheck'],
         'args' => [
           'id' => [
             'description' => __('Webhook ID.', 'flowsystems-webhook-actions'),
@@ -94,7 +95,7 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::DELETABLE,
         'callback' => [$this, 'deleteSchema'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'fullPermissionsCheck'],
         'args' => [
           'id' => [
             'description' => __('Webhook ID.', 'flowsystems-webhook-actions'),
@@ -115,7 +116,7 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'resetCapture'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'fullPermissionsCheck'],
         'args' => [
           'id' => [
             'description' => __('Webhook ID.', 'flowsystems-webhook-actions'),
@@ -136,16 +137,17 @@ class SchemasController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getUserTriggers'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'readPermissionsCheck'],
       ],
     ]);
   }
 
-  /**
-   * Permission check
-   */
-  public function permissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function readPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
+  }
+
+  public function fullPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
   /**

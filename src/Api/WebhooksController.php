@@ -10,6 +10,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class WebhooksController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -70,7 +71,7 @@ class WebhooksController extends WP_REST_Controller {
     register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/toggle', [
       'methods' => WP_REST_Server::CREATABLE,
       'callback' => [$this, 'toggleItem'],
-      'permission_callback' => [$this, 'updateItemPermissionsCheck'],
+      'permission_callback' => [$this, 'toggleItemPermissionsCheck'],
       'args' => [
         'id' => [
           'description' => __('Unique identifier for the webhook.', 'flowsystems-webhook-actions'),
@@ -80,39 +81,28 @@ class WebhooksController extends WP_REST_Controller {
     ]);
   }
 
-  /**
-   * Check permissions for getting items
-   */
-  public function getItemsPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function getItemsPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
-  /**
-   * Check permissions for getting single item
-   */
-  public function getItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function getItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
-  /**
-   * Check permissions for creating items
-   */
-  public function createItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function createItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
-  /**
-   * Check permissions for updating items
-   */
-  public function updateItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function updateItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
-  /**
-   * Check permissions for deleting items
-   */
-  public function deleteItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function toggleItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_OPERATIONAL);
+  }
+
+  public function deleteItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
   /**

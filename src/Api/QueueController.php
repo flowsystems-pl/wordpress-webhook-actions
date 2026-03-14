@@ -13,6 +13,7 @@ use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class QueueController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -30,7 +31,7 @@ class QueueController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getItems'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'readPermissionsCheck'],
         'args' => [
           'status' => [
             'type' => 'string',
@@ -71,7 +72,7 @@ class QueueController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getStats'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'readPermissionsCheck'],
       ],
     ]);
 
@@ -80,7 +81,7 @@ class QueueController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'executeItem'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'operationalPermissionsCheck'],
         'args' => [
           'id' => [
             'required' => true,
@@ -95,7 +96,7 @@ class QueueController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'deleteItem'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'fullPermissionsCheck'],
         'args' => [
           'id' => [
             'required' => true,
@@ -110,7 +111,7 @@ class QueueController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'retryItem'],
-        'permission_callback' => [$this, 'permissionsCheck'],
+        'permission_callback' => [$this, 'operationalPermissionsCheck'],
         'args' => [
           'id' => [
             'required' => true,
@@ -121,8 +122,16 @@ class QueueController extends WP_REST_Controller {
     ]);
   }
 
-  public function permissionsCheck(WP_REST_Request $_request): bool {
-    return current_user_can('manage_options');
+  public function readPermissionsCheck(WP_REST_Request $request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
+  }
+
+  public function operationalPermissionsCheck(WP_REST_Request $request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_OPERATIONAL);
+  }
+
+  public function fullPermissionsCheck(WP_REST_Request $request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
   /**

@@ -14,6 +14,7 @@ use FlowSystems\WebhookActions\Repositories\QueueRepository;
 use FlowSystems\WebhookActions\Repositories\StatsRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\QueueService;
+use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class LogsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -78,7 +79,7 @@ class LogsController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'retryItem'],
-        'permission_callback' => [$this, 'getItemPermissionsCheck'],
+        'permission_callback' => [$this, 'operationalPermissionsCheck'],
       ],
     ]);
 
@@ -86,7 +87,7 @@ class LogsController extends WP_REST_Controller {
     register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/replay', [[
       'methods'             => WP_REST_Server::CREATABLE,
       'callback'            => [$this, 'replayItem'],
-      'permission_callback' => [$this, 'getItemPermissionsCheck'],
+      'permission_callback' => [$this, 'operationalPermissionsCheck'],
     ]]);
 
     // Bulk retry queue jobs associated with multiple logs
@@ -94,7 +95,7 @@ class LogsController extends WP_REST_Controller {
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'bulkRetry'],
-        'permission_callback' => [$this, 'getItemsPermissionsCheck'],
+        'permission_callback' => [$this, 'operationalPermissionsCheck'],
         'args' => [
           'ids' => [
             'description' => __('Array of log IDs to retry.', 'flowsystems-webhook-actions'),
@@ -136,32 +137,24 @@ class LogsController extends WP_REST_Controller {
     ]);
   }
 
-  /**
-   * Check permissions for getting items
-   */
-  public function getItemsPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function getItemsPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
-  /**
-   * Check permissions for getting single item
-   */
-  public function getItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function getItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
-  /**
-   * Check permissions for deleting items
-   */
-  public function deleteItemsPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function operationalPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_OPERATIONAL);
   }
 
-  /**
-   * Check permissions for deleting single item
-   */
-  public function deleteItemPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function deleteItemsPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
+  }
+
+  public function deleteItemPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_FULL);
   }
 
   /**

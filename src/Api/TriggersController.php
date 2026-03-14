@@ -7,6 +7,8 @@ defined('ABSPATH') || exit;
 use WP_REST_Controller;
 use WP_REST_Server;
 use WP_REST_Response;
+use WP_Error;
+use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class TriggersController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -23,11 +25,8 @@ class TriggersController extends WP_REST_Controller {
     ]);
   }
 
-  /**
-   * Check permissions
-   */
-  public function getItemsPermissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function getItemsPermissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
   /**

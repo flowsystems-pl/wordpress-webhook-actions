@@ -12,6 +12,8 @@ use FlowSystems\WebhookActions\Repositories\StatsRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\StatsService;
+use FlowSystems\WebhookActions\Api\AuthHelper;
+use WP_Error;
 
 class HealthController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -44,11 +46,8 @@ class HealthController extends WP_REST_Controller {
     ]);
   }
 
-  /**
-   * Check permissions
-   */
-  public function permissionsCheck($request): bool {
-    return current_user_can('manage_options');
+  public function permissionsCheck($request): bool|WP_Error {
+    return AuthHelper::dualAuth($request, AuthHelper::SCOPE_READ);
   }
 
   /**
