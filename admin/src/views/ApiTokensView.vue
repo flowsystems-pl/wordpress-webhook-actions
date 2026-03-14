@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { KeyRound, Plus, RefreshCw, Trash2 } from 'lucide-vue-next'
+import { KeyRound, Plus, RefreshCw, Trash2, CalendarClock } from 'lucide-vue-next'
 import { Button, Badge, Dialog } from '@/components/ui'
 import CreateTokenDialog from '@/components/CreateTokenDialog.vue'
 import TokenCreatedDialog from '@/components/TokenCreatedDialog.vue'
 import RotateTokenDialog from '@/components/RotateTokenDialog.vue'
+import ChangeExpiryDialog from '@/components/ChangeExpiryDialog.vue'
 import api from '@/lib/api'
 
 const tokens = ref([])
@@ -18,6 +19,9 @@ const plaintextToken = ref(null)
 
 const showRotateDialog = ref(false)
 const tokenToRotate = ref(null)
+
+const showChangeExpiryDialog = ref(false)
+const tokenToChangeExpiry = ref(null)
 
 const showDeleteDialog = ref(false)
 const tokenToDelete = ref(null)
@@ -72,9 +76,9 @@ const openRotate = (token) => {
   showRotateDialog.value = true
 }
 
-const handleRotate = async (token) => {
+const handleRotate = async (token, payload = {}) => {
   try {
-    const result = await api.tokens.rotate(token.id)
+    const result = await api.tokens.rotate(token.id, payload)
     plaintextToken.value = result.plaintext_token
     showRotateDialog.value = false
     tokenToRotate.value = null
@@ -84,6 +88,24 @@ const handleRotate = async (token) => {
     error.value = e.message
     showRotateDialog.value = false
     tokenToRotate.value = null
+  }
+}
+
+const openChangeExpiry = (token) => {
+  tokenToChangeExpiry.value = token
+  showChangeExpiryDialog.value = true
+}
+
+const handleChangeExpiry = async ({ token, expiresAt }) => {
+  try {
+    await api.tokens.updateExpiry(token.id, expiresAt)
+    showChangeExpiryDialog.value = false
+    tokenToChangeExpiry.value = null
+    await loadTokens()
+  } catch (e) {
+    error.value = e.message
+    showChangeExpiryDialog.value = false
+    tokenToChangeExpiry.value = null
   }
 }
 
@@ -202,6 +224,14 @@ onMounted(loadTokens)
                 <Button
                   variant="ghost"
                   size="sm"
+                  @click="openChangeExpiry(token)"
+                  title="Change expiry"
+                >
+                  <CalendarClock class="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   @click="openDelete(token)"
                   title="Delete token"
                   class="text-destructive hover:text-destructive"
@@ -243,6 +273,13 @@ onMounted(loadTokens)
       :token="tokenToRotate"
       @close="showRotateDialog = false; tokenToRotate = null"
       @rotate="handleRotate"
+    />
+
+    <ChangeExpiryDialog
+      :open="showChangeExpiryDialog"
+      :token="tokenToChangeExpiry"
+      @close="showChangeExpiryDialog = false; tokenToChangeExpiry = null"
+      @updated="handleChangeExpiry"
     />
 
     <!-- Delete confirm dialog -->

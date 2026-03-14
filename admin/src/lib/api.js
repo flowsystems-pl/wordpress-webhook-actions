@@ -92,6 +92,16 @@ export function put(endpoint, data = {}) {
 }
 
 /**
+ * PATCH request
+ */
+export function patch(endpoint, data = {}) {
+  return request(endpoint, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
  * DELETE request
  */
 export function del(endpoint, params = {}) {
@@ -160,7 +170,8 @@ export const api = {
   tokens: {
     list: () => get('tokens'),
     create: (data) => post('tokens', data),
-    rotate: (id) => post(`tokens/${id}/rotate`),
+    rotate: (id, data = {}) => post(`tokens/${id}/rotate`, data),
+    updateExpiry: (id, expiresAt) => patch(`tokens/${id}`, { expires_at: expiresAt }),
     delete: (id) => del(`tokens/${id}`),
   },
   schemas: {
