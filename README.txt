@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -269,6 +269,9 @@ Yes. The plugin is completely free and licensed under GPL.
 8. REST API Tokens configuration screen
 
 == Changelog ==
+
+= 1.3.2 — 2026-03-15 =
+- Fixed `auth_header` field being exposed to API tokens without `full` scope — read and operational tokens now receive a permission notice instead
 
 = 1.3.1 — 2026-03-15 =
 - Fixed log details dialog showing error message from the first attempt instead of the most recent one
