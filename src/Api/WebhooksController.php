@@ -106,10 +106,21 @@ class WebhooksController extends WP_REST_Controller {
   }
 
   /**
+   * Strip auth_header for non-full-scope callers.
+   */
+  private function prepareWebhook(array $webhook, WP_REST_Request $request): array {
+    if (!AuthHelper::requestHasScope($request, AuthHelper::SCOPE_FULL)) {
+      $webhook['auth_header'] = __('You don\'t have permissions to see it.', 'flowsystems-webhook-actions');
+    }
+    return $webhook;
+  }
+
+  /**
    * Get all webhooks
    */
   public function getItems($request): WP_REST_Response {
     $webhooks = $this->repository->getAll();
+    $webhooks = array_map(fn($w) => $this->prepareWebhook($w, $request), $webhooks);
 
     return rest_ensure_response($webhooks);
   }
@@ -129,7 +140,7 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    return rest_ensure_response($webhook);
+    return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
   /**
@@ -184,7 +195,7 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($webhookId);
 
-    return rest_ensure_response($webhook);
+    return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
   /**
@@ -244,7 +255,7 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($id);
 
-    return rest_ensure_response($webhook);
+    return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
   /**
@@ -303,7 +314,7 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($id);
 
-    return rest_ensure_response($webhook);
+    return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
   /**

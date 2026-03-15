@@ -54,4 +54,23 @@ class AuthHelper {
 
     return true;
   }
+
+  /**
+   * Check if the current request has at least the given scope (or is an admin session).
+   * Use this for response shaping — does not send errors.
+   */
+  public static function requestHasScope(WP_REST_Request $request, string $scope): bool {
+    if (current_user_can('manage_options')) {
+      return true;
+    }
+
+    $service = new ApiTokenService();
+    $token   = $service->validateFromRequest($request);
+
+    if ($token === false) {
+      return false;
+    }
+
+    return $service->tokenHasScope($token, $scope);
+  }
 }
