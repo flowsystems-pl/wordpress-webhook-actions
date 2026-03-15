@@ -271,6 +271,7 @@ Yes. The plugin is completely free and licensed under GPL.
 == Changelog ==
 
 = 1.3.1 — 2026-03-15 =
+- Fixed log details dialog showing error message from the first attempt instead of the most recent one
 - Added [REST API Reference](https://flowsystems.pl/webhook-wordpress-plugin-api/) link to the plugin description
 
 = 1.3.0 — 2026-03-15 =
