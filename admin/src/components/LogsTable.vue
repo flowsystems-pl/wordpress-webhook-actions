@@ -63,8 +63,7 @@ const lastAttempt = computed(() => {
 })
 
 const lastAttemptError = computed(() => {
-  if (!selectedLog.value) return null
-  return lastAttempt.value?.error_message || selectedLog.value.error_message || null
+  return lastAttempt.value?.error_message || null
 })
 
 const formatJson = (data) => {
