@@ -34,6 +34,8 @@ Built for production environments where losing events is not acceptable.
 - Replace fragile custom `wp_remote_post()` integrations
 - Build idempotent WordPress automation pipelines
 - Query delivery logs, trigger retries, or manage webhooks programmatically from CI/CD pipelines or external dashboards using API tokens
+- Allow AI coding assistants (e.g. Claude Code) to inspect webhook logs and retry failed events automatically
+- Use AI agents to monitor webhook delivery health and operate the queue through the REST API
 
 = Event Identity & Idempotency =
 
@@ -115,7 +117,7 @@ Payloads always include stable event metadata for consistency.
 
 = REST API Access with Token Authentication =
 
-The plugin exposes a full REST API (`/wp-json/fswa/v1/`) that powers the admin interface and can be used directly by external tools and automation platforms.
+The plugin exposes a full operational REST API (`/wp-json/fswa/v1/`) that powers the admin interface and can also be used directly by external tools, automation systems, AI agents, and CI/CD pipelines.
 
 Every endpoint supports dual authentication:
 
@@ -137,6 +139,31 @@ Token authentication is accepted via:
 - `?api_token=<token>` query parameter
 
 Tokens can be set to expire and rotated at any time. Rotation issues a new secret immediately while preserving the token's name, scope, and settings. Token management always requires a WordPress admin login — tokens cannot be used to create or manage other tokens.
+
+= AI Agents and Programmatic Automation =
+
+The REST API makes Flow Systems Webhook Actions accessible to AI-powered tools and coding agents.
+
+Automation systems, CI pipelines, and AI coding assistants (such as Claude Code or Cursor) can safely interact with webhook infrastructure using API tokens without requiring WordPress admin sessions.
+
+Typical AI-driven workflows include:
+
+- AI agents monitoring webhook delivery health
+- Automatically retrying failed webhook events
+- Inspecting delivery logs to debug integrations
+- Enabling or disabling webhooks dynamically during deployments
+- Managing automation pipelines across environments
+
+Because the API exposes operational endpoints for logs, queue jobs, webhooks, and triggers, external agents can treat WordPress as a programmable event infrastructure.
+
+Example scenarios:
+
+• A Claude Code agent analyzes webhook delivery logs and automatically retries failed integrations.
+• A CI/CD pipeline disables webhook triggers during deployments and re-enables them afterward.
+• Automation systems query webhook health metrics and alert when the queue becomes stuck.
+• External dashboards display real-time webhook delivery metrics using API tokens.
+
+This allows WordPress automation pipelines to be controlled entirely through HTTP APIs, enabling advanced integration with AI-driven development workflows.
 
 = Developer Friendly =
 
@@ -241,7 +268,7 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
-= 1.3.0 — 2026-03-14 =
+= 1.3.0 — 2026-03-15 =
 - Added API token authentication for the REST API — create tokens with `read`, `operational`, or `full` scope; tokens are SHA-256 hashed at rest and accepted via `X-FSWA-Token` header, `Authorization: Bearer`, or `?api_token=` query param
 - Added token expiry support with optional `expires_at`; expired tokens are rejected at auth time and visually flagged in the admin panel
 - Added token rotation — issues a new secret while preserving all other token fields; optionally updates expiry in the same request; revived expired tokens auto-extend to +30 days by default
