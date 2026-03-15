@@ -1,10 +1,10 @@
 === Flow Systems Webhook Actions ===
 Contributors: mateuszflowsystems
-Tags: webhook, automation, integration, n8n, api
+Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ Built for production environments where losing events is not acceptable.
 - Send event-driven data to internal APIs
 - Replace fragile custom `wp_remote_post()` integrations
 - Build idempotent WordPress automation pipelines
+- Query delivery logs, trigger retries, or manage webhooks programmatically from CI/CD pipelines or external dashboards using API tokens
+- Allow AI coding assistants (e.g. Claude Code) to inspect webhook logs and retry failed events automatically
+- Use AI agents to monitor webhook delivery health and operate the queue through the REST API
 
 = Event Identity & Idempotency =
 
@@ -112,10 +115,61 @@ Adapt outgoing JSON payloads to match any external API:
 
 Payloads always include stable event metadata for consistency.
 
+= REST API Access with Token Authentication =
+
+The plugin exposes a full operational REST API (`/wp-json/fswa/v1/`) that powers the admin interface and can also be used directly by external tools, automation systems, AI agents, and CI/CD pipelines.
+
+Every endpoint supports dual authentication:
+
+- WordPress admin session (cookie-based, used by the admin panel)
+- API token — for programmatic access without a browser session
+
+**API Tokens**
+
+Create tokens directly from the API Tokens screen in the admin panel. Each token is assigned one of three scopes:
+
+- `read` — GET access to webhooks, logs, queue, health, triggers, and schemas
+- `operational` — Read + toggle webhooks on/off, retry and replay log entries, execute queue jobs
+- `full` — Operational + create, update, and delete webhooks, schemas, and queue jobs
+
+Token authentication is accepted via:
+
+- `X-FSWA-Token: <token>` header (recommended)
+- `Authorization: Bearer <token>` header
+- `?api_token=<token>` query parameter
+
+Tokens can be set to expire and rotated at any time. Rotation issues a new secret immediately while preserving the token's name, scope, and settings. Token management always requires a WordPress admin login — tokens cannot be used to create or manage other tokens.
+
+= AI Agents and Programmatic Automation =
+
+The REST API makes Flow Systems Webhook Actions accessible to AI-powered tools and coding agents.
+
+Automation systems, CI pipelines, and AI coding assistants (such as Claude Code or Cursor) can safely interact with webhook infrastructure using API tokens without requiring WordPress admin sessions.
+
+Typical AI-driven workflows include:
+
+- AI agents monitoring webhook delivery health
+- Automatically retrying failed webhook events
+- Inspecting delivery logs to debug integrations
+- Enabling or disabling webhooks dynamically during deployments
+- Managing automation pipelines across environments
+
+Because the API exposes operational endpoints for logs, queue jobs, webhooks, and triggers, external agents can treat WordPress as a programmable event infrastructure.
+
+Example scenarios:
+
+• A Claude Code agent analyzes webhook delivery logs and automatically retries failed integrations.
+• A CI/CD pipeline disables webhook triggers during deployments and re-enables them afterward.
+• Automation systems query webhook health metrics and alert when the queue becomes stuck.
+• External dashboards display real-time webhook delivery metrics using API tokens.
+
+This allows WordPress automation pipelines to be controlled entirely through HTTP APIs, enabling advanced integration with AI-driven development workflows.
+
 = Developer Friendly =
 
 - Works with any WordPress or WooCommerce action
-- Internal REST endpoints power the admin interface
+- Full REST API (`/wp-json/fswa/v1/`) usable from any HTTP client — not just the admin panel
+- API token authentication with scoped access (`read`, `operational`, `full`)
 - Fully extensible via filters and actions
 - Clean namespace and unique prefixes
 - Built according to WordPress.org standards
@@ -133,6 +187,7 @@ Flow Systems Webhook Actions provides:
 - Permanent failure state handling
 - Event UUIDs and timestamps
 - Full delivery logging and metrics
+- REST API with token authentication for programmatic access
 
 Built for developers who need production-grade automation reliability.
 
@@ -192,6 +247,10 @@ Payload Mapping allows you to transform the webhook payload before it is sent. Y
 
 Yes. For user-related triggers (such as `user_register`, `profile_update`, `wp_login`, `wp_logout`), you can enable "Include User Data" to automatically add user information (ID, email, display name, roles, etc.) to the payload.
 
+= Can I access the REST API without a WordPress login? =
+
+Yes. Create an API token from the API Tokens screen in the admin panel and use it in the `X-FSWA-Token` header (or `Authorization: Bearer`) with your requests. Tokens support three scopes — `read`, `operational`, and `full` — so you can grant only the access level each integration needs.
+
 = Is this plugin free? =
 
 Yes. The plugin is completely free and licensed under GPL.
@@ -205,8 +264,20 @@ Yes. The plugin is completely free and licensed under GPL.
 5. Webhook delivery logs with replay and retry controls
 6. Queue status overview
 7. Settings configuration screen
+8. REST API Tokens configuration screen
 
 == Changelog ==
+
+= 1.3.0 — 2026-03-15 =
+- Added API token authentication for the REST API — create tokens with `read`, `operational`, or `full` scope; tokens are SHA-256 hashed at rest and accepted via `X-FSWA-Token` header, `Authorization: Bearer`, or `?api_token=` query param
+- Added token expiry support with optional `expires_at`; expired tokens are rejected at auth time and visually flagged in the admin panel
+- Added token rotation — issues a new secret while preserving all other token fields; optionally updates expiry in the same request; revived expired tokens auto-extend to +30 days by default
+- Added `PATCH /tokens/{id}` endpoint for updating `expires_at` independently of rotation
+- Added `fswa_api_tokens` database table (migration 1.3.0)
+- Applied scope-based dual auth (`manage_options` session OR valid token) to all existing REST controllers: `read` for GET endpoints, `operational` for toggle/retry/replay, `full` for create/update/delete
+- Fixed all admin UI date displays (logs, queue, schema panel) to show times in the user's local timezone instead of raw UTC
+- Fixed date range filters (logs, queue) to correctly convert local picker values to UTC before querying
+- Improved log details panel — error message, response body, HTTP code, and duration now reflect the most recent attempt history entry rather than the top-level log fields
 
 = 1.2.1 — 2026-03-07 =
 - Fixed retry returning 500 when a log has multiple queue jobs (replay + original) — `findByLogId` now returns the most recent job via `ORDER BY id DESC`
@@ -253,6 +324,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Adds a new database table for API tokens. The table is created automatically on update — no manual steps needed.
 
 = 1.1.1 =
 Fixes permanently_failed entries being undercounted in delivery statistics. No database changes.

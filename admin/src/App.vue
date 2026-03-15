@@ -7,6 +7,7 @@ import {
   Moon,
   Sun,
   Clock,
+  KeyRound,
 } from 'lucide-vue-next';
 import { useTheme } from './composables/useTheme';
 import HealthStatusBar from './components/HealthStatusBar.vue';
@@ -18,6 +19,7 @@ const navItems = [
   { path: '/webhooks', label: 'Webhooks', icon: Webhook },
   { path: '/logs', label: 'Logs', icon: ScrollText },
   { path: '/queue', label: 'Queue', icon: Clock },
+  { path: '/tokens', label: 'API Tokens', icon: KeyRound },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 

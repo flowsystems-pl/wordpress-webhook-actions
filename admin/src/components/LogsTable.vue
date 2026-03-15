@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2 } from 'lucide-vue-next'
 import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
+import { formatUtcDate } from '@/lib/dates'
 
 const props = defineProps({
   logs: {
@@ -54,9 +55,17 @@ const statusVariant = (status) => {
 const isRetryable  = (status) => status === 'error' || status === 'permanently_failed'
 const isReplayable = (status) => status === 'success'
 
-const formatDate = (date) => {
-  return new Date(date).toLocaleString()
-}
+const formatDate = formatUtcDate
+
+const lastAttempt = computed(() => {
+  const history = selectedLog.value?.attempt_history
+  return history?.length ? history[history.length - 1] : null
+})
+
+const lastAttemptError = computed(() => {
+  if (!selectedLog.value) return null
+  return lastAttempt.value?.error_message || selectedLog.value.error_message || null
+})
 
 const formatJson = (data) => {
   if (!data) return 'null'
@@ -333,10 +342,13 @@ const allOnPageSelected = computed(() => {
         </div>
 
         <!-- Error Message -->
-        <div v-if="selectedLog.error_message">
-          <div class="text-sm font-medium mb-1">Error Message</div>
-          <div class="text-sm p-3 bg-destructive/10 text-destructive rounded-md">
-            {{ selectedLog.error_message }}
+        <div v-if="lastAttemptError">
+          <div class="text-sm font-medium mb-1">
+            Error Message
+            <span v-if="selectedLog.attempt_history?.length" class="text-muted-foreground font-normal">(last attempt)</span>
+          </div>
+          <div class="text-sm p-3 bg-destructive/10 text-destructive rounded-md font-mono break-all">
+            {{ lastAttemptError }}
           </div>
         </div>
 
@@ -413,13 +425,7 @@ const allOnPageSelected = computed(() => {
           </div>
         </div>
 
-        <!-- Original Payload (if mapping was applied) -->
-        <div v-if="selectedLog.mapping_applied && selectedLog.original_payload">
-          <div class="text-sm font-medium mb-1">Original Payload</div>
-          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.original_payload) }}</pre>
-        </div>
-
-        <!-- Request Payload (Transformed if mapping applied) -->
+         <!-- Request Payload (Transformed if mapping applied) -->
         <div>
           <div class="text-sm font-medium mb-1">
             {{ selectedLog.mapping_applied ? 'Transformed Payload (Sent)' : 'Request Payload' }}
@@ -427,21 +433,36 @@ const allOnPageSelected = computed(() => {
           <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.request_payload) }}</pre>
         </div>
 
+        <!-- Original Payload (if mapping was applied) -->
+        <div v-if="selectedLog.mapping_applied && selectedLog.original_payload">
+          <div class="text-sm font-medium mb-1">Original Payload</div>
+          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.original_payload) }}</pre>
+        </div>
+
         <!-- Response Body -->
-        <div v-if="selectedLog.response_body">
-          <div class="text-sm font-medium mb-1">Response Body</div>
-          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.response_body) }}</pre>
+        <div v-if="lastAttempt?.response_body ?? selectedLog.response_body">
+          <div class="text-sm font-medium mb-1">
+            Response Body
+            <span v-if="lastAttempt?.response_body" class="text-muted-foreground font-normal">(last attempt)</span>
+          </div>
+          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(lastAttempt?.response_body ?? selectedLog.response_body) }}</pre>
         </div>
 
         <!-- Meta -->
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
             <div class="font-medium">HTTP Code</div>
-            <div class="text-muted-foreground">{{ selectedLog.http_code || 'N/A' }}</div>
+            <div class="text-muted-foreground">
+              {{ (lastAttempt?.http_code ?? selectedLog.http_code) || 'N/A' }}
+              <span v-if="lastAttempt?.http_code" class="text-xs text-muted-foreground/60">(last attempt)</span>
+            </div>
           </div>
           <div>
             <div class="font-medium">Duration</div>
-            <div class="text-muted-foreground">{{ selectedLog.duration_ms ? `${selectedLog.duration_ms}ms` : 'N/A' }}</div>
+            <div class="text-muted-foreground">
+              {{ (lastAttempt?.duration_ms ?? selectedLog.duration_ms) != null ? `${lastAttempt?.duration_ms ?? selectedLog.duration_ms}ms` : 'N/A' }}
+              <span v-if="lastAttempt?.duration_ms != null" class="text-xs text-muted-foreground/60">(last attempt)</span>
+            </div>
           </div>
           <div>
             <div class="font-medium">Trigger</div>

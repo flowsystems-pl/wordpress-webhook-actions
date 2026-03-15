@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Card, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Alert, Input, Button, DateTimePicker, Dialog } from '@/components/ui'
+import { pickerLocalToUtcDb } from '@/lib/dates'
 import { Loader2 } from 'lucide-vue-next'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
@@ -67,11 +68,11 @@ const loadLogs = async () => {
     }
 
     if (dateFromFilter.value) {
-      params.date_from = dateFromFilter.value
+      params.date_from = pickerLocalToUtcDb(dateFromFilter.value)
     }
 
     if (dateToFilter.value) {
-      params.date_to = dateToFilter.value
+      params.date_to = pickerLocalToUtcDb(dateToFilter.value)
     }
 
     const result = await api.logs.list(params)

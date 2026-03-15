@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { Card, Button, Badge, Alert, Input, DateTimePicker } from '@/components/ui'
+import { pickerLocalToUtcDb } from '@/lib/dates'
 import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-vue-next'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
@@ -46,8 +47,8 @@ const loadQueue = async () => {
     const params = { page: page.value, per_page: perPage.value }
     if (eventUuidFilter.value) params.event_uuid = eventUuidFilter.value
     if (targetUrlFilter.value) params.target_url = targetUrlFilter.value
-    if (dateFromFilter.value) params.date_from = dateFromFilter.value
-    if (dateToFilter.value) params.date_to = dateToFilter.value
+    if (dateFromFilter.value) params.date_from = pickerLocalToUtcDb(dateFromFilter.value)
+    if (dateToFilter.value) params.date_to = pickerLocalToUtcDb(dateToFilter.value)
 
     const queueResponse = await api.queue.list(params)
     items.value = queueResponse.items || queueResponse || []

@@ -106,7 +106,7 @@ const displayLabel = computed(() => {
 
     <div class="p-0">
       <Calendar
-        :model-value="selectedDate"
+        :model-value="selectedDate ?? undefined"
         @update:model-value="onDateSelect"
       />
 

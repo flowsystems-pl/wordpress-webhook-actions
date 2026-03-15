@@ -10,6 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-vue-next';
 import { Button, Card, Badge, Switch, Label, Alert } from '@/components/ui';
+import { formatUtcDate } from '@/lib/dates';
 import MappingEditor from '@/components/MappingEditor.vue';
 import { useSchemas, useUserTriggers } from '@/composables/useSchemas';
 import { Braces } from 'lucide-vue-next';
@@ -46,11 +47,7 @@ const savingState = ref({});
 const localMappings = ref({});
 const localUserData = ref({});
 
-// Format date for display
-const formatDate = (date) => {
-  if (!date) return null;
-  return new Date(date).toLocaleString();
-};
+const formatDate = formatUtcDate;
 
 // Toggle trigger expansion
 const toggleExpanded = (trigger) => {
