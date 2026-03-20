@@ -7,6 +7,7 @@ import api from '@/lib/api'
 const settings = ref({
   log_retention_days: 30,
   archive_logs: true,
+  menu_under_tools: false,
 })
 const info = ref(null)
 const archive = ref(null)
@@ -299,6 +300,15 @@ onMounted(loadData)
             </div>
             <p class="text-sm text-muted-foreground">
               When enabled, logs are exported to JSON files before being deleted
+            </p>
+
+            <div class="flex items-center space-x-2 pt-2">
+              <Switch v-model="settings.menu_under_tools" />
+              <Label>Show menu under Tools</Label>
+            </div>
+            <p class="text-sm text-muted-foreground">
+              Move the admin menu item under Tools instead of the top-level sidebar.
+              Takes effect after saving and reloading the page.
             </p>
           </div>
 

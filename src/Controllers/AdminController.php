@@ -26,15 +26,26 @@ class AdminController {
    * Add admin menu page
    */
   public function addMenuPage(): void {
-    add_menu_page(
-      __('Webhook Actions', 'flowsystems-webhook-actions'),
-      __('Webhook Actions', 'flowsystems-webhook-actions'),
-      'manage_options',
-      'fswa-webhook-actions',
-      [$this, 'renderPage'],
-      'dashicons-rest-api',
-      80
-    );
+    if (get_option('fswa_menu_under_tools', false)) {
+      add_submenu_page(
+        'tools.php',
+        __('Webhook Actions', 'flowsystems-webhook-actions'),
+        __('Webhook Actions', 'flowsystems-webhook-actions'),
+        'manage_options',
+        'fswa-webhook-actions',
+        [$this, 'renderPage']
+      );
+    } else {
+      add_menu_page(
+        __('Webhook Actions', 'flowsystems-webhook-actions'),
+        __('Webhook Actions', 'flowsystems-webhook-actions'),
+        'manage_options',
+        'fswa-webhook-actions',
+        [$this, 'renderPage'],
+        'dashicons-rest-api',
+        80
+      );
+    }
   }
 
 
@@ -51,7 +62,7 @@ class AdminController {
    * @param string $hook
    */
   public function enqueueAssets(string $hook): void {
-    if ($hook !== 'toplevel_page_fswa-webhook-actions') {
+    if (strpos($hook, 'fswa-webhook-actions') === false) {
       return;
     }
 

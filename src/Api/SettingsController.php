@@ -16,6 +16,7 @@ class SettingsController extends WP_REST_Controller {
 
   private const DEFAULT_RETENTION_DAYS = 30;
   private const DEFAULT_ARCHIVE_LOGS = true;
+  private const DEFAULT_MENU_UNDER_TOOLS = false;
 
   /**
    * Register routes
@@ -39,6 +40,9 @@ class SettingsController extends WP_REST_Controller {
             'maximum' => 365,
           ],
           'archive_logs' => [
+            'type' => 'boolean',
+          ],
+          'menu_under_tools' => [
             'type' => 'boolean',
           ],
         ],
@@ -88,6 +92,7 @@ class SettingsController extends WP_REST_Controller {
     $settings = [
       'log_retention_days' => (int) get_option('fswa_log_retention_days', self::DEFAULT_RETENTION_DAYS),
       'archive_logs' => (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS),
+      'menu_under_tools' => (bool) get_option('fswa_menu_under_tools', self::DEFAULT_MENU_UNDER_TOOLS),
     ];
 
     return rest_ensure_response($settings);
@@ -105,6 +110,10 @@ class SettingsController extends WP_REST_Controller {
 
     if ($request->has_param('archive_logs')) {
       update_option('fswa_archive_logs', (bool) $request->get_param('archive_logs'));
+    }
+
+    if ($request->has_param('menu_under_tools')) {
+      update_option('fswa_menu_under_tools', (bool) $request->get_param('menu_under_tools'));
     }
 
     return $this->getSettings($request);
