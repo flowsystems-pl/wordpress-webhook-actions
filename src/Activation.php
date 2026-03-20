@@ -4,6 +4,8 @@ namespace FlowSystems\WebhookActions;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Services\Scheduler;
+
 class Activation {
   /**
    * Run activation tasks
@@ -152,38 +154,27 @@ class Activation {
    * Schedule the cleanup cron job
    */
   public static function scheduleCleanupCron(): void {
-    if (!wp_next_scheduled('fswa_cleanup_logs')) {
-
-      $timestamp = strtotime('tomorrow 3:00am');
-      wp_schedule_event($timestamp, 'daily', 'fswa_cleanup_logs');
-    }
+    Scheduler::scheduleRecurring(
+      'fswa_cleanup_logs',
+      DAY_IN_SECONDS,
+      'daily',
+      strtotime('tomorrow 3:00am')
+    );
   }
 
   /**
    * Schedule the queue processor cron job (every minute)
    */
   public static function scheduleQueueProcessor(): void {
-    if (!wp_next_scheduled('fswa_process_queue')) {
-      wp_schedule_event(time(), 'every_minute', 'fswa_process_queue');
-    }
-
-    add_filter('cron_schedules', function ($schedules) {
-      if (!isset($schedules['every_minute'])) {
-        $schedules['every_minute'] = [
-          'interval' => 60,
-          'display' => __('Every Minute', 'flowsystems-webhook-actions'),
-        ];
-      }
-      return $schedules;
-    });
+    Scheduler::scheduleRecurring('fswa_process_queue', MINUTE_IN_SECONDS, 'every_minute');
   }
 
   /**
    * Clean up on deactivation
    */
   public static function deactivate(): void {
-    wp_unschedule_hook('fswa_process_queue');
-    wp_unschedule_hook('fswa_cleanup_logs');
+    Scheduler::unschedule('fswa_process_queue');
+    Scheduler::unschedule('fswa_cleanup_logs');
   }
 
   /**

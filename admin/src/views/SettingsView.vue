@@ -179,8 +179,14 @@ onMounted(loadData)
           <div class="space-y-4">
             <div>
               <p class="text-sm text-muted-foreground mb-4">
-                For reliable webhook delivery, set up a system cron job to process the queue every minute.
-                WP-Cron serves as a fallback when system cron isn't configured.
+                <span v-if="cronInfo.action_scheduler_active">
+                  Action Scheduler detected — queue processing is managed automatically.
+                  You can still configure an external cron URL as a direct trigger.
+                </span>
+                <span v-else>
+                  For reliable webhook delivery, set up a system cron job to process the queue every minute.
+                  WP-Cron serves as a fallback when system cron isn't configured.
+                </span>
               </p>
             </div>
 
@@ -232,6 +238,13 @@ onMounted(loadData)
                 <div class="text-muted-foreground">{{ cronInfo.last_run_human }}</div>
               </div>
               <div>
+                <div class="font-medium">Scheduler</div>
+                <div>
+                  <span v-if="cronInfo.action_scheduler_active" class="text-green-600">Action Scheduler</span>
+                  <span v-else class="text-muted-foreground">WP-Cron</span>
+                </div>
+              </div>
+              <div v-if="!cronInfo.action_scheduler_active">
                 <div class="font-medium">WP-Cron Fallback</div>
                 <div class="text-muted-foreground">
                   <span v-if="cronInfo.wp_cron_disabled" class="text-yellow-600">Disabled</span>

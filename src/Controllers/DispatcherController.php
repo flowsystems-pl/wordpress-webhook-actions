@@ -12,6 +12,7 @@ use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\HooksHandler;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\QueueService;
+use FlowSystems\WebhookActions\Services\Scheduler;
 
 class DispatcherController {
 
@@ -189,6 +190,7 @@ class DispatcherController {
     $token = get_option('fswa_cron_secret', '');
     $lastRun = get_option('fswa_last_cron_run', 0);
     $wpCronDisabled = defined('DISABLE_WP_CRON') && DISABLE_WP_CRON;
+    $asActive = Scheduler::hasActionScheduler();
 
     return rest_ensure_response([
       'token' => $token,
@@ -197,7 +199,9 @@ class DispatcherController {
       'last_run' => $lastRun ? gmdate('Y-m-d H:i:s', $lastRun) : null,
       'last_run_human' => $lastRun ? human_time_diff($lastRun, time()) . ' ago' : 'Never',
       'wp_cron_disabled' => $wpCronDisabled,
-      'wp_cron_next' => wp_next_scheduled('fswa_process_queue'),
+      'action_scheduler_active' => $asActive,
+      'wp_cron_next' => $asActive ? null : wp_next_scheduled('fswa_process_queue'),
+      'as_next' => $asActive ? Scheduler::nextScheduled('fswa_process_queue') : null,
     ]);
   }
 

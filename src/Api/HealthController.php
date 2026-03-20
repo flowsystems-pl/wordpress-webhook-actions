@@ -12,6 +12,7 @@ use FlowSystems\WebhookActions\Repositories\StatsRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\StatsService;
+use FlowSystems\WebhookActions\Services\Scheduler;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 use WP_Error;
 
@@ -128,7 +129,7 @@ class HealthController extends WP_REST_Controller {
         'avg_attempts_per_event' => $this->logRepository->getAvgAttemptsPerEvent(),
         'oldest_pending_age_seconds' => $oldestPendingAge,
         'queue_stuck' => ($oldestPendingAge ?? 0) > 600,
-        'wp_cron_only' => (int) get_option('fswa_last_cron_run', 0) === 0,
+        'wp_cron_only' => !Scheduler::hasActionScheduler() && (int) get_option('fswa_last_cron_run', 0) === 0,
       ],
     ]);
   }
