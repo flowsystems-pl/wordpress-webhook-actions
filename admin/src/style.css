@@ -107,10 +107,6 @@
   cursor: pointer;
 }
 
-#fswa-app input:focus,
-#fswa-app button:focus,
-#fswa-app select:focus,
-#fswa-app textarea:focus,
 #fswa-app a:focus {
   outline: none !important;
   box-shadow: none !important;
