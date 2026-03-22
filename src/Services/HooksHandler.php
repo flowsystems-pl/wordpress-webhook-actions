@@ -31,7 +31,7 @@ class HooksHandler {
       ->getAllTriggers();
 
     foreach ($allTriggers as $trigger) {
-      add_action($trigger, [$this, 'registerTriggerHandler']);
+      add_action($trigger, [$this, 'registerTriggerHandler'], 10, PHP_INT_MAX);
     }
 
     // Register queue processor for cron

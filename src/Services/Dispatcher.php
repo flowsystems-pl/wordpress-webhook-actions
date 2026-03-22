@@ -455,10 +455,18 @@ class Dispatcher {
         return array_map([$this, 'normalizeValue'], iterator_to_array($value, false));
       }
 
+      // Allow third-party code to provide custom extraction for any object type.
+      $custom = apply_filters('fswa_normalize_object', null, $value);
+      if (is_array($custom)) {
+        return array_merge(['__type' => get_class($value)], array_map([$this, 'normalizeValue'], $custom));
+      }
+
       if (method_exists($value, 'get_data')) {
         $data = $value->get_data();
       } elseif ($value instanceof \JsonSerializable) {
         $data = $value->jsonSerialize();
+      } elseif (method_exists($value, 'get_properties')) {
+        $data = $value->get_properties();
       } else {
         $data = get_object_vars($value);
       }

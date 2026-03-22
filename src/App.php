@@ -11,6 +11,7 @@ use FlowSystems\WebhookActions\Services\LogArchiver;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
 use FlowSystems\WebhookActions\Services\Scheduler;
+use FlowSystems\WebhookActions\Integrations\CF7Integration;
 
 class App {
   const VERSION = '1.1.0';
@@ -60,6 +61,11 @@ class App {
     // Initialize controllers
     new DispatcherController();
     new AdminController();
+
+    // Third-party integrations (loaded only when the plugin is active)
+    if (class_exists('WPCF7_ContactForm')) {
+      (new CF7Integration())->register();
+    }
 
     // Register cleanup cron
     add_action('fswa_cleanup_logs', [$this, 'runLogCleanup']);
