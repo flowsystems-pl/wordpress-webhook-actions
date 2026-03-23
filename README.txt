@@ -20,6 +20,7 @@ Works great with WooCommerce, n8n, Zapier alternatives, and custom APIs.
 
 Includes built-in Contact Form 7 integration — send CF7 form submissions to webhooks instantly with clean, structured payloads. Replace fragile CF7 email workflows with reliable webhook-based automation.
 
+
 Unlike basic “fire-and-forget” webhook implementations, this plugin ensures:
 
 - Delivery attempts are tracked
@@ -28,6 +29,8 @@ Unlike basic “fire-and-forget” webhook implementations, this plugin ensures:
 - Events include stable identity metadata for idempotency
 
 Built for production environments where losing events is not acceptable.
+
+👉 Example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://flowsystems.pl/examples/cf7-to-webhook/)
 
 = Typical Use Cases =
 
