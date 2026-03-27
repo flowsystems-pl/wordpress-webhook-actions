@@ -49,7 +49,7 @@ class SchemasController extends WP_REST_Controller {
     ]);
 
     // Get/Update/Delete schema for specific webhook+trigger
-    register_rest_route($this->namespace, '/' . $this->rest_base . '/webhook/(?P<id>[\d]+)/trigger/(?P<trigger>[a-zA-Z0-9_-]+)', [
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/webhook/(?P<id>[\d]+)/trigger/(?P<trigger>[a-zA-Z0-9_%\-\.]+)', [
       [
         'methods' => WP_REST_Server::READABLE,
         'callback' => [$this, 'getSchema'],
@@ -112,7 +112,7 @@ class SchemasController extends WP_REST_Controller {
     ]);
 
     // Reset capture for specific webhook+trigger
-    register_rest_route($this->namespace, '/' . $this->rest_base . '/webhook/(?P<id>[\d]+)/trigger/(?P<trigger>[a-zA-Z0-9_-]+)/capture', [
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/webhook/(?P<id>[\d]+)/trigger/(?P<trigger>[a-zA-Z0-9_%\-\.]+)/capture', [
       [
         'methods' => WP_REST_Server::CREATABLE,
         'callback' => [$this, 'resetCapture'],
@@ -182,7 +182,7 @@ class SchemasController extends WP_REST_Controller {
    */
   public function getSchema(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $webhookId = (int) $request->get_param('id');
-    $trigger = sanitize_text_field($request->get_param('trigger'));
+    $trigger = sanitize_text_field(rawurldecode($request->get_param('trigger')));
 
     // Verify webhook exists
     $webhook = $this->webhookRepository->find($webhookId);
@@ -218,7 +218,7 @@ class SchemasController extends WP_REST_Controller {
    */
   public function updateSchema(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $webhookId = (int) $request->get_param('id');
-    $trigger = sanitize_text_field($request->get_param('trigger'));
+    $trigger = sanitize_text_field(rawurldecode($request->get_param('trigger')));
 
     // Verify webhook exists
     $webhook = $this->webhookRepository->find($webhookId);
@@ -269,7 +269,7 @@ class SchemasController extends WP_REST_Controller {
    */
   public function deleteSchema(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $webhookId = (int) $request->get_param('id');
-    $trigger = sanitize_text_field($request->get_param('trigger'));
+    $trigger = sanitize_text_field(rawurldecode($request->get_param('trigger')));
 
     // Verify webhook exists
     $webhook = $this->webhookRepository->find($webhookId);
@@ -299,7 +299,7 @@ class SchemasController extends WP_REST_Controller {
    */
   public function resetCapture(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $webhookId = (int) $request->get_param('id');
-    $trigger = sanitize_text_field($request->get_param('trigger'));
+    $trigger = sanitize_text_field(rawurldecode($request->get_param('trigger')));
 
     // Verify webhook exists
     $webhook = $this->webhookRepository->find($webhookId);
