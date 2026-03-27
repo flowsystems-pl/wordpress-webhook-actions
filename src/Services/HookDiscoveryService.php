@@ -147,7 +147,7 @@ class HookDiscoveryService {
     }
 
     preg_match_all(
-      '/do_action(?:_ref_array)?\s*\(\s*[\'"]([a-zA-Z0-9_\-\.]+)[\'"]/',
+      '/do_action(?:_ref_array)?\s*\(\s*[\'"]([a-zA-Z0-9_\-\.\/]+)[\'"]/',
       $content,
       $matches
     );
