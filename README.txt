@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -353,6 +353,9 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
+= 1.6.1 — 2026-03-28 =
+- Fixed schema API endpoints for triggers containing forward slashes (e.g. `ivyforms/form/before_submission`) returning 404 on Apache — admin now uses double-encoding to pass through Apache's encoded-slash restriction
+
 = 1.6.0 — 2026-03-28 =
 - Added built-in IvyForms integration — automatically normalizes IvyForms field objects and enriches submission payloads for `ivyforms/form/before_submission` and `ivyforms/form/after_submission` hooks
 - Added IntegrationLoader to centralize third-party integration registration
@@ -437,6 +440,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.6.1 =
+Fixes schema API endpoints for slash-based trigger names (e.g. IvyForms hooks) on Apache hosting. No database changes.
 
 = 1.6.0 =
 Adds built-in IvyForms webhook integration and fixes hook discovery for triggers containing forward slashes. No database changes.
