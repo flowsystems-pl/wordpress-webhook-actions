@@ -176,10 +176,10 @@ export const api = {
   },
   schemas: {
     getByWebhook: (webhookId) => get(`schemas/webhook/${webhookId}`),
-    get: (webhookId, triggerName) => get(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(triggerName)}`),
-    update: (webhookId, triggerName, data) => put(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(triggerName)}`, data),
-    delete: (webhookId, triggerName) => del(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(triggerName)}`),
-    resetCapture: (webhookId, triggerName) => post(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(triggerName)}/capture`),
+    get: (webhookId, triggerName) => get(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}`),
+    update: (webhookId, triggerName, data) => put(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}`, data),
+    delete: (webhookId, triggerName) => del(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}`),
+    resetCapture: (webhookId, triggerName) => post(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}/capture`),
     getUserTriggers: () => get('schemas/user-triggers'),
   },
 }
