@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Flow Systems Webhook Actions
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
- * Description: Trigger HTTP webhooks from WordPress actions (do_action). Easily connect WordPress with n8n, Zapier, Make, or custom workflows.
+ * Description: Reliable WordPress webhooks with retries, queue, Action Scheduler support, delivery logs, and replayable events for n8n, APIs, and integrations.
  * Version: 1.5.0
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
