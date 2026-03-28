@@ -79,12 +79,12 @@ const isActive = (path) => {
         class="flex flex-wrap items-center justify-between text-sm text-muted-foreground"
       >
         <a
-          href="https://flowsystems.pl"
+          href="https://wpwebhooks.org"
           target="_blank"
           rel="noopener noreferrer"
           class="flow-logo hover:text-foreground transition-colors"
         >
-          Flow_Systems<span class="cursor">█</span>
+          WP_Webhooks<span class="cursor">█</span>
         </a>
         <span class="text-muted-foreground">⭐ Love the plugin? <a
           href="https://wordpress.org/support/plugin/flowsystems-webhook-actions/reviews/#new-post"

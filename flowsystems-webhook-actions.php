@@ -1,7 +1,7 @@
 <?php
 /*
  * Plugin Name: Flow Systems Webhook Actions
- * Plugin URI: https://flowsystems.pl/wordpress-webhook-actions
+ * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
  * Description: Trigger HTTP webhooks from WordPress actions (do_action). Easily connect WordPress with n8n, Zapier, Make, or custom workflows.
  * Version: 1.5.0
  * Author: Mateusz Skorupa
