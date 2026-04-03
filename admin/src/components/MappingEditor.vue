@@ -64,6 +64,24 @@ const draggedIndex = ref(null);
 const dragOverIndex = ref(null);
 const canDrag = ref(false);
 
+// Escape a key segment that may contain dots
+const escapeKey = (key) => key.replace(/\./g, '\\.');
+
+// Unescape a key segment (for display or lookup)
+const unescapeKey = (key) => key.replace(/\\\./g, '.');
+
+// Split a dot-notation path on unescaped dots only (keeps raw escaped segments)
+const splitPathRaw = (path) => path.split(/(?<!\\)\./);
+
+// Split a path and unescape each segment (for object traversal)
+const splitPath = (path) => splitPathRaw(path).map(unescapeKey);
+
+// Build a path by joining prefix + escaped key
+const joinPath = (prefix, key) => {
+  const escaped = escapeKey(key);
+  return prefix ? `${prefix}.${escaped}` : escaped;
+};
+
 // Flatten payload to show available fields - supports arrays with depth limit
 const flattenObject = (obj, prefix = '', depth = 0, maxDepth = 4) => {
   const result = [];
@@ -77,7 +95,7 @@ const flattenObject = (obj, prefix = '', depth = 0, maxDepth = 4) => {
     : Object.entries(obj);
 
   for (const [key, value] of entries) {
-    const path = prefix ? `${prefix}.${key}` : key;
+    const path = joinPath(prefix, key);
     const isArray = Array.isArray(value);
     const isObject = value !== null && typeof value === 'object';
 
@@ -129,7 +147,7 @@ const visibleFields = computed(() => {
 
   for (const field of fields) {
     // Check if any parent is collapsed
-    const pathParts = field.path.split('.');
+    const pathParts = splitPathRaw(field.path);
     let isHidden = false;
 
     for (let i = 1; i < pathParts.length; i++) {
@@ -172,14 +190,15 @@ watch(
       // Auto-expand first two levels
       const topLevel = Object.keys(effectivePayload.value);
       topLevel.forEach((key) => {
-        expandedPaths.value[key] = true;
+        const escapedKey = escapeKey(key);
+        expandedPaths.value[escapedKey] = true;
         const value = effectivePayload.value[key];
         if (value && typeof value === 'object') {
           const subKeys = Array.isArray(value)
-            ? value.map((_, i) => i)
+            ? value.map((_, i) => String(i))
             : Object.keys(value);
           subKeys.forEach((subKey) => {
-            expandedPaths.value[`${key}.${subKey}`] = true;
+            expandedPaths.value[joinPath(escapedKey, subKey)] = true;
           });
         }
       });
@@ -385,9 +404,9 @@ const getIndentStyle = (depth) => {
 
 // ============ PREVIEW LOGIC ============
 
-// Get value by dot-notation path
+// Get value by dot-notation path (supports escaped dots in keys, e.g. "args.0.6\.1")
 const getValueByPath = (obj, path) => {
-  const keys = path.split('.');
+  const keys = splitPath(path);
   let current = obj;
 
   for (const key of keys) {
@@ -407,13 +426,13 @@ const isValidSourcePath = (path) => {
   return getValueByPath(effectivePayload.value, path) !== undefined;
 };
 
-// Set value by dot-notation path
+// Set value by dot-notation path (supports escaped dots in keys, e.g. "args.0.6\.1")
 // ref: optional reference object (e.g. the original payload) used to determine
 // whether intermediate containers should be arrays or plain objects.
 // Without ref, large numeric-keyed objects like WC line_items { "303962": {...} }
 // would be mis-created as sparse arrays with 303k empty slots.
 const setValueByPath = (obj, path, value, ref = null) => {
-  const keys = path.split('.');
+  const keys = splitPath(path);
   let current = obj;
   let currentRef = ref;
 
@@ -472,7 +491,7 @@ const flattenForTransform = (obj, prefix = '', depth = 0, maxDepth = 10) => {
     : Object.entries(obj);
 
   for (const [key, value] of entries) {
-    const path = prefix ? `${prefix}.${key}` : key;
+    const path = joinPath(prefix, key);
 
     if (value !== null && typeof value === 'object') {
       // Always recurse into objects and arrays
@@ -641,7 +660,7 @@ const previewHtml = computed(() => {
               <span v-else class="w-4" />
 
               <code class="text-xs font-mono truncate">{{
-                field.path.split('.').pop()
+                splitPath(field.path).pop()
               }}</code>
               <Badge
                 :variant="getTypeBadgeVariant(field.type)"
