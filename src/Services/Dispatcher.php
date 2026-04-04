@@ -5,6 +5,7 @@ namespace FlowSystems\WebhookActions\Services;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Services\ConditionEvaluator;
 use WP_Error;
 
 class Dispatcher {
@@ -13,6 +14,7 @@ class Dispatcher {
   private QueueService $queueService;
   private WebhookRepository $webhookRepository;
   private PayloadTransformer $payloadTransformer;
+  private ConditionEvaluator $conditionEvaluator;
 
   /**
    * Constructor
@@ -26,6 +28,7 @@ class Dispatcher {
     $this->logService = new LogService();
     $this->webhookRepository = new WebhookRepository();
     $this->payloadTransformer = new PayloadTransformer();
+    $this->conditionEvaluator = new ConditionEvaluator();
   }
 
   /**
@@ -107,6 +110,26 @@ class Dispatcher {
       $transformedPayload = $transformResult['transformed'];
       $originalPayload = $transformResult['original'];
       $mappingApplied = $transformResult['mapping_applied'];
+
+      // Evaluate conditions against the transformed payload
+      $conditions = is_array($webhook['conditions'] ?? null) ? $webhook['conditions'] : [];
+      if (!empty($conditions)) {
+        $evalResult = $this->conditionEvaluator->evaluate($conditions, $transformedPayload);
+        if (!$evalResult['passed']) {
+          $this->logService->logSkipped(
+            $webhookId,
+            $trigger,
+            $transformedPayload,
+            $originalPayload,
+            $mappingApplied,
+            $this->buildSkipMessage($evalResult['failed_rule']),
+            $eventUuid,
+            $eventTimestamp
+          );
+          do_action('fswa_skipped', $trigger, $webhookId, $evalResult['failed_rule']);
+          continue;
+        }
+      }
 
       // Log pending status first to get log_id
       $logId = $this->logService->logPending(
@@ -415,6 +438,28 @@ class Dispatcher {
     }
 
     return ['success' => $success, 'shouldRetry' => $shouldRetry];
+  }
+
+  /**
+   * Build a human-readable skip message from the failed condition rule.
+   *
+   * @param array|null $rule
+   * @return string
+   */
+  private function buildSkipMessage(?array $rule): string {
+    if ($rule === null) {
+      return 'Conditions not met.';
+    }
+
+    $op    = $rule['operator'] ?? 'unknown';
+    $field = $rule['field'] ?? 'unknown';
+    $val   = $rule['value'] ?? '';
+
+    $valueHidden = in_array($op, ['is_empty', 'is_not_empty', 'is_true', 'is_false'], true);
+
+    return $valueHidden
+      ? sprintf('Condition not met: %s %s', $field, $op)
+      : sprintf('Condition not met: %s %s "%s"', $field, $op, $val);
   }
 
   /**

@@ -60,6 +60,9 @@ class WebhookRepository {
     foreach ($webhooks as &$webhook) {
       $webhook['triggers'] = $triggersByWebhook[$webhook['id']] ?? [];
       $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+      $webhook['conditions'] = !empty($webhook['conditions'])
+        ? json_decode($webhook['conditions'], true)
+        : null;
     }
 
     return $webhooks;
@@ -100,6 +103,9 @@ class WebhookRepository {
 
     $webhook['triggers'] = $triggers ?: [];
     $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+    $webhook['conditions'] = !empty($webhook['conditions'])
+      ? json_decode($webhook['conditions'], true)
+      : null;
 
     return $webhook;
   }
@@ -141,6 +147,9 @@ class WebhookRepository {
       // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
       $webhook['triggers'] = $triggers ?: [];
       $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+      $webhook['conditions'] = !empty($webhook['conditions'])
+        ? json_decode($webhook['conditions'], true)
+        : null;
     }
 
     return $webhooks;
@@ -159,12 +168,15 @@ class WebhookRepository {
     $result = $wpdb->insert(
       $this->webhooksTable,
       [
-        'name' => $data['name'],
+        'name'       => $data['name'],
         'endpoint_url' => $data['endpoint_url'],
         'auth_header' => $data['auth_header'] ?? null,
         'is_enabled' => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
+        'conditions' => isset($data['conditions'])
+          ? (is_array($data['conditions']) ? wp_json_encode($data['conditions']) : $data['conditions'])
+          : null,
       ],
-      ['%s', '%s', '%s', '%d']
+      ['%s', '%s', '%s', '%d', '%s']
     );
 
     if (!$result) {
@@ -212,6 +224,13 @@ class WebhookRepository {
     if (isset($data['is_enabled'])) {
       $updateData['is_enabled'] = (int) $data['is_enabled'];
       $format[] = '%d';
+    }
+
+    if (array_key_exists('conditions', $data)) {
+      $updateData['conditions'] = $data['conditions'] !== null
+        ? (is_array($data['conditions']) ? wp_json_encode($data['conditions']) : $data['conditions'])
+        : null;
+      $format[] = '%s';
     }
 
     if (!empty($updateData)) {

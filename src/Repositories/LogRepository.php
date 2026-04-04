@@ -378,12 +378,13 @@ class LogRepository {
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
     $result = [
-      'total' => 0,
-      'success' => 0,
-      'error' => 0,
-      'pending' => 0,
-      'retry' => 0,
+      'total'              => 0,
+      'success'            => 0,
+      'error'              => 0,
+      'pending'            => 0,
+      'retry'              => 0,
       'permanently_failed' => 0,
+      'skipped'            => 0,
     ];
 
     foreach ($stats as $stat) {

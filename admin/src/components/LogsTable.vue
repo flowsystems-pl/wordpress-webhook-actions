@@ -43,10 +43,11 @@ const pendingDeleteLog = ref(null)
 
 const statusVariant = (status) => {
   const variants = {
-    success: 'success',
-    error: 'destructive',
-    retry: 'warning',
-    pending: 'secondary',
+    success:           'success',
+    error:             'destructive',
+    retry:             'warning',
+    pending:           'secondary',
+    skipped:           'warning',
     permanently_failed: 'destructive',
   }
   return variants[status] || 'default'
@@ -332,6 +333,15 @@ const allOnPageSelected = computed(() => {
               Mapping Applied
             </Badge>
           </div>
+        </div>
+
+        <!-- Skipped reason -->
+        <div
+          v-if="selectedLog.status === 'skipped' && selectedLog.error_message"
+          class="flex items-start gap-2 text-sm p-3 bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300 rounded-md border border-amber-200 dark:border-amber-800"
+        >
+          <span class="font-medium shrink-0">Skipped:</span>
+          <span class="font-mono break-all">{{ selectedLog.error_message }}</span>
         </div>
 
         <!-- Next Attempt -->

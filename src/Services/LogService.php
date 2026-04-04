@@ -50,6 +50,42 @@ class LogService {
   }
 
   /**
+   * Log a skipped webhook dispatch (conditions not met).
+   *
+   * @param int $webhookId
+   * @param string $triggerName
+   * @param array $payload The transformed payload at time of evaluation
+   * @param array|null $originalPayload
+   * @param bool $mappingApplied
+   * @param string|null $errorMessage Human-readable description of which condition failed
+   * @param string|null $eventUuid
+   * @param string|null $eventTimestamp
+   * @return int|false Log ID or false on failure
+   */
+  public function logSkipped(
+    int $webhookId,
+    string $triggerName,
+    array $payload,
+    ?array $originalPayload = null,
+    bool $mappingApplied = false,
+    ?string $errorMessage = null,
+    ?string $eventUuid = null,
+    ?string $eventTimestamp = null
+  ) {
+    return $this->repository->create([
+      'webhook_id'       => $webhookId,
+      'trigger_name'     => $triggerName,
+      'status'           => 'skipped',
+      'request_payload'  => $payload,
+      'original_payload' => $originalPayload,
+      'mapping_applied'  => $mappingApplied,
+      'error_message'    => $errorMessage,
+      'event_uuid'       => $eventUuid,
+      'event_timestamp'  => $eventTimestamp,
+    ]);
+  }
+
+  /**
    * Log a successful webhook request
    *
    * @param int $webhookId
