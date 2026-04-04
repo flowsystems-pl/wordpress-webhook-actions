@@ -111,8 +111,8 @@ class Dispatcher {
       $originalPayload = $transformResult['original'];
       $mappingApplied = $transformResult['mapping_applied'];
 
-      // Evaluate conditions against the transformed payload
-      $conditions = is_array($webhook['conditions'] ?? null) ? $webhook['conditions'] : [];
+      // Evaluate conditions (per-trigger schema) against the transformed payload
+      $conditions = is_array($transformResult['conditions'] ?? null) ? $transformResult['conditions'] : [];
       if (!empty($conditions)) {
         $evalResult = $this->conditionEvaluator->evaluate($conditions, $transformedPayload);
         if (!$evalResult['passed']) {
@@ -155,6 +155,17 @@ class Dispatcher {
         null,
         $logId ?: null
       );
+    }
+
+    // Capture example payloads for disabled webhooks so mapping and conditions
+    // can be configured without needing to re-enable the webhook first.
+    $disabledWebhooks = $this->webhookRepository->getDisabledByTrigger($trigger);
+    foreach ($disabledWebhooks as $webhook) {
+      $webhookId = (int) ($webhook['id'] ?? 0);
+      if ($webhookId === 0) {
+        continue;
+      }
+      $this->payloadTransformer->transform($webhookId, $trigger, $payload, $args);
     }
   }
 

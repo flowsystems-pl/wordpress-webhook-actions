@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.4.0';
+  private const CURRENT_VERSION = '1.4.1';
 
   /**
    * Run pending migrations
@@ -70,6 +70,7 @@ class Migrator {
       '1.2.0' => [self::class, 'migration_1_2_0'],
       '1.3.0' => [self::class, 'migration_1_3_0'],
       '1.4.0' => [self::class, 'migration_1_4_0'],
+      '1.4.1' => [self::class, 'migration_1_4_1'],
     ];
   }
 
@@ -310,6 +311,36 @@ class Migrator {
     ));
     if (!$exists) {
       $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN conditions LONGTEXT DEFAULT NULL");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.4.1 - Move conditions from fswa_webhooks to fswa_trigger_schemas
+   */
+  public static function migration_1_4_1(): void {
+    global $wpdb;
+
+    $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
+    $schemasTable  = $wpdb->prefix . 'fswa_trigger_schemas';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    // Drop conditions from webhooks if it was added by 1.4.0
+    $webhookConditionsExists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$webhooksTable} LIKE %s",
+      'conditions'
+    ));
+    if ($webhookConditionsExists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} DROP COLUMN conditions");
+    }
+
+    // Add conditions to trigger_schemas
+    $schemaConditionsExists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$schemasTable} LIKE %s",
+      'conditions'
+    ));
+    if (!$schemaConditionsExists) {
+      $wpdb->query("ALTER TABLE {$schemasTable} ADD COLUMN conditions LONGTEXT DEFAULT NULL");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }

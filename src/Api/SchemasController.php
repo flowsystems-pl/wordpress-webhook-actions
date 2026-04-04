@@ -240,6 +240,10 @@ class SchemasController extends WP_REST_Controller {
       $data['include_user_data'] = (bool) $request->get_param('include_user_data');
     }
 
+    if ($request->has_param('conditions')) {
+      $data['conditions'] = $this->sanitizeConditions($request->get_param('conditions'));
+    }
+
     if (empty($data)) {
       return new WP_Error(
         'rest_no_data',
@@ -340,5 +344,47 @@ class SchemasController extends WP_REST_Controller {
     return rest_ensure_response([
       'triggers' => $this->payloadTransformer->getUserEnrichmentTriggers(),
     ]);
+  }
+
+  /**
+   * Sanitize and validate a conditions payload from the request.
+   *
+   * @param mixed $raw
+   * @return array|null
+   */
+  private function sanitizeConditions(mixed $raw): ?array {
+    if ($raw === null || !is_array($raw)) {
+      return null;
+    }
+
+    $allowedOperators = [
+      'equals', 'not_equals', 'contains', 'not_contains',
+      'greater_than', 'less_than', 'is_empty', 'is_not_empty',
+      'is_true', 'is_false',
+    ];
+
+    $sanitized = [
+      'enabled' => (bool) ($raw['enabled'] ?? false),
+      'type'    => in_array($raw['type'] ?? 'and', ['and', 'or'], true)
+        ? $raw['type']
+        : 'and',
+      'rules'   => [],
+    ];
+
+    foreach ((array) ($raw['rules'] ?? []) as $rule) {
+      if (empty($rule['field']) || empty($rule['operator'])) {
+        continue;
+      }
+      if (!in_array($rule['operator'], $allowedOperators, true)) {
+        continue;
+      }
+      $sanitized['rules'][] = [
+        'field'    => sanitize_text_field($rule['field']),
+        'operator' => $rule['operator'],
+        'value'    => isset($rule['value']) ? sanitize_text_field((string) $rule['value']) : '',
+      ];
+    }
+
+    return $sanitized;
   }
 }

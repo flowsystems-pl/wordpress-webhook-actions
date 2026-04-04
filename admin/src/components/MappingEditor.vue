@@ -609,6 +609,7 @@ const previewHtml = computed(() => {
   if (!transformedPreview.value) return '';
   return formatJsonWithHighlight(transformedPreview.value);
 });
+
 </script>
 
 <template>

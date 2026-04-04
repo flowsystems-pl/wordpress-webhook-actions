@@ -2,7 +2,6 @@
 import { ref, computed, watch } from 'vue';
 import { Button, Input, Label, Switch } from '@/components/ui';
 import TriggerSelect from '@/components/TriggerSelect.vue';
-import ConditionsEditor from '@/components/ConditionsEditor.vue';
 
 const props = defineProps({
   webhook: {
@@ -20,7 +19,6 @@ const form = ref({
   auth_header: '',
   is_enabled: true,
   triggers: [],
-  conditions: { enabled: false, type: 'and', rules: [] },
 });
 
 const errors = ref({});
@@ -34,9 +32,8 @@ watch(
         name: webhook.name || '',
         endpoint_url: webhook.endpoint_url || '',
         auth_header: webhook.auth_header || '',
-        is_enabled:  webhook.is_enabled ?? true,
-        triggers:    webhook.triggers || [],
-        conditions:  webhook.conditions ?? { enabled: false, type: 'and', rules: [] },
+        is_enabled: webhook.is_enabled ?? true,
+        triggers:   webhook.triggers || [],
       };
     }
   },
@@ -136,9 +133,6 @@ const handleSubmit = () => {
         WordPress actions that will trigger this webhook
       </p>
     </div>
-
-    <!-- Conditions -->
-    <ConditionsEditor v-model="form.conditions" :is-pro="false" />
 
     <!-- Enabled -->
     <div class="space-y-2">

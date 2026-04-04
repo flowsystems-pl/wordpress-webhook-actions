@@ -8,12 +8,15 @@ import {
   Clock,
   Check,
   AlertCircle,
+  Braces,
+  EqualNot,
+  Cog,
 } from 'lucide-vue-next';
 import { Button, Card, Badge, Switch, Label, Alert } from '@/components/ui';
 import { formatUtcDate } from '@/lib/dates';
 import MappingEditor from '@/components/MappingEditor.vue';
+import ConditionsEditor from '@/components/ConditionsEditor.vue';
 import { useSchemas, useUserTriggers } from '@/composables/useSchemas';
-import { Braces } from 'lucide-vue-next';
 
 const props = defineProps({
   webhookId: {
@@ -40,12 +43,29 @@ const { userTriggers, fetchUserTriggers, isUserTrigger } = useUserTriggers();
 // Track expanded triggers
 const expandedTriggers = ref({});
 
+// Track expanded sections per trigger (mapping / conditions), default open
+const sectionsExpanded = ref({});
+
+const isSectionExpanded = (trigger, section) => {
+  const key = `${trigger}:${section}`;
+  return sectionsExpanded.value[key] !== false; // default true
+};
+
+const toggleSection = (trigger, section) => {
+  const key = `${trigger}:${section}`;
+  sectionsExpanded.value = {
+    ...sectionsExpanded.value,
+    [key]: !isSectionExpanded(trigger, section),
+  };
+};
+
 // Track saving state per trigger
 const savingState = ref({});
 
 // Track local changes per trigger
 const localMappings = ref({});
 const localUserData = ref({});
+const localConditions = ref({});
 
 const formatDate = formatUtcDate;
 
@@ -96,6 +116,11 @@ const handleMappingChange = (trigger, value) => {
   localMappings.value = { ...localMappings.value, [trigger]: value };
 };
 
+// Handle conditions change
+const handleConditionsChange = (trigger, value) => {
+  localConditions.value = { ...localConditions.value, [trigger]: value };
+};
+
 // Save schema for a trigger
 const saveSchema = async (trigger) => {
   savingState.value = { ...savingState.value, [trigger]: true };
@@ -116,11 +141,17 @@ const saveSchema = async (trigger) => {
       data.field_mapping = localMappings.value[trigger];
     }
 
+    // Include conditions if changed
+    if (localConditions.value[trigger] !== undefined) {
+      data.conditions = localConditions.value[trigger];
+    }
+
     await updateSchema(trigger, data);
 
     // Clear local state after save
     delete localMappings.value[trigger];
     delete localUserData.value[trigger];
+    delete localConditions.value[trigger];
   } finally {
     savingState.value = { ...savingState.value, [trigger]: false };
   }
@@ -130,7 +161,8 @@ const saveSchema = async (trigger) => {
 const hasChanges = (trigger) => {
   return (
     localMappings.value[trigger] !== undefined ||
-    localUserData.value[trigger] !== undefined
+    localUserData.value[trigger] !== undefined ||
+    localConditions.value[trigger] !== undefined
   );
 };
 
@@ -156,6 +188,15 @@ const getMappingValue = (trigger) => {
       includeUnmapped: true,
     }
   );
+};
+
+// Get current conditions value (local or from schema)
+const getConditionsValue = (trigger) => {
+  if (localConditions.value[trigger] !== undefined) {
+    return localConditions.value[trigger];
+  }
+  const schema = getSchema(trigger);
+  return schema?.conditions ?? { enabled: false, type: 'and', rules: [] };
 };
 
 // Get example payload for a trigger
@@ -194,8 +235,11 @@ watch(
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <Braces class="h-6 w-6" />
-        <h3 class="text-lg font-medium">Payload Mapping</h3>
+
+        <Cog class="h-6 w-6" />
+        <h3 class="text-lg font-medium flex items-center gap-2">
+          Advanced Trigger Configuration
+        </h3>
       </div>
 
       <Button v-if="loading" variant="ghost" size="sm" disabled>
@@ -259,6 +303,15 @@ watch(
               <Braces class="h-3 w-3 mr-1" />
               Mapped
             </Badge>
+
+            <Badge
+              v-if="getSchema(trigger)?.conditions?.enabled && getSchema(trigger)?.conditions?.rules?.length"
+              variant="default"
+              class="text-xs"
+            >
+              <EqualNot class="h-3 w-3 mr-1" />
+              Conditions
+            </Badge>
           </div>
         </button>
 
@@ -316,13 +369,44 @@ watch(
             />
           </div>
 
-          <!-- Mapping Editor -->
-          <MappingEditor
-            :examplePayload="getExamplePayload(trigger)"
-            :modelValue="getMappingValue(trigger)"
-            :includeUserData="getUserDataValue(trigger)"
-            @update:modelValue="handleMappingChange(trigger, $event)"
-          />
+          <!-- Payload Mapping Section -->
+          <div class="border-t pt-2">
+            <button
+              class="w-full flex items-center gap-2 py-2 hover:text-foreground text-left transition-colors"
+              @click.stop="toggleSection(trigger, 'mapping')"
+            >
+              <component :is="isSectionExpanded(trigger, 'mapping') ? ChevronDown : ChevronRight" class="h-4 w-4 text-muted-foreground shrink-0" />
+              <Braces class="h-5 w-5 shrink-0" />
+              <span class="text-sm font-semibold">Payload Mapping</span>
+            </button>
+            <div v-if="isSectionExpanded(trigger, 'mapping')" class="pt-2">
+              <MappingEditor
+                :examplePayload="getExamplePayload(trigger)"
+                :modelValue="getMappingValue(trigger)"
+                :includeUserData="getUserDataValue(trigger)"
+                @update:modelValue="handleMappingChange(trigger, $event)"
+              />
+            </div>
+          </div>
+
+          <!-- Conditions Section -->
+          <div class="border-t pt-2">
+            <button
+              class="w-full flex items-center gap-2 py-2 hover:text-foreground text-left transition-colors"
+              @click.stop="toggleSection(trigger, 'conditions')"
+            >
+              <component :is="isSectionExpanded(trigger, 'conditions') ? ChevronDown : ChevronRight" class="h-4 w-4 text-muted-foreground shrink-0" />
+              <EqualNot class="h-5 w-5 shrink-0" />
+              <span class="text-sm font-semibold">Conditions</span>
+            </button>
+            <div v-if="isSectionExpanded(trigger, 'conditions')" class="pt-2">
+              <ConditionsEditor
+                :modelValue="getConditionsValue(trigger)"
+                :is-pro="false"
+                @update:modelValue="handleConditionsChange(trigger, $event)"
+              />
+            </div>
+          </div>
 
           <!-- Save Button -->
           <div
@@ -344,7 +428,7 @@ watch(
                 v-if="isSaving(trigger)"
                 class="h-4 w-4 mr-1 animate-spin"
               />
-              Save Mapping
+              Save
             </Button>
           </div>
         </div>
