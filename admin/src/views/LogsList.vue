@@ -139,7 +139,15 @@ const executeReplayedJob = async () => {
     const log = logs.value.find(l => l.id === replayedLogId.value)
     if (log) logsTable.value?.openDetails(log)
   } catch (e) {
-    error.value = e.message
+    if (e.code === 'rest_job_completed') {
+      // Job already ran in background — close modal and show log details
+      showReplaySuccess.value = false
+      await loadLogs()
+      const log = logs.value.find(l => l.id === replayedLogId.value)
+      if (log) logsTable.value?.openDetails(log)
+    } else {
+      error.value = e.message
+    }
   }
 }
 

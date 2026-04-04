@@ -275,6 +275,22 @@ class PayloadTransformer {
   }
 
   /**
+   * Escape a key segment that may contain dots (for safe dot-notation paths)
+   */
+  private static function escapeDotKey(string $key): string {
+    return str_replace('.', '\\.', $key);
+  }
+
+  /**
+   * Split a dot-notation path on unescaped dots only, then unescape each segment.
+   * e.g. 'args.0.6\.1' → ['args', '0', '6.1']
+   */
+  private static function splitPath(string $path): array {
+    $parts = preg_split('/(?<!\\\\)\./', $path);
+    return array_map(fn($p) => str_replace('\\.', '.', $p), $parts);
+  }
+
+  /**
    * Flatten an array to dot notation paths (including indexed arrays)
    *
    * @param array $array
@@ -293,7 +309,8 @@ class PayloadTransformer {
     }
 
     foreach ($array as $key => $value) {
-      $newKey = $prefix === '' ? (string) $key : "{$prefix}.{$key}";
+      $escapedKey = static::escapeDotKey((string) $key);
+      $newKey = $prefix === '' ? $escapedKey : "{$prefix}.{$escapedKey}";
 
       if (is_array($value) && !empty($value)) {
         // Recursively flatten both sequential and associative arrays
@@ -307,14 +324,14 @@ class PayloadTransformer {
   }
 
   /**
-   * Get value from array by dot-notation path
+   * Get value from array by dot-notation path (supports escaped dots in keys, e.g. 'args.0.6\.1')
    *
    * @param array $array
    * @param string $path
    * @return mixed
    */
   private function getValueByPath(array $array, string $path) {
-    $keys = explode('.', $path);
+    $keys = static::splitPath($path);
     $current = $array;
 
     foreach ($keys as $key) {
@@ -341,14 +358,14 @@ class PayloadTransformer {
   }
 
   /**
-   * Set value in array by dot-notation path
+   * Set value in array by dot-notation path (supports escaped dots in keys, e.g. 'args.0.6\.1')
    *
    * @param array $array
    * @param string $path
    * @param mixed $value
    */
   private function setValueByPath(array &$array, string $path, $value): void {
-    $keys = explode('.', $path);
+    $keys = static::splitPath($path);
     $current = &$array;
 
     foreach ($keys as $i => $key) {
