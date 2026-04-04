@@ -67,8 +67,13 @@ const executeItem = async (item) => {
     await api.queue.execute({ id: item.id })
     await Promise.all([loadQueue(), loadStats()])
   } catch (e) {
-    error.value = e.message
-    console.error('Failed to execute:', e)
+    if (e.code === 'rest_job_completed') {
+      // Already completed in background — just refresh the list
+      await Promise.all([loadQueue(), loadStats()])
+    } else {
+      error.value = e.message
+      console.error('Failed to execute:', e)
+    }
   } finally {
     executingId.value = null
   }
