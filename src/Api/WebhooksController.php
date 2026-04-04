@@ -151,8 +151,9 @@ class WebhooksController extends WP_REST_Controller {
       'name' => sanitize_text_field($request->get_param('name')),
       'endpoint_url' => esc_url_raw($request->get_param('endpoint_url')),
       'auth_header' => sanitize_text_field($request->get_param('auth_header') ?? ''),
-      'is_enabled' => (bool) $request->get_param('is_enabled'),
-      'triggers' => $request->get_param('triggers') ?? [],
+      'is_enabled'  => (bool) $request->get_param('is_enabled'),
+      'triggers'    => $request->get_param('triggers') ?? [],
+      'conditions'  => $this->sanitizeConditions($request->get_param('conditions')),
     ];
 
     // Validate
@@ -243,6 +244,10 @@ class WebhooksController extends WP_REST_Controller {
       $data['triggers'] = array_map('sanitize_text_field', $request->get_param('triggers'));
     }
 
+    if ($request->has_param('conditions')) {
+      $data['conditions'] = $this->sanitizeConditions($request->get_param('conditions'));
+    }
+
     $result = $this->repository->update($id, $data);
 
     if (!$result) {
@@ -331,6 +336,48 @@ class WebhooksController extends WP_REST_Controller {
   }
 
   /**
+   * Sanitize and validate a conditions payload from the request.
+   *
+   * @param mixed $raw
+   * @return array|null
+   */
+  private function sanitizeConditions(mixed $raw): ?array {
+    if ($raw === null || !is_array($raw)) {
+      return null;
+    }
+
+    $allowedOperators = [
+      'equals', 'not_equals', 'contains', 'not_contains',
+      'greater_than', 'less_than', 'is_empty', 'is_not_empty',
+      'is_true', 'is_false',
+    ];
+
+    $sanitized = [
+      'enabled' => (bool) ($raw['enabled'] ?? false),
+      'type'    => in_array($raw['type'] ?? 'and', ['and', 'or'], true)
+        ? $raw['type']
+        : 'and',
+      'rules'   => [],
+    ];
+
+    foreach ((array) ($raw['rules'] ?? []) as $rule) {
+      if (empty($rule['field']) || empty($rule['operator'])) {
+        continue;
+      }
+      if (!in_array($rule['operator'], $allowedOperators, true)) {
+        continue;
+      }
+      $sanitized['rules'][] = [
+        'field'    => sanitize_text_field($rule['field']),
+        'operator' => $rule['operator'],
+        'value'    => isset($rule['value']) ? sanitize_text_field((string) $rule['value']) : '',
+      ];
+    }
+
+    return $sanitized;
+  }
+
+  /**
    * Get item schema
    */
   public function getItemSchema(): array {
@@ -392,6 +439,26 @@ class WebhooksController extends WP_REST_Controller {
           'format' => 'date-time',
           'context' => ['view'],
           'readonly' => true,
+        ],
+        'conditions' => [
+          'description' => __('Conditional dispatch rules.', 'flowsystems-webhook-actions'),
+          'type'        => ['object', 'null'],
+          'context'     => ['view', 'edit'],
+          'properties'  => [
+            'enabled' => ['type' => 'boolean'],
+            'type'    => ['type' => 'string', 'enum' => ['and', 'or']],
+            'rules'   => [
+              'type'  => 'array',
+              'items' => [
+                'type'       => 'object',
+                'properties' => [
+                  'field'    => ['type' => 'string'],
+                  'operator' => ['type' => 'string'],
+                  'value'    => ['type' => 'string'],
+                ],
+              ],
+            ],
+          ],
         ],
       ],
     ];
