@@ -54,8 +54,9 @@ class Dispatcher {
     }
 
     $webhooks = $this->webhookRepository->getByTrigger($trigger);
+    $disabledWebhooks = $this->webhookRepository->getDisabledByTrigger($trigger);
 
-    if (empty($webhooks)) {
+    if (empty($webhooks) && empty($disabledWebhooks)) {
       return;
     }
 
@@ -88,6 +89,19 @@ class Dispatcher {
       $trigger,
       $args
     );
+
+    if (empty($webhooks)) {
+      // Capture example payloads for disabled webhooks so field mapping
+      // can be configured without having to temporarily re-enable the webhook.
+      foreach ($disabledWebhooks as $webhook) {
+        $webhookId = (int) ($webhook['id'] ?? 0);
+        if ($webhookId === 0) {
+          continue;
+        }
+        $this->payloadTransformer->transform($webhookId, $trigger, $payload, $args);
+      }
+      return;
+    }
 
     // Track enqueued webhooks to prevent duplicates within same request
     static $enqueuedWebhooks = [];
@@ -159,7 +173,6 @@ class Dispatcher {
 
     // Capture example payloads for disabled webhooks so mapping and conditions
     // can be configured without needing to re-enable the webhook first.
-    $disabledWebhooks = $this->webhookRepository->getDisabledByTrigger($trigger);
     foreach ($disabledWebhooks as $webhook) {
       $webhookId = (int) ($webhook['id'] ?? 0);
       if ($webhookId === 0) {
