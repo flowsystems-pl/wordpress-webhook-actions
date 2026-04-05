@@ -238,7 +238,7 @@ watch(
 
         <Cog class="h-6 w-6" />
         <h3 class="text-lg font-medium flex items-center gap-2">
-          Advanced Trigger Configuration
+          Advanced Configuration
         </h3>
       </div>
 
