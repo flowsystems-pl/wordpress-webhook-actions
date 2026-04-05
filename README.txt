@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -30,12 +30,14 @@ Unlike basic “fire-and-forget” webhook implementations, this plugin ensures:
 
 Built for production environments where losing events is not acceptable.
 
-👉 Example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/cf7-to-webhook/)
-👉 Example: [Send IvyForms submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/ivyforms-to-webhook/)
+👉 Step-by-step example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/cf7-to-webhook/)
+👉 Step-by-step example: [Send Gravity Forms Submissions to n8n](https://wpwebhooks.org/examples/gravity-forms-webhooks/)
+👉 Step-by-step example: [Send IvyForms submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/ivyforms-to-webhook/)
 
 = Typical Use Cases =
 
-- Send Contact Form 7 submissions to n8n or external APIs
+- CF7 to Webhook: Send Contact Form 7 Data to n8n or external APIs
+- Gravity Forms webhooks for sending submission to CRM
 - Send IvyForms submissions to n8n or external APIs
 - Build reliable form-to-CRM integrations with retry protection
 - Process high-volume WooCommerce webhooks using Action Scheduler
@@ -353,6 +355,10 @@ Yes. The plugin is completely free and licensed under GPL.
 
 == Changelog ==
 
+= 1.6.2 — 2026-04-05 =
+- Fixed graceful handling of 409 responses when a queue job was already completed in a background process
+- Fixed mapping editor not supporting dot-containing keys (e.g. Gravity Forms sub-field IDs like `6.1`)
+
 = 1.6.1 — 2026-03-28 =
 - Fixed schema API endpoints for triggers containing forward slashes (e.g. `ivyforms/form/before_submission`) returning 404 on Apache — admin now uses double-encoding to pass through Apache's encoded-slash restriction
 
@@ -382,7 +388,7 @@ Yes. The plugin is completely free and licensed under GPL.
 
 = 1.3.1 — 2026-03-15 =
 - Fixed log details dialog showing error message from the first attempt instead of the most recent one
-- Added [REST API Reference](https://flowsystems.pl/webhook-wordpress-plugin-api/) link to the plugin description
+- Added [REST API Reference](https://wpwebhooks.org/webhook-wordpress-plugin-api/) link to the plugin description
 
 = 1.3.0 — 2026-03-15 =
 - Added API token authentication for the REST API — create tokens with `read`, `operational`, or `full` scope; tokens are SHA-256 hashed at rest and accepted via `X-FSWA-Token` header, `Authorization: Bearer`, or `?api_token=` query param
@@ -440,6 +446,9 @@ Yes. The plugin is completely free and licensed under GPL.
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.6.2 =
+Bug fixes: graceful 409 handling for already-completed queue jobs, and dot-containing keys (e.g. Gravity Forms `6.1`) in the mapping editor. No database changes.
 
 = 1.6.1 =
 Fixes schema API endpoints for slash-based trigger names (e.g. IvyForms hooks) on Apache hosting. No database changes.
