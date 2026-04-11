@@ -402,6 +402,7 @@ watch(
             <div v-if="isSectionExpanded(trigger, 'conditions')" class="pt-2">
               <ConditionsEditor
                 :modelValue="getConditionsValue(trigger)"
+                :examplePayload="getExamplePayload(trigger)"
                 :is-pro="false"
                 @update:modelValue="handleConditionsChange(trigger, $event)"
               />

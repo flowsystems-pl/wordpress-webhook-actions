@@ -128,7 +128,7 @@ class Dispatcher {
       // Evaluate conditions (per-trigger schema) against the transformed payload
       $conditions = is_array($transformResult['conditions'] ?? null) ? $transformResult['conditions'] : [];
       if (!empty($conditions)) {
-        $evalResult = $this->conditionEvaluator->evaluate($conditions, $transformedPayload);
+        $evalResult = $this->conditionEvaluator->evaluate($conditions, $payload);
         if (!$evalResult['passed']) {
           $this->logService->logSkipped(
             $webhookId,
