@@ -32,7 +32,9 @@ class ConditionEvaluator {
     $lastRule = null;
     foreach ($rules as $rule) {
       $lastRule   = $rule;
-      $ruleResult = $this->evaluateRule($rule, $payload);
+      $ruleResult = isset($rule['type']) && $rule['type'] === 'group'
+        ? $this->evaluateGroup($rule, $payload)
+        : $this->evaluateRule($rule, $payload);
 
       if ($type === 'and' && !$ruleResult) {
         return ['passed' => false, 'failed_rule' => $rule];
@@ -47,6 +49,30 @@ class ConditionEvaluator {
     }
 
     return ['passed' => true, 'failed_rule' => null];
+  }
+
+  /**
+   * Evaluate a group item (has its own match type and nested rules).
+   *
+   * @param array $group   {type: 'group', match: 'and'|'or', rules: array}
+   * @param array $payload
+   * @return bool
+   */
+  private function evaluateGroup(array $group, array $payload): bool {
+    $rules = $group['rules'] ?? [];
+    if (empty($rules)) {
+      return true;
+    }
+
+    $match = isset($group['match']) && $group['match'] === 'or' ? 'or' : 'and';
+
+    foreach ($rules as $rule) {
+      $result = $this->evaluateRule($rule, $payload);
+      if ($match === 'and' && !$result) return false;
+      if ($match === 'or'  && $result)  return true;
+    }
+
+    return $match === 'and';
   }
 
   /**

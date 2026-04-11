@@ -403,7 +403,7 @@ watch(
               <ConditionsEditor
                 :modelValue="getConditionsValue(trigger)"
                 :examplePayload="getExamplePayload(trigger)"
-                :is-pro="false"
+                :is-pro="true"
                 @update:modelValue="handleConditionsChange(trigger, $event)"
               />
             </div>

@@ -372,6 +372,31 @@ class SchemasController extends WP_REST_Controller {
     ];
 
     foreach ((array) ($raw['rules'] ?? []) as $rule) {
+      if (isset($rule['type']) && $rule['type'] === 'group') {
+        $groupRules = [];
+        foreach ((array) ($rule['rules'] ?? []) as $groupRule) {
+          if (empty($groupRule['field']) || empty($groupRule['operator'])) {
+            continue;
+          }
+          if (!in_array($groupRule['operator'], $allowedOperators, true)) {
+            continue;
+          }
+          $groupRules[] = [
+            'field'    => sanitize_text_field($groupRule['field']),
+            'operator' => $groupRule['operator'],
+            'value'    => isset($groupRule['value']) ? sanitize_text_field((string) $groupRule['value']) : '',
+          ];
+        }
+        if (!empty($groupRules)) {
+          $sanitized['rules'][] = [
+            'type'  => 'group',
+            'match' => in_array($rule['match'] ?? 'and', ['and', 'or'], true) ? $rule['match'] : 'and',
+            'rules' => $groupRules,
+          ];
+        }
+        continue;
+      }
+
       if (empty($rule['field']) || empty($rule['operator'])) {
         continue;
       }
