@@ -639,7 +639,7 @@ const overallResult = computed(() => {
         <RouterLink
           v-if="atFreeLimit && !isPro"
           to="/pro"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 !text-primary border border-primary/30"
         >
           <Sparkles class="h-3 w-3" />
           Upgrade
@@ -672,7 +672,7 @@ const overallResult = computed(() => {
         <RouterLink
           v-if="!isPro"
           to="/pro"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 !text-primary border border-primary/30"
         >
           <Sparkles class="h-3 w-3" />
           Upgrade
