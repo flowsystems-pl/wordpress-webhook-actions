@@ -1,5 +1,4 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { RouterView, RouterLink, useRoute } from 'vue-router';
 import {
   Webhook,
@@ -12,22 +11,12 @@ import {
   Sparkles,
 } from 'lucide-vue-next';
 import { useTheme } from './composables/useTheme';
+import { usePro } from './composables/usePro';
 import HealthStatusBar from './components/HealthStatusBar.vue';
-import api from './lib/api';
 
 const route = useRoute();
 const { theme, toggleTheme } = useTheme();
-
-const proActive = ref(false);
-
-onMounted(async () => {
-  try {
-    const data = await api.pro.status();
-    proActive.value = data.state === 'active';
-  } catch {
-    // silently ignore — badge is non-critical
-  }
-});
+const { proActive } = usePro();
 
 const navItems = [
   { path: '/webhooks', label: 'Webhooks', icon: Webhook },

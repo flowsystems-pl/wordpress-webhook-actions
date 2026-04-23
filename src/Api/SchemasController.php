@@ -241,7 +241,37 @@ class SchemasController extends WP_REST_Controller {
     }
 
     if ($request->has_param('conditions')) {
-      $data['conditions'] = $this->sanitizeConditions($request->get_param('conditions'));
+      $conditions = $request->get_param('conditions');
+
+      $proActive = class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
+        && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+
+      if (!$proActive && is_array($conditions) && !empty($conditions['rules'])) {
+        $rules = (array) $conditions['rules'];
+
+        foreach ($rules as $rule) {
+          if (isset($rule['type']) && $rule['type'] === 'group') {
+            return new WP_Error(
+              'rest_pro_required',
+              __('Condition groups require a Pro license.', 'flowsystems-webhook-actions'),
+              ['status' => 403]
+            );
+          }
+        }
+
+        if (count($rules) > 1) {
+          return new WP_Error(
+            'rest_pro_required',
+            __('More than 1 condition requires a Pro license.', 'flowsystems-webhook-actions'),
+            ['status' => 403]
+          );
+        }
+
+        // Silently force match type to 'and' on free tier
+        $conditions['type'] = 'and';
+      }
+
+      $data['conditions'] = $this->sanitizeConditions($conditions);
     }
 
     if (empty($data)) {

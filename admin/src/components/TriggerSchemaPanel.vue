@@ -17,6 +17,7 @@ import { formatUtcDate } from '@/lib/dates';
 import MappingEditor from '@/components/MappingEditor.vue';
 import ConditionsEditor from '@/components/ConditionsEditor.vue';
 import { useSchemas, useUserTriggers } from '@/composables/useSchemas';
+import { usePro } from '@/composables/usePro';
 
 const props = defineProps({
   webhookId: {
@@ -39,6 +40,7 @@ const {
   getSchemaForTrigger,
 } = useSchemas(props.webhookId);
 const { userTriggers, fetchUserTriggers, isUserTrigger } = useUserTriggers();
+const { proActive } = usePro();
 
 // Track expanded triggers
 const expandedTriggers = ref({});
@@ -403,7 +405,7 @@ watch(
               <ConditionsEditor
                 :modelValue="getConditionsValue(trigger)"
                 :examplePayload="getExamplePayload(trigger)"
-                :is-pro="true"
+                :is-pro="proActive"
                 @update:modelValue="handleConditionsChange(trigger, $event)"
               />
             </div>
