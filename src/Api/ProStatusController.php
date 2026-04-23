@@ -28,8 +28,14 @@ class ProStatusController extends WP_REST_Controller {
   }
 
   public function getStatus(WP_REST_Request $request): WP_REST_Response {
-    if (!class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')) {
+    $proFile = WP_PLUGIN_DIR . '/flowsystems-webhook-actions-pro/flowsystems-webhook-actions-pro.php';
+
+    if (!file_exists($proFile)) {
       return new WP_REST_Response(['state' => 'upsell', 'license' => null]);
+    }
+
+    if (!class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')) {
+      return new WP_REST_Response(['state' => 'inactive', 'license' => null]);
     }
 
     $manager = new \FlowSystems\WebhookActions\Pro\License\LicenseManager();

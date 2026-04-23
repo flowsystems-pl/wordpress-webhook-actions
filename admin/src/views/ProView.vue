@@ -134,6 +134,28 @@ onMounted(loadStatus)
       </a>
     </template>
 
+    <!-- STATE 1b: Installed but WP-deactivated -->
+    <template v-else-if="state === 'inactive'">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-foreground">Pro Plugin Installed</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          The Pro plugin is installed but not activated in WordPress.
+        </p>
+      </div>
+
+      <Card class="p-6">
+        <p class="text-sm text-muted-foreground mb-4">
+          Activate the <strong class="text-foreground">Flow Systems Webhook Actions Pro</strong> plugin on the WordPress plugins page to continue.
+        </p>
+        <a :href="(window.fswaSettings?.adminUrl ?? '') + 'plugins.php'">
+          <Button variant="outline" class="gap-2">
+            Go to Plugins
+            <ExternalLink class="w-3.5 h-3.5 opacity-70" />
+          </Button>
+        </a>
+      </Card>
+    </template>
+
     <!-- STATE 2: Activate -->
     <template v-else-if="state === 'activate'">
       <div class="mb-6">
