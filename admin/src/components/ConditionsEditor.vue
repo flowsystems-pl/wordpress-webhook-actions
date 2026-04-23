@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { Button, Label, Switch, Badge, Select, SelectTrigger, SelectContent, SelectItem, Input, RadioGroup, RadioGroupItem, Tooltip } from '@/components/ui'
 import {
-  Plus, X, Lock, Info,
+  Plus, X, Sparkles, Info,
   Equal, EqualNot, CircleCheckBig,
   ChevronRight, ChevronLeft,
   Square, CheckSquare,
@@ -635,14 +636,14 @@ const overallResult = computed(() => {
           <FolderPlus class="h-4 w-4 mr-1" />
           Add group
         </Button>
-        <Badge
+        <RouterLink
           v-if="atFreeLimit && !isPro"
-          variant="outline"
-          class="text-xs gap-1"
+          to="/pro"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors"
         >
-          <Lock class="h-3 w-3" />
-          Pro
-        </Badge>
+          <Sparkles class="h-3 w-3" />
+          Upgrade
+        </RouterLink>
       </div>
 
       <!-- Match type -->
@@ -668,10 +669,14 @@ const overallResult = computed(() => {
             ANY (OR)
           </label>
         </RadioGroup>
-        <Badge v-if="!isPro" variant="outline" class="text-xs gap-1">
-          <Lock class="h-3 w-3" />
-          Pro
-        </Badge>
+        <RouterLink
+          v-if="!isPro"
+          to="/pro"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors"
+        >
+          <Sparkles class="h-3 w-3" />
+          Upgrade
+        </RouterLink>
       </div>
     </template>
 
