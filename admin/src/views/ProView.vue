@@ -91,18 +91,20 @@ onMounted(loadStatus)
       <div class="mb-6">
         <h2 class="text-xl font-semibold text-foreground">Upgrade to Pro</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          More sites, priority support, and future pro features.
+          More sites, advanced conditions, and priority support.
         </p>
       </div>
 
       <Card class="p-6 mb-6">
         <ul class="space-y-3">
           <li v-for="feature in [
-            { text: '1 site', pro: false },
-            { text: 'Up to 10 sites (Business) or 75 sites (Agency)', pro: true },
-            { text: 'Priority support', pro: true },
             { text: 'Reliable webhooks with queue & retries', pro: false },
             { text: 'Delivery logs & replay', pro: false },
+            { text: '1 site', pro: false },
+            { text: 'Up to 10 sites (Business) or 75 sites (Agency)', pro: true },
+            { text: 'Unlimited conditions per trigger — filter which events fire your webhook', pro: true },
+            { text: 'Condition groups with AND / OR logic', pro: true },
+            { text: 'Priority support', pro: true },
           ]" :key="feature.text" class="flex items-start gap-3 text-sm">
             <CheckCircle2 class="w-4 h-4 mt-0.5 shrink-0 text-primary" />
             <span :class="feature.pro ? 'text-foreground font-medium' : 'text-muted-foreground'">
