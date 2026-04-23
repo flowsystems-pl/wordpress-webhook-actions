@@ -167,13 +167,18 @@ onMounted(loadStatus)
           </Button>
         </div>
 
-        <p class="mt-4 text-xs text-muted-foreground">
-          Don't have a license yet?
-          <a href="https://wpwebhooks.org/#pricing" target="_blank" rel="noopener noreferrer"
-             class="underline underline-offset-2 hover:text-foreground transition-colors">
-            Get Pro
-          </a>
-        </p>
+        <div class="mt-4 space-y-1.5">
+          <p class="text-xs text-muted-foreground">
+            Don't have a license yet?
+            <a href="https://wpwebhooks.org/#pricing" target="_blank" rel="noopener noreferrer"
+               class="underline underline-offset-2 hover:text-foreground transition-colors">
+              Get Pro
+            </a>
+          </p>
+          <p class="text-xs text-muted-foreground">
+            💡 Local installs (<span class="font-mono">localhost</span>, <span class="font-mono">*.local</span>, <span class="font-mono">*.test</span>) don't count toward your site limit.
+          </p>
+        </div>
       </Card>
     </template>
 
