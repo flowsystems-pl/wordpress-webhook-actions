@@ -216,6 +216,9 @@ onMounted(loadStatus)
               <dd class="font-medium text-foreground mt-0.5">{{ expiresLabel }}</dd>
             </div>
           </dl>
+          <p class="text-xs text-muted-foreground pt-1">
+            💡 Local installs (<span class="font-mono">localhost</span>, <span class="font-mono">*.local</span>, <span class="font-mono">*.test</span>) don't count toward your site limit.
+          </p>
         </div>
       </Card>
 
