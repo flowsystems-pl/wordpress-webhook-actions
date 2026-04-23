@@ -39,7 +39,6 @@ class Activation {
             endpoint_url VARCHAR(2048) NOT NULL,
             auth_header VARCHAR(1024) DEFAULT NULL,
             is_enabled TINYINT(1) NOT NULL DEFAULT 1,
-            conditions LONGTEXT DEFAULT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -148,7 +147,7 @@ class Activation {
 
     dbDelta($sqlApiTokens);
 
-    update_option('fswa_db_version', '1.4.0');
+    update_option('fswa_db_version', '1.4.1');
   }
 
   /**

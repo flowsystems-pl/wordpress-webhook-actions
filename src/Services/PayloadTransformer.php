@@ -55,9 +55,10 @@ class PayloadTransformer {
     if (!$schema) {
       $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $payload);
       return [
-        'original' => null,
-        'transformed' => $payload,
+        'original'        => null,
+        'transformed'     => $payload,
         'mapping_applied' => false,
+        'conditions'      => null,
       ];
     }
 
@@ -90,9 +91,10 @@ class PayloadTransformer {
     }
 
     return [
-      'original' => $mappingApplied ? $payload : null,
-      'transformed' => $transformedPayload,
+      'original'        => $mappingApplied ? $payload : null,
+      'transformed'     => $transformedPayload,
       'mapping_applied' => $mappingApplied,
+      'conditions'      => $schema['conditions'] ?? null,
     ];
   }
 

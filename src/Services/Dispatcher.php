@@ -54,8 +54,9 @@ class Dispatcher {
     }
 
     $webhooks = $this->webhookRepository->getByTrigger($trigger);
+    $disabledWebhooks = $this->webhookRepository->getDisabledByTrigger($trigger);
 
-    if (empty($webhooks)) {
+    if (empty($webhooks) && empty($disabledWebhooks)) {
       return;
     }
 
@@ -89,6 +90,19 @@ class Dispatcher {
       $args
     );
 
+    if (empty($webhooks)) {
+      // Capture example payloads for disabled webhooks so field mapping
+      // can be configured without having to temporarily re-enable the webhook.
+      foreach ($disabledWebhooks as $webhook) {
+        $webhookId = (int) ($webhook['id'] ?? 0);
+        if ($webhookId === 0) {
+          continue;
+        }
+        $this->payloadTransformer->transform($webhookId, $trigger, $payload, $args);
+      }
+      return;
+    }
+
     // Track enqueued webhooks to prevent duplicates within same request
     static $enqueuedWebhooks = [];
 
@@ -111,10 +125,10 @@ class Dispatcher {
       $originalPayload = $transformResult['original'];
       $mappingApplied = $transformResult['mapping_applied'];
 
-      // Evaluate conditions against the transformed payload
-      $conditions = is_array($webhook['conditions'] ?? null) ? $webhook['conditions'] : [];
+      // Evaluate conditions (per-trigger schema) against the transformed payload
+      $conditions = is_array($transformResult['conditions'] ?? null) ? $transformResult['conditions'] : [];
       if (!empty($conditions)) {
-        $evalResult = $this->conditionEvaluator->evaluate($conditions, $transformedPayload);
+        $evalResult = $this->conditionEvaluator->evaluate($conditions, $payload);
         if (!$evalResult['passed']) {
           $this->logService->logSkipped(
             $webhookId,
@@ -122,7 +136,7 @@ class Dispatcher {
             $transformedPayload,
             $originalPayload,
             $mappingApplied,
-            $this->buildSkipMessage($evalResult['failed_rule']),
+            $this->buildSkipMessage($evalResult['failed_rule'], $payload),
             $eventUuid,
             $eventTimestamp
           );
@@ -155,6 +169,16 @@ class Dispatcher {
         null,
         $logId ?: null
       );
+    }
+
+    // Capture example payloads for disabled webhooks so mapping and conditions
+    // can be configured without needing to re-enable the webhook first.
+    foreach ($disabledWebhooks as $webhook) {
+      $webhookId = (int) ($webhook['id'] ?? 0);
+      if ($webhookId === 0) {
+        continue;
+      }
+      $this->payloadTransformer->transform($webhookId, $trigger, $payload, $args);
     }
   }
 
@@ -446,20 +470,72 @@ class Dispatcher {
    * @param array|null $rule
    * @return string
    */
-  private function buildSkipMessage(?array $rule): string {
+  private function buildSkipMessage(?array $rule, array $payload = []): string {
     if ($rule === null) {
       return 'Conditions not met.';
     }
 
+    if (isset($rule['type']) && $rule['type'] === 'group') {
+      $match = isset($rule['match']) && $rule['match'] === 'or' ? 'ANY' : 'ALL';
+      $parts = [];
+      foreach ($rule['rules'] ?? [] as $subRule) {
+        $actual    = $this->resolveFieldForMessage($subRule['field'] ?? '', $payload);
+        $ruleMsg   = $this->formatRuleMessage($subRule, $actual);
+        $passed    = $this->evaluateSubRule($subRule, $payload);
+        $parts[]   = $ruleMsg . ($passed ? ' ✓' : ' ✗');
+      }
+      if (!empty($parts)) {
+        return sprintf('Condition not met: group (%s) — %s', $match, implode('; ', $parts));
+      }
+      $count = count($rule['rules'] ?? []);
+      return sprintf('Condition not met: group (%s of %d rule%s)', $match, $count, $count !== 1 ? 's' : '');
+    }
+
+    $actual = $this->resolveFieldForMessage($rule['field'] ?? '', $payload);
+    return 'Condition not met: ' . $this->formatRuleMessage($rule, $actual);
+  }
+
+  private function formatRuleMessage(array $rule, mixed $actual): string {
     $op    = $rule['operator'] ?? 'unknown';
     $field = $rule['field'] ?? 'unknown';
     $val   = $rule['value'] ?? '';
 
     $valueHidden = in_array($op, ['is_empty', 'is_not_empty', 'is_true', 'is_false'], true);
 
-    return $valueHidden
-      ? sprintf('Condition not met: %s %s', $field, $op)
-      : sprintf('Condition not met: %s %s "%s"', $field, $op, $val);
+    $base = $valueHidden
+      ? sprintf('%s %s', $field, $op)
+      : sprintf('%s %s "%s"', $field, $op, $val);
+
+    if ($actual !== null) {
+      $actualStr = is_array($actual) ? json_encode($actual) : (string) $actual;
+      return sprintf('%s (actual: "%s")', $base, $actualStr);
+    }
+
+    return $base;
+  }
+
+  private function evaluateSubRule(array $rule, array $payload): bool {
+    $result = $this->conditionEvaluator->evaluate([
+      'enabled' => true,
+      'type'    => 'and',
+      'rules'   => [$rule],
+    ], $payload);
+    return $result['passed'];
+  }
+
+  private function resolveFieldForMessage(string $field, array $payload): mixed {
+    if (empty($field) || empty($payload)) {
+      return null;
+    }
+    $segments = explode('.', $field);
+    $current  = $payload;
+    foreach ($segments as $segment) {
+      if (!is_array($current) || !array_key_exists($segment, $current)) {
+        return null;
+      }
+      $current = $current[$segment];
+    }
+    return $current;
   }
 
   /**

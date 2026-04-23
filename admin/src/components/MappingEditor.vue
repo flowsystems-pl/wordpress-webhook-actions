@@ -5,8 +5,6 @@ import {
   Trash2,
   GripVertical,
   ArrowRight,
-  Eye,
-  EyeOff,
   ChevronDown,
   ChevronRight,
   Lock,
@@ -56,7 +54,7 @@ const emit = defineEmits(['update:modelValue']);
 const localMappings = ref([]);
 const localExcluded = ref([]);
 const localIncludeUnmapped = ref(true);
-const showPreview = ref(true);
+const previewExpanded = ref(false);
 const expandedPaths = ref({});
 
 // Drag and drop state
@@ -609,6 +607,7 @@ const previewHtml = computed(() => {
   if (!transformedPreview.value) return '';
   return formatJsonWithHighlight(transformedPreview.value);
 });
+
 </script>
 
 <template>
@@ -843,15 +842,15 @@ const previewHtml = computed(() => {
       <div>
         <div class="flex items-center justify-between mb-3">
           <Label class="text-sm font-medium">Transformed Payload Preview</Label>
-          <Button size="sm" variant="ghost" @click="showPreview = !showPreview">
-            <component :is="showPreview ? EyeOff : Eye" class="h-4 w-4 mr-1" />
-            {{ showPreview ? 'Hide' : 'Show' }}
+          <Button size="sm" variant="ghost" @click="previewExpanded = !previewExpanded">
+            <component :is="previewExpanded ? ChevronDown : ChevronRight" class="h-4 w-4 mr-1" />
+            {{ previewExpanded ? 'Show less' : 'Show full' }}
           </Button>
         </div>
 
         <div
-          v-if="showPreview"
-          class="border rounded-md bg-muted/30 p-3 overflow-x-auto"
+          class="border rounded-md bg-muted/30 p-3 overflow-x-auto overflow-y-auto"
+          :class="previewExpanded ? '' : 'max-h-72'"
         >
           <pre
             class="text-xs font-mono leading-relaxed"

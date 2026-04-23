@@ -104,6 +104,12 @@ class SchemaRepository {
       $insertData['captured_at'] = $data['captured_at'];
     }
 
+    if (array_key_exists('conditions', $data)) {
+      $insertData['conditions'] = $data['conditions'] !== null
+        ? (is_array($data['conditions']) ? wp_json_encode($data['conditions']) : $data['conditions'])
+        : null;
+    }
+
     if ($existing) {
       // Update existing record
       unset($insertData['webhook_id'], $insertData['trigger_name']);
@@ -277,6 +283,15 @@ class SchemaRepository {
       if ($decoded !== null || json_last_error() === JSON_ERROR_NONE) {
         $schema['field_mapping'] = $decoded;
       }
+    }
+
+    if (!empty($schema['conditions'])) {
+      $decoded = json_decode($schema['conditions'], true);
+      if ($decoded !== null || json_last_error() === JSON_ERROR_NONE) {
+        $schema['conditions'] = $decoded;
+      }
+    } else {
+      $schema['conditions'] = null;
     }
 
     $schema['include_user_data'] = (bool) ($schema['include_user_data'] ?? false);

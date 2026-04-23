@@ -9,14 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "@vueuse/core": "^10.9.0",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
+    "@vueuse/core": "^10.11.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lucide-vue-next": "^0.356.0",
     "radix-vue": "^1.5.3",
-    "tailwind-merge": "^2.2.1"
+    "tailwind-merge": "^2.6.1",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
