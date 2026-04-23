@@ -179,6 +179,7 @@ export const api = {
   },
   pro: {
     status: () => get('pro/status'),
+    activatePlugin: () => post('pro/activate-plugin'),
     activate: (licenseKey) => post('license/activate', { license_key: licenseKey }),
     deactivate: () => del('license/deactivate'),
   },

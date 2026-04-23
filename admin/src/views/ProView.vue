@@ -17,6 +17,22 @@ const activating = ref(false)
 const activateError = ref(null)
 const activatedSites = ref([])
 
+const activatingPlugin = ref(false)
+const activatePluginError = ref(null)
+
+const activatePlugin = async () => {
+  activatingPlugin.value = true
+  activatePluginError.value = null
+  try {
+    await api.pro.activatePlugin()
+    await loadStatus()
+  } catch (e) {
+    activatePluginError.value = e.message
+  } finally {
+    activatingPlugin.value = false
+  }
+}
+
 const deactivating = ref(false)
 const showDeactivateDialog = ref(false)
 
@@ -144,15 +160,14 @@ onMounted(loadStatus)
       </div>
 
       <Card class="p-6">
+        <Alert v-if="activatePluginError" variant="destructive" class="mb-4">{{ activatePluginError }}</Alert>
         <p class="text-sm text-muted-foreground mb-4">
-          Activate the <strong class="text-foreground">Flow Systems Webhook Actions Pro</strong> plugin on the WordPress plugins page to continue.
+          Activate <strong class="text-foreground">Flow Systems Webhook Actions Pro</strong> to continue.
         </p>
-        <a :href="(window.fswaSettings?.adminUrl ?? '') + 'plugins.php'">
-          <Button variant="outline" class="gap-2">
-            Go to Plugins
-            <ExternalLink class="w-3.5 h-3.5 opacity-70" />
-          </Button>
-        </a>
+        <Button :loading="activatingPlugin" :disabled="activatingPlugin" @click="activatePlugin" class="gap-2">
+          <Sparkles class="w-4 h-4" />
+          {{ activatingPlugin ? 'Activating…' : 'Activate Plugin' }}
+        </Button>
       </Card>
     </template>
 
