@@ -3,6 +3,9 @@ import { ref, computed, onMounted } from 'vue'
 import { CheckCircle2, Check, XCircle, Sparkles, ExternalLink, Loader2 } from 'lucide-vue-next'
 import { Button, Card, Input, Label, Badge, Alert } from '@/components/ui'
 import api from '@/lib/api'
+import { usePro } from '@/composables/usePro'
+
+const { refresh: refreshPro } = usePro()
 
 const loading = ref(true)
 const error = ref(null)
@@ -50,6 +53,7 @@ const activate = async () => {
     state.value = 'active'
     license.value = data.data
     licenseKey.value = ''
+    refreshPro()
   } catch (e) {
     activateError.value = e.message
   } finally {
@@ -64,6 +68,7 @@ const deactivate = async () => {
     await api.pro.deactivate()
     state.value = 'activate'
     license.value = null
+    refreshPro()
   } catch (e) {
     error.value = e.message
   } finally {
