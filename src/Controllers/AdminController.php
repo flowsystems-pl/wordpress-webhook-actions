@@ -13,6 +13,7 @@ use FlowSystems\WebhookActions\Api\QueueController;
 use FlowSystems\WebhookActions\Api\HealthController;
 use FlowSystems\WebhookActions\Api\SchemasController;
 use FlowSystems\WebhookActions\Api\ApiTokensController;
+use FlowSystems\WebhookActions\Api\ProStatusController;
 
 class AdminController {
   public function __construct() {
@@ -175,6 +176,7 @@ class AdminController {
     (new HealthController())->registerRoutes();
     (new SchemasController())->registerRoutes();
     (new ApiTokensController())->registerRoutes();
+    (new ProStatusController())->registerRoutes();
   }
 
   /**

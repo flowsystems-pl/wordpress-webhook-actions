@@ -176,6 +176,11 @@ export const api = {
     updateExpiry: (id, expiresAt) => patch(`tokens/${id}`, { expires_at: expiresAt }),
     delete: (id) => del(`tokens/${id}`),
   },
+  pro: {
+    status: () => get('pro/status'),
+    activate: (licenseKey) => post('license/activate', { license_key: licenseKey }),
+    deactivate: () => del('license/deactivate'),
+  },
   schemas: {
     getByWebhook: (webhookId) => get(`schemas/webhook/${webhookId}`),
     get: (webhookId, triggerName) => get(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}`),
