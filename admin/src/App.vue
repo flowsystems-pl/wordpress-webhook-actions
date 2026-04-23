@@ -42,9 +42,9 @@ const isActive = (path) => {
         <h1 class="text-2xl font-semibold text-foreground">Webhook Actions</h1>
         <span
           v-if="proActive"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-primary/15 text-primary border border-primary/30"
         >
-          <Sparkles class="w-3 h-3" />
+          <Sparkles class="w-3.5 h-3.5" />
           Pro
         </span>
       </div>
