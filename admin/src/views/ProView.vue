@@ -15,6 +15,7 @@ const license = ref(null)
 const licenseKey = ref('')
 const activating = ref(false)
 const activateError = ref(null)
+const activatedSites = ref([])
 
 const deactivating = ref(false)
 
@@ -48,6 +49,7 @@ const activate = async () => {
   if (!licenseKey.value.trim()) return
   activating.value = true
   activateError.value = null
+  activatedSites.value = []
   try {
     const data = await api.pro.activate(licenseKey.value.trim())
     state.value = 'active'
@@ -56,6 +58,7 @@ const activate = async () => {
     refreshPro()
   } catch (e) {
     activateError.value = e.message
+    activatedSites.value = e.data?.activated_sites ?? []
   } finally {
     activating.value = false
   }
@@ -140,7 +143,12 @@ onMounted(loadStatus)
       </div>
 
       <Card class="p-6">
-        <Alert v-if="activateError" variant="destructive" class="mb-4">{{ activateError }}</Alert>
+        <Alert v-if="activateError" variant="destructive" class="mb-4">
+          {{ activateError }}
+          <ul v-if="activatedSites.length" class="mt-2 space-y-1 text-xs opacity-80">
+            <li v-for="site in activatedSites" :key="site" class="font-mono">{{ site }}</li>
+          </ul>
+        </Alert>
 
         <div class="space-y-4">
           <div class="space-y-1.5">
@@ -187,6 +195,13 @@ onMounted(loadStatus)
           </div>
 
           <dl class="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
+            <div>
+              <dt class="text-muted-foreground">Sites used</dt>
+              <dd class="font-medium text-foreground mt-0.5">
+                {{ license?.activations_used ?? '—' }} / {{ license?.sites_allowed ?? '—' }}
+                <span v-if="license?.is_local" class="ml-1 text-xs text-muted-foreground">(local, not counted)</span>
+              </dd>
+            </div>
             <div>
               <dt class="text-muted-foreground">Sites allowed</dt>
               <dd class="font-medium text-foreground mt-0.5">{{ license?.sites_allowed ?? '—' }}</dd>
