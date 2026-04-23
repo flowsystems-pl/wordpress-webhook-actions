@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { CheckCircle2, XCircle, Sparkles, ExternalLink, Loader2 } from 'lucide-vue-next'
+import { CheckCircle2, Check, XCircle, Sparkles, ExternalLink, Loader2 } from 'lucide-vue-next'
 import { Button, Card, Input, Label, Badge, Alert } from '@/components/ui'
 import api from '@/lib/api'
 
@@ -100,13 +100,14 @@ onMounted(loadStatus)
           <li v-for="feature in [
             { text: 'Reliable webhooks with queue & retries', pro: false },
             { text: 'Delivery logs & replay', pro: false },
-            { text: '1 site', pro: false },
+            { text: '1 site included', pro: false },
             { text: 'Up to 10 sites (Business) or 75 sites (Agency)', pro: true },
-            { text: 'Unlimited conditions per trigger — filter which events fire your webhook', pro: true },
+            { text: 'Unlimited conditions per trigger', pro: true },
             { text: 'Condition groups with AND / OR logic', pro: true },
             { text: 'Priority support', pro: true },
           ]" :key="feature.text" class="flex items-start gap-3 text-sm">
-            <CheckCircle2 class="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+            <CheckCircle2 v-if="feature.pro" class="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+            <Check v-else class="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground/50" />
             <span :class="feature.pro ? 'text-foreground font-medium' : 'text-muted-foreground'">
               {{ feature.text }}
               <Badge v-if="feature.pro" class="ml-2 text-[10px] py-0 px-1.5 align-middle">Pro</Badge>
