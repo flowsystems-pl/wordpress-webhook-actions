@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { CheckCircle2, Check, XCircle, Sparkles, ExternalLink, Loader2 } from 'lucide-vue-next'
-import { Button, Card, Input, Label, Badge, Alert } from '@/components/ui'
+import { Button, Card, Input, Label, Badge, Alert, Dialog } from '@/components/ui'
 import api from '@/lib/api'
 import { usePro } from '@/composables/usePro'
 
@@ -18,6 +18,7 @@ const activateError = ref(null)
 const activatedSites = ref([])
 
 const deactivating = ref(false)
+const showDeactivateDialog = ref(false)
 
 const planLabel = computed(() => {
   const map = { starter: 'Starter', business: 'Business', agency: 'Agency' }
@@ -65,7 +66,7 @@ const activate = async () => {
 }
 
 const deactivate = async () => {
-  if (!window.confirm('Remove the license from this site?')) return
+  showDeactivateDialog.value = false
   deactivating.value = true
   try {
     await api.pro.deactivate()
@@ -234,11 +235,23 @@ onMounted(loadStatus)
           variant="destructive"
           :loading="deactivating"
           :disabled="deactivating"
-          @click="deactivate"
+          @click="showDeactivateDialog = true"
         >
           {{ deactivating ? 'Deactivating…' : 'Deactivate License' }}
         </Button>
       </div>
+
+      <Dialog
+        :open="showDeactivateDialog"
+        title="Deactivate license?"
+        description="This will remove the license from this site and free up a slot. You can reactivate at any time."
+        @close="showDeactivateDialog = false"
+      >
+        <template #footer>
+          <Button variant="outline" @click="showDeactivateDialog = false">Cancel</Button>
+          <Button variant="destructive" :loading="deactivating" @click="deactivate">Deactivate</Button>
+        </template>
+      </Dialog>
     </template>
 
   </div>
