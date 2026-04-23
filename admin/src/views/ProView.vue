@@ -25,7 +25,7 @@ const activatePlugin = async () => {
   activatePluginError.value = null
   try {
     await api.pro.activatePlugin()
-    await loadStatus()
+    await Promise.all([loadStatus(), refreshPro()])
   } catch (e) {
     activatePluginError.value = e.message
   } finally {
