@@ -13,6 +13,7 @@ const pad = (n) => String(n).padStart(2, '0')
  */
 export function parseUtcDb(utcStr) {
   if (!utcStr) return null
+  if (utcStr.includes('T')) return new Date(utcStr)
   return new Date(utcStr.replace(' ', 'T') + 'Z')
 }
 
