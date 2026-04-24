@@ -1,7 +1,10 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Button, Input, Label, Switch } from '@/components/ui';
+import { Button, Input, Label, Switch, UpgradeBadge } from '@/components/ui';
 import TriggerSelect from '@/components/TriggerSelect.vue';
+import { usePro } from '@/composables/usePro';
+
+const { proActive } = usePro();
 
 const props = defineProps({
   webhook: {
@@ -19,6 +22,7 @@ const form = ref({
   auth_header: '',
   is_enabled: true,
   triggers: [],
+  retry_limit: '',
 });
 
 const errors = ref({});
@@ -34,6 +38,7 @@ watch(
         auth_header: webhook.auth_header || '',
         is_enabled: webhook.is_enabled ?? true,
         triggers:   webhook.triggers || [],
+        retry_limit: webhook.retry_limit != null ? String(webhook.retry_limit) : '',
       };
     }
   },
@@ -69,7 +74,9 @@ const validate = () => {
 
 const handleSubmit = () => {
   if (validate()) {
-    emit('submit', { ...form.value });
+    const data = { ...form.value };
+    data.retry_limit = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+    emit('submit', data);
   }
 };
 </script>
@@ -131,6 +138,33 @@ const handleSubmit = () => {
       </p>
       <p class="text-sm text-muted-foreground">
         WordPress actions that will trigger this webhook
+      </p>
+    </div>
+
+    <!-- Max Attempts (Pro) -->
+    <div class="space-y-2">
+      <div class="flex items-center gap-2">
+        <Label for="retry_limit">Max Attempts</Label>
+        <UpgradeBadge v-if="!proActive" />
+      </div>
+      <Input
+        v-if="proActive"
+        id="retry_limit"
+        v-model="form.retry_limit"
+        type="number"
+        min="1"
+        max="100"
+        placeholder="Use global setting"
+        class="w-48"
+      />
+      <Input
+        v-else
+        disabled
+        placeholder="Upgrade to Pro"
+        class="w-48"
+      />
+      <p class="text-sm text-muted-foreground">
+        Override the global retry limit for this webhook. Leave empty to use the global setting.
       </p>
     </div>
 

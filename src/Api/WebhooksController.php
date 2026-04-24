@@ -106,13 +106,21 @@ class WebhooksController extends WP_REST_Controller {
   }
 
   /**
-   * Strip auth_header for non-full-scope callers.
+   * Strip auth_header for non-full-scope callers and allow extensions to append fields.
    */
   private function prepareWebhook(array $webhook, WP_REST_Request $request): array {
     if (!AuthHelper::requestHasScope($request, AuthHelper::SCOPE_FULL)) {
       $webhook['auth_header'] = __('You don\'t have permissions to see it.', 'flowsystems-webhook-actions');
     }
-    return $webhook;
+
+    /**
+     * Filter webhook data before it is returned in a REST response.
+     * Extensions can append or transform fields here.
+     *
+     * @param array           $webhook  The webhook data array.
+     * @param WP_REST_Request $request  The current REST request.
+     */
+    return apply_filters('fswa_webhook_data', $webhook, $request);
   }
 
   /**
@@ -193,6 +201,14 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
+    /**
+     * Fires after a webhook is created. Extensions can persist additional fields.
+     *
+     * @param int             $webhookId The newly created webhook ID.
+     * @param WP_REST_Request $request   The current REST request.
+     */
+    do_action('fswa_webhook_saved', $webhookId, $request);
+
     $webhook = $this->repository->find($webhookId);
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
@@ -252,6 +268,14 @@ class WebhooksController extends WP_REST_Controller {
         ['status' => 500]
       );
     }
+
+    /**
+     * Fires after a webhook is updated. Extensions can persist additional fields.
+     *
+     * @param int             $id      The webhook ID.
+     * @param WP_REST_Request $request The current REST request.
+     */
+    do_action('fswa_webhook_saved', $id, $request);
 
     $webhook = $this->repository->find($id);
 

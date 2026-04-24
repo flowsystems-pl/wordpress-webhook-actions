@@ -183,6 +183,10 @@ export const api = {
     activate: (licenseKey) => post('license/activate', { license_key: licenseKey }),
     deactivate: () => del('license/deactivate'),
   },
+  proSettings: {
+    get: () => get('pro/settings'),
+    update: (data) => put('pro/settings', data),
+  },
   schemas: {
     getByWebhook: (webhookId) => get(`schemas/webhook/${webhookId}`),
     get: (webhookId, triggerName) => get(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}`),

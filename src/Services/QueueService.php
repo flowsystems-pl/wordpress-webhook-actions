@@ -34,8 +34,9 @@ class QueueService {
      * Filter the maximum number of retry attempts for failed webhooks.
      *
      * @param int $max_attempts Maximum retry attempts (default 5)
+     * @param int $webhookId    The webhook ID being enqueued
      */
-    $maxAttempts = (int) apply_filters('fswa_max_attempts', 5);
+    $maxAttempts = (int) apply_filters('fswa_max_attempts', 5, $webhookId);
 
     $data = [
       'webhook_id' => $webhookId,
