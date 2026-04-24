@@ -15,7 +15,7 @@ const emit = defineEmits(['update:modelValue'])
     :model-value="modelValue"
     :disabled="disabled"
     :orientation="orientation"
-    class="flex gap-3"
+    class="grid grid-cols-1 sm:grid-cols-2 gap-3 space-y-2 sm:space-y-0"
     @update:model-value="emit('update:modelValue', $event)"
   >
     <slot />

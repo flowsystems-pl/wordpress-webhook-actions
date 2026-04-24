@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { Download, Trash2, Archive, Copy, RefreshCw, Clock, Check, RotateCcw } from 'lucide-vue-next'
-import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Switch, Alert, Dialog, UpgradeBadge } from '@/components/ui'
+import { ref, computed, watch, onMounted } from 'vue'
+import { Download, Trash2, Archive, Copy, RefreshCw, Clock, Check, RotateCcw, Info } from 'lucide-vue-next'
+import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Switch, Alert, Dialog, UpgradeBadge, RadioGroup, RadioGroupItem, Tooltip } from '@/components/ui'
 import api from '@/lib/api'
 import { usePro } from '@/composables/usePro'
 
@@ -24,8 +24,70 @@ const clearing = ref(false)
 const regeneratingToken = ref(false)
 const copiedField = ref(null)
 
-const proSettings = ref({ global_max_attempts: '' })
+const proSettings = ref({
+  global_max_attempts: '',
+  backoff_strategy: '',
+  backoff_base_delay: '',
+  backoff_max_delay: '',
+})
 const savingProSettings = ref(false)
+
+const ordinal = (n) => {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] || s[v] || s[0])
+}
+
+const formatDelay = (seconds) => {
+  if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`
+  if (seconds < 3600) {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    const mStr = `${m} minute${m !== 1 ? 's' : ''}`
+    return s > 0 ? `${mStr} ${s}s` : mStr
+  }
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const hStr = `${h} hour${h !== 1 ? 's' : ''}`
+  return m > 0 ? `${hStr} ${m} min` : hStr
+}
+
+watch(() => proSettings.value.backoff_strategy, (val) => {
+  if (val === '') {
+    proSettings.value.backoff_base_delay = ''
+    proSettings.value.backoff_max_delay  = ''
+  }
+})
+
+const backoffPreview = computed(() => {
+  const maxAttempts = proSettings.value.global_max_attempts !== ''
+    ? Math.max(2, parseInt(proSettings.value.global_max_attempts, 10))
+    : 5
+  const strategy  = proSettings.value.backoff_strategy || 'exponential'
+  const baseDelay = proSettings.value.backoff_base_delay !== ''
+    ? parseInt(proSettings.value.backoff_base_delay, 10)
+    : (strategy === 'exponential' ? 30 : 60)
+  const maxDelay  = proSettings.value.backoff_max_delay !== ''
+    ? parseInt(proSettings.value.backoff_max_delay, 10)
+    : 3600
+
+  const delays = []
+  for (let n = 1; n < maxAttempts; n++) {
+    let d
+    if (strategy === 'linear')      d = n * baseDelay
+    else if (strategy === 'fixed')  d = baseDelay
+    else                            d = Math.min(Math.pow(2, n) * baseDelay, maxDelay)
+    delays.push(d)
+  }
+
+  const peak = Math.max(...delays, 1)
+  return delays.map((d, i) => ({
+    delay: d,
+    label: `Wait ${formatDelay(d)}`,
+    height: Math.max(4, Math.round((d / peak) * 56)),
+    retryLabel: `${ordinal(i + 1)} Retry`,
+  }))
+})
 
 const retentionOptions = [
   { value: '7', label: '7 days' },
@@ -68,8 +130,13 @@ const loadData = async () => {
     cronInfo.value = cronData
 
     if (proSettingsData) {
-      proSettings.value.global_max_attempts =
-        proSettingsData.global_max_attempts != null ? String(proSettingsData.global_max_attempts) : ''
+      proSettings.value.global_max_attempts = proSettingsData.global_max_attempts != null
+        ? String(proSettingsData.global_max_attempts) : ''
+      proSettings.value.backoff_strategy    = proSettingsData.backoff_strategy ?? ''
+      proSettings.value.backoff_base_delay  = proSettingsData.backoff_base_delay != null
+        ? String(proSettingsData.backoff_base_delay) : ''
+      proSettings.value.backoff_max_delay   = proSettingsData.backoff_max_delay != null
+        ? String(proSettingsData.backoff_max_delay) : ''
     }
   } catch (e) {
     error.value = e.message
@@ -85,9 +152,12 @@ const saveProSettings = async () => {
   success.value = null
 
   try {
-    const val = proSettings.value.global_max_attempts
+    const s = proSettings.value
     await api.proSettings.update({
-      global_max_attempts: val !== '' ? parseInt(val, 10) : null,
+      global_max_attempts: s.global_max_attempts !== '' ? parseInt(s.global_max_attempts, 10) : null,
+      backoff_strategy:    s.backoff_strategy !== '' ? s.backoff_strategy : null,
+      backoff_base_delay:  s.backoff_base_delay !== '' ? parseInt(s.backoff_base_delay, 10) : null,
+      backoff_max_delay:   s.backoff_max_delay !== '' ? parseInt(s.backoff_max_delay, 10) : null,
     })
     success.value = 'Retry settings saved'
     setTimeout(() => { success.value = null }, 3000)
@@ -394,7 +464,7 @@ onMounted(loadData)
           </Card>
 
           <!-- Retry Settings (Pro) -->
-          <Card class="p-6">
+          <Card class="p-6 space-y-6">
             <div class="flex items-center gap-2 mb-4">
               <h3 class="text-lg font-medium">
                 <RotateCcw class="inline h-5 w-5 mr-2" />
@@ -404,9 +474,15 @@ onMounted(loadData)
             </div>
 
             <template v-if="proActive">
-              <div class="space-y-4">
+              <div class="space-y-6">
+                <!-- Max Attempts -->
                 <div class="space-y-2">
-                  <Label for="global_max_attempts">Global Max Attempts</Label>
+                  <div class="flex items-center gap-1.5">
+                    <Label for="global_max_attempts">Max Attempts</Label>
+                    <Tooltip content="Total delivery attempts per webhook, including the first try. Once this number is reached the job is permanently failed." side="right">
+                      <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+                    </Tooltip>
+                  </div>
                   <Input
                     id="global_max_attempts"
                     v-model="proSettings.global_max_attempts"
@@ -417,11 +493,108 @@ onMounted(loadData)
                     class="w-48"
                   />
                   <p class="text-sm text-muted-foreground">
-                    How many total delivery attempts to make for failed webhooks (including the first try).
-                    Leave empty to use the plugin default of 5. Individual webhooks can override this.
+                    Total delivery attempts per webhook (including the first try). Leave empty for the plugin default of 5.
                   </p>
                 </div>
+
+                <div class="border-t pt-5 space-y-4">
+                  <!-- Backoff Strategy -->
+                  <div class="space-y-3">
+                    <Label>Backoff Strategy</Label>
+                    <RadioGroup v-model="proSettings.backoff_strategy" class="space-y-2">
+                      <div class="flex items-start gap-2">
+                        <RadioGroupItem id="strategy-default" value="" class="mt-0.5" />
+                        <label for="strategy-default" class="cursor-pointer">
+                          <div class="text-sm font-medium">Plugin default</div>
+                          <div class="text-xs text-muted-foreground">Exponential — base 30 s, cap 3600 s</div>
+                        </label>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <RadioGroupItem id="strategy-exponential" value="exponential" class="mt-0.5" />
+                        <label for="strategy-exponential" class="cursor-pointer">
+                          <div class="text-sm font-medium">Exponential</div>
+                          <div class="text-xs text-muted-foreground">Delay doubles each retry: 2ⁿ × base, capped at max</div>
+                        </label>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <RadioGroupItem id="strategy-linear" value="linear" class="mt-0.5" />
+                        <label for="strategy-linear" class="cursor-pointer">
+                          <div class="text-sm font-medium">Linear</div>
+                          <div class="text-xs text-muted-foreground">Delay grows evenly: n × base seconds</div>
+                        </label>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <RadioGroupItem id="strategy-fixed" value="fixed" class="mt-0.5" />
+                        <label for="strategy-fixed" class="cursor-pointer">
+                          <div class="text-sm font-medium">Fixed</div>
+                          <div class="text-xs text-muted-foreground">Same delay every retry: base seconds</div>
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  <!-- Delay inputs (shown when a strategy is explicitly selected) -->
+                  <div v-if="proSettings.backoff_strategy !== ''" class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                      <div class="flex items-center gap-1.5">
+                      <Label for="backoff_base_delay">Base Delay (seconds)</Label>
+                      <Tooltip content="The base number of seconds used to calculate each retry delay. Exact role depends on the strategy: multiplier for exponential, interval for linear, constant for fixed." side="right">
+                        <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+                      </Tooltip>
+                    </div>
+                      <Input
+                        id="backoff_base_delay"
+                        v-model="proSettings.backoff_base_delay"
+                        type="number"
+                        min="1"
+                        max="86400"
+                        :placeholder="proSettings.backoff_strategy === 'exponential' ? '30' : '60'"
+                      />
+                    </div>
+                    <div v-if="proSettings.backoff_strategy === 'exponential'" class="space-y-2">
+                      <div class="flex items-center gap-1.5">
+                      <Label for="backoff_max_delay">Max Delay (seconds)</Label>
+                      <Tooltip content="Cap on the wait between retries. Exponential backoff grows 2ⁿ × base — without a cap delays would grow indefinitely. Any calculated delay above this value is clamped to it." side="right">
+                        <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+                      </Tooltip>
+                    </div>
+                      <Input
+                        id="backoff_max_delay"
+                        v-model="proSettings.backoff_max_delay"
+                        type="number"
+                        min="1"
+                        max="86400"
+                        placeholder="3600"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <!-- Backoff preview chart -->
+              <div v-if="backoffPreview.length" class="border-t pt-5 space-y-2">
+                <p class="text-sm font-medium">Delay preview</p>
+                <div class="flex items-end gap-1.5" style="height: 64px;">
+                  <div
+                    v-for="item in backoffPreview"
+                    :key="item.retry"
+                    class="flex-1 bg-accent rounded-sm transition-all duration-300"
+                    :style="{ height: item.height + 'px' }"
+                  />
+                </div>
+                <div class="flex gap-1.5">
+                  <div
+                    v-for="item in backoffPreview"
+                    :key="item.retry"
+                    class="flex-1 text-center"
+                  >
+                    <div class="text-xs font-medium truncate">{{ item.label }}</div>
+                    <div class="text-xs text-muted-foreground truncate">{{ item.retryLabel }}</div>
+                  </div>
+                </div>
+                <p class="text-xs text-muted-foreground">Wait before each retry</p>
+              </div>
+
               <div class="mt-6">
                 <Button :loading="savingProSettings" @click="saveProSettings">
                   Save Retry Settings
@@ -431,7 +604,7 @@ onMounted(loadData)
 
             <template v-else>
               <p class="text-sm text-muted-foreground">
-                Configure the number of delivery attempts for failed webhooks, globally and per webhook.
+                Configure retry attempts and backoff delay strategy for failed webhooks, globally and per webhook.
               </p>
             </template>
           </Card>

@@ -140,6 +140,17 @@ class QueueService {
 
     // Calculate backoff delay: min(2^attempts * 30, 3600) seconds
     $delaySeconds = min(pow(2, $newAttempts) * 30, 3600);
+    $webhookId    = (int) ($job['webhook_id'] ?? 0);
+
+    /**
+     * Filter the backoff delay before rescheduling a failed webhook job.
+     *
+     * @param int $delay_seconds  Calculated delay in seconds
+     * @param int $attempt_number Attempt number after this failure (1-indexed)
+     * @param int $webhook_id     The webhook ID
+     */
+    $delaySeconds = max(1, (int) apply_filters('fswa_backoff_delay', $delaySeconds, $newAttempts, $webhookId));
+
     $scheduledAt = new DateTime('now', new DateTimeZone('UTC'));
     $scheduledAt->modify("+{$delaySeconds} seconds");
     $scheduledAtStr = $scheduledAt->format('Y-m-d H:i:s');

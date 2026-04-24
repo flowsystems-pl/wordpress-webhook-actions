@@ -1,16 +1,38 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Button, Input, Label, Switch, UpgradeBadge } from '@/components/ui';
+import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem } from '@/components/ui';
+import { Info } from 'lucide-vue-next';
 import TriggerSelect from '@/components/TriggerSelect.vue';
 import { usePro } from '@/composables/usePro';
 
 const { proActive } = usePro();
 
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+const ordinal = (n) => {
+  const s = ['th', 'st', 'nd', 'rd']
+  const v = n % 100
+  return n + (s[(v - 20) % 10] || s[v] || s[0])
+}
+
+const formatDelay = (seconds) => {
+  if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`
+  if (seconds < 3600) {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    const mStr = `${m} minute${m !== 1 ? 's' : ''}`
+    return s > 0 ? `${mStr} ${s}s` : mStr
+  }
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const hStr = `${h} hour${h !== 1 ? 's' : ''}`
+  return m > 0 ? `${hStr} ${m} min` : hStr
+}
+
+// ── props / emits / state ─────────────────────────────────────────────────────
+
 const props = defineProps({
-  webhook: {
-    type: Object,
-    default: null,
-  },
+  webhook: { type: Object, default: null },
   loading: Boolean,
 });
 
@@ -23,27 +45,73 @@ const form = ref({
   is_enabled: true,
   triggers: [],
   retry_limit: '',
+  backoff_strategy: 'default',
+  backoff_base_delay: '',
+  backoff_max_delay: '',
 });
 
 const errors = ref({});
 
-// Initialize form with webhook data
-watch(
-  () => props.webhook,
-  (webhook) => {
-    if (webhook) {
-      form.value = {
-        name: webhook.name || '',
-        endpoint_url: webhook.endpoint_url || '',
-        auth_header: webhook.auth_header || '',
-        is_enabled: webhook.is_enabled ?? true,
-        triggers:   webhook.triggers || [],
-        retry_limit: webhook.retry_limit != null ? String(webhook.retry_limit) : '',
-      };
-    }
-  },
-  { immediate: true },
-);
+// ── watches ───────────────────────────────────────────────────────────────────
+
+watch(() => props.webhook, (webhook) => {
+  if (webhook) {
+    form.value = {
+      name:               webhook.name || '',
+      endpoint_url:       webhook.endpoint_url || '',
+      auth_header:        webhook.auth_header || '',
+      is_enabled:         webhook.is_enabled ?? true,
+      triggers:           webhook.triggers || [],
+      retry_limit:        webhook.retry_limit != null ? String(webhook.retry_limit) : '',
+      backoff_strategy:   webhook.backoff_strategy ?? 'default',
+      backoff_base_delay: webhook.backoff_base_delay != null ? String(webhook.backoff_base_delay) : '',
+      backoff_max_delay:  webhook.backoff_max_delay != null ? String(webhook.backoff_max_delay) : '',
+    };
+  }
+}, { immediate: true });
+
+watch(() => form.value.backoff_strategy, (val) => {
+  if (val === 'default') {
+    form.value.backoff_base_delay = ''
+    form.value.backoff_max_delay  = ''
+  }
+})
+
+// ── computed ──────────────────────────────────────────────────────────────────
+
+const backoffPreview = computed(() => {
+  const strategy = form.value.backoff_strategy
+  if (!strategy || strategy === 'default') return []
+
+  const maxAttempts = form.value.retry_limit !== ''
+    ? Math.max(2, parseInt(form.value.retry_limit, 10))
+    : 5
+  const baseDelay = form.value.backoff_base_delay !== ''
+    ? parseInt(form.value.backoff_base_delay, 10)
+    : (strategy === 'exponential' ? 30 : 60)
+  const maxDelay = form.value.backoff_max_delay !== ''
+    ? parseInt(form.value.backoff_max_delay, 10)
+    : 3600
+
+  const delays = []
+  for (let n = 1; n < maxAttempts; n++) {
+    let d
+    if (strategy === 'linear')     d = n * baseDelay
+    else if (strategy === 'fixed') d = baseDelay
+    else                           d = Math.min(Math.pow(2, n) * baseDelay, maxDelay)
+    delays.push(d)
+  }
+
+  const peak = Math.max(...delays, 1)
+  return delays.map((d, i) => ({
+    delay: d,
+    label: `Wait ${formatDelay(d)}`,
+    height: Math.max(4, Math.round((d / peak) * 56)),
+    retryLabel: `${ordinal(i + 1)} Retry`,
+  }))
+})
+
+// ── form logic ────────────────────────────────────────────────────────────────
 
 const validate = () => {
   errors.value = {};
@@ -75,7 +143,10 @@ const validate = () => {
 const handleSubmit = () => {
   if (validate()) {
     const data = { ...form.value };
-    data.retry_limit = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+    data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+    data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
+    data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
+    data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
     emit('submit', data);
   }
 };
@@ -92,9 +163,7 @@ const handleSubmit = () => {
         placeholder="My Webhook"
         :class="{ 'border-destructive': errors.name }"
       />
-      <p v-if="errors.name" class="text-sm text-destructive">
-        {{ errors.name }}
-      </p>
+      <p v-if="errors.name" class="text-sm text-destructive">{{ errors.name }}</p>
     </div>
 
     <!-- Endpoint URL -->
@@ -107,16 +176,12 @@ const handleSubmit = () => {
         placeholder="https://example.com/webhook"
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
-      <p v-if="errors.endpoint_url" class="text-sm text-destructive">
-        {{ errors.endpoint_url }}
-      </p>
-      <p class="text-sm text-muted-foreground">
-        The URL where webhook payloads will be sent
-      </p>
+      <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <p class="text-sm text-muted-foreground">The URL where webhook payloads will be sent</p>
     </div>
 
     <!-- Auth Header -->
-    <div class="space-y-2">
+    <div class="space-y-2 border-t pt-5">
       <Label for="auth_header">Authorization Header (optional)</Label>
       <Input
         id="auth_header"
@@ -130,25 +195,23 @@ const handleSubmit = () => {
     </div>
 
     <!-- Triggers -->
-    <div class="space-y-2">
+    <div class="space-y-2 border-t pt-5">
       <Label>Triggers</Label>
       <TriggerSelect v-model="form.triggers" />
-      <p v-if="errors.triggers" class="text-sm text-destructive">
-        {{ errors.triggers }}
-      </p>
-      <p class="text-sm text-muted-foreground">
-        WordPress actions that will trigger this webhook
-      </p>
+      <p v-if="errors.triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
+      <p class="text-sm text-muted-foreground">WordPress actions that will trigger this webhook</p>
     </div>
 
     <!-- Max Attempts (Pro) -->
-    <div class="space-y-2">
+    <div class="space-y-2 border-t pt-5">
       <div class="flex items-center gap-2">
         <Label for="retry_limit">Max Attempts</Label>
+        <Tooltip content="Total delivery attempts for this webhook, including the first try. Overrides the global setting. Once reached the job is permanently failed." side="right">
+          <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+        </Tooltip>
         <UpgradeBadge v-if="!proActive" />
       </div>
       <Input
-        v-if="proActive"
         id="retry_limit"
         v-model="form.retry_limit"
         type="number"
@@ -156,23 +219,104 @@ const handleSubmit = () => {
         max="100"
         placeholder="Use global setting"
         class="w-48"
-      />
-      <Input
-        v-else
-        disabled
-        placeholder="Upgrade to Pro"
-        class="w-48"
+        :disabled="!proActive"
       />
       <p class="text-sm text-muted-foreground">
         Override the global retry limit for this webhook. Leave empty to use the global setting.
       </p>
     </div>
 
+    <!-- Backoff Strategy (Pro) -->
+    <div class="space-y-2 border-t pt-5">
+      <div class="flex items-center gap-2">
+        <Label>Backoff Strategy</Label>
+        <Tooltip content="How to calculate the wait between retries. Overrides the global setting." side="right">
+          <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+        </Tooltip>
+        <UpgradeBadge v-if="!proActive" />
+      </div>
+
+      <div class="space-y-2">
+      <Select v-model="form.backoff_strategy" :disabled="!proActive">
+        <SelectTrigger class="w-56">
+          <SelectValue placeholder="Use global setting" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="default">Use global setting</SelectItem>
+          <SelectItem value="exponential">Exponential</SelectItem>
+          <SelectItem value="linear">Linear</SelectItem>
+          <SelectItem value="fixed">Fixed</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <p class="text-sm text-muted-foreground">
+        Override the retry delay strategy for this webhook. Leave empty to use the global setting.
+      </p>
+
+     </div>
+
+      <div v-if="form.backoff_strategy !== 'default'" class="flex flex-wrap gap-3 mt-2">
+        <div class="space-y-1">
+          <div class="flex items-center gap-1">
+            <Label class="text-xs text-muted-foreground">Base Delay (s)</Label>
+            <Tooltip content="Base seconds used to calculate the retry delay. Acts as a multiplier for exponential, interval for linear, and constant wait for fixed." side="right">
+              <Info class="h-3 w-3 text-muted-foreground cursor-help shrink-0" />
+            </Tooltip>
+          </div>
+          <Input
+            v-model="form.backoff_base_delay"
+            type="number"
+            min="1"
+            max="86400"
+            :placeholder="form.backoff_strategy === 'exponential' ? '30' : '60'"
+            class="w-32"
+            :disabled="!proActive"
+          />
+        </div>
+        <div v-if="form.backoff_strategy === 'exponential'" class="space-y-1">
+          <div class="flex items-center gap-1">
+            <Label class="text-xs text-muted-foreground">Max Delay (s)</Label>
+            <Tooltip content="Cap on the wait between retries. Prevents exponential backoff from growing indefinitely — any delay above this value is clamped to it." side="right">
+              <Info class="h-3 w-3 text-muted-foreground cursor-help shrink-0" />
+            </Tooltip>
+          </div>
+          <Input
+            v-model="form.backoff_max_delay"
+            type="number"
+            min="1"
+            max="86400"
+            placeholder="3600"
+            class="w-32"
+            :disabled="!proActive"
+          />
+        </div>
+      </div>
+
+      <!-- Per-webhook backoff preview -->
+      <div v-if="backoffPreview.length" class="pt-2 space-y-2">
+        <p class="text-xs font-medium text-muted-foreground">Delay preview</p>
+        <div class="flex items-end gap-1" style="height: 48px;">
+          <div
+            v-for="item in backoffPreview"
+            :key="item.retryLabel"
+            class="flex-1 bg-accent rounded-sm transition-all duration-300"
+            :style="{ height: item.height + 'px' }"
+          />
+        </div>
+        <div class="flex gap-1">
+          <div v-for="item in backoffPreview" :key="item.retryLabel" class="flex-1 text-center">
+            <div class="text-xs font-medium truncate">{{ item.label }}</div>
+            <div class="text-xs text-muted-foreground truncate">{{ item.retryLabel }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Enabled -->
-    <div class="space-y-2">
+    <div class="space-y-2 border-t pt-5">
       <div class="flex items-center space-x-2">
         <Switch v-model="form.is_enabled" />
-        <Label>Enabled</Label>
+        <Label>Enabled Webhook</Label>
       </div>
       <div
         v-if="!form.is_enabled"

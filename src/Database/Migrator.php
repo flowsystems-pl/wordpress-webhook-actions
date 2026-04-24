@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.5.0';
+  private const CURRENT_VERSION = '1.6.0';
 
   /**
    * Run pending migrations
@@ -72,6 +72,7 @@ class Migrator {
       '1.4.0' => [self::class, 'migration_1_4_0'],
       '1.4.1' => [self::class, 'migration_1_4_1'],
       '1.5.0' => [self::class, 'migration_1_5_0'],
+      '1.6.0' => [self::class, 'migration_1_6_0'],
     ];
   }
 
@@ -361,6 +362,33 @@ class Migrator {
     ));
     if (!$exists) {
       $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN retry_limit INT UNSIGNED NULL DEFAULT NULL");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.6.0 - Add backoff config columns to webhooks table
+   */
+  public static function migration_1_6_0(): void {
+    global $wpdb;
+
+    $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
+
+    $columns = [
+      'backoff_strategy'   => "ALTER TABLE {$webhooksTable} ADD COLUMN backoff_strategy VARCHAR(20) NULL DEFAULT NULL",
+      'backoff_base_delay' => "ALTER TABLE {$webhooksTable} ADD COLUMN backoff_base_delay INT UNSIGNED NULL DEFAULT NULL",
+      'backoff_max_delay'  => "ALTER TABLE {$webhooksTable} ADD COLUMN backoff_max_delay INT UNSIGNED NULL DEFAULT NULL",
+    ];
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    foreach ($columns as $column => $sql) {
+      $exists = $wpdb->get_var($wpdb->prepare(
+        "SHOW COLUMNS FROM {$webhooksTable} LIKE %s",
+        $column
+      ));
+      if (!$exists) {
+        $wpdb->query($sql);
+      }
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
