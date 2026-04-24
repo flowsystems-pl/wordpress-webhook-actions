@@ -10,6 +10,12 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Repositories\SchemaRepository;
+use FlowSystems\WebhookActions\Services\QueueService;
+use FlowSystems\WebhookActions\Services\LogService;
+use FlowSystems\WebhookActions\Services\PayloadTransformer;
+use FlowSystems\WebhookActions\Services\Dispatcher;
+use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 
 class WebhooksController extends WP_REST_Controller {
@@ -17,9 +23,17 @@ class WebhooksController extends WP_REST_Controller {
   protected $rest_base = 'webhooks';
 
   private WebhookRepository $repository;
+  private SchemaRepository $schemaRepository;
+  private QueueService $queueService;
+  private LogService $logService;
+  private PayloadTransformer $payloadTransformer;
 
   public function __construct() {
-    $this->repository = new WebhookRepository();
+    $this->repository         = new WebhookRepository();
+    $this->schemaRepository   = new SchemaRepository();
+    $this->queueService       = new QueueService();
+    $this->logService         = new LogService();
+    $this->payloadTransformer = new PayloadTransformer();
   }
 
   /**
@@ -76,6 +90,38 @@ class WebhooksController extends WP_REST_Controller {
         'id' => [
           'description' => __('Unique identifier for the webhook.', 'flowsystems-webhook-actions'),
           'type' => 'integer',
+        ],
+      ],
+    ]);
+
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/test', [
+      'methods'             => WP_REST_Server::CREATABLE,
+      'callback'            => [$this, 'testItem'],
+      'permission_callback' => [$this, 'updateItemPermissionsCheck'],
+      'args' => [
+        'id' => [
+          'description' => __('Unique identifier for the webhook.', 'flowsystems-webhook-actions'),
+          'type'        => 'integer',
+        ],
+        'payload_source' => [
+          'description' => __('Where to source the test payload from.', 'flowsystems-webhook-actions'),
+          'type'        => 'string',
+          'enum'        => ['captured', 'mapped', 'custom'],
+          'default'     => 'captured',
+        ],
+        'trigger' => [
+          'description' => __('Trigger name to use for the test.', 'flowsystems-webhook-actions'),
+          'type'        => 'string',
+        ],
+        'payload' => [
+          'description' => __('Custom payload JSON (required when payload_source is custom).', 'flowsystems-webhook-actions'),
+          'type'        => 'object',
+        ],
+        'mode' => [
+          'description' => __('How to run the test: now (synchronous) or queue (async).', 'flowsystems-webhook-actions'),
+          'type'        => 'string',
+          'enum'        => ['now', 'queue'],
+          'default'     => 'queue',
         ],
       ],
     ]);
@@ -339,6 +385,127 @@ class WebhooksController extends WP_REST_Controller {
     $webhook = $this->repository->find($id);
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
+  }
+
+  /**
+   * Enqueue a test dispatch for a webhook with a chosen payload source.
+   */
+  public function testItem($request): WP_REST_Response|WP_Error {
+    $id = (int) $request->get_param('id');
+    $webhook = $this->repository->find($id);
+
+    if (!$webhook) {
+      return new WP_Error(
+        'rest_webhook_not_found',
+        __('Webhook not found.', 'flowsystems-webhook-actions'),
+        ['status' => 404]
+      );
+    }
+
+    $triggers = $webhook['triggers'] ?? [];
+    if (empty($triggers)) {
+      return new WP_Error(
+        'rest_webhook_no_triggers',
+        __('Webhook has no triggers configured.', 'flowsystems-webhook-actions'),
+        ['status' => 422]
+      );
+    }
+
+    // Resolve trigger to use
+    $requestedTrigger = $request->get_param('trigger');
+    if ($requestedTrigger && in_array($requestedTrigger, $triggers, true)) {
+      $trigger = sanitize_text_field($requestedTrigger);
+    } else {
+      $trigger = $triggers[0];
+    }
+
+    $source = $request->get_param('payload_source') ?? 'captured';
+
+    switch ($source) {
+      case 'custom':
+        $raw = $request->get_param('payload');
+        if (empty($raw) || !is_array($raw)) {
+          return new WP_Error(
+            'rest_missing_payload',
+            __('A payload object is required for custom source.', 'flowsystems-webhook-actions'),
+            ['status' => 400]
+          );
+        }
+        $testPayload     = $raw;
+        $mappingApplied  = false;
+        $originalPayload = null;
+        break;
+
+      case 'mapped':
+        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
+        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        if (empty($example)) {
+          return new WP_Error(
+            'rest_no_captured_payload',
+            __('No captured payload found for this trigger. Fire the trigger at least once first.', 'flowsystems-webhook-actions'),
+            ['status' => 422]
+          );
+        }
+        $decoded = is_string($example) ? json_decode($example, true) : $example;
+        $mapped  = $this->payloadTransformer->applyStoredMapping($id, $trigger, $decoded ?? []);
+        $testPayload     = $mapped['payload'];
+        $mappingApplied  = $mapped['mapping_applied'];
+        $originalPayload = $mappingApplied ? $decoded : null;
+        break;
+
+      case 'captured':
+      default:
+        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
+        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        if (empty($example)) {
+          return new WP_Error(
+            'rest_no_captured_payload',
+            __('No captured payload found for this trigger. Fire the trigger at least once first.', 'flowsystems-webhook-actions'),
+            ['status' => 422]
+          );
+        }
+        $testPayload     = is_string($example) ? json_decode($example, true) : $example;
+        $mappingApplied  = false;
+        $originalPayload = null;
+        break;
+    }
+
+    $mode  = $request->get_param('mode') ?? 'queue';
+    $logId = $this->logService->logPending($id, $trigger, $testPayload, $originalPayload, $mappingApplied);
+
+    if ($mode === 'now') {
+      $dispatcher = new Dispatcher(new WPHttpTransport(), $this->queueService);
+      $dispatcher->sendToWebhook($webhook, $testPayload, $trigger, $logId, 0, true);
+
+      $log = $this->logService->getRepository()->find($logId);
+
+      return rest_ensure_response([
+        'mode'   => 'now',
+        'log_id' => $logId,
+        'log'    => $log,
+      ]);
+    }
+
+    $jobId = $this->queueService->enqueue(
+      $id,
+      $trigger,
+      [
+        'webhook'          => $webhook,
+        'payload'          => $testPayload,
+        'log_id'           => $logId,
+        'mapping_applied'  => $mappingApplied,
+        'original_payload' => $originalPayload,
+      ],
+      null,
+      $logId ?: null,
+      true
+    );
+
+    return rest_ensure_response([
+      'mode'   => 'queue',
+      'job_id' => $jobId,
+      'log_id' => $logId,
+    ]);
   }
 
   /**

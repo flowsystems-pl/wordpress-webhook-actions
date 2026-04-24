@@ -49,12 +49,13 @@ const statusVariant = (status) => {
     pending:           'secondary',
     skipped:           'warning',
     permanently_failed: 'destructive',
+    test:              'outline',
   }
   return variants[status] || 'default'
 }
 
 const isRetryable  = (status) => status === 'error' || status === 'permanently_failed'
-const isReplayable = (status) => status === 'success'
+const isReplayable = (status) => status === 'success' || status === 'test'
 
 const formatDate = formatUtcDate
 

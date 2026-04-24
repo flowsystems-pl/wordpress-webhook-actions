@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Pencil, Trash2, ScrollText, Power, PowerOff } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, ScrollText, FlaskConical } from 'lucide-vue-next'
 import { Button, Card, Badge, Switch, Dialog } from '@/components/ui'
+import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
 
@@ -14,6 +15,7 @@ const loading = ref(true)
 const error = ref(null)
 const togglingId = ref(null)
 const pendingDeleteWebhook = ref(null)
+const testWebhook = ref(null)
 
 const loadWebhooks = async () => {
   loading.value = true
@@ -65,6 +67,13 @@ onMounted(loadWebhooks)
 
 <template>
   <div>
+    <!-- Test Drawer -->
+    <TestWebhookDrawer
+      :open="!!testWebhook"
+      :webhook="testWebhook"
+      @close="testWebhook = null"
+    />
+
     <!-- Delete Confirm Dialog -->
     <Dialog
       :open="!!pendingDeleteWebhook"
@@ -157,6 +166,15 @@ onMounted(loadWebhooks)
               class="h-8 w-8 sm:h-9 sm:w-9"
             >
               <ScrollText class="h-4 w-4" />
+            </Button>
+            <Button
+              size="icon"
+              variant="ghost"
+              title="Test"
+              class="h-8 w-8 sm:h-9 sm:w-9"
+              @click="testWebhook = webhook"
+            >
+              <FlaskConical class="h-4 w-4" />
             </Button>
             <Button
               size="icon"

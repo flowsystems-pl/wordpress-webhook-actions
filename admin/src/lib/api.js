@@ -130,6 +130,7 @@ export const api = {
     update: (id, data) => put(`webhooks/${id}`, data),
     delete: (id) => del(`webhooks/${id}`),
     toggle: (id) => post(`webhooks/${id}/toggle`),
+    test: (id, data) => post(`webhooks/${id}/test`, data),
     logs: (id, params) => get(`webhooks/${id}/logs`, params),
   },
   logs: {

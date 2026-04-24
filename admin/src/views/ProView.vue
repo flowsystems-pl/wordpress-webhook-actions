@@ -125,10 +125,12 @@ onMounted(loadStatus)
           <li v-for="feature in [
             { text: 'Reliable webhooks with queue & retries', pro: false },
             { text: 'Delivery logs & replay', pro: false },
-            { text: '1 site included', pro: false },
-            { text: 'Up to 10 sites (Business) or 75 sites (Agency)', pro: true },
+            { text: 'Payload mapping', pro: false },
+            { text: 'Full REST API with API token authentication', pro: false },
             { text: 'Unlimited conditions per trigger', pro: true },
             { text: 'Condition groups with AND / OR logic', pro: true },
+            { text: 'Per-webhook retry limit override', pro: true },
+            { text: 'Custom backoff strategy (exponential, linear, fixed)', pro: true },
             { text: 'Priority support', pro: true },
           ]" :key="feature.text" class="flex items-start gap-3 text-sm">
             <CheckCircle2 v-if="feature.pro" class="w-4 h-4 mt-0.5 shrink-0 text-primary" />
@@ -260,14 +262,7 @@ onMounted(loadStatus)
         </div>
       </Card>
 
-      <div class="flex flex-wrap gap-3">
-        <a href="https://wpwebhooks.org/account" target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" class="gap-2">
-            Manage Subscription
-            <ExternalLink class="w-3.5 h-3.5 opacity-70" />
-          </Button>
-        </a>
-
+      <div class="flex flex-wrap gap-3 mb-6">
         <Button
           variant="destructive"
           :loading="deactivating"
@@ -276,6 +271,26 @@ onMounted(loadStatus)
         >
           {{ deactivating ? 'Deactivating…' : 'Deactivate License' }}
         </Button>
+      </div>
+
+      <div class="space-y-1.5 text-sm text-muted-foreground">
+        <p>
+          Need help?
+          <a
+            href="https://wordpress.org/support/plugin/flowsystems-webhook-actions/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2 hover:text-foreground transition-colors"
+          >Community support forum</a>
+        </p>
+        <p>
+          <a
+            href="https://wpwebhooks.org/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2 hover:text-foreground transition-colors"
+          >Priority support</a> — Pro subscribers get a direct response via email.
+        </p>
       </div>
 
       <Dialog

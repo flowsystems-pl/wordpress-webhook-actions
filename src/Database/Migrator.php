@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.6.0';
+  private const CURRENT_VERSION = '1.7.0';
 
   /**
    * Run pending migrations
@@ -73,6 +73,7 @@ class Migrator {
       '1.4.1' => [self::class, 'migration_1_4_1'],
       '1.5.0' => [self::class, 'migration_1_5_0'],
       '1.6.0' => [self::class, 'migration_1_6_0'],
+      '1.7.0' => [self::class, 'migration_1_7_0'],
     ];
   }
 
@@ -389,6 +390,25 @@ class Migrator {
       if (!$exists) {
         $wpdb->query($sql);
       }
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.7.0 - Add is_test flag to queue table
+   */
+  public static function migration_1_7_0(): void {
+    global $wpdb;
+
+    $queueTable = $wpdb->prefix . 'fswa_queue';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$queueTable} LIKE %s",
+      'is_test'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$queueTable} ADD COLUMN is_test TINYINT(1) NOT NULL DEFAULT 0");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }

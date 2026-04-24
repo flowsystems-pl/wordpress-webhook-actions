@@ -36,7 +36,7 @@ const props = defineProps({
   loading: Boolean,
 });
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel', 'change']);
 
 const form = ref({
   name: '',
@@ -76,6 +76,8 @@ watch(() => form.value.backoff_strategy, (val) => {
     form.value.backoff_max_delay  = ''
   }
 })
+
+watch(form, () => emit('change'), { deep: true })
 
 // ── computed ──────────────────────────────────────────────────────────────────
 

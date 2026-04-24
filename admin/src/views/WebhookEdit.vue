@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { ArrowLeft } from 'lucide-vue-next';
+import { ArrowLeft, FlaskConical } from 'lucide-vue-next';
 import { Button, Card, Alert } from '@/components/ui';
 import WebhookForm from '@/components/WebhookForm.vue';
 import TriggerSchemaPanel from '@/components/TriggerSchemaPanel.vue';
+import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue';
 import api from '@/lib/api';
 import { useHealthStats } from '@/composables/useHealthStats';
 
@@ -17,6 +18,8 @@ const webhook = ref(null);
 const loading = ref(false);
 const saving = ref(false);
 const error = ref(null);
+const showTest = ref(false);
+const hasUnsavedChanges = ref(false);
 
 const isEdit = computed(() => !!route.params.id);
 const pageTitle = computed(() =>
@@ -50,6 +53,7 @@ const handleSubmit = async (data) => {
   try {
     if (isEdit.value) {
       await api.webhooks.update(route.params.id, data);
+      hasUnsavedChanges.value = false;
       // Silently reload webhook to refresh triggers for TriggerSchemaPanel
       await loadWebhook(true);
     } else {
@@ -74,6 +78,15 @@ onMounted(loadWebhook);
 
 <template>
   <div>
+    <!-- Test Drawer -->
+    <TestWebhookDrawer
+      v-if="isEdit && webhook"
+      :open="showTest"
+      :webhook="webhook"
+      :has-unsaved-changes="hasUnsavedChanges"
+      @close="showTest = false"
+    />
+
     <!-- Header -->
     <div class="mb-6">
       <Button
@@ -101,6 +114,13 @@ onMounted(loadWebhook);
     <!-- Form -->
     <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card class="p-6">
+        <div v-if="isEdit" class="flex justify-end mb-4">
+          <Button variant="outline" size="sm" class="gap-1.5" @click="showTest = true">
+            <FlaskConical class="h-3.5 w-3.5" />
+            Test
+          </Button>
+        </div>
+
         <Alert v-if="error" variant="destructive" class="mb-4">
           {{ error }}
         </Alert>
@@ -110,6 +130,7 @@ onMounted(loadWebhook);
           :loading="saving"
           @submit="handleSubmit"
           @cancel="handleCancel"
+          @change="hasUnsavedChanges = true"
         />
       </Card>
 
