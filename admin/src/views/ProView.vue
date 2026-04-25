@@ -125,6 +125,7 @@ onMounted(loadStatus)
           <li v-for="feature in [
             { text: 'Reliable webhooks with queue & retries', pro: false },
             { text: 'Delivery logs & replay', pro: false },
+            { text: 'Test webhook delivery on demand', pro: false },
             { text: 'Payload mapping', pro: false },
             { text: 'Full REST API with API token authentication', pro: false },
             { text: 'Unlimited conditions per trigger', pro: true },
