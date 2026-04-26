@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: Flow Systems Webhook Actions
+ * Plugin Name: Webhook Actions by Flow Systems
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
  * Description: Reliable WordPress webhooks with retries, queue, Action Scheduler support, delivery logs, and replayable events for n8n, APIs, and integrations.
  * Version: 1.6.2

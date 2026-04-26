@@ -188,7 +188,7 @@ class AdminController {
 ?>
       <div class="notice notice-success is-dismissible">
         <p>
-          <?php esc_html_e('Flow Systems Webhook Actions: Your webhooks have been migrated to the new database format.', 'flowsystems-webhook-actions'); ?>
+          <?php esc_html_e('Webhook Actions by Flow Systems: Your webhooks have been migrated to the new database format.', 'flowsystems-webhook-actions'); ?>
         </p>
       </div>
 <?php

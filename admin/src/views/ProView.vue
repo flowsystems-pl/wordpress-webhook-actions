@@ -165,7 +165,7 @@ onMounted(loadStatus)
       <Card class="p-6">
         <Alert v-if="activatePluginError" variant="destructive" class="mb-4">{{ activatePluginError }}</Alert>
         <p class="text-sm text-muted-foreground mb-4">
-          Activate <strong class="text-foreground">Flow Systems Webhook Actions Pro</strong> to continue.
+          Activate <strong class="text-foreground">Webhook Actions Pro</strong> to continue.
         </p>
         <Button :loading="activatingPlugin" :disabled="activatingPlugin" @click="activatePlugin" class="gap-2">
           <Sparkles class="w-4 h-4" />

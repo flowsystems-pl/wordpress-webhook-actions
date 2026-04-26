@@ -1,4 +1,4 @@
-=== Flow Systems Webhook Actions ===
+=== Webhook Actions by Flow Systems ===
 Contributors: mateuszflowsystems
 Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
@@ -12,7 +12,7 @@ Reliable WordPress webhooks with retries, queue, Action Scheduler support, deliv
 
 == Description ==
 
-Flow Systems Webhook Actions is a developer-focused WordPress webhook delivery layer designed for reliable automation workflows.
+Webhook Actions by Flow Systems is a developer-focused WordPress webhook delivery layer designed for reliable automation workflows.
 
 It adds a persistent queue, automatic retries, and Action Scheduler support for production-grade background processing — so your webhooks don’t get lost when external APIs fail.
 
@@ -83,7 +83,7 @@ No silent failures.
 
 Webhook debugging is difficult when events cannot be reproduced.
 
-Flow Systems Webhook Actions allows you to replay any webhook event directly from the delivery logs — including successful deliveries.
+Webhook Actions by Flow Systems allows you to replay any webhook event directly from the delivery logs — including successful deliveries.
 
 This makes it easy to:
 
@@ -158,7 +158,7 @@ Full REST API documentation: [REST API Reference](https://wpwebhooks.org/webhook
 
 = AI Agents and Programmatic Automation =
 
-The REST API makes Flow Systems Webhook Actions accessible to AI-powered tools and coding agents.
+The REST API makes Webhook Actions by Flow Systems accessible to AI-powered tools and coding agents.
 
 Automation systems, CI pipelines, and AI coding assistants (such as Claude Code or Cursor) can safely interact with webhook infrastructure using API tokens without requiring WordPress admin sessions.
 
@@ -183,7 +183,7 @@ This allows WordPress automation pipelines to be controlled entirely through HTT
 
 = Contact Form 7 Webhooks (NEW in 1.5.0) =
 
-Flow Systems Webhook Actions includes built-in integration with Contact Form 7.
+Webhook Actions by Flow Systems includes built-in integration with Contact Form 7.
 
 When Contact Form 7 is active, form submissions are automatically converted into structured webhook payloads — no custom code required.
 
@@ -206,7 +206,7 @@ This allows you to build reliable form-to-automation pipelines directly from Wor
 
 = Action Scheduler Support (NEW in 1.4.0) =
 
-Flow Systems Webhook Actions now supports Action Scheduler — the same background job system used by WooCommerce.
+Webhook Actions by Flow Systems now supports Action Scheduler — the same background job system used by WooCommerce.
 
 When available, webhook queue processing automatically switches from WP-Cron to Action Scheduler for improved reliability and scalability.
 
@@ -229,11 +229,11 @@ This makes the plugin suitable for production WooCommerce stores and high-throug
 - Built according to WordPress.org standards
 - Supports system cron, WP-Cron, and Action Scheduler (auto-detected)
 
-= Why Choose Flow Systems Webhook Actions? =
+= Why Choose Webhook Actions by Flow Systems? =
 
 Most WordPress webhook setups fire once, don't retry intelligently, don't provide delivery visibility, and don't expose event identity.
 
-Flow Systems Webhook Actions provides:
+Webhook Actions by Flow Systems provides:
 
 - Persistent queue
 - Smart retry logic
@@ -303,7 +303,7 @@ Yes. If Action Scheduler is available (for example via WooCommerce), the plugin 
 
 WP-Cron depends on site traffic and can be unreliable on low-traffic sites. Action Scheduler is a dedicated background job system used by WooCommerce that provides more consistent and reliable execution of queued jobs.
 
-Flow Systems Webhook Actions automatically uses Action Scheduler when available.
+Webhook Actions by Flow Systems automatically uses Action Scheduler when available.
 
 = What is a WordPress action? =
 
