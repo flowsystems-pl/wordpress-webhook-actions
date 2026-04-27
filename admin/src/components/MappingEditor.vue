@@ -10,7 +10,7 @@ import {
   Lock,
   AlertTriangle,
 } from 'lucide-vue-next';
-import { Button, Input, Switch, Label, Badge } from '@/components/ui';
+import { Button, Input, Switch, Label, Badge, Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui';
 
 const props = defineProps({
   examplePayload: {
@@ -171,7 +171,8 @@ watch(
     if (val) {
       localMappings.value = (val.mappings || []).map((m) => ({
         ...m,
-        locked: m.locked !== false, // Keep locked state, default to true for existing
+        locked: m.locked !== false,
+        cast: m.cast || null,
       }));
       localExcluded.value = [...(val.excluded || [])];
       localIncludeUnmapped.value = val.includeUnmapped !== false;
@@ -205,12 +206,38 @@ watch(
   { immediate: true },
 );
 
+const CAST_OPTIONS = [
+  { value: 'auto',    label: 'auto' },
+  { value: 'number',  label: 'number' },
+  { value: 'string',  label: 'string' },
+  { value: 'boolean', label: 'bool' },
+]
+
+const castToSelect = (cast) => cast || 'auto'
+const castFromSelect = (val) => (val === 'auto' ? null : val)
+
+const applyCast = (value, cast) => {
+  if (!cast) return value
+  if (cast === 'number') return Number(value)
+  if (cast === 'string') return String(value ?? '')
+  if (cast === 'boolean') {
+    if (typeof value === 'boolean') return value
+    const s = String(value).toLowerCase()
+    return s === 'true' || s === '1' || s === 'yes'
+  }
+  return value
+}
+
 // Emit changes
 const emitUpdate = () => {
   emit('update:modelValue', {
     mappings: localMappings.value
       .filter((m) => m.source && m.target)
-      .map((m) => ({ source: m.source, target: m.target })),
+      .map((m) => {
+        const row = { source: m.source, target: m.target }
+        if (m.cast) row.cast = m.cast
+        return row
+      }),
     excluded: localExcluded.value,
     includeUnmapped: localIncludeUnmapped.value,
   });
@@ -258,6 +285,16 @@ const updateMappingSource = (index, value) => {
     emitUpdate();
   }
 };
+
+// Update mapping cast
+const updateMappingCast = (index, value) => {
+  const updated = [...localMappings.value]
+  updated[index] = { ...updated[index], cast: value || null }
+  localMappings.value = updated
+  if (updated[index].source && updated[index].target) {
+    emitUpdate()
+  }
+}
 
 // Update mapping target
 const updateMappingTarget = (index, value) => {
@@ -534,8 +571,9 @@ const transformedPreview = computed(() => {
 
   // Apply explicit mappings first
   for (const map of mappings) {
-    const value = getValueByPath(effectivePayload.value, map.source);
+    let value = getValueByPath(effectivePayload.value, map.source);
     if (value !== undefined) {
+      if (map.cast) value = applyCast(value, map.cast)
       setValueByPath(result, map.target, value, effectivePayload.value);
     }
   }
@@ -808,6 +846,22 @@ const previewHtml = computed(() => {
               class="flex-0 sm:flex-1 text-sm font-mono"
               @update:modelValue="updateMappingTarget(index, $event)"
             />
+
+            <Select
+              :model-value="castToSelect(mapping.cast)"
+              @update:model-value="updateMappingCast(index, castFromSelect($event))"
+            >
+              <SelectTrigger class="w-24 shrink-0">
+                <span class="truncate text-xs" :class="!mapping.cast ? 'text-muted-foreground' : ''">
+                  {{ CAST_OPTIONS.find(c => c.value === castToSelect(mapping.cast))?.label ?? 'auto' }}
+                </span>
+              </SelectTrigger>
+              <SelectContent to="#fswa-app">
+                <SelectItem v-for="c in CAST_OPTIONS" :key="c.value" :value="c.value">
+                  <span :class="c.value === 'auto' ? 'text-muted-foreground' : ''">{{ c.label }}</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
             <Button
               size="icon"

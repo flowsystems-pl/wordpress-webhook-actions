@@ -115,6 +115,16 @@ class ConditionEvaluator {
 
     $actual = $this->getField($field, $payload);
 
+    $cast = $rule['cast'] ?? null;
+    if ($cast !== null && $actual !== null) {
+      $actual = match ($cast) {
+        'number'  => (float) $actual,
+        'string'  => (string) $actual,
+        'boolean' => filter_var($actual, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $actual,
+        default   => $actual,
+      };
+    }
+
     switch ($operator) {
       case 'equals':
         return $actual !== null && (string) $actual === (string) $value;

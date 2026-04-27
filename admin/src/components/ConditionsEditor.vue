@@ -64,6 +64,16 @@ const OPERATORS_BY_TYPE = {
   null:    new Set(['is_empty', 'is_not_empty']),
 }
 
+const CAST_OPTIONS = [
+  { value: 'auto',     label: 'auto',    short: '—' },
+  { value: 'number',   label: 'number',  short: '#' },
+  { value: 'string',   label: 'string',  short: '"' },
+  { value: 'boolean',  label: 'bool',    short: '?' },
+]
+
+const castToSelect = (cast) => cast || 'auto'
+const castFromSelect = (val) => (val === 'auto' ? null : val)
+
 const valueHidden = (operator) =>
   ['is_empty', 'is_not_empty', 'is_true', 'is_false'].includes(operator)
 
@@ -137,8 +147,10 @@ watch(
   { immediate: true }
 )
 
-const isOperatorEnabled = (key, operator) => {
-  const type = ruleFieldTypes.value[key]
+const effectiveType = (key, cast) => cast || ruleFieldTypes.value[key] || null
+
+const isOperatorEnabled = (key, operator, cast = null) => {
+  const type = effectiveType(key, cast)
   if (!type) return true
   return OPERATORS_BY_TYPE[type]?.has(operator) ?? true
 }
@@ -175,13 +187,34 @@ const updateRule = (index, key, value) =>
     rules: conditions.value.rules.map((r, i) => (i === index ? { ...r, [key]: value } : r)),
   })
 
+const resetOperatorIfNeeded = (rule, key, updateFn) => {
+  const type = effectiveType(key, rule?.cast || null)
+  if (type && rule && !OPERATORS_BY_TYPE[type]?.has(rule.operator)) {
+    const first = OPERATORS.find((op) => OPERATORS_BY_TYPE[type]?.has(op.value))
+    if (first) updateFn(first.value)
+  }
+}
+
 const handleFieldType = (index, type) => {
   ruleFieldTypes.value = { ...ruleFieldTypes.value, [index]: type }
   const rule = conditions.value.rules[index]
-  if (type && rule && !isGroup(rule) && !OPERATORS_BY_TYPE[type]?.has(rule.operator)) {
-    const first = OPERATORS.find((op) => OPERATORS_BY_TYPE[type]?.has(op.value))
-    if (first) updateRule(index, 'operator', first.value)
+  if (rule && !isGroup(rule)) {
+    resetOperatorIfNeeded(rule, index, (op) => updateRule(index, 'operator', op))
   }
+}
+
+const handleCastChange = (index, cast) => {
+  const castVal = cast || null
+  updateRule(index, 'cast', castVal)
+  const rule = { ...conditions.value.rules[index], cast: castVal }
+  resetOperatorIfNeeded(rule, index, (op) => updateRule(index, 'operator', op))
+}
+
+const handleGroupRuleCastChange = (gi, ri, cast) => {
+  const castVal = cast || null
+  updateGroupRule(gi, ri, 'cast', castVal)
+  const rule = { ...conditions.value.rules[gi]?.rules[ri], cast: castVal }
+  resetOperatorIfNeeded(rule, groupRuleKey(gi, ri), (op) => updateGroupRule(gi, ri, 'operator', op))
 }
 
 const setType = (type) => {
@@ -244,10 +277,7 @@ const handleGroupRuleFieldType = (gi, ri, type) => {
   const key = groupRuleKey(gi, ri)
   ruleFieldTypes.value = { ...ruleFieldTypes.value, [key]: type }
   const rule = conditions.value.rules[gi]?.rules[ri]
-  if (type && rule && !OPERATORS_BY_TYPE[type]?.has(rule.operator)) {
-    const first = OPERATORS.find((op) => OPERATORS_BY_TYPE[type]?.has(op.value))
-    if (first) updateGroupRule(gi, ri, 'operator', first.value)
-  }
+  if (rule) resetOperatorIfNeeded(rule, key, (op) => updateGroupRule(gi, ri, 'operator', op))
 }
 
 // ── Labels ────────────────────────────────────────────────────────────────
@@ -286,10 +316,23 @@ const isEmpty = (val) => {
   return false
 }
 
+const applyRuleCast = (value, cast) => {
+  if (!cast) return value
+  if (cast === 'number') return Number(value)
+  if (cast === 'string') return String(value ?? '')
+  if (cast === 'boolean') {
+    if (typeof value === 'boolean') return value
+    const s = String(value).toLowerCase()
+    return s === 'true' || s === '1' || s === 'yes'
+  }
+  return value
+}
+
 const evaluateRule = (rule, payload) => {
   if (!rule.field || !payload) return null
-  const raw = resolveFieldValue(rule.field, payload)
+  let raw = resolveFieldValue(rule.field, payload)
   if (raw === undefined) return null
+  if (rule.cast) raw = applyRuleCast(raw, rule.cast)
   const { operator, value } = rule
   const strVal = String(raw ?? '').toLowerCase()
   const compareStr = String(value ?? '').toLowerCase()
@@ -440,6 +483,22 @@ const overallResult = computed(() => {
               />
 
               <Select
+                :model-value="castToSelect(rule.cast)"
+                @update:model-value="handleGroupRuleCastChange(index, ri, castFromSelect($event))"
+              >
+                <SelectTrigger class="w-24 shrink-0">
+                  <span class="truncate text-xs" :class="!rule.cast ? 'text-muted-foreground' : ''">
+                    {{ CAST_OPTIONS.find(c => c.value === castToSelect(rule.cast))?.label ?? 'auto' }}
+                  </span>
+                </SelectTrigger>
+                <SelectContent to="#fswa-app">
+                  <SelectItem v-for="c in CAST_OPTIONS" :key="c.value" :value="c.value">
+                    <span :class="c.value === 'auto' ? 'text-muted-foreground' : ''">{{ c.label }}</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
                 :model-value="rule.operator"
                 @update:model-value="updateGroupRule(index, ri, 'operator', $event)"
               >
@@ -454,7 +513,7 @@ const overallResult = computed(() => {
                     v-for="op in OPERATORS"
                     :key="op.value"
                     :value="op.value"
-                    :disabled="!isOperatorEnabled(groupRuleKey(index, ri), op.value)"
+                    :disabled="!isOperatorEnabled(groupRuleKey(index, ri), op.value, rule.cast)"
                   >
                     <div class="flex items-center gap-2">
                       <component :is="op.icon" class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -539,6 +598,22 @@ const overallResult = computed(() => {
           />
 
           <Select
+            :model-value="castToSelect(item.cast)"
+            @update:model-value="handleCastChange(index, castFromSelect($event))"
+          >
+            <SelectTrigger class="w-24 shrink-0">
+              <span class="truncate text-xs" :class="!item.cast ? 'text-muted-foreground' : ''">
+                {{ CAST_OPTIONS.find(c => c.value === castToSelect(item.cast))?.label ?? 'auto' }}
+              </span>
+            </SelectTrigger>
+            <SelectContent to="#fswa-app">
+              <SelectItem v-for="c in CAST_OPTIONS" :key="c.value" :value="c.value">
+                <span :class="c.value === 'auto' ? 'text-muted-foreground' : ''">{{ c.label }}</span>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
             :model-value="item.operator"
             @update:model-value="updateRule(index, 'operator', $event)"
           >
@@ -553,7 +628,7 @@ const overallResult = computed(() => {
                 v-for="op in OPERATORS"
                 :key="op.value"
                 :value="op.value"
-                :disabled="!isOperatorEnabled(index, op.value)"
+                :disabled="!isOperatorEnabled(index, op.value, item.cast)"
               >
                 <div class="flex items-center gap-2">
                   <component :is="op.icon" class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />

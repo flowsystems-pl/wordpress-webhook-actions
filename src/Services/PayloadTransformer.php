@@ -270,6 +270,15 @@ class PayloadTransformer {
       $value = $this->getValueByPath($payload, $sourcePath);
 
       if ($value !== null) {
+        $cast = $map['cast'] ?? null;
+        if ($cast !== null) {
+          $value = match ($cast) {
+            'number'  => (float) $value,
+            'string'  => (string) $value,
+            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $value,
+            default   => $value,
+          };
+        }
         // Set value at target path
         $this->setValueByPath($result, $targetPath, $value);
       }

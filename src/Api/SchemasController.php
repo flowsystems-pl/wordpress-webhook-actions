@@ -411,11 +411,16 @@ class SchemasController extends WP_REST_Controller {
           if (!in_array($groupRule['operator'], $allowedOperators, true)) {
             continue;
           }
-          $groupRules[] = [
+            $groupCast = $groupRule['cast'] ?? null;
+          $groupSanitizedRule = [
             'field'    => sanitize_text_field($groupRule['field']),
             'operator' => $groupRule['operator'],
             'value'    => isset($groupRule['value']) ? sanitize_text_field((string) $groupRule['value']) : '',
           ];
+          if (in_array($groupCast, ['number', 'string', 'boolean'], true)) {
+            $groupSanitizedRule['cast'] = $groupCast;
+          }
+          $groupRules[] = $groupSanitizedRule;
         }
         if (!empty($groupRules)) {
           $sanitized['rules'][] = [
@@ -433,11 +438,16 @@ class SchemasController extends WP_REST_Controller {
       if (!in_array($rule['operator'], $allowedOperators, true)) {
         continue;
       }
-      $sanitized['rules'][] = [
+      $cast = $rule['cast'] ?? null;
+      $sanitizedRule = [
         'field'    => sanitize_text_field($rule['field']),
         'operator' => $rule['operator'],
         'value'    => isset($rule['value']) ? sanitize_text_field((string) $rule['value']) : '',
       ];
+      if (in_array($cast, ['number', 'string', 'boolean'], true)) {
+        $sanitizedRule['cast'] = $cast;
+      }
+      $sanitized['rules'][] = $sanitizedRule;
     }
 
     return $sanitized;

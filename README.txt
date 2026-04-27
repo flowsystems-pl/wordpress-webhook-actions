@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -33,6 +33,12 @@ Built for production environments where losing events is not acceptable.
 👉 Step-by-step example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/cf7-to-webhook/)
 👉 Step-by-step example: [Send Gravity Forms Submissions to n8n](https://wpwebhooks.org/examples/gravity-forms-webhooks/)
 👉 Step-by-step example: [Send IvyForms submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/ivyforms-to-webhook/)
+
+= ⚡ Webhook Actions Pro =
+
+Unlock unlimited conditions, per-webhook retry and backoff settings, type casting in payload mapping, and more.
+
+[See pricing and upgrade →](https://wpwebhooks.org/pricing/)
 
 = Typical Use Cases =
 
@@ -124,6 +130,7 @@ Adapt outgoing JSON payloads to match any external API:
 - Rename fields using dot notation
 - Restructure nested objects
 - Exclude sensitive or unnecessary data
+- Cast field values to number, string, or boolean before sending (e.g. WooCommerce price `"100.50"` → `100.5`)
 - Store example payloads for configuration
 - Modify via `fswa_payload` filter
 
@@ -188,6 +195,7 @@ Send webhooks only when your conditions are met — filter by payload field valu
 Each webhook can have one or more conditions evaluated against the incoming payload:
 
 - Match against string, number, boolean, or null values
+- Cast field values to number, string, or boolean before comparison — enables `greater than` / `less than` on numeric strings (e.g. WooCommerce `"100.50"`)
 - Operators: equals, not equals, contains, starts with, ends with, greater than, less than, empty, not empty
 - AND / OR match type per condition group (Pro)
 - Multiple condition groups with independent match types (Pro)
@@ -196,11 +204,13 @@ Each webhook can have one or more conditions evaluated against the incoming payl
 Free plan: one condition, AND match only.
 Pro plan: unlimited conditions, condition groups, and AND/OR match per group.
 
-= Webhook Actions Pro =
+= Webhook Actions Pro (full feature list) =
 
 Webhook Actions Pro extends the plugin with advanced features for production workflows:
 
 - Unlimited conditions and condition groups with AND/OR logic
+- Type casting in conditions — cast field values to number, string, or boolean before comparison
+- Type casting in payload mapping — cast values before sending to external APIs
 - Per-webhook retry settings — override maximum retry attempts at the webhook level
 - Per-webhook backoff strategy — override retry delay behavior per webhook
 - License managed directly from the Pro tab in the admin panel
@@ -394,6 +404,11 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 
 == Changelog ==
 
+= 1.8.0 — 2026-04-28 =
+- Added type casting in Conditions — cast field values to number, string, or boolean before comparison; enables greater than / less than on numeric strings (e.g. WooCommerce price "100.50")
+- Added type casting in Payload Mapping — cast field values before sending to external APIs
+- Fixed test webhook result label — now reflects actual HTTP status: 2xx = Success, 3xx = Redirect, 4xx = Client Error, 5xx = Server Error (previously all completed deliveries showed green "Success")
+
 = 1.7.0 — 2026-04-27 =
 - Added "Test Webhook" delivery with run-now and queue modes — test webhook delivery without triggering real WordPress events
 - Added conditional webhook dispatch — filter events by payload field values before dispatch; free plan includes one condition with AND match
@@ -493,6 +508,9 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.8.0 =
+Adds type casting in Conditions and Payload Mapping — cast string values to number, string, or boolean before comparison or before sending to an API. Fixes test webhook result labels to correctly reflect HTTP status codes. No database changes.
 
 = 1.7.0 =
 Adds test webhook delivery (run-now or via queue without triggering real events) and conditional dispatch — filter webhooks by payload field values before they fire. No database changes.
