@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.7.0';
+  private const CURRENT_VERSION = '1.8.0';
 
   /**
    * Run pending migrations
@@ -74,6 +74,7 @@ class Migrator {
       '1.5.0' => [self::class, 'migration_1_5_0'],
       '1.6.0' => [self::class, 'migration_1_6_0'],
       '1.7.0' => [self::class, 'migration_1_7_0'],
+      '1.8.0' => [self::class, 'migration_1_8_0'],
     ];
   }
 
@@ -411,6 +412,48 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$queueTable} ADD COLUMN is_test TINYINT(1) NOT NULL DEFAULT 0");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.8.0 - Add webhook_uuid to webhooks table
+   */
+  public static function migration_1_8_0(): void {
+    global $wpdb;
+
+    $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$webhooksTable} LIKE %s",
+      'webhook_uuid'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN webhook_uuid VARCHAR(36) NOT NULL DEFAULT '' AFTER id");
+    }
+
+    // Populate UUIDs for existing webhooks (before adding the unique index)
+    $rows = $wpdb->get_results(
+      "SELECT id FROM {$webhooksTable} WHERE webhook_uuid = '' OR webhook_uuid IS NULL",
+      ARRAY_A
+    );
+    foreach ($rows as $row) {
+      $wpdb->update(
+        $webhooksTable,
+        ['webhook_uuid' => wp_generate_uuid4()],
+        ['id' => (int) $row['id']],
+        ['%s'],
+        ['%d']
+      );
+    }
+
+    // Add unique index if not present
+    $indexExists = $wpdb->get_var(
+      "SHOW INDEX FROM {$webhooksTable} WHERE Key_name = 'idx_webhook_uuid'"
+    );
+    if (!$indexExists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD UNIQUE KEY idx_webhook_uuid (webhook_uuid)");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
 
   /**

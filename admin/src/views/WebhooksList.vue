@@ -1,13 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Pencil, Trash2, ScrollText, FlaskConical } from 'lucide-vue-next'
+import { Plus, Pencil, Trash2, ScrollText, FlaskConical, Copy, Check } from 'lucide-vue-next'
 import { Button, Card, Badge, Switch, Dialog } from '@/components/ui'
 import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 
 const { fetchStats: refreshHealthStats } = useHealthStats()
+const { copiedKey, copy } = useCopyToClipboard()
 
 const router = useRouter()
 const webhooks = ref([])
@@ -136,19 +138,53 @@ onMounted(loadWebhooks)
               </Badge>
             </div>
 
-            <p class="text-xs sm:text-sm text-muted-foreground font-mono truncate mb-2">
-              {{ webhook.endpoint_url }}
-            </p>
+            <div class="flex items-center gap-1 mb-2">
+              <p class="text-xs sm:text-sm text-muted-foreground font-mono truncate">
+                {{ webhook.endpoint_url }}
+              </p>
+              <button
+                @click="copy(webhook.endpoint_url, `wh-url-${webhook.id}`)"
+                class="shrink-0 rounded p-1 hover:bg-muted transition-colors"
+                title="Copy endpoint URL"
+              >
+                <Check v-if="copiedKey === `wh-url-${webhook.id}`" class="h-3.5 w-3.5 text-green-500" />
+                <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
+
+            <div class="flex items-center gap-1 mb-2">
+              <span class="text-xs text-muted-foreground font-mono">X-Webhook-Id: {{ webhook.webhook_uuid }}</span>
+              <button
+                @click="copy(webhook.webhook_uuid, `wh-id-${webhook.id}`)"
+                class="shrink-0 rounded p-1 hover:bg-muted transition-colors"
+                title="Copy X-Webhook-Id"
+              >
+                <Check v-if="copiedKey === `wh-id-${webhook.id}`" class="h-3.5 w-3.5 text-green-500" />
+                <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
 
             <div class="flex flex-wrap gap-1">
-              <Badge
+              <div
                 v-for="trigger in webhook.triggers"
                 :key="trigger"
-                variant="outline"
-                class="text-xs break-all sm:break-normal"
+                class="inline-flex items-center gap-0.5"
               >
-                {{ trigger }}
-              </Badge>
+                <Badge
+                  variant="outline"
+                  class="text-xs break-all sm:break-normal"
+                >
+                  {{ trigger }}
+                </Badge>
+                <button
+                  @click="copy(trigger, `wh-trigger-${webhook.id}-${trigger}`)"
+                  class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors"
+                  title="Copy trigger name"
+                >
+                  <Check v-if="copiedKey === `wh-trigger-${webhook.id}-${trigger}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
+              </div>
             </div>
           </div>
 
