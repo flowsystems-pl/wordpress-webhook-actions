@@ -191,6 +191,10 @@ class LogsController extends WP_REST_Controller {
       $filters['target_url'] = sanitize_text_field($request->get_param('target_url'));
     }
 
+    if ($request->get_param('webhook_uuid')) {
+      $filters['webhook_uuid'] = sanitize_text_field($request->get_param('webhook_uuid'));
+    }
+
     $page = (int) ($request->get_param('page') ?: 1);
     $perPage = (int) ($request->get_param('per_page') ?: 20);
 
@@ -480,7 +484,7 @@ class LogsController extends WP_REST_Controller {
       'status' => [
         'description' => __('Filter by status.', 'flowsystems-webhook-actions'),
         'type' => 'string',
-        'enum' => ['success', 'error', 'retry', 'pending', 'permanently_failed'],
+        'enum' => ['success', 'error', 'retry', 'pending', 'permanently_failed', 'skipped', 'test'],
       ],
       'trigger_name' => [
         'description' => __('Filter by trigger name.', 'flowsystems-webhook-actions'),
@@ -500,6 +504,10 @@ class LogsController extends WP_REST_Controller {
       ],
       'target_url' => [
         'description' => __('Filter by target URL (partial match).', 'flowsystems-webhook-actions'),
+        'type' => 'string',
+      ],
+      'webhook_uuid' => [
+        'description' => __('Filter by webhook UUID (X-Webhook-Id header value).', 'flowsystems-webhook-actions'),
         'type' => 'string',
       ],
     ];

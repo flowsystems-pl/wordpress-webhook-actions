@@ -4,6 +4,7 @@ import { Download, Trash2, Archive, Copy, RefreshCw, Clock, Check, RotateCcw, In
 import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Switch, Alert, Dialog, UpgradeBadge, RadioGroup, RadioGroupItem, Tooltip } from '@/components/ui'
 import api from '@/lib/api'
 import { usePro } from '@/composables/usePro'
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 
 const { proActive } = usePro()
 
@@ -22,7 +23,7 @@ const success = ref(null)
 const showClearDialog = ref(false)
 const clearing = ref(false)
 const regeneratingToken = ref(false)
-const copiedField = ref(null)
+const { copiedKey: copiedField, copy: copyToClipboard } = useCopyToClipboard()
 
 const proSettings = ref({
   global_max_attempts: '',
@@ -244,18 +245,6 @@ const regenerateCronToken = async () => {
     console.error('Failed to regenerate token:', e)
   } finally {
     regeneratingToken.value = false
-  }
-}
-
-const copyToClipboard = async (text, field) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    copiedField.value = field
-    setTimeout(() => {
-      copiedField.value = null
-    }, 2000)
-  } catch (e) {
-    console.error('Failed to copy:', e)
   }
 }
 

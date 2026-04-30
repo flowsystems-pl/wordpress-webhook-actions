@@ -40,6 +40,9 @@ class QueueController extends WP_REST_Controller {
           'webhook_id' => [
             'type' => 'integer',
           ],
+          'webhook_uuid' => [
+            'type' => 'string',
+          ],
           'event_uuid' => [
             'type' => 'string',
           ],
@@ -152,6 +155,12 @@ class QueueController extends WP_REST_Controller {
       $filters['webhook_id'] = (int) $request->get_param('webhook_id');
     }
 
+    if ($request->get_param('webhook_uuid')) {
+      $webhookRepo = new WebhookRepository();
+      $ids = $webhookRepo->findIdsByUuidPartial(sanitize_text_field($request->get_param('webhook_uuid')));
+      $filters['webhook_ids'] = !empty($ids) ? $ids : [-1];
+    }
+
     if ($request->get_param('event_uuid')) {
       $filters['event_uuid'] = sanitize_text_field($request->get_param('event_uuid'));
     }
@@ -171,9 +180,13 @@ class QueueController extends WP_REST_Controller {
     $jobs = $this->queueService->getJobs($filters, $perPage, $offset);
     $total = $this->queueService->countJobs($filters);
 
+    // Batch-fetch webhook UUIDs so old queue items (pre-migration payload) show correctly
+    $webhookIds = array_unique(array_map(fn($j) => (int) $j['webhook_id'], $jobs));
+    $uuidMap = (new WebhookRepository())->getUuidMap($webhookIds);
+
     // Enrich jobs with webhook information
-    $items = array_map(function ($job) {
-      return $this->formatJob($job);
+    $items = array_map(function ($job) use ($uuidMap) {
+      return $this->formatJob($job, $uuidMap);
     }, $jobs);
 
     $response = rest_ensure_response($items);
@@ -370,7 +383,7 @@ class QueueController extends WP_REST_Controller {
   /**
    * Format a job for API response
    */
-  private function formatJob(array $job): array {
+  private function formatJob(array $job, array $uuidMap = []): array {
     $jobData = json_decode($job['payload'], true);
     $webhook = $jobData['webhook'] ?? [];
     $eventPayload = $jobData['payload'] ?? [];
@@ -378,11 +391,14 @@ class QueueController extends WP_REST_Controller {
     $scheduledTimestamp = strtotime($job['scheduled_at']);
     $createdTimestamp = strtotime($job['created_at']);
 
+    $webhookId = (int) $job['webhook_id'];
+
     return [
       'id' => (int) $job['id'],
       'log_id' => isset($job['log_id']) ? (int) $job['log_id'] : null,
       'event_uuid' => $eventPayload['event']['id'] ?? null,
-      'webhook_id' => (int) $job['webhook_id'],
+      'webhook_id' => $webhookId,
+      'webhook_uuid' => $uuidMap[$webhookId] ?? $webhook['webhook_uuid'] ?? null,
       'webhook_name' => $webhook['name'] ?? null,
       'webhook_url' => $webhook['endpoint_url'] ?? null,
       'trigger_name' => $job['trigger_name'],

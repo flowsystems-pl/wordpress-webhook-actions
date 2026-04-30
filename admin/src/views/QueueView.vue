@@ -2,16 +2,19 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { Card, Button, Badge, Alert, Input, DateTimePicker } from '@/components/ui'
 import { pickerLocalToUtcDb } from '@/lib/dates'
-import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-vue-next'
+import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2, Copy, Check } from 'lucide-vue-next'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 
 const { fetchStats: refreshHealthStats } = useHealthStats()
+const { copiedKey, copy } = useCopyToClipboard()
 
 const items = ref([])
 const total = ref(0)
 const page = ref(1)
 const perPage = ref(20)
+const webhookUuidFilter = ref('')
 const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
 const dateFromFilter = ref('')
@@ -45,6 +48,7 @@ const loadQueue = async () => {
 
   try {
     const params = { page: page.value, per_page: perPage.value }
+    if (webhookUuidFilter.value) params.webhook_uuid = webhookUuidFilter.value
     if (eventUuidFilter.value) params.event_uuid = eventUuidFilter.value
     if (targetUrlFilter.value) params.target_url = targetUrlFilter.value
     if (dateFromFilter.value) params.date_from = pickerLocalToUtcDb(dateFromFilter.value)
@@ -152,6 +156,7 @@ const resetPage = () => {
 }
 
 watch(page, loadQueue)
+watch(webhookUuidFilter, resetPage)
 watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
 watch(dateFromFilter, resetPage)
@@ -214,6 +219,11 @@ onMounted(() => {
 
     <!-- Filters -->
     <div class="flex flex-wrap items-center gap-3 mb-4">
+      <Input
+        v-model="webhookUuidFilter"
+        placeholder="Filter by X-Webhook-ID..."
+        class="w-full sm:w-72"
+      />
       <Input
         v-model="eventUuidFilter"
         placeholder="Filter by event UUID..."
@@ -279,19 +289,43 @@ onMounted(() => {
               <div class="flex items-center gap-2">
                 <span class="font-medium">Trigger:</span>
                 <code class="px-1.5 py-0.5 bg-muted rounded text-xs">{{ item.trigger_name }}</code>
+                <button @click="copy(item.trigger_name, `q-trigger-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy trigger name">
+                  <Check v-if="copiedKey === `q-trigger-${item.id}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
+              </div>
+              <div v-if="item.webhook_uuid" class="flex items-center gap-2">
+                <span class="font-medium">X-Webhook-Id:</span>
+                <Badge variant="secondary" class="font-mono rounded text-xs tracking-tight">{{ item.webhook_uuid }}</Badge>
+                <button @click="copy(item.webhook_uuid, `q-whuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy X-Webhook-Id">
+                  <Check v-if="copiedKey === `q-whuuid-${item.id}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
               </div>
               <div v-if="item.event_uuid" class="flex items-center gap-2">
                 <span class="font-medium">Event UUID:</span>
                 <Badge variant="secondary" class="font-mono rounded text-xs tracking-tight">{{ item.event_uuid }}</Badge>
+                <button @click="copy(item.event_uuid, `q-evuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy Event UUID">
+                  <Check v-if="copiedKey === `q-evuuid-${item.id}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
               </div>
               <div class="flex items-center gap-2">
                 <Clock class="w-4 h-4" />
                 <span>{{ item.scheduled_at_human }}</span>
                 <span class="text-muted-foreground/60">({{ item.scheduled_at }})</span>
+                <button @click="copy(item.scheduled_at, `q-time-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy scheduled time">
+                  <Check v-if="copiedKey === `q-time-${item.id}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
               </div>
-              <div v-if="item.webhook_url" class="truncate">
-                <span class="font-medium">URL:</span>
-                <span class="ml-1">{{ item.webhook_url }}</span>
+              <div v-if="item.webhook_url" class="flex items-center gap-2 min-w-0">
+                <span class="font-medium shrink-0">URL:</span>
+                <span class="ml-1 truncate">{{ item.webhook_url }}</span>
+                <button @click="copy(item.webhook_url, `q-url-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy URL">
+                  <Check v-if="copiedKey === `q-url-${item.id}`" class="h-3 w-3 text-green-500" />
+                  <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                </button>
               </div>
               <div v-if="item.locked_by" class="text-xs text-muted-foreground">
                 Locked by: {{ item.locked_by }}

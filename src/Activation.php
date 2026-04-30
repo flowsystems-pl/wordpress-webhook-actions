@@ -35,6 +35,7 @@ class Activation {
     // Webhooks table
     $sqlWebhooks = "CREATE TABLE {$webhooksTable} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            webhook_uuid VARCHAR(36) NOT NULL DEFAULT '',
             name VARCHAR(255) NOT NULL,
             endpoint_url VARCHAR(2048) NOT NULL,
             auth_header VARCHAR(1024) DEFAULT NULL,
@@ -42,6 +43,7 @@ class Activation {
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
+            UNIQUE KEY idx_webhook_uuid (webhook_uuid),
             KEY idx_enabled (is_enabled)
         ) {$charsetCollate};";
 
@@ -147,7 +149,7 @@ class Activation {
 
     dbDelta($sqlApiTokens);
 
-    update_option('fswa_db_version', '1.4.1');
+    update_option('fswa_db_version', '1.8.0');
   }
 
   /**

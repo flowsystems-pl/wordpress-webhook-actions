@@ -108,6 +108,82 @@ class WebhookRepository {
   }
 
   /**
+   * Get a map of webhook_id => webhook_uuid for a set of IDs
+   *
+   * @param int[] $ids
+   * @return array<int, string>
+   */
+  public function getUuidMap(array $ids): array {
+    if (empty($ids)) {
+      return [];
+    }
+
+    global $wpdb;
+
+    $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+      $wpdb->prepare(
+        "SELECT id, webhook_uuid FROM {$this->webhooksTable} WHERE id IN ({$placeholders})",
+        ...$ids
+      ),
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    $map = [];
+    foreach ($rows as $row) {
+      $map[(int) $row['id']] = $row['webhook_uuid'];
+    }
+
+    return $map;
+  }
+
+  /**
+   * Find a webhook by its UUID (exact match)
+   *
+   * @param string $uuid
+   * @return array|null
+   */
+  public function findByUuid(string $uuid): ?array {
+    global $wpdb;
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $webhook = $wpdb->get_row(
+      $wpdb->prepare(
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        "SELECT * FROM {$this->webhooksTable} WHERE webhook_uuid = %s",
+        $uuid
+      ),
+      ARRAY_A
+    );
+
+    return $webhook ?: null;
+  }
+
+  /**
+   * Find webhook IDs whose UUID contains the given partial string
+   *
+   * @param string $partial
+   * @return int[]
+   */
+  public function findIdsByUuidPartial(string $partial): array {
+    global $wpdb;
+
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $ids = $wpdb->get_col(
+      $wpdb->prepare(
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        "SELECT id FROM {$this->webhooksTable} WHERE webhook_uuid LIKE %s",
+        '%' . $wpdb->esc_like($partial) . '%'
+      )
+    );
+
+    return array_map('intval', $ids ?: []);
+  }
+
+  /**
    * Get webhooks by trigger name
    *
    * @param string $trigger_name
@@ -162,12 +238,13 @@ class WebhookRepository {
     $result = $wpdb->insert(
       $this->webhooksTable,
       [
+        'webhook_uuid' => wp_generate_uuid4(),
         'name'         => $data['name'],
         'endpoint_url' => $data['endpoint_url'],
         'auth_header'  => $data['auth_header'] ?? null,
         'is_enabled'   => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
       ],
-      ['%s', '%s', '%s', '%d']
+      ['%s', '%s', '%s', '%s', '%d']
     );
 
     if (!$result) {

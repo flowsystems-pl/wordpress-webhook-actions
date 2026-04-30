@@ -255,6 +255,15 @@ class QueueRepository {
       $params[] = (int) $filters['webhook_id'];
     }
 
+    if (!empty($filters['webhook_ids']) && is_array($filters['webhook_ids'])) {
+      $placeholders = implode(',', array_fill(0, count($filters['webhook_ids']), '%d'));
+      // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+      $where[] = "webhook_id IN ({$placeholders})";
+      foreach ($filters['webhook_ids'] as $wid) {
+        $params[] = (int) $wid;
+      }
+    }
+
     if (!empty($filters['trigger_name'])) {
       $where[] = 'trigger_name = %s';
       $params[] = $filters['trigger_name'];
@@ -319,6 +328,15 @@ class QueueRepository {
     if (!empty($filters['webhook_id'])) {
       $where[] = 'webhook_id = %d';
       $params[] = (int) $filters['webhook_id'];
+    }
+
+    if (!empty($filters['webhook_ids']) && is_array($filters['webhook_ids'])) {
+      $placeholders = implode(',', array_fill(0, count($filters['webhook_ids']), '%d'));
+      // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+      $where[] = "webhook_id IN ({$placeholders})";
+      foreach ($filters['webhook_ids'] as $wid) {
+        $params[] = (int) $wid;
+      }
     }
 
     if (!empty($filters['event_uuid'])) {

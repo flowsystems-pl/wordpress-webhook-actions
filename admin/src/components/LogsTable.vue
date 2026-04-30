@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2 } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2, Copy, Check } from 'lucide-vue-next'
 import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 import { formatUtcDate } from '@/lib/dates'
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 
 const props = defineProps({
   logs: {
@@ -158,6 +159,8 @@ const toggleSelectAll = () => {
 const allOnPageSelected = computed(() => {
   return props.logs.length > 0 && props.logs.every((l) => props.selectedIds.includes(l.id))
 })
+
+const { copiedKey, copy } = useCopyToClipboard()
 </script>
 
 <template>
@@ -230,6 +233,7 @@ const allOnPageSelected = computed(() => {
             <td v-if="showWebhook" class="px-4 py-3 text-sm">
               <div>{{ log.webhook_name || `#${log.webhook_id}` }}</div>
               <div v-if="log.target_url" class="text-xs text-muted-foreground font-mono truncate max-w-[200px]" :title="log.target_url">{{ log.target_url }}</div>
+              <div v-if="log.webhook_uuid" class="text-xs text-muted-foreground font-mono mt-0.5">X-Webhook-Id: {{ log.webhook_uuid }}</div>
             </td>
             <td class="px-4 py-3 text-sm">
               {{ log.http_code || '-' }}
@@ -363,10 +367,26 @@ const allOnPageSelected = computed(() => {
         </div>
 
         <!-- Event Identity -->
-        <div v-if="selectedLog.event_uuid" class="grid grid-cols-1 gap-2">
-          <div>
-            <div class="text-sm font-medium mb-1">Event UUID</div>
+        <div v-if="selectedLog.event_uuid || selectedLog.webhook_uuid" class="grid grid-cols-1 gap-2">
+          <div v-if="selectedLog.event_uuid">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-sm font-medium">Event UUID</div>
+              <button @click="copy(selectedLog.event_uuid, 'detail-uuid')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy Event UUID">
+                <Check v-if="copiedKey === 'detail-uuid'" class="h-3.5 w-3.5 text-green-500" />
+                <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
             <div class="text-xs font-mono p-2 bg-muted rounded-md break-all">{{ selectedLog.event_uuid }}</div>
+          </div>
+          <div v-if="selectedLog.webhook_uuid">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-sm font-medium">X-Webhook-Id</div>
+              <button @click="copy(selectedLog.webhook_uuid, 'detail-wh-id')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy X-Webhook-Id">
+                <Check v-if="copiedKey === 'detail-wh-id'" class="h-3.5 w-3.5 text-green-500" />
+                <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
+            <div class="text-xs font-mono p-2 bg-muted rounded-md break-all">{{ selectedLog.webhook_uuid }}</div>
           </div>
         </div>
 
@@ -427,7 +447,13 @@ const allOnPageSelected = computed(() => {
                   <div class="mt-0.5 text-destructive font-mono break-all">{{ attempt.error_message }}</div>
                 </div>
                 <div v-if="attempt.response_body != null">
-                  <span class="text-muted-foreground">Response Body</span>
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted-foreground">Response Body</span>
+                    <button @click="copy(formatJson(attempt.response_body), `attempt-${index}-resp`)" class="shrink-0 rounded p-0.5 hover:bg-background transition-colors" title="Copy response body">
+                      <Check v-if="copiedKey === `attempt-${index}-resp`" class="h-3 w-3 text-green-500" />
+                      <Copy v-else class="h-3 w-3 text-muted-foreground" />
+                    </button>
+                  </div>
                   <pre class="mt-0.5 p-2 bg-muted rounded-md overflow-x-auto font-mono break-all whitespace-pre-wrap">{{ formatJson(attempt.response_body) }}</pre>
                 </div>
               </div>
@@ -437,23 +463,41 @@ const allOnPageSelected = computed(() => {
 
          <!-- Request Payload (Transformed if mapping applied) -->
         <div>
-          <div class="text-sm font-medium mb-1">
-            {{ selectedLog.mapping_applied ? 'Transformed Payload (Sent)' : 'Request Payload' }}
+          <div class="flex items-center justify-between mb-1">
+            <div class="text-sm font-medium">
+              {{ selectedLog.mapping_applied ? 'Transformed Payload (Sent)' : 'Request Payload' }}
+            </div>
+            <button @click="copy(formatJson(selectedLog.request_payload), 'detail-request')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy payload">
+              <Check v-if="copiedKey === 'detail-request'" class="h-3.5 w-3.5 text-green-500" />
+              <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
           </div>
           <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.request_payload) }}</pre>
         </div>
 
         <!-- Original Payload (if mapping was applied) -->
         <div v-if="selectedLog.mapping_applied && selectedLog.original_payload">
-          <div class="text-sm font-medium mb-1">Original Payload</div>
+          <div class="flex items-center justify-between mb-1">
+            <div class="text-sm font-medium">Original Payload</div>
+            <button @click="copy(formatJson(selectedLog.original_payload), 'detail-original')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy original payload">
+              <Check v-if="copiedKey === 'detail-original'" class="h-3.5 w-3.5 text-green-500" />
+              <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          </div>
           <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.original_payload) }}</pre>
         </div>
 
         <!-- Response Body -->
         <div v-if="lastAttempt?.response_body ?? selectedLog.response_body">
-          <div class="text-sm font-medium mb-1">
-            Response Body
-            <span v-if="lastAttempt?.response_body" class="text-muted-foreground font-normal">(last attempt)</span>
+          <div class="flex items-center justify-between mb-1">
+            <div class="text-sm font-medium">
+              Response Body
+              <span v-if="lastAttempt?.response_body" class="text-muted-foreground font-normal">(last attempt)</span>
+            </div>
+            <button @click="copy(formatJson(lastAttempt?.response_body ?? selectedLog.response_body), 'detail-response')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy response body">
+              <Check v-if="copiedKey === 'detail-response'" class="h-3.5 w-3.5 text-green-500" />
+              <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
           </div>
           <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(lastAttempt?.response_body ?? selectedLog.response_body) }}</pre>
         </div>

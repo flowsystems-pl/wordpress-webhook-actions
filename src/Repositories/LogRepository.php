@@ -63,6 +63,11 @@ class LogRepository {
       $whereValues[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
     }
 
+    if (!empty($filters['webhook_uuid'])) {
+      $whereClauses[] = "w.webhook_uuid LIKE %s";
+      $whereValues[] = '%' . $wpdb->esc_like($filters['webhook_uuid']) . '%';
+    }
+
     $whereSql = !empty($whereClauses)
       ? "WHERE " . implode(' AND ', $whereClauses)
       : "";
@@ -85,7 +90,7 @@ class LogRepository {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $items = $wpdb->get_results(
       $wpdb->prepare(
-        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url
+        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url, w.webhook_uuid as webhook_uuid
                   FROM {$this->logsTable} l
                   {$joinSql}
                   {$whereSql}
@@ -136,7 +141,7 @@ class LogRepository {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
     $log = $wpdb->get_row(
       $wpdb->prepare(
-        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url
+        "SELECT l.*, w.name as webhook_name, w.endpoint_url as target_url, w.webhook_uuid as webhook_uuid
                  FROM {$this->logsTable} l
                  LEFT JOIN {$this->webhooksTable} w ON l.webhook_id = w.id
                  WHERE l.id = %d",

@@ -372,6 +372,7 @@ class Dispatcher {
     // Add event identity headers before fswa_headers filter
     $headers['X-Event-Id']        = $payload['event']['id'] ?? '';
     $headers['X-Event-Timestamp'] = $payload['event']['timestamp'] ?? '';
+    $headers['X-Webhook-Id']      = $webhook['webhook_uuid'] ?? '';
 
     /**
      * Filter the HTTP headers sent with the webhook request.

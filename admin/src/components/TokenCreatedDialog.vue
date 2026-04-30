@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Copy, Check } from 'lucide-vue-next'
 import { Button, Dialog } from '@/components/ui'
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 
 const props = defineProps({
   open: Boolean,
@@ -10,26 +11,17 @@ const props = defineProps({
 
 const emit = defineEmits(['close'])
 
-const copied = ref(false)
+const { copiedKey, copy } = useCopyToClipboard()
+const hasCopied = ref(false)
 
-const copyToken = async () => {
-  try {
-    await navigator.clipboard.writeText(props.token)
-    copied.value = true
-  } catch {
-    // Fallback for older browsers
-    const el = document.createElement('textarea')
-    el.value = props.token
-    document.body.appendChild(el)
-    el.select()
-    document.execCommand('copy')
-    document.body.removeChild(el)
-    copied.value = true
-  }
+const copyToken = () => {
+  copy(props.token, 'token')
+  hasCopied.value = true
 }
 
 const handleClose = () => {
-  copied.value = false
+  copiedKey.value = null
+  hasCopied.value = false
   emit('close')
 }
 </script>
@@ -53,7 +45,7 @@ const handleClose = () => {
             class="shrink-0 rounded p-1 hover:bg-background transition-colors"
             title="Copy to clipboard"
           >
-            <Check v-if="copied" class="h-4 w-4 text-green-500" />
+            <Check v-if="copiedKey === 'token'" class="h-4 w-4 text-green-500" />
             <Copy v-else class="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
@@ -73,18 +65,18 @@ const handleClose = () => {
       <div class="flex flex-col gap-2 w-full">
         <div class="flex justify-between gap-4">
           <Button
-            v-if="!copied"
+            v-if="!hasCopied"
             variant="outline"
             @click="copyToken"
           >
             <Copy class="mr-2 h-4 w-4" />
             Copy to clipboard
           </Button>
-          <Button @click="handleClose" :disabled="!copied">
+          <Button @click="handleClose" :disabled="!hasCopied">
             Done
           </Button>
         </div>
-        <div v-if="!copied" class="flex justify-center mt-4">
+        <div v-if="!hasCopied" class="flex justify-center mt-4">
           <button
             class="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
             @click="handleClose"

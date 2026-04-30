@@ -24,6 +24,7 @@ const statusOptions = [
   { value: 'error', label: 'Error' },
   { value: 'retry', label: 'Retry' },
   { value: 'pending', label: 'Pending' },
+  { value: 'test',               label: 'Test' },
   { value: 'skipped',            label: 'Skipped' },
   { value: 'permanently_failed', label: 'Permanently Failed' },
 ]
@@ -34,6 +35,7 @@ const statusFilterSelect = computed({
   set: (val) => { statusFilter.value = val === 'all' ? '' : val },
 })
 
+const webhookUuidFilter = ref('')
 const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
 const dateFromFilter = ref('')
@@ -58,6 +60,10 @@ const loadLogs = async () => {
 
     if (statusFilter.value) {
       params.status = statusFilter.value
+    }
+
+    if (webhookUuidFilter.value) {
+      params.webhook_uuid = webhookUuidFilter.value
     }
 
     if (eventUuidFilter.value) {
@@ -200,6 +206,7 @@ watch(page, () => {
 })
 
 watch(statusFilter, resetPage)
+watch(webhookUuidFilter, resetPage)
 watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
 watch(dateFromFilter, resetPage)
@@ -255,6 +262,11 @@ onMounted(() => {
           </SelectItem>
         </SelectContent>
       </Select>
+      <Input
+        v-model="webhookUuidFilter"
+        placeholder="Filter by X-Webhook-ID..."
+        class="w-full sm:w-72"
+      />
       <Input
         v-model="eventUuidFilter"
         placeholder="Filter by event UUID..."
