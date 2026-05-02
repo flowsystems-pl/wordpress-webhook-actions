@@ -786,6 +786,16 @@ const previewHtml = computed(() => {
         </div>
 
         <div v-else class="space-y-2">
+          <!-- Column legend -->
+          <div class="hidden sm:flex items-center gap-2 px-2 text-xs text-muted-foreground">
+            <span class="w-4 shrink-0" />
+            <span class="flex-1">Source <span class="opacity-60">(value)</span></span>
+            <span class="w-24 shrink-0">Cast</span>
+            <span class="w-4 shrink-0" />
+            <span class="flex-0 sm:flex-1">Target <span class="opacity-60">(param name)</span></span>
+            <span class="w-8 shrink-0" />
+          </div>
+
           <div
             v-for="(mapping, index) in localMappings"
             :key="index"
@@ -839,16 +849,6 @@ const previewHtml = computed(() => {
               </div>
             </div>
 
-            <ArrowRight class="h-4 w-4 text-muted-foreground shrink-0" />
-
-            <!-- Target field - always editable -->
-            <Input
-              :modelValue="mapping.target"
-              placeholder="Target path (e.g., user_id)"
-              class="flex-0 sm:flex-1 text-sm font-mono"
-              @update:modelValue="updateMappingTarget(index, $event)"
-            />
-
             <Select
               :model-value="castToSelect(mapping.cast)"
               @update:model-value="updateMappingCast(index, castFromSelect($event))"
@@ -864,6 +864,16 @@ const previewHtml = computed(() => {
                 </SelectItem>
               </SelectContent>
             </Select>
+
+            <ArrowRight class="h-4 w-4 text-muted-foreground shrink-0" />
+
+            <!-- Target field - always editable -->
+            <Input
+              :modelValue="mapping.target"
+              placeholder="Target path (e.g., user_id)"
+              class="flex-0 sm:flex-1 text-sm font-mono"
+              @update:modelValue="updateMappingTarget(index, $event)"
+            />
 
             <Button
               size="icon"

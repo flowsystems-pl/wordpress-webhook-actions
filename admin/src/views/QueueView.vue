@@ -279,6 +279,7 @@ onMounted(() => {
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <span class="font-medium truncate">{{ item.webhook_name || 'Unknown Webhook' }}</span>
               <Badge :variant="getStatusBadgeVariant(item.status)">{{ item.status }}</Badge>
+              <Badge v-if="item.http_method" variant="outline" class="text-xs font-mono">{{ item.http_method }}</Badge>
               <Badge v-if="item.attempts > 0" variant="outline">
                 Attempt {{ item.attempts + 1 }}/{{ item.max_attempts }}
               </Badge>

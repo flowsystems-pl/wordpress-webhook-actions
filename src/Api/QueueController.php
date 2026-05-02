@@ -401,6 +401,7 @@ class QueueController extends WP_REST_Controller {
       'webhook_uuid' => $uuidMap[$webhookId] ?? $webhook['webhook_uuid'] ?? null,
       'webhook_name' => $webhook['name'] ?? null,
       'webhook_url' => $webhook['endpoint_url'] ?? null,
+      'http_method' => strtoupper($webhook['http_method'] ?? 'POST'),
       'trigger_name' => $job['trigger_name'],
       'status' => $job['status'],
       'attempts' => (int) $job['attempts'],

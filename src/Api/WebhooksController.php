@@ -527,8 +527,10 @@ class WebhooksController extends WP_REST_Controller {
     return array_values(array_filter(
       array_map(function ($pair) {
         if (!is_array($pair) || empty($pair['key'])) return null;
+        $key = sanitize_text_field($pair['key']);
+        if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $key)) return null;
         return [
-          'key'   => sanitize_text_field($pair['key']),
+          'key'   => $key,
           'value' => sanitize_text_field($pair['value'] ?? ''),
         ];
       }, $pairs)

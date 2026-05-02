@@ -35,6 +35,7 @@ const formatDelay = (seconds) => {
 const props = defineProps({
   webhook: { type: Object, default: null },
   loading: Boolean,
+  examplePayload: { type: Object, default: null },
 });
 
 const emit = defineEmits(['submit', 'cancel', 'change']);
@@ -87,6 +88,38 @@ watch(() => form.value.backoff_strategy, (val) => {
 watch(form, () => emit('change'), { deep: true })
 
 // ── computed ──────────────────────────────────────────────────────────────────
+
+const isDotPath = (val) => val && val.includes('.') && !/\s/.test(val)
+
+const resolveByPath = (obj, path) => {
+  if (!obj || !path) return undefined
+  return path.split('.').reduce(
+    (acc, key) => (acc != null && typeof acc === 'object' ? acc[key] : undefined),
+    obj
+  )
+}
+
+const urlParamsPreview = computed(() => {
+  const params = form.value.url_params.filter(p => p.key)
+  if (!params.length) return null
+
+  const base = form.value.endpoint_url || ''
+  const qs = params.map(p => {
+    let displayVal = p.value || ''
+    if (isDotPath(p.value)) {
+      const resolved = props.examplePayload
+        ? resolveByPath(props.examplePayload, p.value)
+        : undefined
+      displayVal = (resolved !== undefined && resolved !== null)
+        ? String(resolved)
+        : `{${p.value}}`
+    }
+    return `${p.key}=${displayVal}`
+  }).join('&')
+
+  if (!base) return `?${qs}`
+  return base.includes('?') ? `${base}&${qs}` : `${base}?${qs}`
+})
 
 const backoffPreview = computed(() => {
   const strategy = form.value.backoff_strategy
@@ -225,7 +258,7 @@ const handleSubmit = () => {
     <!-- Custom Request Headers -->
     <div class="space-y-2 border-t pt-5">
       <Label>Custom Request Headers</Label>
-      <KeyValueEditor v-model="form.custom_headers" />
+      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" keyPlaceholder="Header name" />
       <p class="text-sm text-muted-foreground">
         Values support dot-notation paths into the outgoing payload (e.g. <code class="text-xs">event.id</code>) or static strings.
       </p>
@@ -236,7 +269,7 @@ const handleSubmit = () => {
       <Label>
         {{ ['GET', 'DELETE'].includes(form.http_method) ? 'URL Query Parameters' : 'Additional URL Query Parameters' }}
       </Label>
-      <KeyValueEditor v-model="form.url_params" />
+      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" keyPlaceholder="Param name" />
       <p class="text-sm text-muted-foreground">
         <template v-if="['GET', 'DELETE'].includes(form.http_method)">
           These are the primary way to send data for {{ form.http_method }} requests. If none are set, the mapped payload is sent as <code class="text-xs">?payload=&lt;json&gt;</code>.
@@ -245,6 +278,9 @@ const handleSubmit = () => {
           Appended to the URL alongside the JSON body. Values support dot-notation paths or static strings.
         </template>
       </p>
+      <div v-if="urlParamsPreview" class="rounded-md bg-muted px-3 py-2 font-mono text-xs break-all text-muted-foreground">
+        {{ urlParamsPreview }}
+      </div>
     </div>
 
     <!-- Triggers -->
