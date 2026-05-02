@@ -222,8 +222,10 @@ const applyCast = (value, cast) => {
   if (cast === 'string') return String(value ?? '')
   if (cast === 'boolean') {
     if (typeof value === 'boolean') return value
-    const s = String(value).toLowerCase()
-    return s === 'true' || s === '1' || s === 'yes'
+    const s = String(value ?? '').toLowerCase().trim()
+    if (['true', '1', 'on', 'yes'].includes(s)) return true
+    if (['false', '0', 'off', 'no', ''].includes(s)) return false
+    return s !== '' && s !== '0'
   }
   return value
 }

@@ -60,6 +60,8 @@ class WebhookRepository {
     foreach ($webhooks as &$webhook) {
       $webhook['triggers'] = $triggersByWebhook[$webhook['id']] ?? [];
       $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+      $webhook['custom_headers'] = !empty($webhook['custom_headers']) ? json_decode($webhook['custom_headers'], true) : [];
+      $webhook['url_params']     = !empty($webhook['url_params'])     ? json_decode($webhook['url_params'], true)     : [];
     }
 
     return $webhooks;
@@ -103,6 +105,8 @@ class WebhookRepository {
     $webhook['conditions'] = !empty($webhook['conditions'])
       ? json_decode($webhook['conditions'], true)
       : null;
+    $webhook['custom_headers'] = !empty($webhook['custom_headers']) ? json_decode($webhook['custom_headers'], true) : [];
+    $webhook['url_params']     = !empty($webhook['url_params'])     ? json_decode($webhook['url_params'], true)     : [];
 
     return $webhook;
   }
@@ -238,13 +242,16 @@ class WebhookRepository {
     $result = $wpdb->insert(
       $this->webhooksTable,
       [
-        'webhook_uuid' => wp_generate_uuid4(),
-        'name'         => $data['name'],
-        'endpoint_url' => $data['endpoint_url'],
-        'auth_header'  => $data['auth_header'] ?? null,
-        'is_enabled'   => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
+        'webhook_uuid'   => wp_generate_uuid4(),
+        'name'           => $data['name'],
+        'endpoint_url'   => $data['endpoint_url'],
+        'http_method'    => strtoupper($data['http_method'] ?? 'POST'),
+        'custom_headers' => !empty($data['custom_headers']) ? wp_json_encode($data['custom_headers']) : null,
+        'url_params'     => !empty($data['url_params']) ? wp_json_encode($data['url_params']) : null,
+        'auth_header'    => $data['auth_header'] ?? null,
+        'is_enabled'     => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
       ],
-      ['%s', '%s', '%s', '%s', '%d']
+      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
     );
 
     if (!$result) {
@@ -292,6 +299,21 @@ class WebhookRepository {
     if (isset($data['is_enabled'])) {
       $updateData['is_enabled'] = (int) $data['is_enabled'];
       $format[] = '%d';
+    }
+
+    if (isset($data['http_method'])) {
+      $updateData['http_method'] = strtoupper($data['http_method']);
+      $format[] = '%s';
+    }
+
+    if (array_key_exists('custom_headers', $data)) {
+      $updateData['custom_headers'] = !empty($data['custom_headers']) ? wp_json_encode($data['custom_headers']) : null;
+      $format[] = '%s';
+    }
+
+    if (array_key_exists('url_params', $data)) {
+      $updateData['url_params'] = !empty($data['url_params']) ? wp_json_encode($data['url_params']) : null;
+      $format[] = '%s';
     }
 
     if (!empty($updateData)) {

@@ -308,7 +308,7 @@ class Dispatcher {
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
 
-    return $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest);
+    return $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest, $originalPayload ?: null);
   }
 
   /**
@@ -344,7 +344,8 @@ class Dispatcher {
     string $trigger,
     ?int $logId = null,
     int $attemptNumber = 0,
-    bool $isTest = false
+    bool $isTest = false,
+    ?array $originalPayload = null
   ): array {
     if (empty($webhook['endpoint_url']) || !is_string($webhook['endpoint_url'])) {
       return ['success' => false, 'shouldRetry' => false];
@@ -383,8 +384,34 @@ class Dispatcher {
      */
     $headers = apply_filters('fswa_headers', $headers, $webhook, $trigger);
 
+    $method = strtoupper($webhook['http_method'] ?? 'POST');
+    $resolveAgainst = $originalPayload ?? $payload;
+
+    // Merge custom headers (values resolved against pre-mapping payload, falling back to literal)
+    foreach ($webhook['custom_headers'] ?? [] as $pair) {
+      if (!empty($pair['key'])) {
+        $resolved = $this->payloadTransformer->getValueByPath($resolveAgainst, $pair['value'] ?? '');
+        $headers[$pair['key']] = ($resolved !== null) ? (string) $resolved : ($pair['value'] ?? '');
+      }
+    }
+
+    // Build URL with query params
+    $noBodyMethods = ['GET', 'DELETE'];
+    if (!empty($webhook['url_params'])) {
+      $queryArgs = [];
+      foreach ($webhook['url_params'] as $pair) {
+        if (!empty($pair['key'])) {
+          $resolved = $this->payloadTransformer->getValueByPath($resolveAgainst, $pair['value'] ?? '');
+          $queryArgs[$pair['key']] = ($resolved !== null) ? (string) $resolved : ($pair['value'] ?? '');
+        }
+      }
+      $url = add_query_arg($queryArgs, $url);
+    } elseif (in_array($method, $noBodyMethods, true)) {
+      $url = add_query_arg('payload', rawurlencode(wp_json_encode($payload)), $url);
+    }
+
     $startTime = microtime(true);
-    $result = $this->transport->send($url, $payload, $headers);
+    $result = $this->transport->send($url, $payload, $headers, $method);
     $durationMs = (int) ((microtime(true) - $startTime) * 1000);
 
     if (is_wp_error($result)) {

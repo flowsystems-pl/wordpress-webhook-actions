@@ -10,7 +10,7 @@ import {
   AlertCircle,
   Braces,
   EqualNot,
-  Cog,
+  Waypoints,
 } from 'lucide-vue-next';
 import { Button, Card, Badge, Switch, Label, Alert } from '@/components/ui';
 import { formatUtcDate } from '@/lib/dates';
@@ -238,9 +238,9 @@ watch(
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
 
-        <Cog class="h-6 w-6" />
+        <Waypoints class="h-6 w-6" />
         <h3 class="text-lg font-medium flex items-center gap-2">
-          Advanced Configuration
+          Mapping & Conditions
         </h3>
       </div>
 

@@ -42,11 +42,11 @@ const atFreeLimit = computed(
 
 const OPERATORS = [
   { value: 'equals',       icon: Equal,          label: 'equals',           short: 'equals' },
-  { value: 'not_equals',   icon: EqualNot,       label: 'does not equal',   short: '≠ equal' },
+  { value: 'not_equals',   icon: EqualNot,       label: 'does not equal',   short: 'not equals' },
   { value: 'contains',     icon: CircleCheckBig, label: 'contains',         short: 'contains' },
   { value: 'not_contains', icon: CircleDashed,   label: 'does not contain', short: 'excludes' },
-  { value: 'greater_than', icon: ChevronRight,   label: 'greater than',     short: '> than' },
-  { value: 'less_than',    icon: ChevronLeft,    label: 'less than',        short: '< than' },
+  { value: 'greater_than', icon: ChevronRight,   label: 'greater than',     short: 'greater than' },
+  { value: 'less_than',    icon: ChevronLeft,    label: 'less than',        short: 'less than' },
   { value: 'is_empty',     icon: Square,         label: 'is empty',         short: 'empty' },
   { value: 'is_not_empty', icon: CheckSquare,    label: 'is not empty',     short: 'not empty' },
   { value: 'is_true',      icon: ToggleRight,    label: 'is true',          short: 'is true' },

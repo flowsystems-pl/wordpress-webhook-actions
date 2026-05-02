@@ -369,7 +369,7 @@ class PayloadTransformer {
    * @param string $path
    * @return mixed
    */
-  private function getValueByPath(array $array, string $path) {
+  public function getValueByPath(array $array, string $path) {
     $keys = static::splitPath($path);
     $current = $array;
 

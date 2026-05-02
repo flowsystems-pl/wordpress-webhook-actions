@@ -38,6 +38,9 @@ class Activation {
             webhook_uuid VARCHAR(36) NOT NULL DEFAULT '',
             name VARCHAR(255) NOT NULL,
             endpoint_url VARCHAR(2048) NOT NULL,
+            http_method VARCHAR(10) NOT NULL DEFAULT 'POST',
+            custom_headers TEXT NULL,
+            url_params TEXT NULL,
             auth_header VARCHAR(1024) DEFAULT NULL,
             is_enabled TINYINT(1) NOT NULL DEFAULT 1,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -149,7 +152,7 @@ class Activation {
 
     dbDelta($sqlApiTokens);
 
-    update_option('fswa_db_version', '1.8.0');
+    update_option('fswa_db_version', '1.9.0');
   }
 
   /**
