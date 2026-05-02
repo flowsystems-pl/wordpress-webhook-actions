@@ -136,6 +136,9 @@ onMounted(loadWebhooks)
               <Badge :variant="webhook.is_enabled ? 'success' : 'secondary'" class="text-xs">
                 {{ webhook.is_enabled ? 'Active' : 'Disabled' }}
               </Badge>
+              <Badge variant="outline" class="text-xs font-mono">
+                {{ webhook.http_method || 'POST' }}
+              </Badge>
             </div>
 
             <div class="flex items-center gap-1 mb-2">

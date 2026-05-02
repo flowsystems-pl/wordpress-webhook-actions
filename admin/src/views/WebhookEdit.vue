@@ -8,11 +8,25 @@ import TriggerSchemaPanel from '@/components/TriggerSchemaPanel.vue';
 import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue';
 import api from '@/lib/api';
 import { useHealthStats } from '@/composables/useHealthStats';
+import { useSchemas } from '@/composables/useSchemas';
 
 const { fetchStats: refreshHealthStats } = useHealthStats();
 
 const router = useRouter();
 const route = useRoute();
+
+const { schemas } = useSchemas(route.params.id);
+
+const firstExamplePayload = computed(() => {
+  for (const schema of schemas.value) {
+    if (!schema.example_payload) continue;
+    const parsed = typeof schema.example_payload === 'string'
+      ? JSON.parse(schema.example_payload)
+      : schema.example_payload;
+    if (parsed) return parsed;
+  }
+  return null;
+});
 
 const webhook = ref(null);
 const loading = ref(false);
@@ -128,6 +142,7 @@ onMounted(loadWebhook);
         <WebhookForm
           :webhook="webhook"
           :loading="saving"
+          :examplePayload="firstExamplePayload"
           @submit="handleSubmit"
           @cancel="handleCancel"
           @change="hasUnsavedChanges = true"

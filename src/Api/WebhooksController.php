@@ -202,11 +202,14 @@ class WebhooksController extends WP_REST_Controller {
    */
   public function createItem($request) {
     $data = [
-      'name' => sanitize_text_field($request->get_param('name')),
-      'endpoint_url' => esc_url_raw($request->get_param('endpoint_url')),
-      'auth_header' => sanitize_text_field($request->get_param('auth_header') ?? ''),
-      'is_enabled' => (bool) $request->get_param('is_enabled'),
-      'triggers'   => $request->get_param('triggers') ?? [],
+      'name'           => sanitize_text_field($request->get_param('name')),
+      'endpoint_url'   => esc_url_raw($request->get_param('endpoint_url')),
+      'auth_header'    => sanitize_text_field($request->get_param('auth_header') ?? ''),
+      'is_enabled'     => (bool) $request->get_param('is_enabled'),
+      'triggers'       => $request->get_param('triggers') ?? [],
+      'http_method'    => strtoupper(sanitize_text_field($request->get_param('http_method') ?? 'POST')),
+      'custom_headers' => $this->sanitizeKvArray($request->get_param('custom_headers') ?? []),
+      'url_params'     => $this->sanitizeKvArray($request->get_param('url_params') ?? []),
     ];
 
     // Validate
@@ -303,6 +306,18 @@ class WebhooksController extends WP_REST_Controller {
 
     if ($request->has_param('triggers')) {
       $data['triggers'] = array_map('sanitize_text_field', $request->get_param('triggers'));
+    }
+
+    if ($request->has_param('http_method')) {
+      $data['http_method'] = strtoupper(sanitize_text_field($request->get_param('http_method')));
+    }
+
+    if ($request->has_param('custom_headers')) {
+      $data['custom_headers'] = $this->sanitizeKvArray($request->get_param('custom_headers') ?? []);
+    }
+
+    if ($request->has_param('url_params')) {
+      $data['url_params'] = $this->sanitizeKvArray($request->get_param('url_params') ?? []);
     }
 
     $result = $this->repository->update($id, $data);
@@ -475,7 +490,7 @@ class WebhooksController extends WP_REST_Controller {
 
     if ($mode === 'now') {
       $dispatcher = new Dispatcher(new WPHttpTransport(), $this->queueService);
-      $dispatcher->sendToWebhook($webhook, $testPayload, $trigger, $logId, 0, true);
+      $dispatcher->sendToWebhook($webhook, $testPayload, $trigger, $logId, 0, true, $originalPayload ?? null);
 
       $log = $this->logService->getRepository()->find($logId);
 
@@ -506,6 +521,20 @@ class WebhooksController extends WP_REST_Controller {
       'job_id' => $jobId,
       'log_id' => $logId,
     ]);
+  }
+
+  private function sanitizeKvArray(array $pairs): array {
+    return array_values(array_filter(
+      array_map(function ($pair) {
+        if (!is_array($pair) || empty($pair['key'])) return null;
+        $key = sanitize_text_field($pair['key']);
+        if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $key)) return null;
+        return [
+          'key'   => $key,
+          'value' => sanitize_text_field($pair['value'] ?? ''),
+        ];
+      }, $pairs)
+    ));
   }
 
   /**
@@ -557,6 +586,37 @@ class WebhooksController extends WP_REST_Controller {
           'description' => __('Authorization header value.', 'flowsystems-webhook-actions'),
           'type' => 'string',
           'context' => ['view', 'edit'],
+        ],
+        'http_method' => [
+          'description' => __('HTTP method used for delivery.', 'flowsystems-webhook-actions'),
+          'type'        => 'string',
+          'enum'        => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+          'default'     => 'POST',
+          'context'     => ['view', 'edit'],
+        ],
+        'custom_headers' => [
+          'description' => __('Extra request headers as key-value pairs.', 'flowsystems-webhook-actions'),
+          'type'        => 'array',
+          'context'     => ['view', 'edit'],
+          'items'       => [
+            'type'       => 'object',
+            'properties' => [
+              'key'   => ['type' => 'string'],
+              'value' => ['type' => 'string'],
+            ],
+          ],
+        ],
+        'url_params' => [
+          'description' => __('Query parameters appended to the URL.', 'flowsystems-webhook-actions'),
+          'type'        => 'array',
+          'context'     => ['view', 'edit'],
+          'items'       => [
+            'type'       => 'object',
+            'properties' => [
+              'key'   => ['type' => 'string'],
+              'value' => ['type' => 'string'],
+            ],
+          ],
         ],
         'is_enabled' => [
           'description' => __('Whether the webhook is enabled.', 'flowsystems-webhook-actions'),

@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem } from '@/components/ui';
 import { Info } from 'lucide-vue-next';
 import TriggerSelect from '@/components/TriggerSelect.vue';
+import KeyValueEditor from '@/components/KeyValueEditor.vue';
 import { usePro } from '@/composables/usePro';
 
 const { proActive } = usePro();
@@ -34,6 +35,7 @@ const formatDelay = (seconds) => {
 const props = defineProps({
   webhook: { type: Object, default: null },
   loading: Boolean,
+  examplePayload: { type: Object, default: null },
 });
 
 const emit = defineEmits(['submit', 'cancel', 'change']);
@@ -41,7 +43,10 @@ const emit = defineEmits(['submit', 'cancel', 'change']);
 const form = ref({
   name: '',
   endpoint_url: '',
+  http_method: 'POST',
   auth_header: '',
+  custom_headers: [],
+  url_params: [],
   is_enabled: true,
   triggers: [],
   retry_limit: '',
@@ -59,7 +64,10 @@ watch(() => props.webhook, (webhook) => {
     form.value = {
       name:               webhook.name || '',
       endpoint_url:       webhook.endpoint_url || '',
+      http_method:        webhook.http_method || 'POST',
       auth_header:        webhook.auth_header || '',
+      custom_headers:     webhook.custom_headers || [],
+      url_params:         webhook.url_params || [],
       is_enabled:         webhook.is_enabled ?? true,
       triggers:           webhook.triggers || [],
       retry_limit:        webhook.retry_limit != null ? String(webhook.retry_limit) : '',
@@ -80,6 +88,38 @@ watch(() => form.value.backoff_strategy, (val) => {
 watch(form, () => emit('change'), { deep: true })
 
 // ── computed ──────────────────────────────────────────────────────────────────
+
+const isDotPath = (val) => val && val.includes('.') && !/\s/.test(val)
+
+const resolveByPath = (obj, path) => {
+  if (!obj || !path) return undefined
+  return path.split('.').reduce(
+    (acc, key) => (acc != null && typeof acc === 'object' ? acc[key] : undefined),
+    obj
+  )
+}
+
+const urlParamsPreview = computed(() => {
+  const params = form.value.url_params.filter(p => p.key)
+  if (!params.length) return null
+
+  const base = form.value.endpoint_url || ''
+  const qs = params.map(p => {
+    let displayVal = p.value || ''
+    if (isDotPath(p.value)) {
+      const resolved = props.examplePayload
+        ? resolveByPath(props.examplePayload, p.value)
+        : undefined
+      displayVal = (resolved !== undefined && resolved !== null)
+        ? String(resolved)
+        : `{${p.value}}`
+    }
+    return `${p.key}=${displayVal}`
+  }).join('&')
+
+  if (!base) return `?${qs}`
+  return base.includes('?') ? `${base}&${qs}` : `${base}?${qs}`
+})
 
 const backoffPreview = computed(() => {
   const strategy = form.value.backoff_strategy
@@ -149,6 +189,8 @@ const handleSubmit = () => {
     data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
     data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
     data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
+    data.custom_headers     = data.custom_headers ?? [];
+    data.url_params         = data.url_params ?? [];
     emit('submit', data);
   }
 };
@@ -182,6 +224,23 @@ const handleSubmit = () => {
       <p class="text-sm text-muted-foreground">The URL where webhook payloads will be sent</p>
     </div>
 
+    <!-- HTTP Method -->
+    <div class="space-y-2 border-t pt-5">
+      <Label>HTTP Method</Label>
+      <Select v-model="form.http_method">
+        <SelectTrigger class="w-40">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="POST">POST</SelectItem>
+          <SelectItem value="GET">GET</SelectItem>
+          <SelectItem value="PUT">PUT</SelectItem>
+          <SelectItem value="PATCH">PATCH</SelectItem>
+          <SelectItem value="DELETE">DELETE</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+
     <!-- Auth Header -->
     <div class="space-y-2 border-t pt-5">
       <Label for="auth_header">Authorization Header (optional)</Label>
@@ -194,6 +253,34 @@ const handleSubmit = () => {
         Value for the Authorization header (e.g., "Bearer your_token_goes_here"
         or "Basic your_encoded_base64(username:password)")
       </p>
+    </div>
+
+    <!-- Custom Request Headers -->
+    <div class="space-y-2 border-t pt-5">
+      <Label>Custom Request Headers</Label>
+      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" keyPlaceholder="Header name" />
+      <p class="text-sm text-muted-foreground">
+        Values support dot-notation paths into the outgoing payload (e.g. <code class="text-xs">event.id</code>) or static strings.
+      </p>
+    </div>
+
+    <!-- URL Query Parameters -->
+    <div class="space-y-2 border-t pt-5">
+      <Label>
+        {{ ['GET', 'DELETE'].includes(form.http_method) ? 'URL Query Parameters' : 'Additional URL Query Parameters' }}
+      </Label>
+      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" keyPlaceholder="Param name" />
+      <p class="text-sm text-muted-foreground">
+        <template v-if="['GET', 'DELETE'].includes(form.http_method)">
+          These are the primary way to send data for {{ form.http_method }} requests. If none are set, the mapped payload is sent as <code class="text-xs">?payload=&lt;json&gt;</code>.
+        </template>
+        <template v-else>
+          Appended to the URL alongside the JSON body. Values support dot-notation paths or static strings.
+        </template>
+      </p>
+      <div v-if="urlParamsPreview" class="rounded-md bg-muted px-3 py-2 font-mono text-xs break-all text-muted-foreground">
+        {{ urlParamsPreview }}
+      </div>
     </div>
 
     <!-- Triggers -->

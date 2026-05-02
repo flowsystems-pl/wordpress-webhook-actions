@@ -42,11 +42,11 @@ const atFreeLimit = computed(
 
 const OPERATORS = [
   { value: 'equals',       icon: Equal,          label: 'equals',           short: 'equals' },
-  { value: 'not_equals',   icon: EqualNot,       label: 'does not equal',   short: '≠ equal' },
+  { value: 'not_equals',   icon: EqualNot,       label: 'does not equal',   short: 'not equals' },
   { value: 'contains',     icon: CircleCheckBig, label: 'contains',         short: 'contains' },
   { value: 'not_contains', icon: CircleDashed,   label: 'does not contain', short: 'excludes' },
-  { value: 'greater_than', icon: ChevronRight,   label: 'greater than',     short: '> than' },
-  { value: 'less_than',    icon: ChevronLeft,    label: 'less than',        short: '< than' },
+  { value: 'greater_than', icon: ChevronRight,   label: 'greater than',     short: 'greater than' },
+  { value: 'less_than',    icon: ChevronLeft,    label: 'less than',        short: 'less than' },
   { value: 'is_empty',     icon: Square,         label: 'is empty',         short: 'empty' },
   { value: 'is_not_empty', icon: CheckSquare,    label: 'is not empty',     short: 'not empty' },
   { value: 'is_true',      icon: ToggleRight,    label: 'is true',          short: 'is true' },
@@ -498,15 +498,14 @@ const overallResult = computed(() => {
                 </SelectContent>
               </Select>
 
+              <component :is="getOperator(rule.operator)?.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+
               <Select
                 :model-value="rule.operator"
                 @update:model-value="updateGroupRule(index, ri, 'operator', $event)"
               >
                 <SelectTrigger class="w-32 shrink-0">
-                  <div class="flex items-center gap-1.5 min-w-0">
-                    <component :is="getOperator(rule.operator)?.icon" class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                    <span class="truncate text-xs">{{ getOperator(rule.operator)?.short }}</span>
-                  </div>
+                  <span class="truncate text-xs">{{ getOperator(rule.operator)?.short }}</span>
                 </SelectTrigger>
                 <SelectContent to="#fswa-app">
                   <SelectItem
@@ -613,15 +612,14 @@ const overallResult = computed(() => {
             </SelectContent>
           </Select>
 
+          <component :is="getOperator(item.operator)?.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+
           <Select
             :model-value="item.operator"
             @update:model-value="updateRule(index, 'operator', $event)"
           >
             <SelectTrigger class="w-32 shrink-0">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <component :is="getOperator(item.operator)?.icon" class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                <span class="truncate text-xs">{{ getOperator(item.operator)?.short }}</span>
-              </div>
+              <span class="truncate text-xs">{{ getOperator(item.operator)?.short }}</span>
             </SelectTrigger>
             <SelectContent to="#fswa-app">
               <SelectItem

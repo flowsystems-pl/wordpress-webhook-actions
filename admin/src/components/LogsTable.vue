@@ -209,7 +209,7 @@ const { copiedKey, copy } = useCopyToClipboard()
               />
             </td>
             <td class="px-4 py-3">
-              <div class="flex items-center gap-1">
+              <div class="flex items-center gap-1 flex-wrap">
                 <Badge :variant="statusVariant(log.status)">
                   {{ log.status === 'permanently_failed' ? 'perm. failed' : log.status }}
                 </Badge>
@@ -231,7 +231,10 @@ const { copiedKey, copy } = useCopyToClipboard()
               <span v-else class="text-muted-foreground text-sm">-</span>
             </td>
             <td v-if="showWebhook" class="px-4 py-3 text-sm">
-              <div>{{ log.webhook_name || `#${log.webhook_id}` }}</div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span>{{ log.webhook_name || `#${log.webhook_id}` }}</span>
+                <Badge v-if="log.http_method" variant="outline" class="text-xs font-mono">{{ log.http_method }}</Badge>
+              </div>
               <div v-if="log.target_url" class="text-xs text-muted-foreground font-mono truncate max-w-[200px]" :title="log.target_url">{{ log.target_url }}</div>
               <div v-if="log.webhook_uuid" class="text-xs text-muted-foreground font-mono mt-0.5">X-Webhook-Id: {{ log.webhook_uuid }}</div>
             </td>
@@ -326,17 +329,23 @@ const { copiedKey, copy } = useCopyToClipboard()
       @close="closeDetails"
     >
       <div v-if="selectedLog" class="space-y-4 max-h-[60vh] overflow-y-auto">
-        <!-- Status -->
-        <div>
-          <div class="text-sm font-medium mb-1">Status</div>
-          <div class="flex items-center gap-2">
-            <Badge :variant="statusVariant(selectedLog.status)">
-              {{ selectedLog.status }}
-            </Badge>
-            <Badge v-if="selectedLog.mapping_applied" variant="outline" class="text-xs">
-              <ArrowRight class="h-3 w-3 mr-0.5" />
-              Mapping Applied
-            </Badge>
+        <!-- Status + Method -->
+        <div class="flex gap-6">
+          <div>
+            <div class="text-sm font-medium mb-1">Status</div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <Badge :variant="statusVariant(selectedLog.status)">
+                {{ selectedLog.status }}
+              </Badge>
+              <Badge v-if="selectedLog.mapping_applied" variant="outline" class="text-xs">
+                <ArrowRight class="h-3 w-3 mr-0.5" />
+                Mapping Applied
+              </Badge>
+            </div>
+          </div>
+          <div v-if="selectedLog.http_method">
+            <div class="text-sm font-medium mb-1">Method</div>
+            <Badge variant="outline" class="font-mono">{{ selectedLog.http_method }}</Badge>
           </div>
         </div>
 
