@@ -60,6 +60,7 @@ class WebhookRepository {
     foreach ($webhooks as &$webhook) {
       $webhook['triggers'] = $triggersByWebhook[$webhook['id']] ?? [];
       $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+      $webhook['is_synchronous'] = (bool) $webhook['is_synchronous'];
       $webhook['custom_headers'] = !empty($webhook['custom_headers']) ? json_decode($webhook['custom_headers'], true) : [];
       $webhook['url_params']     = !empty($webhook['url_params'])     ? json_decode($webhook['url_params'], true)     : [];
     }
@@ -102,6 +103,7 @@ class WebhookRepository {
 
     $webhook['triggers'] = $triggers ?: [];
     $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+    $webhook['is_synchronous'] = (bool) ($webhook['is_synchronous'] ?? false);
     $webhook['conditions'] = !empty($webhook['conditions'])
       ? json_decode($webhook['conditions'], true)
       : null;
@@ -222,8 +224,11 @@ class WebhookRepository {
         )
       );
       // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-      $webhook['triggers'] = $triggers ?: [];
-      $webhook['is_enabled'] = (bool) $webhook['is_enabled'];
+      $webhook['triggers']       = $triggers ?: [];
+      $webhook['is_enabled']     = (bool) $webhook['is_enabled'];
+      $webhook['is_synchronous'] = (bool) ($webhook['is_synchronous'] ?? false);
+      $webhook['custom_headers'] = !empty($webhook['custom_headers']) ? json_decode($webhook['custom_headers'], true) : [];
+      $webhook['url_params']     = !empty($webhook['url_params'])     ? json_decode($webhook['url_params'], true)     : [];
     }
 
     return $webhooks;
@@ -250,8 +255,9 @@ class WebhookRepository {
         'url_params'     => !empty($data['url_params']) ? wp_json_encode($data['url_params']) : null,
         'auth_header'    => $data['auth_header'] ?? null,
         'is_enabled'     => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
+        'is_synchronous' => isset($data['is_synchronous']) ? (int)(bool)$data['is_synchronous'] : 0,
       ],
-      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
+      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d']
     );
 
     if (!$result) {
@@ -314,6 +320,11 @@ class WebhookRepository {
     if (array_key_exists('url_params', $data)) {
       $updateData['url_params'] = !empty($data['url_params']) ? wp_json_encode($data['url_params']) : null;
       $format[] = '%s';
+    }
+
+    if (isset($data['is_synchronous'])) {
+      $updateData['is_synchronous'] = (int)(bool)$data['is_synchronous'];
+      $format[] = '%d';
     }
 
     if (!empty($updateData)) {

@@ -156,19 +156,72 @@ class Dispatcher {
         $eventTimestamp
       );
 
-      $this->queueService->enqueue(
-        $webhookId,
-        $trigger,
-        [
-          'webhook'          => $webhook,
-          'payload'          => $transformedPayload,
-          'log_id'           => $logId,
-          'mapping_applied'  => $mappingApplied,
-          'original_payload' => $originalPayload,
-        ],
-        null,
-        $logId ?: null
-      );
+      if (!empty($webhook['is_synchronous'])) {
+        // Attempt 0 runs inline, blocking the current WP request
+        $result = $this->sendToWebhook(
+          $webhook,
+          $transformedPayload,
+          $trigger,
+          $logId,
+          0,
+          false,
+          $originalPayload ?: null
+        );
+
+        if ($result['shouldRetry']) {
+          // Retryable failure — hand off to queue starting at attempt 1
+          // First retry delay mirrors rescheduleWithBackoff() for attempt 1: min(2^1 * 30, 3600)
+          $firstRetryDelay = max(1, (int) apply_filters('fswa_backoff_delay', min(pow(2, 1) * 30, 3600), 1, $webhookId));
+          $retryAt = new \DateTime('now', new \DateTimeZone('UTC'));
+          $retryAt->modify("+{$firstRetryDelay} seconds");
+
+          $this->queueService->enqueue(
+            $webhookId,
+            $trigger,
+            [
+              'webhook'          => $webhook,
+              'payload'          => $transformedPayload,
+              'log_id'           => $logId,
+              'mapping_applied'  => $mappingApplied,
+              'original_payload' => $originalPayload,
+            ],
+            $retryAt,
+            $logId ?: null,
+            false,
+            1
+          );
+
+          if ($logId) {
+            $this->logService->updateLog($logId, [
+              'status'          => 'retry',
+              'next_attempt_at' => $retryAt->format('Y-m-d H:i:s'),
+            ]);
+          }
+        } elseif (!$result['success']) {
+          // Non-retryable failure (4xx, config error) — mark permanently failed
+          if ($logId) {
+            $this->logService->updateLog($logId, [
+              'status'          => 'permanently_failed',
+              'next_attempt_at' => null,
+            ]);
+          }
+        }
+        // Success: log already updated to 'success' by sendToWebhook()
+      } else {
+        $this->queueService->enqueue(
+          $webhookId,
+          $trigger,
+          [
+            'webhook'          => $webhook,
+            'payload'          => $transformedPayload,
+            'log_id'           => $logId,
+            'mapping_applied'  => $mappingApplied,
+            'original_payload' => $originalPayload,
+          ],
+          null,
+          $logId ?: null
+        );
+      }
     }
 
     // Capture example payloads for disabled webhooks so mapping and conditions
