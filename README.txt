@@ -428,6 +428,7 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 7. Settings configuration screen
 8. REST API Tokens configuration screen
 9. Conditional webhook dispatch — conditions editor
+10. Test webhook drawer — send a test delivery and inspect request details inline
 
 == Changelog ==
 
