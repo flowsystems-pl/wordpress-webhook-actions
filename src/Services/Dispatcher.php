@@ -470,6 +470,21 @@ class Dispatcher {
       ]);
     }
 
+    /**
+     * Fires after a webhook HTTP response is received.
+     * Use this to process the response per-webhook — e.g. parse the body,
+     * trigger follow-up actions, or store data from the remote system.
+     * Fires for both success and error HTTP responses (not transport failures).
+     *
+     * @param int    $webhookId    The webhook ID.
+     * @param string $trigger      The trigger event name.
+     * @param int    $responseCode The HTTP response code.
+     * @param string $responseBody The raw response body.
+     * @param array  $payload      The payload that was sent.
+     * @param array  $webhook      The full webhook configuration.
+     */
+    do_action('fswa_webhook_response', $webhookId, $trigger, $responseCode, $responseBody, $payload, $webhook);
+
     if ($success) {
       /**
        * Fires after a successful webhook delivery.

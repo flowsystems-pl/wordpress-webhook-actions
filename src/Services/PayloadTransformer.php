@@ -53,7 +53,17 @@ class PayloadTransformer {
 
     // If no schema exists, capture this as an example payload
     if (!$schema) {
-      $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $payload);
+      /**
+       * Filters the payload just before it is stored as the captured example.
+       * Use this to add or modify properties in the example payload only —
+       * it does not affect what is dispatched to the endpoint.
+       *
+       * @param array  $payload   The payload about to be captured.
+       * @param int    $webhookId The webhook ID.
+       * @param string $trigger   The trigger event name.
+       */
+      $examplePayload = apply_filters('fswa_capture_payload', $payload, $webhookId, $trigger);
+      $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $examplePayload);
       return [
         'original'        => null,
         'transformed'     => $payload,
@@ -64,7 +74,9 @@ class PayloadTransformer {
 
     // If schema exists but no example captured yet, capture it
     if (empty($schema['example_payload'])) {
-      $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $payload);
+      /** This filter is documented above. */
+      $examplePayload = apply_filters('fswa_capture_payload', $payload, $webhookId, $trigger);
+      $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $examplePayload);
     }
 
     $transformedPayload = $payload;
