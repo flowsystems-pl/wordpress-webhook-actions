@@ -1,12 +1,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem } from '@/components/ui';
+import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox } from '@/components/ui';
 import { Info } from 'lucide-vue-next';
 import TriggerSelect from '@/components/TriggerSelect.vue';
 import KeyValueEditor from '@/components/KeyValueEditor.vue';
 import { usePro } from '@/composables/usePro';
+import { useSyncWarning } from '@/composables/useSyncWarning';
 
 const { proActive } = usePro();
+const { dontShowAgain, isWarningDismissed, applyDismiss, resetDontShowAgain } = useSyncWarning();
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -53,9 +55,12 @@ const form = ref({
   backoff_strategy: 'default',
   backoff_base_delay: '',
   backoff_max_delay: '',
+  is_synchronous: false,
 });
 
 const errors = ref({});
+const showSyncWarning = ref(false);
+const pendingSyncValue = ref(false);
 
 // ── watches ───────────────────────────────────────────────────────────────────
 
@@ -74,6 +79,7 @@ watch(() => props.webhook, (webhook) => {
       backoff_strategy:   webhook.backoff_strategy ?? 'default',
       backoff_base_delay: webhook.backoff_base_delay != null ? String(webhook.backoff_base_delay) : '',
       backoff_max_delay:  webhook.backoff_max_delay != null ? String(webhook.backoff_max_delay) : '',
+      is_synchronous:     webhook.is_synchronous ?? false,
     };
   }
 }, { immediate: true });
@@ -180,6 +186,31 @@ const validate = () => {
   }
 
   return Object.keys(errors.value).length === 0;
+};
+
+const handleSyncToggle = (newVal) => {
+  if (newVal) {
+    if (isWarningDismissed()) {
+      form.value.is_synchronous = true;
+    } else {
+      pendingSyncValue.value = true;
+      showSyncWarning.value = true;
+    }
+  } else {
+    form.value.is_synchronous = false;
+  }
+};
+
+const confirmSyncToggle = () => {
+  applyDismiss();
+  form.value.is_synchronous = true;
+  showSyncWarning.value = false;
+};
+
+const cancelSyncToggle = () => {
+  showSyncWarning.value = false;
+  pendingSyncValue.value = false;
+  resetDontShowAgain();
 };
 
 const handleSubmit = () => {
@@ -412,6 +443,51 @@ const handleSubmit = () => {
         class="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
       >
         Disabled webhooks still capture payload examples for mapping and conditions configuration.
+      </div>
+    </div>
+
+    <!-- Synchronous Execution warning dialog -->
+    <Dialog
+      :open="showSyncWarning"
+      title="Enable Synchronous Execution?"
+      @close="cancelSyncToggle"
+    >
+      <div class="space-y-2 text-sm text-muted-foreground">
+        <p>
+          This webhook will fire inline during the WordPress request that triggers it, bypassing the queue.
+          Slow or unreachable endpoints can <strong class="text-foreground">delay page loads, form submissions, and other frontend interactions.</strong>
+        </p>
+        <p>
+          The <strong class="text-foreground">recommended approach is asynchronous delivery</strong> via the built-in system cron or an external cron job.
+        </p>
+      </div>
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <Checkbox v-model="dontShowAgain" />
+        <span class="text-sm text-muted-foreground">Don't show this again</span>
+      </label>
+      <template #footer>
+        <Button variant="outline" type="button" @click="cancelSyncToggle">Cancel</Button>
+        <Button variant="destructive" type="button" @click="confirmSyncToggle">Enable Anyway</Button>
+      </template>
+    </Dialog>
+
+    <!-- Synchronous Execution -->
+    <div class="space-y-2 border-t pt-5">
+      <div class="flex items-center space-x-2">
+        <Switch
+          :model-value="form.is_synchronous"
+          @update:model-value="handleSyncToggle"
+        />
+        <Label>Synchronous Execution</Label>
+        <Tooltip content="When enabled, this webhook fires inline during the WordPress request that triggers it, bypassing the queue. May slow down your site if the endpoint is slow." side="right">
+          <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+        </Tooltip>
+      </div>
+      <div
+        v-if="form.is_synchronous"
+        class="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-300"
+      >
+        This webhook executes synchronously. Slow or unreachable endpoints will delay page loads and frontend interactions.
       </div>
     </div>
 

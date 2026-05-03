@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.9.0
+Stable tag: 1.10.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -64,7 +64,9 @@ Every dispatched webhook includes:
 - Unique UUID (v4) per event
 - ISO 8601 UTC timestamp
 - Embedded `event.id`, `event.timestamp`, `event.version` in the payload
-- HTTP headers: `X-Event-Id`, `X-Event-Timestamp`
+- HTTP headers: `X-Event-Id`, `X-Event-Timestamp`, `X-Webhook-Id`
+
+`X-Webhook-Id` carries the webhook's own stable UUID — distinct from the per-event `X-Event-Id`. When multiple webhooks point to the same endpoint, the receiving system can use `X-Webhook-Id` to identify which webhook configuration triggered the delivery without inspecting the payload.
 
 This enables downstream deduplication, idempotent workflow design, and reliable debugging across systems.
 
@@ -89,7 +91,7 @@ No silent failures.
 
 Webhook debugging is difficult when events cannot be reproduced.
 
-Webhook Actions by Flow Systems allows you to replay any webhook event directly from the delivery logs — including successful deliveries.
+Webhook Actions by Flow Systems allows you to replay any webhook event directly from the delivery logs — including successful deliveries and condition-skipped events.
 
 This makes it easy to:
 
@@ -97,8 +99,23 @@ This makes it easy to:
 - Debug external integrations
 - Recover from temporary endpoint failures
 - Test webhook consumers without recreating WordPress events
+- Re-evaluate previously skipped events after changing webhook conditions
 
 Each replay uses the original payload and event metadata, ensuring consistent behavior across retries and debugging sessions.
+
+= Synchronous Execution =
+
+By default, all webhooks are delivered asynchronously via the built-in queue — events are stored, processed in the background, and retried automatically on failure. This is the recommended approach for production sites.
+
+For specific webhooks that require inline delivery (e.g. an internal API that must respond within the same request), you can enable **Synchronous Execution** per webhook:
+
+- The webhook fires during the WordPress request that triggered it — no queue delay
+- The first attempt runs blocking in the current request
+- If that attempt fails with a retryable error (5xx, transport error), it automatically falls back to the queue with standard exponential backoff starting at attempt 2
+- Non-retryable failures (4xx) are marked permanently failed immediately
+- A warning dialog must be acknowledged before enabling, and can be dismissed permanently per-browser
+
+Use with caution on user-facing requests — a slow or unreachable endpoint will delay page loads, form submissions, and other frontend interactions.
 
 = Delivery Observability =
 
@@ -302,6 +319,7 @@ Webhook Actions by Flow Systems provides:
 - Full delivery logging and metrics
 - Configurable HTTP method, custom headers, and URL query parameters per webhook
 - Conditional webhook dispatch
+- Per-webhook synchronous execution — optional inline delivery with automatic queue fallback on failure
 - Test webhook delivery — send a test event instantly or via queue without triggering real WordPress events
 - REST API with token authentication for programmatic access
 - Action Scheduler support for reliable background processing (when available)
@@ -395,7 +413,7 @@ Failed webhooks are automatically retried using exponential backoff. The delay i
 = Can I replay webhook events? =
 
 Yes. Every webhook delivery is logged with its payload and attempt history.
-You can replay any event directly from the logs, which is useful for debugging integrations or re-running automation workflows.
+You can replay successful events and condition-skipped events directly from the logs — useful for debugging integrations, re-running automation workflows, or re-evaluating a skipped event after you've changed the webhook's conditions.
 
 = What is Payload Mapping? =
 
@@ -432,6 +450,15 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 
 == Changelog ==
 
+= 1.10.0 — 2026-05-03 =
+- Added per-webhook synchronous execution mode — when enabled, the webhook fires inline during the WordPress request that triggers it, bypassing the queue; a warning dialog explains the performance impact before enabling; dismissal can be stored permanently per-browser
+- First synchronous attempt runs blocking in the current request; retryable failures (5xx, transport errors) automatically fall back to the async queue starting at attempt 2 with standard exponential backoff; non-retryable failures (4xx) are marked permanently failed immediately
+- Added sync execution toggle to the Webhooks list view — enable or disable per webhook without opening the edit screen
+- Added Request Headers and Query Parameters sections to delivery log details — inspect the exact headers and URL parameters sent with each delivery
+- Added collapsible Request Payload and Original Payload sections in delivery log details — collapse state is persisted in browser storage so the panel opens in the same state on next visit
+- Fixed GET and DELETE webhooks not including custom headers or URL parameters in deliveries
+- Added replay support for skipped (condition-failed) log entries — re-evaluate a previously skipped event after changing the webhook's conditions
+
 = 1.9.0 — 2026-05-03 =
 - Added configurable HTTP method per webhook — choose GET, POST, PUT, PATCH, or DELETE (default: POST)
 - Added custom request headers per webhook — define key/value pairs sent with every delivery; values support dot-notation paths resolved against the outgoing payload
@@ -444,6 +471,7 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 = 1.8.0 — 2026-04-28 =
 - Added type casting in Conditions — cast field values to number, string, or boolean before comparison; enables greater than / less than on numeric strings (e.g. WooCommerce price "100.50")
 - Added type casting in Payload Mapping — cast field values before sending to external APIs
+- Added `X-Webhook-Id` request header — sent with every delivery; carries the webhook's stable UUID so downstream systems can identify which webhook configuration triggered the request when multiple webhooks share the same endpoint
 - Fixed test webhook result label — now reflects actual HTTP status: 2xx = Success, 3xx = Redirect, 4xx = Client Error, 5xx = Server Error (previously all completed deliveries showed green "Success")
 
 = 1.7.0 — 2026-04-27 =
@@ -545,6 +573,9 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.10.0 =
+Adds per-webhook synchronous execution, delivery log details improvements (request headers, query parameters, collapsible payloads), a fix for GET/DELETE webhooks not sending custom headers or URL params, and replay support for condition-skipped log entries. Database migration runs automatically — adds `is_synchronous` to the webhooks table. No manual steps required.
 
 = 1.9.0 =
 Adds configurable HTTP method, custom headers, and URL query parameters per webhook. Database migration runs automatically — adds `http_method`, `custom_headers`, `url_params` to the webhooks table and `request_headers`, `request_url` to the logs table. No manual steps required.

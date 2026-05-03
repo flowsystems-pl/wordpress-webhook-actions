@@ -25,7 +25,7 @@ class QueueService {
    * @param int|null $logId Associated log ID
    * @return int Job ID
    */
-  public function enqueue(int $webhookId, string $trigger, array $payload, ?DateTime $scheduledAt = null, ?int $logId = null, bool $isTest = false): int {
+  public function enqueue(int $webhookId, string $trigger, array $payload, ?DateTime $scheduledAt = null, ?int $logId = null, bool $isTest = false, int $startingAttempts = 0): int {
     if ($scheduledAt === null) {
       $scheduledAt = new DateTime('now', new DateTimeZone('UTC'));
     }
@@ -43,7 +43,7 @@ class QueueService {
       'trigger_name' => $trigger,
       'payload'      => wp_json_encode($payload),
       'status'       => 'pending',
-      'attempts'     => 0,
+      'attempts'     => $startingAttempts,
       'max_attempts' => $maxAttempts,
       'is_test'      => $isTest ? 1 : 0,
       'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),

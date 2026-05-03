@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.10.0';
+  private const CURRENT_VERSION = '1.11.0';
 
   /**
    * Run pending migrations
@@ -77,6 +77,7 @@ class Migrator {
       '1.8.0' => [self::class, 'migration_1_8_0'],
       '1.9.0'  => [self::class, 'migration_1_9_0'],
       '1.10.0' => [self::class, 'migration_1_10_0'],
+      '1.11.0' => [self::class, 'migration_1_11_0'],
     ];
   }
 
@@ -507,6 +508,25 @@ class Migrator {
       if (!$exists) {
         $wpdb->query($sql);
       }
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.11.0 - Add is_synchronous to webhooks table
+   */
+  public static function migration_1_11_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_webhooks';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'is_synchronous'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN is_synchronous TINYINT(1) NOT NULL DEFAULT 0");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }

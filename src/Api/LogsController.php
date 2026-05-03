@@ -343,10 +343,10 @@ class LogsController extends WP_REST_Controller {
       );
     }
 
-    if ($log['status'] !== 'success') {
+    if (!in_array($log['status'], ['success', 'skipped'], true)) {
       return new WP_Error(
         'rest_log_not_replayable',
-        __('Only successful log entries can be replayed.', 'flowsystems-webhook-actions'),
+        __('Only successful or skipped log entries can be replayed.', 'flowsystems-webhook-actions'),
         ['status' => 409]
       );
     }

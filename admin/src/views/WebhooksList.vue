@@ -1,22 +1,26 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Pencil, Trash2, ScrollText, FlaskConical, Copy, Check } from 'lucide-vue-next'
-import { Button, Card, Badge, Switch, Dialog } from '@/components/ui'
+import { Plus, Pencil, Trash2, ScrollText, FlaskConical, Copy, Check, Zap } from 'lucide-vue-next'
+import { Button, Card, Badge, Switch, Dialog, Checkbox } from '@/components/ui'
 import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
+import { useSyncWarning } from '@/composables/useSyncWarning'
 
 const { fetchStats: refreshHealthStats } = useHealthStats()
 const { copiedKey, copy } = useCopyToClipboard()
+const { dontShowAgain, isWarningDismissed, applyDismiss, resetDontShowAgain } = useSyncWarning()
 
 const router = useRouter()
 const webhooks = ref([])
 const loading = ref(true)
 const error = ref(null)
 const togglingId = ref(null)
+const togglingSync = ref(null)
 const pendingDeleteWebhook = ref(null)
+const pendingSyncWebhook = ref(null)
 const testWebhook = ref(null)
 
 const loadWebhooks = async () => {
@@ -44,6 +48,51 @@ const toggleWebhook = async (webhook) => {
     console.error('Failed to toggle webhook:', e)
   } finally {
     togglingId.value = null
+  }
+}
+
+const toggleSynchronous = async (webhook) => {
+  if (webhook.is_synchronous) {
+    togglingSync.value = webhook.id
+    try {
+      const updated = await api.webhooks.update(webhook.id, { is_synchronous: false })
+      const index = webhooks.value.findIndex((w) => w.id === webhook.id)
+      if (index !== -1) webhooks.value[index] = updated
+    } catch (e) {
+      console.error('Failed to update webhook:', e)
+    } finally {
+      togglingSync.value = null
+    }
+  } else if (isWarningDismissed()) {
+    togglingSync.value = webhook.id
+    try {
+      const updated = await api.webhooks.update(webhook.id, { is_synchronous: true })
+      const index = webhooks.value.findIndex((w) => w.id === webhook.id)
+      if (index !== -1) webhooks.value[index] = updated
+    } catch (e) {
+      console.error('Failed to update webhook:', e)
+    } finally {
+      togglingSync.value = null
+    }
+  } else {
+    pendingSyncWebhook.value = webhook
+  }
+}
+
+const confirmToggleSync = async () => {
+  const webhook = pendingSyncWebhook.value
+  if (!webhook) return
+  applyDismiss()
+  pendingSyncWebhook.value = null
+  togglingSync.value = webhook.id
+  try {
+    const updated = await api.webhooks.update(webhook.id, { is_synchronous: true })
+    const index = webhooks.value.findIndex((w) => w.id === webhook.id)
+    if (index !== -1) webhooks.value[index] = updated
+  } catch (e) {
+    console.error('Failed to update webhook:', e)
+  } finally {
+    togglingSync.value = null
   }
 }
 
@@ -87,6 +136,33 @@ onMounted(loadWebhooks)
         <div class="flex gap-2">
           <Button variant="destructive" @click="confirmDeleteWebhook">Delete</Button>
           <Button variant="outline" @click="pendingDeleteWebhook = null">Cancel</Button>
+        </div>
+      </template>
+    </Dialog>
+
+    <!-- Sync Warning Dialog -->
+    <Dialog
+      :open="!!pendingSyncWebhook"
+      title="Enable Synchronous Execution?"
+      @close="() => { pendingSyncWebhook = null; resetDontShowAgain() }"
+    >
+      <div class="space-y-2 text-sm text-muted-foreground">
+        <p>
+          This webhook will fire inline during the WordPress request that triggers it, bypassing the queue.
+          Slow or unreachable endpoints can <strong class="text-foreground">delay page loads, form submissions, and other frontend interactions.</strong>
+        </p>
+        <p>
+          The <strong class="text-foreground">recommended approach is asynchronous delivery</strong> via the built-in system cron or an external cron job.
+        </p>
+      </div>
+      <label class="flex items-center gap-2 cursor-pointer select-none">
+        <Checkbox v-model="dontShowAgain" />
+        <span class="text-sm text-muted-foreground">Don't show this again</span>
+      </label>
+      <template #footer>
+        <div class="flex gap-2">
+          <Button variant="destructive" @click="confirmToggleSync">Enable Anyway</Button>
+          <Button variant="outline" @click="() => { pendingSyncWebhook = null; resetDontShowAgain() }">Cancel</Button>
         </div>
       </template>
     </Dialog>
@@ -138,6 +214,14 @@ onMounted(loadWebhooks)
               </Badge>
               <Badge variant="outline" class="text-xs font-mono">
                 {{ webhook.http_method || 'POST' }}
+              </Badge>
+              <Badge
+                v-if="webhook.is_synchronous"
+                variant="warning"
+                class="text-xs cursor-help"
+                title="Executes synchronously (blocking)"
+              >
+                Sync
               </Badge>
             </div>
 
@@ -197,6 +281,17 @@ onMounted(loadWebhooks)
               :loading="togglingId === webhook.id"
               @update:model-value="toggleWebhook(webhook)"
             />
+            <div
+              class="flex items-center gap-1 border-l pl-2 ml-1"
+              title="Synchronous execution"
+            >
+              <Zap class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Switch
+                :model-value="webhook.is_synchronous"
+                :loading="togglingSync === webhook.id"
+                @update:model-value="toggleSynchronous(webhook)"
+              />
+            </div>
             <Button
               size="icon"
               variant="ghost"

@@ -208,8 +208,9 @@ class WebhooksController extends WP_REST_Controller {
       'is_enabled'     => (bool) $request->get_param('is_enabled'),
       'triggers'       => $request->get_param('triggers') ?? [],
       'http_method'    => strtoupper(sanitize_text_field($request->get_param('http_method') ?? 'POST')),
-      'custom_headers' => $this->sanitizeKvArray($request->get_param('custom_headers') ?? []),
-      'url_params'     => $this->sanitizeKvArray($request->get_param('url_params') ?? []),
+      'custom_headers'  => $this->sanitizeKvArray($request->get_param('custom_headers') ?? []),
+      'url_params'      => $this->sanitizeKvArray($request->get_param('url_params') ?? []),
+      'is_synchronous'  => (bool) $request->get_param('is_synchronous'),
     ];
 
     // Validate
@@ -318,6 +319,10 @@ class WebhooksController extends WP_REST_Controller {
 
     if ($request->has_param('url_params')) {
       $data['url_params'] = $this->sanitizeKvArray($request->get_param('url_params') ?? []);
+    }
+
+    if ($request->has_param('is_synchronous')) {
+      $data['is_synchronous'] = (bool) $request->get_param('is_synchronous');
     }
 
     $result = $this->repository->update($id, $data);
@@ -623,6 +628,12 @@ class WebhooksController extends WP_REST_Controller {
           'type' => 'boolean',
           'context' => ['view', 'edit'],
           'default' => true,
+        ],
+        'is_synchronous' => [
+          'description' => __('Whether the webhook executes synchronously (blocking, bypasses queue).', 'flowsystems-webhook-actions'),
+          'type' => 'boolean',
+          'context' => ['view', 'edit'],
+          'default' => false,
         ],
         'triggers' => [
           'description' => __('List of trigger actions.', 'flowsystems-webhook-actions'),

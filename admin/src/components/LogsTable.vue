@@ -56,7 +56,7 @@ const statusVariant = (status) => {
 }
 
 const isRetryable  = (status) => status === 'error' || status === 'permanently_failed'
-const isReplayable = (status) => status === 'success' || status === 'test'
+const isReplayable = (status) => status === 'success' || status === 'test' || status === 'skipped'
 
 const formatDate = formatUtcDate
 
@@ -84,6 +84,7 @@ const formatJson = (data) => {
 const openDetails = (log) => {
   selectedLog.value = log
   showDetails.value = true
+  openAttempts.value.clear()
 }
 
 const closeDetails = () => {
@@ -101,6 +102,43 @@ const toggleAttempt = (index) => {
   }
   openAttempts.value = new Set(openAttempts.value)
 }
+
+// Collapse state — persisted in localStorage so preferences survive across log opens
+const readBool = (key, def) => {
+  const v = localStorage.getItem(key)
+  return v !== null ? v === 'true' : def
+}
+const writeBool = (key, val) => localStorage.setItem(key, String(val))
+
+const payloadCollapsed       = ref(readBool('fswa_log_detail_payload_collapsed', true))
+const originalPayloadCollapsed = ref(readBool('fswa_log_detail_original_collapsed', true))
+
+const togglePayloadCollapsed = () => {
+  payloadCollapsed.value = !payloadCollapsed.value
+  writeBool('fswa_log_detail_payload_collapsed', payloadCollapsed.value)
+}
+const toggleOriginalCollapsed = () => {
+  originalPayloadCollapsed.value = !originalPayloadCollapsed.value
+  writeBool('fswa_log_detail_original_collapsed', originalPayloadCollapsed.value)
+}
+
+const isNoBodyMethod = computed(() => {
+  const m = selectedLog.value?.http_method?.toUpperCase()
+  return m === 'GET' || m === 'DELETE'
+})
+
+const queryParams = computed(() => {
+  const url = selectedLog.value?.request_url
+  if (!url) return []
+  try {
+    const parsed = new URL(url)
+    const params = []
+    parsed.searchParams.forEach((value, key) => params.push({ key, value }))
+    return params
+  } catch {
+    return []
+  }
+})
 
 defineExpose({ openDetails })
 
@@ -470,30 +508,91 @@ const { copiedKey, copy } = useCopyToClipboard()
           </div>
         </div>
 
-         <!-- Request Payload (Transformed if mapping applied) -->
+        <!-- Request Headers -->
+        <div v-if="selectedLog.request_headers && Object.keys(selectedLog.request_headers).length">
+          <div class="flex items-center justify-between mb-1">
+            <div class="text-sm font-medium">Request Headers</div>
+            <button @click="copy(formatJson(selectedLog.request_headers), 'detail-headers')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy headers">
+              <Check v-if="copiedKey === 'detail-headers'" class="h-3.5 w-3.5 text-green-500" />
+              <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
+          </div>
+          <div class="rounded-md border divide-y text-xs">
+            <div
+              v-for="(value, key) in selectedLog.request_headers"
+              :key="key"
+              class="flex px-3 py-1.5 gap-3"
+            >
+              <span class="font-mono text-muted-foreground shrink-0 min-w-[160px]">{{ key }}</span>
+              <span class="font-mono break-all">{{ value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Query Parameters -->
+        <div v-if="queryParams.length">
+          <div class="flex items-center justify-between mb-1">
+            <div class="text-sm font-medium">Query Parameters</div>
+          </div>
+          <div class="rounded-md border divide-y text-xs">
+            <div
+              v-for="param in queryParams"
+              :key="param.key"
+              class="flex px-3 py-1.5 gap-3"
+            >
+              <span class="font-mono text-muted-foreground shrink-0 min-w-[160px]">{{ param.key }}</span>
+              <span class="font-mono break-all">{{ param.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Request Payload (Transformed if mapping applied) -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <div class="text-sm font-medium">
+            <button
+              type="button"
+              class="flex items-center gap-1.5 text-sm font-medium hover:text-foreground/80 transition-colors"
+              @click="togglePayloadCollapsed"
+            >
+              <ChevronDown
+                class="h-3.5 w-3.5 transition-transform"
+                :class="{ 'rotate-180': !payloadCollapsed }"
+              />
               {{ selectedLog.mapping_applied ? 'Transformed Payload (Sent)' : 'Request Payload' }}
-            </div>
+            </button>
             <button @click="copy(formatJson(selectedLog.request_payload), 'detail-request')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy payload">
               <Check v-if="copiedKey === 'detail-request'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
-          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.request_payload) }}</pre>
+          <template v-if="!payloadCollapsed">
+            <div v-if="isNoBodyMethod" class="text-xs text-muted-foreground p-3 bg-muted/50 rounded-md border border-dashed mb-2">
+              Not sent as request body for GET / DELETE. Without URL parameters configured, the full payload is appended as <code class="font-mono">?payload=&lt;json&gt;</code>.
+            </div>
+            <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.request_payload) }}</pre>
+          </template>
         </div>
 
         <!-- Original Payload (if mapping was applied) -->
         <div v-if="selectedLog.mapping_applied && selectedLog.original_payload">
           <div class="flex items-center justify-between mb-1">
-            <div class="text-sm font-medium">Original Payload</div>
+            <button
+              type="button"
+              class="flex items-center gap-1.5 text-sm font-medium hover:text-foreground/80 transition-colors"
+              @click="toggleOriginalCollapsed"
+            >
+              <ChevronDown
+                class="h-3.5 w-3.5 transition-transform"
+                :class="{ 'rotate-180': !originalPayloadCollapsed }"
+              />
+              Original Payload
+            </button>
             <button @click="copy(formatJson(selectedLog.original_payload), 'detail-original')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy original payload">
               <Check v-if="copiedKey === 'detail-original'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
-          <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.original_payload) }}</pre>
+          <pre v-if="!originalPayloadCollapsed" class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.original_payload) }}</pre>
         </div>
 
         <!-- Response Body -->
