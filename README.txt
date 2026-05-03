@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -290,9 +290,10 @@ Built for developers who need production-grade automation reliability.
 = Available Filters =
 
 - `fswa_should_dispatch` – Decide if a trigger should dispatch
-- `fswa_payload` – Customize webhook payload
+- `fswa_payload` – Customize webhook payload before dispatch
+- `fswa_capture_payload` – Modify the payload just before it is stored as the captured example (does not affect the dispatched payload); args: `$payload`, `$webhookId`, `$trigger`
 - `fswa_normalize_object` – Normalize a third-party object into an array for payload serialization
-- `fswa_headers` – Add custom HTTP headers
+- `fswa_headers` – Add or modify HTTP headers sent with the request
 - `fswa_require_https` – Toggle HTTPS requirement
 - `fswa_max_attempts` – Configure maximum retry attempts
 - `fswa_backoff_delay` – Customize retry backoff delay in seconds
@@ -309,6 +310,7 @@ Built for developers who need production-grade automation reliability.
 - `fswa_error` – Fired after webhook delivery failure
 - `fswa_skipped` – Fired when a webhook dispatch is skipped due to a failed condition
 - `fswa_webhook_saved` – Fired after a webhook is created or updated
+- `fswa_webhook_response` – Fired after an HTTP response is received (success or error); args: `$webhookId`, `$trigger`, `$responseCode`, `$responseBody`, `$payload`, `$webhook`
 
 = Admin UX Improvements =
 
@@ -403,6 +405,15 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 8. REST API Tokens configuration screen
 
 == Changelog ==
+
+= 1.9.0 — 2026-05-03 =
+- Added configurable HTTP method per webhook — choose GET, POST, PUT, PATCH, or DELETE (default: POST)
+- Added custom request headers per webhook — define key/value pairs sent with every delivery; values support dot-notation paths resolved against the outgoing payload
+- Added URL query parameters per webhook — appended to the endpoint URL; for GET and DELETE requests, query params are the primary payload transport (no body); a full `?payload=` fallback is used when no params are configured
+- Added `fswa_capture_payload` filter — modify or enrich the payload stored as the captured example without affecting what is dispatched; designed for Pro extensions and custom PHP snippets
+- Added `fswa_webhook_response` action — fires after every HTTP response is received per webhook; intended for Pro extensions to run custom logic against the response (parse body, trigger follow-up actions, store data)
+- Added `request_headers` and `request_url` columns to delivery logs — the exact headers sent and the fully resolved URL (with query params applied) are now stored and visible in the delivery log
+- Improved test webhook drawer — defaults to "Captured + Mapping" payload source; result panel now shows HTTP method, fully resolved endpoint URL, sent headers, and request body
 
 = 1.8.0 — 2026-04-28 =
 - Added type casting in Conditions — cast field values to number, string, or boolean before comparison; enables greater than / less than on numeric strings (e.g. WooCommerce price "100.50")
@@ -508,6 +519,9 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.9.0 =
+Adds configurable HTTP method, custom headers, and URL query parameters per webhook. Database migration runs automatically — adds `http_method`, `custom_headers`, `url_params` to the webhooks table and `request_headers`, `request_url` to the logs table. No manual steps required.
 
 = 1.8.0 =
 Adds type casting in Conditions and Payload Mapping — cast string values to number, string, or boolean before comparison or before sending to an API. Fixes test webhook result labels to correctly reflect HTTP status codes. No database changes.
