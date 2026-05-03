@@ -109,6 +109,9 @@ class LogRepository {
       if (!empty($item['original_payload'])) {
         $item['original_payload'] = json_decode($item['original_payload'], true);
       }
+      if (!empty($item['request_headers'])) {
+        $item['request_headers'] = json_decode($item['request_headers'], true);
+      }
       if (!empty($item['response_body'])) {
         $decoded = json_decode($item['response_body'], true);
         $item['response_body'] = $decoded !== null ? $decoded : $item['response_body'];
@@ -161,6 +164,9 @@ class LogRepository {
     if (!empty($log['original_payload'])) {
       $log['original_payload'] = json_decode($log['original_payload'], true);
     }
+    if (!empty($log['request_headers'])) {
+      $log['request_headers'] = json_decode($log['request_headers'], true);
+    }
     if (!empty($log['response_body'])) {
       $decoded = json_decode($log['response_body'], true);
       $log['response_body'] = $decoded !== null ? $decoded : $log['response_body'];
@@ -198,6 +204,10 @@ class LogRepository {
           ? (is_array($data['original_payload']) ? wp_json_encode($data['original_payload']) : $data['original_payload'])
           : null,
         'mapping_applied' => isset($data['mapping_applied']) ? (int) $data['mapping_applied'] : 0,
+        'request_headers' => isset($data['request_headers'])
+          ? (is_array($data['request_headers']) ? wp_json_encode($data['request_headers']) : $data['request_headers'])
+          : null,
+        'request_url' => $data['request_url'] ?? null,
         'response_body' => $data['response_body'] ?? null,
         'error_message' => $data['error_message'] ?? null,
         'duration_ms' => $data['duration_ms'] ?? null,
@@ -267,6 +277,18 @@ class LogRepository {
     if (isset($data['stats_recorded'])) {
       $updateData['stats_recorded'] = (int) $data['stats_recorded'];
       $format[] = '%d';
+    }
+
+    if (isset($data['request_headers'])) {
+      $updateData['request_headers'] = is_array($data['request_headers'])
+        ? wp_json_encode($data['request_headers'])
+        : $data['request_headers'];
+      $format[] = '%s';
+    }
+
+    if (isset($data['request_url'])) {
+      $updateData['request_url'] = $data['request_url'];
+      $format[] = '%s';
     }
 
     if (empty($updateData)) {

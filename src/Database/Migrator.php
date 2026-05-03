@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.9.0';
+  private const CURRENT_VERSION = '1.10.0';
 
   /**
    * Run pending migrations
@@ -75,7 +75,8 @@ class Migrator {
       '1.6.0' => [self::class, 'migration_1_6_0'],
       '1.7.0' => [self::class, 'migration_1_7_0'],
       '1.8.0' => [self::class, 'migration_1_8_0'],
-      '1.9.0' => [self::class, 'migration_1_9_0'],
+      '1.9.0'  => [self::class, 'migration_1_9_0'],
+      '1.10.0' => [self::class, 'migration_1_10_0'],
     ];
   }
 
@@ -469,6 +470,32 @@ class Migrator {
       'http_method'    => "ALTER TABLE {$table} ADD COLUMN http_method VARCHAR(10) NOT NULL DEFAULT 'POST'",
       'custom_headers' => "ALTER TABLE {$table} ADD COLUMN custom_headers TEXT NULL",
       'url_params'     => "ALTER TABLE {$table} ADD COLUMN url_params TEXT NULL",
+    ];
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    foreach ($columns as $column => $sql) {
+      $exists = $wpdb->get_var($wpdb->prepare(
+        "SHOW COLUMNS FROM {$table} LIKE %s",
+        $column
+      ));
+      if (!$exists) {
+        $wpdb->query($sql);
+      }
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.10.0 - Add request_headers and request_url to logs table
+   */
+  public static function migration_1_10_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_logs';
+
+    $columns = [
+      'request_headers' => "ALTER TABLE {$table} ADD COLUMN request_headers TEXT NULL",
+      'request_url'     => "ALTER TABLE {$table} ADD COLUMN request_url TEXT NULL",
     ];
 
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter

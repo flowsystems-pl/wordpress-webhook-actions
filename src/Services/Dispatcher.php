@@ -416,7 +416,7 @@ class Dispatcher {
 
     if (is_wp_error($result)) {
       $errorMessage = $result->get_error_message();
-      $this->logError($trigger, $url, (string) $errorMessage, $webhookId, $payload, null, null, $durationMs, $logId, $isTest);
+      $this->logError($trigger, $url, (string) $errorMessage, $webhookId, $payload, null, null, $durationMs, $logId, $isTest, $headers);
 
       if ($logId !== null) {
         $this->logService->appendAttemptHistory($logId, [
@@ -450,10 +450,10 @@ class Dispatcher {
     $shouldRetry = !$isTest && !$success && ($responseCode >= 500 || $responseCode === 429);
 
     if ($success) {
-      $this->logSuccess($trigger, $url, $payload, $result, $webhookId, $durationMs, $logId, $isTest);
+      $this->logSuccess($trigger, $url, $payload, $result, $webhookId, $durationMs, $logId, $isTest, $headers);
     } else {
       $errorMessage = sprintf("HTTP %d: %s", $responseCode, (string) $responseBody);
-      $this->logError($trigger, $url, $errorMessage, $webhookId, $payload, $responseCode, $responseBody, $durationMs, $logId, $isTest);
+      $this->logError($trigger, $url, $errorMessage, $webhookId, $payload, $responseCode, $responseBody, $durationMs, $logId, $isTest, $headers);
     }
 
     if ($logId !== null) {
@@ -678,17 +678,20 @@ class Dispatcher {
     ?string $responseBody = null,
     ?int $durationMs = null,
     ?int $logId = null,
-    bool $isTest = false
+    bool $isTest = false,
+    ?array $headers = null
   ): void {
     $status = $isTest ? 'test' : 'error';
     if ($webhookId > 0) {
       if ($logId !== null) {
         $this->logService->updateLog($logId, [
-          'status'        => $status,
-          'http_code'     => $httpCode,
-          'response_body' => $responseBody,
-          'error_message' => $error,
-          'duration_ms'   => $durationMs,
+          'status'          => $status,
+          'http_code'       => $httpCode,
+          'response_body'   => $responseBody,
+          'error_message'   => $error,
+          'duration_ms'     => $durationMs,
+          'request_headers' => $headers,
+          'request_url'     => $url,
         ]);
       } else {
         $this->logService->logError(
@@ -724,7 +727,8 @@ class Dispatcher {
     int $webhookId = 0,
     int $durationMs = 0,
     ?int $logId = null,
-    bool $isTest = false
+    bool $isTest = false,
+    ?array $headers = null
   ): void {
     $responseCode = wp_remote_retrieve_response_code($response);
     $responseBody = wp_remote_retrieve_body($response);
@@ -733,10 +737,12 @@ class Dispatcher {
     if ($webhookId > 0) {
       if ($logId !== null) {
         $this->logService->updateLog($logId, [
-          'status'        => $status,
-          'http_code'     => (int) $responseCode,
-          'response_body' => (string) $responseBody,
-          'duration_ms'   => $durationMs,
+          'status'          => $status,
+          'http_code'       => (int) $responseCode,
+          'response_body'   => (string) $responseBody,
+          'duration_ms'     => $durationMs,
+          'request_headers' => $headers,
+          'request_url'     => $url,
         ]);
       } else {
         $this->logService->logSuccess(

@@ -74,6 +74,8 @@ class Activation {
             request_payload LONGTEXT,
             original_payload LONGTEXT DEFAULT NULL,
             mapping_applied TINYINT(1) NOT NULL DEFAULT 0,
+            request_headers TEXT DEFAULT NULL,
+            request_url TEXT DEFAULT NULL,
             response_body LONGTEXT,
             error_message TEXT,
             duration_ms INT UNSIGNED DEFAULT NULL,
