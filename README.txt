@@ -427,6 +427,7 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 6. Queue status overview
 7. Settings configuration screen
 8. REST API Tokens configuration screen
+9. Conditional webhook dispatch — conditions editor
 
 == Changelog ==
 
