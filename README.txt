@@ -136,6 +136,28 @@ Adapt outgoing JSON payloads to match any external API:
 
 Payloads always include stable event metadata for consistency.
 
+= Configurable HTTP Requests =
+
+Every webhook can be configured to match exactly what the target API expects:
+
+**HTTP Method**
+
+Choose the method used for each delivery: GET, POST, PUT, PATCH, or DELETE. Default is POST.
+
+**Custom Request Headers**
+
+Add any number of key/value header pairs sent with every delivery. Header values support dot-notation paths — reference any field from the outgoing payload directly (e.g. `event.id`, `site.url`). Resolved at dispatch time against the live payload.
+
+**URL Query Parameters**
+
+Append query parameters to the endpoint URL at dispatch time. Values also support dot-notation payload resolution.
+
+For GET and DELETE requests — where a request body is not appropriate — query parameters become the primary payload transport. If no params are configured, the full payload is sent as a `?payload=` fallback. POST, PUT, and PATCH send a JSON body as normal; any configured params are appended to the URL in addition.
+
+**Request details in delivery logs**
+
+Every delivery log stores the exact headers sent and the fully resolved URL (including all query parameters), so you can inspect precisely what was dispatched.
+
 = REST API Access with Token Authentication =
 
 The plugin exposes a full operational REST API (`/wp-json/fswa/v1/`) that powers the admin interface and can also be used directly by external tools, automation systems, AI agents, and CI/CD pipelines.
@@ -260,6 +282,7 @@ This makes the plugin suitable for production WooCommerce stores and high-throug
 - Works with any WordPress or WooCommerce action
 - Full REST API (`/wp-json/fswa/v1/`) usable from any HTTP client — not just the admin panel
 - API token authentication with scoped access (`read`, `operational`, `full`)
+- Configurable HTTP method, custom headers, and URL query parameters per webhook
 - Fully extensible via filters and actions
 - Clean namespace and unique prefixes
 - Built according to WordPress.org standards
@@ -277,6 +300,7 @@ Webhook Actions by Flow Systems provides:
 - Permanent failure state handling
 - Event UUIDs and timestamps
 - Full delivery logging and metrics
+- Configurable HTTP method, custom headers, and URL query parameters per webhook
 - Conditional webhook dispatch
 - Test webhook delivery — send a test event instantly or via queue without triggering real WordPress events
 - REST API with token authentication for programmatic access
