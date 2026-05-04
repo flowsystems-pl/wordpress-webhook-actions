@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ChevronDown, ChevronLeft, ChevronRight, Search, Hash, FolderOpen, AlertTriangle, PenLine, ListTree } from 'lucide-vue-next'
+import { ChevronDown, ChevronLeft, ChevronRight, Search, Hash, FolderOpen, AlertTriangle, PenLine, ListTree, Plus } from 'lucide-vue-next'
 import { Popover, Badge, Input } from '@/components/ui'
 
 const props = defineProps({
@@ -80,18 +80,18 @@ const resolveType = (path) => {
   return typeof val
 }
 
-const handleItemClick = (item) => {
-  if (item.isLeaf) {
-    const fullPath = [...navigationPath.value, item.key].map(escapeKey).join('.')
-    emit('update:modelValue', fullPath)
-    emit('update:fieldType', item.type)
-    open.value = false
-    search.value = ''
-    navigationPath.value = []
-  } else {
-    navigationPath.value = [...navigationPath.value, item.key]
-    search.value = ''
-  }
+const selectItem = (item) => {
+  const fullPath = [...navigationPath.value, item.key].map(escapeKey).join('.')
+  emit('update:modelValue', fullPath)
+  emit('update:fieldType', item.type)
+  open.value = false
+  search.value = ''
+  navigationPath.value = []
+}
+
+const navigateInto = (item) => {
+  navigationPath.value = [...navigationPath.value, item.key]
+  search.value = ''
 }
 
 const goBack = () => {
@@ -207,35 +207,48 @@ const getValuePreview = (value) => {
             >
               No fields found
             </div>
-            <button
+            <div
               v-for="item in filteredItems"
               :key="item.key"
-              type="button"
-              class="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted text-left"
-              @click.stop="handleItemClick(item)"
+              class="w-full flex items-center gap-2 px-3 py-1.5 text-sm hover:bg-muted text-left group"
             >
-              <component
-                :is="item.isLeaf ? Hash : FolderOpen"
-                class="h-3.5 w-3.5 text-muted-foreground shrink-0"
-              />
-              <code class="font-mono text-xs flex-1 truncate">{{ item.key }}</code>
-              <Badge
-                :variant="getTypeBadgeVariant(item.type)"
-                class="text-[10px] px-1 py-0 shrink-0"
+              <button
+                type="button"
+                class="flex items-center gap-2 flex-1 min-w-0 text-left"
+                @click.stop="item.isLeaf ? selectItem(item) : navigateInto(item)"
               >
-                {{ item.type }}
-              </Badge>
-              <span
-                v-if="item.isLeaf && getValuePreview(item.value)"
-                class="text-xs text-muted-foreground shrink-0 max-w-20 truncate"
-              >
-                {{ getValuePreview(item.value) }}
-              </span>
-              <ChevronRight
+                <component
+                  :is="item.isLeaf ? Hash : FolderOpen"
+                  class="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                />
+                <code class="font-mono text-xs flex-1 truncate">{{ item.key }}</code>
+                <Badge
+                  :variant="getTypeBadgeVariant(item.type)"
+                  class="text-[10px] px-1 py-0 shrink-0"
+                >
+                  {{ item.type }}
+                </Badge>
+                <span
+                  v-if="item.isLeaf && getValuePreview(item.value)"
+                  class="text-xs text-muted-foreground shrink-0 max-w-20 truncate"
+                >
+                  {{ getValuePreview(item.value) }}
+                </span>
+                <ChevronRight
+                  v-if="!item.isLeaf"
+                  class="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                />
+              </button>
+              <button
                 v-if="!item.isLeaf"
-                class="h-3.5 w-3.5 text-muted-foreground shrink-0"
-              />
-            </button>
+                type="button"
+                title="Select this field"
+                class="shrink-0 p-0.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
+                @click.stop="selectItem(item)"
+              >
+                <Plus class="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
 
           <!-- Footer hint -->
@@ -243,7 +256,7 @@ const getValuePreview = (value) => {
             v-if="!modelValue"
             class="px-3 py-2 border-t text-[10px] text-muted-foreground"
           >
-            Select a leaf field to use in condition
+            Click to select or browse • + to select an array/object
           </div>
         </Popover>
 

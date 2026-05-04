@@ -285,10 +285,11 @@ class PayloadTransformer {
         $cast = $map['cast'] ?? null;
         if ($cast !== null) {
           $value = match ($cast) {
-            'number'  => (float) $value,
-            'string'  => (string) $value,
-            'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $value,
-            default   => $value,
+            'number'    => (float) $value,
+            'string'    => (string) $value,
+            'boolean'   => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $value,
+            'stringify' => is_array($value) || is_object($value) ? wp_json_encode($value) : (string) $value,
+            default     => $value,
           };
         }
         // Set value at target path

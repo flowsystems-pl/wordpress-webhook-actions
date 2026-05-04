@@ -118,10 +118,11 @@ class ConditionEvaluator {
     $cast = $rule['cast'] ?? null;
     if ($cast !== null && $actual !== null) {
       $actual = match ($cast) {
-        'number'  => (float) $actual,
-        'string'  => (string) $actual,
-        'boolean' => filter_var($actual, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $actual,
-        default   => $actual,
+        'number'    => (float) $actual,
+        'string'    => (string) $actual,
+        'boolean'   => filter_var($actual, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? (bool) $actual,
+        'stringify' => is_array($actual) || is_object($actual) ? wp_json_encode($actual) : (string) $actual,
+        default     => $actual,
       };
     }
 
@@ -156,6 +157,18 @@ class ConditionEvaluator {
       case 'is_not_empty':
         return $actual !== null && $actual !== '' && $actual !== [];
 
+      case 'array_contains':
+        if (!is_array($actual)) return false;
+        return in_array((string) $value, array_map('strval', $actual), true);
+
+      case 'object_contains':
+        if (!is_array($actual) && !is_object($actual)) return false;
+        $key = isset($rule['key']) && $rule['key'] !== '' ? (string) $rule['key'] : null;
+        if ($key !== null) {
+          return $this->deepContainsEntry((array) $actual, $key, (string) $value);
+        }
+        return $this->deepContainsValue((array) $actual, (string) $value);
+
       case 'is_true':
         return in_array(strtolower((string) $actual), ['true', '1', 'yes'], true)
           || $actual === true;
@@ -168,5 +181,27 @@ class ConditionEvaluator {
       default:
         return false;
     }
+  }
+
+  private function deepContainsValue(array $data, string $search): bool {
+    foreach ($data as $v) {
+      if (is_array($v) || is_object($v)) {
+        if ($this->deepContainsValue((array) $v, $search)) return true;
+      } elseif ((string) $v === $search) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private function deepContainsEntry(array $data, string $key, string $value): bool {
+    foreach ($data as $k => $v) {
+      if (is_array($v) || is_object($v)) {
+        $sub = (array) $v;
+        if (array_key_exists($key, $sub) && (string) $sub[$key] === $value) return true;
+        if ($this->deepContainsEntry($sub, $key, $value)) return true;
+      }
+    }
+    return false;
   }
 }

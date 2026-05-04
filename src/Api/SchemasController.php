@@ -390,7 +390,7 @@ class SchemasController extends WP_REST_Controller {
     $allowedOperators = [
       'equals', 'not_equals', 'contains', 'not_contains',
       'greater_than', 'less_than', 'is_empty', 'is_not_empty',
-      'is_true', 'is_false',
+      'is_true', 'is_false', 'array_contains', 'object_contains',
     ];
 
     $sanitized = [
@@ -417,8 +417,11 @@ class SchemasController extends WP_REST_Controller {
             'operator' => $groupRule['operator'],
             'value'    => isset($groupRule['value']) ? sanitize_text_field((string) $groupRule['value']) : '',
           ];
-          if (in_array($groupCast, ['number', 'string', 'boolean'], true)) {
+          if (in_array($groupCast, ['number', 'string', 'boolean', 'stringify'], true)) {
             $groupSanitizedRule['cast'] = $groupCast;
+          }
+          if ($groupRule['operator'] === 'object_contains' && isset($groupRule['key']) && $groupRule['key'] !== '') {
+            $groupSanitizedRule['key'] = sanitize_text_field((string) $groupRule['key']);
           }
           $groupRules[] = $groupSanitizedRule;
         }
@@ -444,8 +447,11 @@ class SchemasController extends WP_REST_Controller {
         'operator' => $rule['operator'],
         'value'    => isset($rule['value']) ? sanitize_text_field((string) $rule['value']) : '',
       ];
-      if (in_array($cast, ['number', 'string', 'boolean'], true)) {
+      if (in_array($cast, ['number', 'string', 'boolean', 'stringify'], true)) {
         $sanitizedRule['cast'] = $cast;
+      }
+      if ($rule['operator'] === 'object_contains' && isset($rule['key']) && $rule['key'] !== '') {
+        $sanitizedRule['key'] = sanitize_text_field((string) $rule['key']);
       }
       $sanitized['rules'][] = $sanitizedRule;
     }

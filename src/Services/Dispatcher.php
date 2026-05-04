@@ -599,10 +599,13 @@ class Dispatcher {
     $val   = $rule['value'] ?? '';
 
     $valueHidden = in_array($op, ['is_empty', 'is_not_empty', 'is_true', 'is_false'], true);
+    $key = isset($rule['key']) && $rule['key'] !== '' ? $rule['key'] : null;
 
     $base = $valueHidden
       ? sprintf('%s %s', $field, $op)
-      : sprintf('%s %s "%s"', $field, $op, $val);
+      : ($key !== null
+        ? sprintf('%s %s %s="%s"', $field, $op, $key, $val)
+        : sprintf('%s %s "%s"', $field, $op, $val));
 
     if ($actual !== null) {
       $actualStr = is_array($actual) ? json_encode($actual) : (string) $actual;
