@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -17,6 +17,8 @@ Webhook Actions by Flow Systems is a developer-focused WordPress webhook deliver
 It adds a persistent queue, automatic retries, and Action Scheduler support for production-grade background processing — so your webhooks don’t get lost when external APIs fail.
 
 Works great with WooCommerce, n8n, Zapier alternatives, and custom APIs.
+
+Any WordPress `do_action` hook can become a reliable event source — register it as a trigger and the plugin handles queuing, retries, payload mapping, and delivery from there. No custom delivery code required.
 
 Includes built-in Contact Form 7 integration — send CF7 form submissions to webhooks instantly with clean, structured payloads. Replace fragile CF7 email workflows with reliable webhook-based automation.
 
@@ -102,6 +104,29 @@ This makes it easy to:
 - Re-evaluate previously skipped events after changing webhook conditions
 
 Each replay uses the original payload and event metadata, ensuring consistent behavior across retries and debugging sessions.
+
+= Conditional Dispatch =
+
+Not every WordPress event should trigger a webhook. Conditional dispatch lets you define field-level rules on any webhook — the event is only delivered if the conditions pass. Events that fail the check are logged with a `skipped` status and can be replayed later after adjusting the conditions.
+
+Conditions are evaluated against the outgoing payload using dot-notation field paths. Each condition specifies a field, an optional type cast, an operator, and a comparison value. The field selector shows the live captured payload so you can click through nested structures and pick the exact path without typing it manually.
+
+**Operators include:** equals, not equals, contains, starts with, ends with, is empty, has value, greater than, less than, `array_contains`, `object_contains`
+
+**Type casting before comparison:** auto-detect, number, string, boolean, or `stringify` (JSON-encodes arrays and objects into a string for pattern matching)
+
+**Example — WooCommerce: fire only when a specific product is in the order**
+
+A `woocommerce_order_status_changed` hook passes the full order object. The payload includes `args.1.line_items` — an array of purchased products, each with fields like `product_id`, `quantity`, and `subtotal`. To send a webhook only when product ID 26 appears in the order:
+
+- Field: `args.1.line_items`
+- Operator: `has value` → key: `product_id`, value: `26`
+
+The webhook stays silent for every other order and fires only when that product is purchased. No custom PHP, no extra filters — just a condition rule configured in the admin panel.
+
+The same pattern works for any hook-based event: filter by post type, form field value, user role, order total, or any other field present in the payload.
+
+Free plan includes one condition with AND matching. [Upgrade to Pro](https://wpwebhooks.org/pricing/) for unlimited conditions, multiple condition groups with independent AND/OR logic per group, and ANY (OR) matching.
 
 = Synchronous Execution =
 
@@ -226,22 +251,6 @@ Example scenarios:
 • External dashboards display real-time webhook delivery metrics using API tokens.
 
 This allows WordPress automation pipelines to be controlled entirely through HTTP APIs, enabling advanced integration with AI-driven development workflows.
-
-= Conditional Webhook Dispatch =
-
-Send webhooks only when your conditions are met — filter by payload field values before dispatch.
-
-Each webhook can have one or more conditions evaluated against the incoming payload:
-
-- Match against string, number, boolean, or null values
-- Cast field values to number, string, or boolean before comparison — enables `greater than` / `less than` on numeric strings (e.g. WooCommerce `"100.50"`)
-- Operators: equals, not equals, contains, starts with, ends with, greater than, less than, empty, not empty
-- AND / OR match type per condition group (Pro)
-- Multiple condition groups with independent match types (Pro)
-- Payload field selector with live preview to build conditions from real example payloads
-
-Free plan: one condition, AND match only.
-Pro plan: unlimited conditions, condition groups, and AND/OR match per group.
 
 = Webhook Actions Pro (full feature list) =
 
@@ -450,6 +459,14 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 
 == Changelog ==
 
+= 1.11.0 — 2026-05-06 =
+- Added `array_contains` condition operator — checks whether an array field contains a specified value; works with flat arrays and arrays of objects
+- Added `object_contains` condition operator — checks whether an object field contains a specified key (optionally filtered to a specific property within nested objects using a `key=` parameter)
+- Added `stringify` type cast — JSON-encodes array and object field values into a string before comparison, enabling string-based operators on complex nested structures
+- Improved FieldSelector — split navigate and select actions; added a dedicated "+" button to select non-leaf fields (arrays and objects) directly without drilling further into children
+- Improved ConditionsEditor layout — responsive three-row design on small screens (field + delete on top row, cast + operator on second row, value on third); `object_contains` exposes an inline property name input when a key filter is needed
+- Delivery log detail messages now include the property key when `object_contains` is matched against a specific property
+
 = 1.10.0 — 2026-05-03 =
 - Added per-webhook synchronous execution mode — when enabled, the webhook fires inline during the WordPress request that triggers it, bypassing the queue; a warning dialog explains the performance impact before enabling; dismissal can be stored permanently per-browser
 - First synchronous attempt runs blocking in the current request; retryable failures (5xx, transport errors) automatically fall back to the async queue starting at attempt 2 with standard exponential backoff; non-retryable failures (4xx) are marked permanently failed immediately
@@ -573,6 +590,9 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.11.0 =
+Adds two new condition operators (`array_contains`, `object_contains`) and a `stringify` type cast for matching complex array and object fields. Improves the conditions editor layout for mobile screens. No database changes — no manual steps required.
 
 = 1.10.0 =
 Adds per-webhook synchronous execution, delivery log details improvements (request headers, query parameters, collapsible payloads), a fix for GET/DELETE webhooks not sending custom headers or URL params, and replay support for condition-skipped log entries. Database migration runs automatically — adds `is_synchronous` to the webhooks table. No manual steps required.
