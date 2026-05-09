@@ -486,10 +486,11 @@ class WebhooksController extends WP_REST_Controller {
         }
         $decoded = is_string($example) ? json_decode($example, true) : $example;
         $mapped  = $this->payloadTransformer->applyStoredMapping($id, $trigger, $decoded ?? []);
-        $gluePayload     = apply_filters('fswa_webhook_payload', $mapped['payload'], $id, $trigger, $mapped['mapping_applied'] ? $decoded : null);
-        $testPayload     = is_array($gluePayload) ? $gluePayload : $mapped['payload'];
+        // Filter applied later, only for mode=now — processJob applies it for mode=queue
+        $testPayload     = $mapped['payload'];
         $mappingApplied  = $mapped['mapping_applied'];
         $originalPayload = $mapped['mapping_applied'] ? $decoded : null;
+        $applyGlue       = true;
         break;
 
       case 'captured':
@@ -509,7 +510,13 @@ class WebhooksController extends WP_REST_Controller {
         break;
     }
 
-    $mode  = $request->get_param('mode') ?? 'queue';
+    $mode = $request->get_param('mode') ?? 'queue';
+
+    if ($mode === 'now' && ($applyGlue ?? false)) {
+      $glued       = apply_filters('fswa_webhook_payload', $testPayload, $id, $trigger, $originalPayload);
+      $testPayload = is_array($glued) ? $glued : $testPayload;
+    }
+
     $logId = $this->logService->logPending($id, $trigger, $testPayload, $originalPayload, $mappingApplied);
 
     if ($mode === 'now') {
