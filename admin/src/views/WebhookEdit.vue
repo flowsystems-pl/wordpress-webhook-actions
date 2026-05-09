@@ -28,6 +28,12 @@ const firstExamplePayload = computed(() => {
   return null;
 });
 
+const gluePreviewPayloads = ref({});
+const firstGluePayload = computed(() => {
+  const vals = Object.values(gluePreviewPayloads.value);
+  return vals.find(v => v != null) ?? null;
+});
+
 const webhook = ref(null);
 const loading = ref(false);
 const saving = ref(false);
@@ -143,6 +149,7 @@ onMounted(loadWebhook);
           :webhook="webhook"
           :loading="saving"
           :examplePayload="firstExamplePayload"
+          :gluePayload="firstGluePayload"
           @submit="handleSubmit"
           @cancel="handleCancel"
           @change="hasUnsavedChanges = true"
@@ -157,6 +164,7 @@ onMounted(loadWebhook);
         <TriggerSchemaPanel
           :webhookId="route.params.id"
           :triggers="webhook.triggers"
+          @glue-preview-change="gluePreviewPayloads = $event"
         />
       </Card>
     </div>

@@ -348,7 +348,6 @@ class Dispatcher {
     $originalPayload = $jobData['original_payload'] ?? null;
 
     if ($logId === null) {
-      $webhookId = isset($webhook['id']) ? (int) $webhook['id'] : 0;
       if ($webhookId > 0) {
         $recoveredId = $this->logService->logPending(
           $webhookId,
@@ -363,6 +362,7 @@ class Dispatcher {
       }
     }
 
+    $webhookId     = isset($webhook['id']) ? (int) $webhook['id'] : 0;
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
 
@@ -466,23 +466,28 @@ class Dispatcher {
     $headers = apply_filters('fswa_headers', $headers, $webhook, $trigger);
 
     $method = strtoupper($webhook['http_method'] ?? 'POST');
-    $resolveAgainst = $originalPayload ?? $payload;
 
-    // Merge custom headers (values resolved against pre-mapping payload, falling back to literal)
+    // Merge custom headers — try post-glue payload first, fall back to pre-mapping payload.
     foreach ($webhook['custom_headers'] ?? [] as $pair) {
       if (!empty($pair['key'])) {
-        $resolved = $this->payloadTransformer->getValueByPath($resolveAgainst, $pair['value'] ?? '');
+        $resolved = $this->payloadTransformer->getValueByPath($payload, $pair['value'] ?? '');
+        if ($resolved === null && $originalPayload !== null) {
+          $resolved = $this->payloadTransformer->getValueByPath($originalPayload, $pair['value'] ?? '');
+        }
         $headers[$pair['key']] = ($resolved !== null) ? (string) $resolved : ($pair['value'] ?? '');
       }
     }
 
-    // Build URL with query params
+    // Build URL with query params — try post-glue payload first, fall back to pre-mapping payload.
     $noBodyMethods = ['GET', 'DELETE'];
     if (!empty($webhook['url_params'])) {
       $queryArgs = [];
       foreach ($webhook['url_params'] as $pair) {
         if (!empty($pair['key'])) {
-          $resolved = $this->payloadTransformer->getValueByPath($resolveAgainst, $pair['value'] ?? '');
+          $resolved = $this->payloadTransformer->getValueByPath($payload, $pair['value'] ?? '');
+          if ($resolved === null && $originalPayload !== null) {
+            $resolved = $this->payloadTransformer->getValueByPath($originalPayload, $pair['value'] ?? '');
+          }
           $queryArgs[$pair['key']] = ($resolved !== null) ? (string) $resolved : ($pair['value'] ?? '');
         }
       }

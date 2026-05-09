@@ -34,6 +34,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['glue-preview-change']);
+
 const {
   schemas,
   loading,
@@ -76,6 +78,7 @@ const localConditions = ref({});
 // Code Glue state
 const glueDrawer = ref({ open: false, trigger: '', tab: 'pre' });
 const gluePreviewPayloads = ref({}); // trigger → preview result (virtual effective payload for mapping/conditions)
+watch(gluePreviewPayloads, (val) => emit('glue-preview-change', val), { deep: true });
 const gluePreviewSaved = ref({});    // trigger → bool: pre preview was saved (clears warning without clearing payload)
 const postGluePreviewPending = ref({}); // trigger → bool: post preview run but not saved
 const triggerSnippetAssignments = ref({}); // trigger → { pre_snippet_id, pre_enabled, ... }
@@ -88,7 +91,7 @@ const openGlueDrawer = (trigger, tab = 'pre') => {
 // Marks result as saved so no warning is shown — same as if the user had run + saved manually.
 const autoApplyGluePreview = async (trigger, assignment) => {
   if (!assignment?.pre_enabled || !assignment?.pre_snippet?.code) return;
-  const payload = getRawExamplePayload(trigger);
+  const payload = getParsedExamplePayload(trigger);
   if (!payload) return;
   try {
     const { api } = await import('@/lib/api');
@@ -290,9 +293,19 @@ const getRawExamplePayload = (trigger) => {
   return schema?.example_payload || null;
 };
 
-// Get effective example payload: glue preview if available, else raw captured
+// Always returns a parsed object (or null) — the API returns example_payload as a JSON string.
+const getParsedExamplePayload = (trigger) => {
+  const raw = getRawExamplePayload(trigger);
+  if (!raw) return null;
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw); } catch { return null; }
+  }
+  return raw;
+};
+
+// Get effective example payload: glue preview if available, else raw captured (parsed)
 const getExamplePayload = (trigger) => {
-  return gluePreviewPayloads.value[trigger] ?? getRawExamplePayload(trigger);
+  return gluePreviewPayloads.value[trigger] ?? getParsedExamplePayload(trigger);
 };
 
 // Check if saving
@@ -551,7 +564,7 @@ watch(
               </p>
               <ConditionsEditor
                 :modelValue="getConditionsValue(trigger)"
-                :examplePayload="getRawExamplePayload(trigger)"
+                :examplePayload="getParsedExamplePayload(trigger)"
                 :is-pro="proActive"
                 @update:modelValue="handleConditionsChange(trigger, $event)"
               />
@@ -677,7 +690,7 @@ watch(
     :open="glueDrawer.open"
     :webhookId="webhookId"
     :trigger="glueDrawer.trigger"
-    :examplePayload="getRawExamplePayload(glueDrawer.trigger)"
+    :examplePayload="getParsedExamplePayload(glueDrawer.trigger)"
     :initialTab="glueDrawer.tab"
     @close="onGlueDrawerClose"
     @glue-preview="onGluePreview"

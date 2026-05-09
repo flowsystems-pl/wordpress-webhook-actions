@@ -38,6 +38,7 @@ const props = defineProps({
   webhook: { type: Object, default: null },
   loading: Boolean,
   examplePayload: { type: Object, default: null },
+  gluePayload: { type: Object, default: null },
 });
 
 const emit = defineEmits(['submit', 'cancel', 'change']);
@@ -105,17 +106,30 @@ const resolveByPath = (obj, path) => {
   )
 }
 
+const urlHasTemplates = computed(() => form.value.endpoint_url.includes('{{'))
+
+const urlTemplatePreview = computed(() => {
+  if (!urlHasTemplates.value) return null
+  const payload = props.gluePayload ?? props.examplePayload
+  if (!payload) return null
+  return form.value.endpoint_url.replace(/\{\{\s*([\w][\w.]*)\s*\}\}/g, (match, path) => {
+    const value = resolveByPath(payload, path.trim())
+    return value !== null && value !== undefined ? encodeURIComponent(String(value)) : match
+  })
+})
+
 const urlParamsPreview = computed(() => {
   const params = form.value.url_params.filter(p => p.key)
   if (!params.length) return null
 
-  const base = form.value.endpoint_url || ''
+  const base = urlTemplatePreview.value ?? form.value.endpoint_url ?? ''
   const qs = params.map(p => {
     let displayVal = p.value || ''
     if (isDotPath(p.value)) {
-      const resolved = props.examplePayload
-        ? resolveByPath(props.examplePayload, p.value)
-        : undefined
+      let resolved = props.gluePayload ? resolveByPath(props.gluePayload, p.value) : undefined
+      if ((resolved === undefined || resolved === null) && props.examplePayload) {
+        resolved = resolveByPath(props.examplePayload, p.value)
+      }
       displayVal = (resolved !== undefined && resolved !== null)
         ? String(resolved)
         : `{${p.value}}`
@@ -253,11 +267,20 @@ const handleSubmit = () => {
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
       <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
-      <p class="text-sm text-muted-foreground">
-        The URL where webhook payloads will be sent. Supports
-        <code class="font-mono text-xs" v-pre>{{ $payload.field }}</code>
-        templates <span class="text-xs font-medium">(Pro)</span> — resolved against the final post-glue payload.
-      </p>
+      <div class="flex items-start gap-2">
+        <p class="text-sm text-muted-foreground">
+          The URL where webhook payloads will be sent. Supports
+          <code class="font-mono text-xs" v-pre>{{ field.path }}</code>
+          templates — resolved against the final payload, after code glue applied.
+        </p>
+        <UpgradeBadge v-if="!proActive" class="shrink-0 mt-0.5" />
+      </div>
+      <template v-if="urlHasTemplates">
+        <div class="rounded-md bg-muted px-3 py-2 font-mono text-xs break-all text-muted-foreground">
+          <template v-if="urlTemplatePreview">{{ urlTemplatePreview }}</template>
+          <span v-else class="italic">No captured payload — trigger the webhook once to preview the resolved URL.</span>
+        </div>
+      </template>
     </div>
 
     <!-- HTTP Method -->
@@ -294,7 +317,7 @@ const handleSubmit = () => {
     <!-- Custom Request Headers -->
     <div class="space-y-2 border-t pt-5">
       <Label>Custom Request Headers</Label>
-      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" keyPlaceholder="Header name" />
+      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" :gluePayload="gluePayload" keyPlaceholder="Header name" />
       <p class="text-sm text-muted-foreground">
         Values support dot-notation paths into the outgoing payload (e.g. <code class="text-xs">event.id</code>) or static strings.
       </p>
@@ -305,7 +328,7 @@ const handleSubmit = () => {
       <Label>
         {{ ['GET', 'DELETE'].includes(form.http_method) ? 'URL Query Parameters' : 'Additional URL Query Parameters' }}
       </Label>
-      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" keyPlaceholder="Param name" />
+      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" :gluePayload="gluePayload" keyPlaceholder="Param name" />
       <p class="text-sm text-muted-foreground">
         <template v-if="['GET', 'DELETE'].includes(form.http_method)">
           These are the primary way to send data for {{ form.http_method }} requests. If none are set, the mapped payload is sent as <code class="text-xs">?payload=&lt;json&gt;</code>.
