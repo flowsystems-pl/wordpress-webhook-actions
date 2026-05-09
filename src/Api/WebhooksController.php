@@ -106,7 +106,7 @@ class WebhooksController extends WP_REST_Controller {
         'payload_source' => [
           'description' => __('Where to source the test payload from.', 'flowsystems-webhook-actions'),
           'type'        => 'string',
-          'enum'        => ['captured', 'mapped', 'custom'],
+          'enum'        => ['captured', 'mapped', 'pre_glue', 'full_glue', 'custom'],
           'default'     => 'captured',
         ],
         'trigger' => [
@@ -471,6 +471,25 @@ class WebhooksController extends WP_REST_Controller {
         $testPayload     = $mapped['payload'];
         $mappingApplied  = $mapped['mapping_applied'];
         $originalPayload = $mappingApplied ? $decoded : null;
+        break;
+
+      case 'pre_glue':
+      case 'full_glue':
+        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
+        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        if (empty($example)) {
+          return new WP_Error(
+            'rest_no_captured_payload',
+            __('No captured payload found for this trigger. Fire the trigger at least once first.', 'flowsystems-webhook-actions'),
+            ['status' => 422]
+          );
+        }
+        $decoded = is_string($example) ? json_decode($example, true) : $example;
+        $mapped  = $this->payloadTransformer->applyStoredMapping($id, $trigger, $decoded ?? []);
+        $gluePayload     = apply_filters('fswa_webhook_payload', $mapped['payload'], $id, $trigger, $mapped['mapping_applied'] ? $decoded : null);
+        $testPayload     = is_array($gluePayload) ? $gluePayload : $mapped['payload'];
+        $mappingApplied  = $mapped['mapping_applied'];
+        $originalPayload = $mapped['mapping_applied'] ? $decoded : null;
         break;
 
       case 'captured':

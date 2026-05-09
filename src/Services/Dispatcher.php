@@ -361,6 +361,17 @@ class Dispatcher {
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
 
+    /**
+     * Filter the final payload per-webhook before delivery.
+     * Pro uses this to apply pre-dispatch code snippets (Payload Glue).
+     *
+     * @param array      $payload         The mapped payload
+     * @param int        $webhookId       Webhook ID
+     * @param string     $trigger         Trigger event name
+     * @param array|null $originalPayload Pre-mapping payload
+     */
+    $payload = apply_filters('fswa_webhook_payload', $payload, $webhookId, $trigger, $originalPayload ?: null);
+
     return $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest, $originalPayload ?: null);
   }
 
@@ -539,6 +550,20 @@ class Dispatcher {
     do_action('fswa_webhook_response', $webhookId, $trigger, $responseCode, $responseBody, $payload, $webhook);
 
     if ($success) {
+      /**
+       * Fires after a successful webhook delivery with both mapped and pre-mapping payloads.
+       * Pro uses this to apply post-dispatch code snippets (Payload Glue).
+       *
+       * @param int        $webhookId       Webhook ID
+       * @param string     $trigger         Trigger event name
+       * @param int        $responseCode    HTTP response code
+       * @param string     $responseBody    Raw response body
+       * @param array      $payload         The mapped payload that was sent
+       * @param array      $webhook         Full webhook config
+       * @param array|null $originalPayload Pre-mapping payload
+       */
+      do_action('fswa_glue_post_dispatch', $webhookId, $trigger, $responseCode, $responseBody, $payload, $webhook, $originalPayload);
+
       /**
        * Fires after a successful webhook delivery.
        *
