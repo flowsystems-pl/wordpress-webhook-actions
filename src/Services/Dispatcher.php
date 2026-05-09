@@ -157,10 +157,15 @@ class Dispatcher {
       );
 
       if (!empty($webhook['is_synchronous'])) {
+        // Apply pre-glue filter here for synchronous dispatch.
+        // (Queue dispatch applies it in processJob() instead.)
+        $syncPayload = apply_filters('fswa_webhook_payload', $transformedPayload, $webhookId, $trigger, $originalPayload ?: null);
+        $syncPayload = is_array($syncPayload) ? $syncPayload : $transformedPayload;
+
         // Attempt 0 runs inline, blocking the current WP request
         $result = $this->sendToWebhook(
           $webhook,
-          $transformedPayload,
+          $syncPayload,
           $trigger,
           $logId,
           0,
@@ -417,6 +422,18 @@ class Dispatcher {
 
     $webhookId = isset($webhook['id']) ? (int) $webhook['id'] : 0;
     $url = (string) $webhook['endpoint_url'];
+
+    /**
+     * Filter the webhook URL before dispatch, allowing template expansion in the URL path.
+     * Runs after the fswa_webhook_payload filter, so pre-glue-injected values are available.
+     *
+     * @param string $url     The webhook endpoint URL (may contain {{ $payload.field }} templates)
+     * @param array  $payload The final payload (post-pre-glue)
+     * @param array  $webhook The webhook configuration
+     * @param string $trigger The trigger event name
+     */
+    $url = (string) apply_filters('fswa_webhook_url', $url, $payload, $webhook, $trigger);
+
     $authHeader = isset($webhook['auth_header']) && is_string($webhook['auth_header'])
       ? (string) $webhook['auth_header']
       : '';

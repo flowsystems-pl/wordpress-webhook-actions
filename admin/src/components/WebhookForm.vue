@@ -172,7 +172,8 @@ const validate = () => {
     errors.value.endpoint_url = 'Endpoint URL is required';
   } else {
     try {
-      const url = new URL(form.value.endpoint_url);
+      const urlForValidation = form.value.endpoint_url.replace(/\{\{[^}]+\}\}/g, '0');
+      const url = new URL(urlForValidation);
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.value.endpoint_url = 'URL must be HTTP or HTTPS';
       }
@@ -247,12 +248,16 @@ const handleSubmit = () => {
       <Input
         id="endpoint_url"
         v-model="form.endpoint_url"
-        type="url"
+        type="text"
         placeholder="https://example.com/webhook"
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
       <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
-      <p class="text-sm text-muted-foreground">The URL where webhook payloads will be sent</p>
+      <p class="text-sm text-muted-foreground">
+        The URL where webhook payloads will be sent. Supports
+        <code class="font-mono text-xs" v-pre>{{ $payload.field }}</code>
+        templates <span class="text-xs font-medium">(Pro)</span> — resolved against the final post-glue payload.
+      </p>
     </div>
 
     <!-- HTTP Method -->
