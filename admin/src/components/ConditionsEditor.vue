@@ -61,7 +61,7 @@ const OPERATORS_BY_TYPE = {
   string:  new Set(['equals', 'not_equals', 'contains', 'not_contains', 'is_empty', 'is_not_empty']),
   number:  new Set(['equals', 'not_equals', 'greater_than', 'less_than', 'is_empty', 'is_not_empty']),
   boolean: new Set(['equals', 'not_equals', 'is_true', 'is_false']),
-  array:   new Set(['is_empty', 'is_not_empty', 'array_contains']),
+  array:   new Set(['is_empty', 'is_not_empty', 'array_contains', 'object_contains']),
   object:  new Set(['is_empty', 'is_not_empty', 'object_contains']),
   null:    new Set(['is_empty', 'is_not_empty']),
 }
@@ -218,7 +218,7 @@ const handleFieldType = (index, type) => {
     const rule = conditions.value.rules[index]
     if (!rule || isGroup(rule)) return
     if (type === 'array') {
-      if (rule.operator !== 'array_contains') updateRule(index, 'operator', 'array_contains')
+      if (rule.operator !== 'array_contains' && rule.operator !== 'object_contains') updateRule(index, 'operator', 'array_contains')
     } else if (type === 'object') {
       if (rule.operator !== 'object_contains') updateRule(index, 'operator', 'object_contains')
     } else {
@@ -304,7 +304,7 @@ const handleGroupRuleFieldType = (gi, ri, type) => {
     const rule = conditions.value.rules[gi]?.rules[ri]
     if (!rule) return
     if (type === 'array') {
-      if (rule.operator !== 'array_contains') updateGroupRule(gi, ri, 'operator', 'array_contains')
+      if (rule.operator !== 'array_contains' && rule.operator !== 'object_contains') updateGroupRule(gi, ri, 'operator', 'array_contains')
     } else if (type === 'object') {
       if (rule.operator !== 'object_contains') updateGroupRule(gi, ri, 'operator', 'object_contains')
     } else {
@@ -394,14 +394,13 @@ const evaluateRule = (rule, payload) => {
       if (typeof raw !== 'object' || raw === null) return false
       const key = rule.key ?? ''
       if (key) {
-        const deepContainsEntry = (obj, k, v) =>
-          Object.entries(obj).some(([, ev]) => {
-            if (typeof ev === 'object' && ev !== null) {
-              if (Object.prototype.hasOwnProperty.call(ev, k) && String(ev[k]) === v) return true
-              return deepContainsEntry(ev, k, v)
-            }
+        const deepContainsEntry = (obj, k, v) => {
+          if (Object.prototype.hasOwnProperty.call(obj, k) && String(obj[k]) === v) return true
+          return Object.entries(obj).some(([, ev]) => {
+            if (typeof ev === 'object' && ev !== null) return deepContainsEntry(ev, k, v)
             return false
           })
+        }
         return deepContainsEntry(raw, key, String(value))
       }
       const deepContains = (obj, search) =>
@@ -450,7 +449,7 @@ const overallResult = computed(() => {
         @update:model-value="toggleEnabled"
       />
       <Label class="cursor-pointer select-none">Enable conditional dispatch</Label>
-      <Tooltip content="Conditions are evaluated against the original payload, before any field mapping is applied." side="right">
+      <Tooltip content="Conditions are evaluated against the payload — use the 'Evaluate against' toggle above to choose original or transformed." side="right">
         <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
       </Tooltip>
     </div>

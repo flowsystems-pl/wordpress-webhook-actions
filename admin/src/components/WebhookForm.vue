@@ -110,10 +110,13 @@ const urlHasTemplates = computed(() => form.value.endpoint_url.includes('{{'))
 
 const urlTemplatePreview = computed(() => {
   if (!urlHasTemplates.value) return null
-  const payload = props.gluePayload ?? props.examplePayload
-  if (!payload) return null
+  if (!props.gluePayload && !props.examplePayload) return null
   return form.value.endpoint_url.replace(/\{\{\s*([\w][\w.]*)\s*\}\}/g, (match, path) => {
-    const value = resolveByPath(payload, path.trim())
+    const trimmed = path.trim()
+    let value = props.gluePayload ? resolveByPath(props.gluePayload, trimmed) : undefined
+    if ((value === undefined || value === null) && props.examplePayload) {
+      value = resolveByPath(props.examplePayload, trimmed)
+    }
     return value !== null && value !== undefined ? encodeURIComponent(String(value)) : match
   })
 })

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { escapeKey, unescapeKey, splitPathRaw, splitPath, joinPath, flattenObject, applyCast, getValueByPath, setValueByPath, flattenForTransform, isPathExcluded, applyMappingTransform } from '@/utils/payloadTransform';
 import {
   Plus,
   Trash2,
@@ -29,6 +30,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  originalPayload: {
+    type: Object,
+    default: null,
+  },
 });
 
 // Example user data structure (matches PayloadTransformer::getUserData)
@@ -55,6 +60,7 @@ const localMappings = ref([]);
 const localExcluded = ref([]);
 const localIncludeUnmapped = ref(true);
 const previewExpanded = ref(false);
+const originalExpanded = ref(false);
 const expandedPaths = ref({});
 
 // Drag and drop state
@@ -62,66 +68,7 @@ const draggedIndex = ref(null);
 const dragOverIndex = ref(null);
 const canDrag = ref(false);
 
-// Escape a key segment that may contain dots
-const escapeKey = (key) => key.replace(/\./g, '\\.');
 
-// Unescape a key segment (for display or lookup)
-const unescapeKey = (key) => key.replace(/\\\./g, '.');
-
-// Split a dot-notation path on unescaped dots only (keeps raw escaped segments)
-const splitPathRaw = (path) => path.split(/(?<!\\)\./);
-
-// Split a path and unescape each segment (for object traversal)
-const splitPath = (path) => splitPathRaw(path).map(unescapeKey);
-
-// Build a path by joining prefix + escaped key
-const joinPath = (prefix, key) => {
-  const escaped = escapeKey(key);
-  return prefix ? `${prefix}.${escaped}` : escaped;
-};
-
-// Flatten payload to show available fields - supports arrays with depth limit
-const flattenObject = (obj, prefix = '', depth = 0, maxDepth = 4) => {
-  const result = [];
-
-  if (!obj || typeof obj !== 'object' || depth > maxDepth) {
-    return result;
-  }
-
-  const entries = Array.isArray(obj)
-    ? obj.map((v, i) => [String(i), v])
-    : Object.entries(obj);
-
-  for (const [key, value] of entries) {
-    const path = joinPath(prefix, key);
-    const isArray = Array.isArray(value);
-    const isObject = value !== null && typeof value === 'object';
-
-    if (isObject) {
-      // Add the parent path as expandable
-      result.push({
-        path,
-        value,
-        type: isArray ? 'array' : 'object',
-        isExpandable: true,
-        depth,
-        childCount: isArray ? value.length : Object.keys(value).length,
-      });
-      // Recursively flatten children
-      result.push(...flattenObject(value, path, depth + 1, maxDepth));
-    } else {
-      result.push({
-        path,
-        value,
-        type: value === null ? 'null' : typeof value,
-        isExpandable: false,
-        depth,
-      });
-    }
-  }
-
-  return result;
-};
 
 // Merged payload including user data when enabled
 const effectivePayload = computed(() => {
@@ -215,20 +162,6 @@ const CAST_OPTIONS = [
 
 const castToSelect = (cast) => cast || 'auto'
 const castFromSelect = (val) => (val === 'auto' ? null : val)
-
-const applyCast = (value, cast) => {
-  if (!cast) return value
-  if (cast === 'number') return Number(value)
-  if (cast === 'string') return String(value ?? '')
-  if (cast === 'boolean') {
-    if (typeof value === 'boolean') return value
-    const s = String(value ?? '').toLowerCase().trim()
-    if (['true', '1', 'on', 'yes'].includes(s)) return true
-    if (['false', '0', 'off', 'no', ''].includes(s)) return false
-    return s !== '' && s !== '0'
-  }
-  return value
-}
 
 // Emit changes
 const emitUpdate = () => {
@@ -441,160 +374,19 @@ const getIndentStyle = (depth) => {
 
 // ============ PREVIEW LOGIC ============
 
-// Get value by dot-notation path (supports escaped dots in keys, e.g. "args.0.6\.1")
-const getValueByPath = (obj, path) => {
-  const keys = splitPath(path);
-  let current = obj;
-
-  for (const key of keys) {
-    if (current === null || current === undefined) return undefined;
-    if (typeof current !== 'object') return undefined;
-    current = Array.isArray(current)
-      ? current[parseInt(key, 10)]
-      : current[key];
-  }
-
-  return current;
-};
-
 // Check if a source path exists in the payload
 const isValidSourcePath = (path) => {
   if (!path || !effectivePayload.value) return false;
   return getValueByPath(effectivePayload.value, path) !== undefined;
 };
 
-// Set value by dot-notation path (supports escaped dots in keys, e.g. "args.0.6\.1")
-// ref: optional reference object (e.g. the original payload) used to determine
-// whether intermediate containers should be arrays or plain objects.
-// Without ref, large numeric-keyed objects like WC line_items { "303962": {...} }
-// would be mis-created as sparse arrays with 303k empty slots.
-const setValueByPath = (obj, path, value, ref = null) => {
-  const keys = splitPath(path);
-  let current = obj;
-  let currentRef = ref;
-
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    const nextKey = keys[i + 1];
-
-    if (
-      current[key] === undefined ||
-      current[key] === null ||
-      typeof current[key] !== 'object'
-    ) {
-      let isNextArray = false;
-      if (currentRef !== null && currentRef !== undefined && typeof currentRef === 'object') {
-        // Look at what the ref holds at `key` to decide the container type
-        const refVal = Array.isArray(currentRef)
-          ? currentRef[parseInt(key, 10)]
-          : currentRef[key];
-        if (refVal !== undefined && refVal !== null) {
-          isNextArray = Array.isArray(refVal);
-        } else {
-          // Path doesn't exist in ref — fall back to numeric heuristic
-          isNextArray = /^\d+$/.test(nextKey);
-        }
-      } else {
-        isNextArray = /^\d+$/.test(nextKey);
-      }
-      current[key] = isNextArray ? [] : {};
-    }
-
-    // Advance the reference pointer in parallel with current
-    if (currentRef !== null && currentRef !== undefined && typeof currentRef === 'object') {
-      currentRef = Array.isArray(currentRef)
-        ? currentRef[parseInt(key, 10)]
-        : currentRef[key];
-    } else {
-      currentRef = null;
-    }
-
-    current = current[key];
-  }
-
-  current[keys[keys.length - 1]] = value;
-};
-
-// Flatten for transformation - recursively flattens ALL arrays and objects
-const flattenForTransform = (obj, prefix = '', depth = 0, maxDepth = 10) => {
-  const result = {};
-
-  if (!obj || typeof obj !== 'object' || depth > maxDepth) {
-    return result;
-  }
-
-  const entries = Array.isArray(obj)
-    ? obj.map((v, i) => [String(i), v])
-    : Object.entries(obj);
-
-  for (const [key, value] of entries) {
-    const path = joinPath(prefix, key);
-
-    if (value !== null && typeof value === 'object') {
-      // Always recurse into objects and arrays
-      Object.assign(
-        result,
-        flattenForTransform(value, path, depth + 1, maxDepth),
-      );
-    } else {
-      result[path] = value;
-    }
-  }
-
-  return result;
-};
-
-// Check if a path should be excluded
-const isPathExcluded = (path, excludedPaths) => {
-  for (const excludedPath of excludedPaths) {
-    if (path === excludedPath || path.startsWith(excludedPath + '.')) {
-      return true;
-    }
-  }
-  return false;
-};
-
 // Compute transformed preview
 const transformedPreview = computed(() => {
-  if (!effectivePayload.value) return null;
-
-  const mappings = localMappings.value.filter((m) => m.source && m.target);
-  const excluded = localExcluded.value;
-  const includeUnmapped = localIncludeUnmapped.value;
-
-  // If no configuration, return original
-  if (mappings.length === 0 && excluded.length === 0 && includeUnmapped) {
-    return effectivePayload.value;
-  }
-
-  const flatPayload = flattenForTransform(effectivePayload.value);
-  const result = {};
-  const mappedSourcePaths = mappings.map((m) => m.source);
-
-  // Apply explicit mappings first
-  for (const map of mappings) {
-    let value = getValueByPath(effectivePayload.value, map.source);
-    if (value !== undefined) {
-      if (map.cast) value = applyCast(value, map.cast)
-      setValueByPath(result, map.target, value, effectivePayload.value);
-    }
-  }
-
-  // Include unmapped fields if enabled
-  if (includeUnmapped) {
-    for (const [path, value] of Object.entries(flatPayload)) {
-      // Skip if this path is mapped
-      if (mappedSourcePaths.includes(path)) continue;
-
-      // Skip if this path is excluded
-      if (isPathExcluded(path, excluded)) continue;
-
-      // Include this field at its original path
-      setValueByPath(result, path, value, effectivePayload.value);
-    }
-  }
-
-  return result;
+  return applyMappingTransform(effectivePayload.value, {
+    mappings: localMappings.value,
+    excluded: localExcluded.value,
+    includeUnmapped: localIncludeUnmapped.value,
+  });
 });
 
 // Format JSON for display with syntax highlighting
@@ -921,6 +713,27 @@ const previewHtml = computed(() => {
           <pre
             class="text-xs font-mono leading-relaxed"
             v-html="previewHtml"
+          ></pre>
+        </div>
+      </div>
+
+      <!-- Original Payload -->
+      <div v-if="originalPayload">
+        <div class="flex items-center justify-between mb-3">
+          <Label class="text-sm font-medium">Original Payload</Label>
+          <Button size="sm" variant="ghost" @click="originalExpanded = !originalExpanded">
+            <component :is="originalExpanded ? ChevronDown : ChevronRight" class="h-4 w-4 mr-1" />
+            {{ originalExpanded ? 'Show less' : 'Show full' }}
+          </Button>
+        </div>
+
+        <div
+          class="border rounded-md bg-muted/30 p-3 overflow-x-auto overflow-y-auto"
+          :class="originalExpanded ? '' : 'max-h-72'"
+        >
+          <pre
+            class="text-xs font-mono leading-relaxed"
+            v-html="formatJsonWithHighlight(originalPayload)"
           ></pre>
         </div>
       </div>

@@ -4,6 +4,7 @@ namespace FlowSystems\WebhookActions\Services;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\ConditionEvaluator;
 use WP_Error;
@@ -13,6 +14,7 @@ class Dispatcher {
   private LogService $logService;
   private QueueService $queueService;
   private WebhookRepository $webhookRepository;
+  private SchemaRepository $schemaRepository;
   private PayloadTransformer $payloadTransformer;
   private ConditionEvaluator $conditionEvaluator;
 
@@ -27,6 +29,7 @@ class Dispatcher {
     $this->queueService = $queueService;
     $this->logService = new LogService();
     $this->webhookRepository = new WebhookRepository();
+    $this->schemaRepository = new SchemaRepository();
     $this->payloadTransformer = new PayloadTransformer();
     $this->conditionEvaluator = new ConditionEvaluator();
   }
@@ -125,9 +128,11 @@ class Dispatcher {
       $originalPayload = $transformResult['original'];
       $mappingApplied = $transformResult['mapping_applied'];
 
-      // Evaluate conditions (per-trigger schema) against the transformed payload
       $conditions = is_array($transformResult['conditions'] ?? null) ? $transformResult['conditions'] : [];
-      if (!empty($conditions)) {
+      $conditionsEvaluateOn = $transformResult['conditions_evaluate_on'] ?? 'original';
+
+      // 'original' mode: fast-fail before creating a log entry
+      if (!empty($conditions) && $conditionsEvaluateOn === 'original') {
         $evalResult = $this->conditionEvaluator->evaluate($conditions, $payload);
         if (!$evalResult['passed']) {
           $this->logService->logSkipped(
@@ -157,10 +162,37 @@ class Dispatcher {
       );
 
       if (!empty($webhook['is_synchronous'])) {
-        // Apply pre-glue filter here for synchronous dispatch.
+        // Apply Code Glue filter here for synchronous dispatch.
         // (Queue dispatch applies it in processJob() instead.)
         $syncPayload = apply_filters('fswa_webhook_payload', $transformedPayload, $webhookId, $trigger, $originalPayload ?: null);
         $syncPayload = is_array($syncPayload) ? $syncPayload : $transformedPayload;
+
+        // If Code Glue changed the payload, update the log so it reflects the actual sent payload.
+        if ($logId && $syncPayload !== $transformedPayload) {
+          $this->logService->updateLog($logId, [
+            'request_payload' => $syncPayload,
+            'original_payload' => $originalPayload ?? $transformedPayload,
+            'mapping_applied'  => 1,
+          ]);
+        }
+
+        // 'transformed' mode on sync: evaluate conditions against post-glue payload
+        if (!empty($conditions) && $conditionsEvaluateOn === 'transformed') {
+          $evalResult = $this->conditionEvaluator->evaluate($conditions, $syncPayload);
+          if (!$evalResult['passed']) {
+            if ($logId) {
+              $this->logService->updateLog($logId, [
+                'status'          => 'skipped',
+                'error_message'   => $this->buildSkipMessage($evalResult['failed_rule'], $syncPayload),
+                'request_payload' => $syncPayload,
+                'original_payload' => $originalPayload ?? $transformedPayload,
+                'mapping_applied'  => 1,
+              ]);
+            }
+            do_action('fswa_skipped', $trigger, $webhookId, $evalResult['failed_rule']);
+            continue;
+          }
+        }
 
         // Attempt 0 runs inline, blocking the current WP request
         $result = $this->sendToWebhook(
@@ -375,7 +407,43 @@ class Dispatcher {
      * @param string     $trigger         Trigger event name
      * @param array|null $originalPayload Pre-mapping payload
      */
+    $preGluePayload = $payload;
     $payload = apply_filters('fswa_webhook_payload', $payload, $webhookId, $trigger, $originalPayload ?: null);
+
+    // If Code Glue changed the payload, update the log so it reflects the actual sent payload.
+    if ($logId && $payload !== $preGluePayload) {
+      $this->logService->updateLog($logId, [
+        'request_payload' => $payload,
+        'original_payload' => $originalPayload ?? $preGluePayload,
+        'mapping_applied'  => 1,
+      ]);
+    }
+
+    // Re-evaluate conditions after Code Glue so 'transformed' mode sees the final payload.
+    // Also re-applies 'original' mode conditions, picking up any condition changes since dispatch.
+    if (!$isTest && $webhookId > 0) {
+      $schema = $this->schemaRepository->findByWebhookAndTrigger($webhookId, $trigger);
+      if ($schema) {
+        $conditions = is_array($schema['conditions'] ?? null) ? $schema['conditions'] : [];
+        if (!empty($conditions)) {
+          $evaluateOn = $schema['conditions_evaluate_on'] ?? 'original';
+          $conditionsPayload = $evaluateOn === 'transformed' ? $payload : ($originalPayload ?: $preGluePayload);
+          $evalResult = $this->conditionEvaluator->evaluate($conditions, $conditionsPayload);
+          if (!$evalResult['passed']) {
+            if ($logId) {
+              $this->logService->updateLog($logId, [
+                'status'        => 'skipped',
+                'error_message' => $this->buildSkipMessage($evalResult['failed_rule'], $conditionsPayload),
+                'request_payload' => $payload,
+                'original_payload' => $originalPayload ?? $preGluePayload,
+                'mapping_applied'  => 1,
+              ]);
+            }
+            return ['success' => false, 'shouldRetry' => false];
+          }
+        }
+      }
+    }
 
     return $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest, $originalPayload ?: null);
   }
@@ -432,7 +500,7 @@ class Dispatcher {
      * @param array  $webhook The webhook configuration
      * @param string $trigger The trigger event name
      */
-    $url = (string) apply_filters('fswa_webhook_url', $url, $payload, $webhook, $trigger);
+    $url = (string) apply_filters('fswa_webhook_url', $url, $payload, $webhook, $trigger, $originalPayload);
 
     $authHeader = isset($webhook['auth_header']) && is_string($webhook['auth_header'])
       ? (string) $webhook['auth_header']
@@ -810,6 +878,7 @@ class Dispatcher {
           'duration_ms'     => $durationMs,
           'request_headers' => $headers,
           'request_url'     => $url,
+          'request_payload' => $payload,
         ]);
       } else {
         $this->logService->logError(
@@ -861,6 +930,7 @@ class Dispatcher {
           'duration_ms'     => $durationMs,
           'request_headers' => $headers,
           'request_url'     => $url,
+          'request_payload' => $payload,
         ]);
       } else {
         $this->logService->logSuccess(

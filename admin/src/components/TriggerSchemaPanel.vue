@@ -22,6 +22,7 @@ import PayloadGlueDrawer from '@/components/PayloadGlueDrawer.vue';
 import { useSchemas, useUserTriggers } from '@/composables/useSchemas';
 import { usePro } from '@/composables/usePro';
 import { useTriggerSnippet } from '@/composables/useSnippets';
+import { applyMappingTransform } from '@/utils/payloadTransform';
 
 const props = defineProps({
   webhookId: {
@@ -74,6 +75,7 @@ const savingState = ref({});
 const localMappings = ref({});
 const localUserData = ref({});
 const localConditions = ref({});
+const localConditionsEvaluateOn = ref({});
 
 // Code Glue state
 const glueDrawer = ref({ open: false, trigger: '', tab: 'pre' });
@@ -234,12 +236,18 @@ const saveSchema = async (trigger) => {
       data.conditions = localConditions.value[trigger];
     }
 
+    // Include conditions_evaluate_on if changed
+    if (localConditionsEvaluateOn.value[trigger] !== undefined) {
+      data.conditions_evaluate_on = localConditionsEvaluateOn.value[trigger];
+    }
+
     await updateSchema(trigger, data);
 
     // Clear local state after save
     delete localMappings.value[trigger];
     delete localUserData.value[trigger];
     delete localConditions.value[trigger];
+    delete localConditionsEvaluateOn.value[trigger];
   } finally {
     savingState.value = { ...savingState.value, [trigger]: false };
   }
@@ -250,7 +258,8 @@ const hasChanges = (trigger) => {
   return (
     localMappings.value[trigger] !== undefined ||
     localUserData.value[trigger] !== undefined ||
-    localConditions.value[trigger] !== undefined
+    localConditions.value[trigger] !== undefined ||
+    localConditionsEvaluateOn.value[trigger] !== undefined
   );
 };
 
@@ -285,6 +294,38 @@ const getConditionsValue = (trigger) => {
   }
   const schema = getSchema(trigger);
   return schema?.conditions ?? { enabled: false, type: 'and', rules: [] };
+};
+
+// Get conditions_evaluate_on value (local or from schema), default 'original'
+const getConditionsEvaluateOn = (trigger) => {
+  if (localConditionsEvaluateOn.value[trigger] !== undefined) {
+    return localConditionsEvaluateOn.value[trigger];
+  }
+  const schema = getSchema(trigger);
+  return schema?.conditions_evaluate_on ?? 'original';
+};
+
+const handleConditionsEvaluateOnChange = (trigger, value) => {
+  localConditionsEvaluateOn.value = { ...localConditionsEvaluateOn.value, [trigger]: value };
+};
+
+// Compute post-mapping payload for a trigger (for conditions field picker when mode = 'transformed')
+const getTransformedPayload = (trigger) => {
+  const payload = getExamplePayload(trigger);
+  if (!payload) return null;
+  const mapping = getMappingValue(trigger);
+  return applyMappingTransform(payload, {
+    mappings: mapping.mappings || [],
+    excluded: mapping.excluded || [],
+    includeUnmapped: mapping.includeUnmapped !== false,
+  });
+};
+
+// Payload passed to ConditionsEditor — depends on evaluate_on setting
+const getConditionsPayload = (trigger) => {
+  return getConditionsEvaluateOn(trigger) === 'transformed'
+    ? getTransformedPayload(trigger)
+    : getParsedExamplePayload(trigger);
 };
 
 // Get raw captured example payload
@@ -540,6 +581,7 @@ watch(
             <div v-if="isSectionExpanded(trigger, 'mapping')" class="pt-2">
               <MappingEditor
                 :examplePayload="getExamplePayload(trigger)"
+                :originalPayload="getParsedExamplePayload(trigger)"
                 :modelValue="getMappingValue(trigger)"
                 :includeUserData="getUserDataValue(trigger)"
                 @update:modelValue="handleMappingChange(trigger, $event)"
@@ -558,13 +600,27 @@ watch(
               <span class="text-sm font-semibold">Conditions</span>
             </button>
             <div v-if="isSectionExpanded(trigger, 'conditions')" class="pt-2 space-y-2">
-              <p class="text-xs text-muted-foreground px-1 flex items-center flex-wrap gap-1">
-                Conditions are always evaluated against the original captured payload — before field mapping and
-                Code Glue<template v-if="!proActive"> <UpgradeBadge /></template><template v-else>.</template>
-              </p>
+              <div class="flex items-center justify-between px-1">
+                <p class="text-xs text-muted-foreground flex items-center flex-wrap gap-1">
+                  Evaluate against
+                  <template v-if="!proActive"> <UpgradeBadge /></template>
+                </p>
+                <div class="flex items-center gap-1 rounded-md border p-0.5 text-xs">
+                  <button
+                    class="px-2 py-0.5 rounded transition-colors"
+                    :class="getConditionsEvaluateOn(trigger) === 'original' ? 'bg-background shadow text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'"
+                    @click="handleConditionsEvaluateOnChange(trigger, 'original')"
+                  >Original</button>
+                  <button
+                    class="px-2 py-0.5 rounded transition-colors"
+                    :class="getConditionsEvaluateOn(trigger) === 'transformed' ? 'bg-background shadow text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'"
+                    @click="handleConditionsEvaluateOnChange(trigger, 'transformed')"
+                  >Transformed</button>
+                </div>
+              </div>
               <ConditionsEditor
                 :modelValue="getConditionsValue(trigger)"
-                :examplePayload="getParsedExamplePayload(trigger)"
+                :examplePayload="getConditionsPayload(trigger)"
                 :is-pro="proActive"
                 @update:modelValue="handleConditionsChange(trigger, $event)"
               />

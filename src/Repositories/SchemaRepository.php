@@ -110,6 +110,12 @@ class SchemaRepository {
         : null;
     }
 
+    if (array_key_exists('conditions_evaluate_on', $data)) {
+      $insertData['conditions_evaluate_on'] = in_array($data['conditions_evaluate_on'], ['original', 'transformed'], true)
+        ? $data['conditions_evaluate_on']
+        : 'original';
+    }
+
     if ($existing) {
       // Update existing record
       unset($insertData['webhook_id'], $insertData['trigger_name']);
@@ -295,6 +301,10 @@ class SchemaRepository {
     }
 
     $schema['include_user_data'] = (bool) ($schema['include_user_data'] ?? false);
+
+    if (!in_array($schema['conditions_evaluate_on'] ?? '', ['original', 'transformed'], true)) {
+      $schema['conditions_evaluate_on'] = 'original';
+    }
 
     return $schema;
   }

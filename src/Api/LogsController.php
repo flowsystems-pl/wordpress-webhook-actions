@@ -11,8 +11,10 @@ use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
 use FlowSystems\WebhookActions\Repositories\QueueRepository;
+use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\StatsRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Services\ConditionEvaluator;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 
@@ -23,15 +25,19 @@ class LogsController extends WP_REST_Controller {
   private LogRepository   $repository;
   private QueueRepository $queueRepository;
   private WebhookRepository $webhookRepository;
+  private SchemaRepository $schemaRepository;
   private QueueService    $queueService;
   private StatsRepository $statsRepository;
+  private ConditionEvaluator $conditionEvaluator;
 
   public function __construct() {
-    $this->repository      = new LogRepository();
-    $this->queueRepository = new QueueRepository();
-    $this->webhookRepository = new WebhookRepository();
-    $this->queueService    = new QueueService($this->queueRepository);
-    $this->statsRepository = new StatsRepository();
+    $this->repository         = new LogRepository();
+    $this->queueRepository    = new QueueRepository();
+    $this->webhookRepository  = new WebhookRepository();
+    $this->schemaRepository   = new SchemaRepository();
+    $this->queueService       = new QueueService($this->queueRepository);
+    $this->statsRepository    = new StatsRepository();
+    $this->conditionEvaluator = new ConditionEvaluator();
   }
 
   /**
@@ -359,6 +365,26 @@ class LogsController extends WP_REST_Controller {
         __('Webhook not found.', 'flowsystems-webhook-actions'),
         ['status' => 404]
       );
+    }
+
+    // Re-evaluate conditions against the latest schema settings before replay
+    $schema = $this->schemaRepository->findByWebhookAndTrigger((int) $log['webhook_id'], $log['trigger_name']);
+    if ($schema) {
+      $conditions = is_array($schema['conditions'] ?? null) ? $schema['conditions'] : [];
+      if (!empty($conditions)) {
+        $evaluateOn = $schema['conditions_evaluate_on'] ?? 'original';
+        $conditionsPayload = $evaluateOn === 'transformed'
+          ? $log['request_payload']
+          : ($log['original_payload'] ?: $log['request_payload']);
+        $evalResult = $this->conditionEvaluator->evaluate($conditions, $conditionsPayload);
+        if (!$evalResult['passed']) {
+          return new WP_Error(
+            'rest_conditions_failed',
+            __('Conditions are not met with current settings — event would be skipped.', 'flowsystems-webhook-actions'),
+            ['status' => 409]
+          );
+        }
+      }
     }
 
     $payload = [

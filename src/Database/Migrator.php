@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.11.0';
+  private const CURRENT_VERSION = '1.12.0';
 
   /**
    * Run pending migrations
@@ -78,6 +78,7 @@ class Migrator {
       '1.9.0'  => [self::class, 'migration_1_9_0'],
       '1.10.0' => [self::class, 'migration_1_10_0'],
       '1.11.0' => [self::class, 'migration_1_11_0'],
+      '1.12.0' => [self::class, 'migration_1_12_0'],
     ];
   }
 
@@ -175,6 +176,8 @@ class Migrator {
             example_payload LONGTEXT DEFAULT NULL,
             field_mapping LONGTEXT DEFAULT NULL,
             include_user_data TINYINT(1) NOT NULL DEFAULT 0,
+            conditions LONGTEXT DEFAULT NULL,
+            conditions_evaluate_on VARCHAR(20) NOT NULL DEFAULT 'original',
             captured_at DATETIME DEFAULT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -527,6 +530,25 @@ class Migrator {
     ));
     if (!$exists) {
       $wpdb->query("ALTER TABLE {$table} ADD COLUMN is_synchronous TINYINT(1) NOT NULL DEFAULT 0");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.12.0 - Add conditions_evaluate_on to trigger_schemas table
+   */
+  public static function migration_1_12_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_trigger_schemas';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'conditions_evaluate_on'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN conditions_evaluate_on VARCHAR(20) NOT NULL DEFAULT 'original'");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
