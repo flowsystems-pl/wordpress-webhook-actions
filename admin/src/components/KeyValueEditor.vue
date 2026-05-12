@@ -6,6 +6,7 @@ import { X, Plus, AlertTriangle } from 'lucide-vue-next';
 const props = defineProps({
   modelValue: { type: Array, default: () => [] },
   examplePayload: { type: Object, default: null },
+  gluePayload: { type: Object, default: null },
   keyPlaceholder: { type: String, default: 'Key' },
 });
 const emit = defineEmits(['update:modelValue']);
@@ -33,9 +34,16 @@ const resolveByPath = (obj, path) => {
 };
 
 const isPathMissing = (val) => {
-  if (!props.examplePayload || !isDotPath(val)) return false;
-  const resolved = resolveByPath(props.examplePayload, val);
-  return resolved === undefined || resolved === null;
+  if (!isDotPath(val)) return false;
+  if (props.gluePayload) {
+    const r = resolveByPath(props.gluePayload, val);
+    if (r !== undefined && r !== null) return false;
+  }
+  if (props.examplePayload) {
+    const r = resolveByPath(props.examplePayload, val);
+    if (r !== undefined && r !== null) return false;
+  }
+  return !!(props.gluePayload || props.examplePayload);
 };
 
 const isKeyInvalid = (key) => key && !/^[a-zA-Z0-9\-_]+$/.test(key);

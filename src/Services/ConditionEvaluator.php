@@ -195,11 +195,10 @@ class ConditionEvaluator {
   }
 
   private function deepContainsEntry(array $data, string $key, string $value): bool {
-    foreach ($data as $k => $v) {
+    if (array_key_exists($key, $data) && (string) $data[$key] === $value) return true;
+    foreach ($data as $v) {
       if (is_array($v) || is_object($v)) {
-        $sub = (array) $v;
-        if (array_key_exists($key, $sub) && (string) $sub[$key] === $value) return true;
-        if ($this->deepContainsEntry($sub, $key, $value)) return true;
+        if ($this->deepContainsEntry((array) $v, $key, $value)) return true;
       }
     }
     return false;

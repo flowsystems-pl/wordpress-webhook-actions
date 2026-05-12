@@ -106,7 +106,7 @@ class WebhooksController extends WP_REST_Controller {
         'payload_source' => [
           'description' => __('Where to source the test payload from.', 'flowsystems-webhook-actions'),
           'type'        => 'string',
-          'enum'        => ['captured', 'mapped', 'custom'],
+          'enum'        => ['captured', 'mapped', 'pre_glue', 'full_glue', 'custom'],
           'default'     => 'captured',
         ],
         'trigger' => [
@@ -203,7 +203,7 @@ class WebhooksController extends WP_REST_Controller {
   public function createItem($request) {
     $data = [
       'name'           => sanitize_text_field($request->get_param('name')),
-      'endpoint_url'   => esc_url_raw($request->get_param('endpoint_url')),
+      'endpoint_url'   => $this->sanitizeTemplateUrl($request->get_param('endpoint_url') ?? ''),
       'auth_header'    => sanitize_text_field($request->get_param('auth_header') ?? ''),
       'is_enabled'     => (bool) $request->get_param('is_enabled'),
       'triggers'       => $request->get_param('triggers') ?? [],
@@ -230,7 +230,7 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    if (!filter_var($data['endpoint_url'], FILTER_VALIDATE_URL)) {
+    if (!$this->validateTemplateUrl($data['endpoint_url'])) {
       return new WP_Error(
         'rest_invalid_endpoint_url',
         __('Invalid endpoint URL.', 'flowsystems-webhook-actions'),
@@ -286,9 +286,9 @@ class WebhooksController extends WP_REST_Controller {
     }
 
     if ($request->has_param('endpoint_url')) {
-      $data['endpoint_url'] = esc_url_raw($request->get_param('endpoint_url'));
+      $data['endpoint_url'] = $this->sanitizeTemplateUrl($request->get_param('endpoint_url') ?? '');
 
-      if (!filter_var($data['endpoint_url'], FILTER_VALIDATE_URL)) {
+      if (!$this->validateTemplateUrl($data['endpoint_url'])) {
         return new WP_Error(
           'rest_invalid_endpoint_url',
           __('Invalid endpoint URL.', 'flowsystems-webhook-actions'),
@@ -473,6 +473,26 @@ class WebhooksController extends WP_REST_Controller {
         $originalPayload = $mappingApplied ? $decoded : null;
         break;
 
+      case 'pre_glue':
+      case 'full_glue':
+        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
+        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        if (empty($example)) {
+          return new WP_Error(
+            'rest_no_captured_payload',
+            __('No captured payload found for this trigger. Fire the trigger at least once first.', 'flowsystems-webhook-actions'),
+            ['status' => 422]
+          );
+        }
+        $decoded = is_string($example) ? json_decode($example, true) : $example;
+        $mapped  = $this->payloadTransformer->applyStoredMapping($id, $trigger, $decoded ?? []);
+        // Filter applied later, only for mode=now — processJob applies it for mode=queue
+        $testPayload     = $mapped['payload'];
+        $mappingApplied  = $mapped['mapping_applied'];
+        $originalPayload = $mapped['mapping_applied'] ? $decoded : null;
+        $applyGlue       = true;
+        break;
+
       case 'captured':
       default:
         $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
@@ -490,7 +510,13 @@ class WebhooksController extends WP_REST_Controller {
         break;
     }
 
-    $mode  = $request->get_param('mode') ?? 'queue';
+    $mode = $request->get_param('mode') ?? 'queue';
+
+    if ($mode === 'now' && ($applyGlue ?? false)) {
+      $glued       = apply_filters('fswa_webhook_payload', $testPayload, $id, $trigger, $originalPayload);
+      $testPayload = is_array($glued) ? $glued : $testPayload;
+    }
+
     $logId = $this->logService->logPending($id, $trigger, $testPayload, $originalPayload, $mappingApplied);
 
     if ($mode === 'now') {
@@ -526,6 +552,36 @@ class WebhooksController extends WP_REST_Controller {
       'job_id' => $jobId,
       'log_id' => $logId,
     ]);
+  }
+
+  /**
+   * Sanitizes a webhook endpoint URL while preserving {{ $payload.field }} template markers.
+   * Extracts templates, sanitizes the URL skeleton with esc_url_raw(), then restores templates.
+   */
+  private function sanitizeTemplateUrl(string $url): string {
+    $templates = [];
+    $placeholder = 'FSWATPLPH';
+    $skeleton = preg_replace_callback('/\{\{[^}]+\}\}/', function (array $m) use (&$templates, $placeholder): string {
+      $idx = count($templates);
+      $templates[] = $m[0];
+      return $placeholder . $idx;
+    }, $url) ?? $url;
+
+    $sanitized = esc_url_raw($skeleton);
+
+    foreach ($templates as $idx => $tpl) {
+      $sanitized = str_replace($placeholder . $idx, $tpl, $sanitized);
+    }
+    return $sanitized;
+  }
+
+  /**
+   * Validates a webhook endpoint URL that may contain {{ $payload.field }} template markers.
+   * Templates are replaced with '0' before FILTER_VALIDATE_URL so the structure can be checked.
+   */
+  private function validateTemplateUrl(string $url): bool {
+    $skeleton = preg_replace('/\{\{[^}]+\}\}/', '0', $url) ?? $url;
+    return (bool) filter_var($skeleton, FILTER_VALIDATE_URL);
   }
 
   private function sanitizeKvArray(array $pairs): array {

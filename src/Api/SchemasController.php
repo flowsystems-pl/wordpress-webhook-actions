@@ -274,6 +274,11 @@ class SchemasController extends WP_REST_Controller {
       $data['conditions'] = $this->sanitizeConditions($conditions);
     }
 
+    if ($request->has_param('conditions_evaluate_on')) {
+      $raw = $request->get_param('conditions_evaluate_on');
+      $data['conditions_evaluate_on'] = in_array($raw, ['original', 'transformed'], true) ? $raw : 'original';
+    }
+
     if (empty($data)) {
       return new WP_Error(
         'rest_no_data',

@@ -279,6 +279,25 @@ class LogRepository {
       $format[] = '%d';
     }
 
+    if (isset($data['request_payload'])) {
+      $updateData['request_payload'] = is_array($data['request_payload'])
+        ? wp_json_encode($data['request_payload'])
+        : $data['request_payload'];
+      $format[] = '%s';
+    }
+
+    if (isset($data['original_payload'])) {
+      $updateData['original_payload'] = is_array($data['original_payload'])
+        ? wp_json_encode($data['original_payload'])
+        : $data['original_payload'];
+      $format[] = '%s';
+    }
+
+    if (isset($data['mapping_applied'])) {
+      $updateData['mapping_applied'] = (int) $data['mapping_applied'];
+      $format[] = '%d';
+    }
+
     if (isset($data['request_headers'])) {
       $updateData['request_headers'] = is_array($data['request_headers'])
         ? wp_json_encode($data['request_headers'])

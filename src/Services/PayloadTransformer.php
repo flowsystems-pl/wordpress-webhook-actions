@@ -65,10 +65,11 @@ class PayloadTransformer {
       $examplePayload = apply_filters('fswa_capture_payload', $payload, $webhookId, $trigger);
       $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $examplePayload);
       return [
-        'original'        => null,
-        'transformed'     => $payload,
-        'mapping_applied' => false,
-        'conditions'      => null,
+        'original'                => null,
+        'transformed'             => $payload,
+        'mapping_applied'         => false,
+        'conditions'              => null,
+        'conditions_evaluate_on'  => 'original',
       ];
     }
 
@@ -103,10 +104,11 @@ class PayloadTransformer {
     }
 
     return [
-      'original'        => $mappingApplied ? $payload : null,
-      'transformed'     => $transformedPayload,
-      'mapping_applied' => $mappingApplied,
-      'conditions'      => $schema['conditions'] ?? null,
+      'original'               => $mappingApplied ? $payload : null,
+      'transformed'            => $transformedPayload,
+      'mapping_applied'        => $mappingApplied,
+      'conditions'             => $schema['conditions'] ?? null,
+      'conditions_evaluate_on' => $schema['conditions_evaluate_on'] ?? 'original',
     ];
   }
 

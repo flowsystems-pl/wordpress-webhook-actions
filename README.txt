@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.11.0
+Stable tag: 1.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -458,6 +458,18 @@ Yes. Each webhook can have conditions evaluated against the incoming payload bef
 10. Test webhook drawer — send a test delivery and inspect request details inline
 
 == Changelog ==
+
+= 1.12.0 — 2026-05-12 =
+- Added `fswa_webhook_payload` filter — Pro-extensible enrichment of the outgoing payload before dispatch; receives the mapped payload, webhook id, trigger name, and pre-mapping original payload
+- Added `fswa_glue_post_dispatch` action — fires after every delivery with response code/body, mapped payload, webhook, and original pre-mapping payload; intended for Pro post-dispatch snippets
+- Added `fswa_webhook_url` filter — Pro-extensible URL template expansion; passes the URL, post-glue payload, webhook, trigger, and original pre-mapping payload as fallback for dot-notation token resolution
+- Added per-trigger `conditions_evaluate_on` setting (original / transformed) — choose whether conditions evaluate against the pre-mapping payload or the post-mapping/post-glue payload; segmented toggle in the trigger schema panel
+- Added dual-resolution for custom headers and URL parameters — when a dot-notation path resolves to null in the post-glue payload, falls back to the pre-mapping original payload; matches existing condition resolution semantics
+- Added collapsible Original Payload section in the Mapping editor — inspect the pre-glue/pre-mapping payload while authoring field mappings
+- Improved `object_contains` operator — also matches when the value is present at the current array level, not only nested; works for array-typed WooCommerce fields like `meta_data` and `line_items`
+- Improved delivery log writes — `request_payload`, `original_payload`, and `mapping_applied` are now refreshed after the `fswa_webhook_payload` filter mutates the payload
+- Fixed condition evaluation order — re-evaluates conditions after Code Glue pre-dispatch when `conditions_evaluate_on` is `transformed`
+- Fixed pre-glue filter application in synchronous mode — applied exactly once during the inline attempt instead of once before enqueue and again at send
 
 = 1.11.0 — 2026-05-06 =
 - Added `array_contains` condition operator — checks whether an array field contains a specified value; works with flat arrays and arrays of objects

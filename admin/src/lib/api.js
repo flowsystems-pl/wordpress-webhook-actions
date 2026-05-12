@@ -196,6 +196,16 @@ export const api = {
     resetCapture: (webhookId, triggerName) => post(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}/capture`),
     getUserTriggers: () => get('schemas/user-triggers'),
   },
+  snippets: {
+    list: (params = {}) => get('pro/snippets', params),
+    get: (id) => get(`pro/snippets/${id}`),
+    create: (data) => post('pro/snippets', data),
+    update: (id, data) => patch(`pro/snippets/${id}`, data),
+    delete: (id) => del(`pro/snippets/${id}`),
+    preview: (data) => post('pro/snippets/preview', data),
+    getTriggerSnippet: (webhookId, trigger) => get(`pro/trigger-snippets/${webhookId}/trigger/${encodeURIComponent(trigger)}`),
+    saveTriggerSnippet: (webhookId, trigger, data) => post(`pro/trigger-snippets/${webhookId}/trigger/${encodeURIComponent(trigger)}`, data),
+  },
 }
 
 export default api
