@@ -55,6 +55,8 @@ Unlock unlimited conditions, per-webhook retry and backoff settings, type castin
 - Send event-driven data to internal APIs
 - Replace fragile custom `wp_remote_post()` integrations
 - Build idempotent WordPress automation pipelines
+- Sync WooCommerce orders to HubSpot CRM, Pipedrive, or any REST API — create a deal on payment, then PATCH the same deal when the order completes, by storing the remote ID locally and replaying it into the URL on later events
+- Dynamic per-event endpoints — point a webhook at `https://api.example.com/resources/{{ resource_id }}` and the URL is resolved at dispatch time against the live payload
 - Query delivery logs, trigger retries, or manage webhooks programmatically from CI/CD pipelines or external dashboards using API tokens
 - Allow AI coding assistants (e.g. Claude Code) to inspect webhook logs and retry failed events automatically
 - Use AI agents to monitor webhook delivery health and operate the queue through the REST API
@@ -109,11 +111,18 @@ Each replay uses the original payload and event metadata, ensuring consistent be
 
 Not every WordPress event should trigger a webhook. Conditional dispatch lets you define field-level rules on any webhook — the event is only delivered if the conditions pass. Events that fail the check are logged with a `skipped` status and can be replayed later after adjusting the conditions.
 
-Conditions are evaluated against the outgoing payload using dot-notation field paths. Each condition specifies a field, an optional type cast, an operator, and a comparison value. The field selector shows the live captured payload so you can click through nested structures and pick the exact path without typing it manually.
+Conditions are evaluated using dot-notation field paths. Each condition specifies a field, an optional type cast, an operator, and a comparison value. The field selector shows the live captured payload so you can click through nested structures and pick the exact path without typing it manually.
+
+**Evaluate against original or transformed payload**
+
+Each trigger schema exposes a toggle to choose which payload conditions are evaluated against:
+
+- **Original** — the pre-mapping payload exactly as the WordPress hook fired (default for most use cases). Use this to filter on raw hook arguments like the new WooCommerce status in `args.2`.
+- **Transformed** — the post-mapping, post-enrichment payload that will actually be sent. Use this to filter on fields injected by `fswa_payload`, `fswa_webhook_payload`, or **(Pro)** Code Glue snippets — for example, dispatch only when a remote id was successfully resolved.
 
 **Operators include:** equals, not equals, contains, starts with, ends with, is empty, has value, greater than, less than, `array_contains`, `object_contains`
 
-**Type casting before comparison:** auto-detect, number, string, boolean, or `stringify` (JSON-encodes arrays and objects into a string for pattern matching)
+**Type casting before comparison:** auto-detect, number, string, boolean, or `stringify` (JSON-encodes arrays and objects into a string for pattern matching). **(Pro)** Typed casts (number, boolean) — the free plan compares values as captured.
 
 **Example — WooCommerce: fire only when a specific product is in the order**
 
@@ -172,7 +181,7 @@ Adapt outgoing JSON payloads to match any external API:
 - Rename fields using dot notation
 - Restructure nested objects
 - Exclude sensitive or unnecessary data
-- Cast field values to number, string, or boolean before sending (e.g. WooCommerce price `"100.50"` → `100.5`)
+- **(Pro)** Cast field values to number, string, or boolean before sending (e.g. WooCommerce price `"100.50"` → `100.5`)
 - Store example payloads for configuration
 - Modify via `fswa_payload` filter
 
@@ -199,6 +208,29 @@ For GET and DELETE requests — where a request body is not appropriate — quer
 **Request details in delivery logs**
 
 Every delivery log stores the exact headers sent and the fully resolved URL (including all query parameters), so you can inspect precisely what was dispatched.
+
+= Dynamic URL Templates =
+
+Endpoint URLs can contain dot-notation placeholders that are resolved per-event against the outgoing payload at dispatch time. Useful for REST APIs that require an object id directly in the path — HubSpot, Pipedrive, Stripe, Notion, custom internal services.
+
+**Syntax**
+
+`https://api.example.com/v1/resources/{{ resource_id }}/notes`
+`https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}`
+`https://api.example.com/users/{{ user.id }}/orders/{{ order.id }}`
+
+Same dot-notation as custom headers and URL parameters. Values are `rawurlencode()`'d before substitution to keep the URL valid.
+
+**Resolution order**
+
+The template is resolved against the outgoing (post-mapping) payload first. If a placeholder is not found there, the original pre-mapping payload is consulted as a fallback — so paths from the captured event keep working even after payload mapping renames or removes top-level fields.
+
+**Example — WooCommerce → HubSpot deal update**
+
+1. On `woocommerce_payment_complete`, send a POST to `https://api.hubapi.com/crm/objects/2026-03/deals` to create the deal. Store the returned deal id in the WooCommerce order's post meta.
+2. On `woocommerce_order_status_changed`, configure a second webhook with endpoint URL `https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}` and method `PATCH`. Inject `_hs_deal_id` into the payload (read from order meta), and the URL resolves to the right HubSpot deal on every event.
+
+This pattern works for any REST API that uses resource ids in the URL path. The free plugin handles the URL template expansion and dual-resolution; injecting the id from external storage (post meta, options, transients) is straightforward with the `fswa_webhook_payload` filter, or **(Pro)** with no code at all using [Webhook Actions Pro Code Glue](https://wpwebhooks.org/pricing/).
 
 = REST API Access with Token Authentication =
 
@@ -254,14 +286,15 @@ This allows WordPress automation pipelines to be controlled entirely through HTT
 
 = Webhook Actions Pro (full feature list) =
 
-Webhook Actions Pro extends the plugin with advanced features for production workflows:
+Webhook Actions Pro extends the plugin with advanced features for production workflows. Every feature in this section requires an active Pro license.
 
-- Unlimited conditions and condition groups with AND/OR logic
-- Type casting in conditions — cast field values to number, string, or boolean before comparison
-- Type casting in payload mapping — cast values before sending to external APIs
-- Per-webhook retry settings — override maximum retry attempts at the webhook level
-- Per-webhook backoff strategy — override retry delay behavior per webhook
-- License managed directly from the Pro tab in the admin panel
+- **(Pro)** Unlimited conditions and condition groups with AND/OR logic
+- **(Pro)** Type casting in conditions — cast field values to number, string, or boolean before comparison
+- **(Pro)** Type casting in payload mapping — cast values before sending to external APIs
+- **(Pro)** Per-webhook retry settings — override maximum retry attempts at the webhook level
+- **(Pro)** Per-webhook backoff strategy — override retry delay behavior per webhook
+- **(Pro) Code Glue** — attach short PHP snippets per webhook+trigger to enrich the outgoing payload (pre-dispatch) or react to the response (post-dispatch); supports reading WordPress data, looking up remote IDs from post/user meta, and writing back response data; pairs naturally with dynamic URL templates for round-trip integrations like WooCommerce ↔ HubSpot deal sync — no separate plugin or theme code required
+- **(Pro)** License managed directly from the Pro tab in the admin panel
 
 [Learn more and upgrade →](https://wpwebhooks.org/pricing/)
 
@@ -327,7 +360,8 @@ Webhook Actions by Flow Systems provides:
 - Event UUIDs and timestamps
 - Full delivery logging and metrics
 - Configurable HTTP method, custom headers, and URL query parameters per webhook
-- Conditional webhook dispatch
+- Dynamic URL templates — `{{ field.path }}` placeholders resolved per event against the live payload
+- Conditional webhook dispatch with a per-trigger evaluate-on switch (original or transformed payload)
 - Per-webhook synchronous execution — optional inline delivery with automatic queue fallback on failure
 - Test webhook delivery — send a test event instantly or via queue without triggering real WordPress events
 - REST API with token authentication for programmatic access
@@ -342,6 +376,8 @@ Built for developers who need production-grade automation reliability.
 
 - `fswa_should_dispatch` – Decide if a trigger should dispatch
 - `fswa_payload` – Customize webhook payload before dispatch
+- `fswa_webhook_payload` – Enrich the outgoing payload just before dispatch (after mapping); args: `$payload`, `$webhookId`, `$trigger`, `$originalPayload`. Used by Pro Code Glue and any custom integration that injects fields (e.g. a remote id looked up from post meta)
+- `fswa_webhook_url` – Customize the endpoint URL per delivery; powers dynamic `{{ field.path }}` template expansion. Args: `$url`, `$payload` (post-mapping/post-glue), `$webhook`, `$trigger`, `$originalPayload`
 - `fswa_capture_payload` – Modify the payload just before it is stored as the captured example (does not affect the dispatched payload); args: `$payload`, `$webhookId`, `$trigger`
 - `fswa_normalize_object` – Normalize a third-party object into an array for payload serialization
 - `fswa_headers` – Add or modify HTTP headers sent with the request
@@ -362,6 +398,7 @@ Built for developers who need production-grade automation reliability.
 - `fswa_skipped` – Fired when a webhook dispatch is skipped due to a failed condition
 - `fswa_webhook_saved` – Fired after a webhook is created or updated
 - `fswa_webhook_response` – Fired after an HTTP response is received (success or error); args: `$webhookId`, `$trigger`, `$responseCode`, `$responseBody`, `$payload`, `$webhook`
+- `fswa_glue_post_dispatch` – Fired after each delivery with full request and response context; args: `$webhookId`, `$trigger`, `$responseCode`, `$responseBody`, `$payload`, `$webhook`, `$originalPayload`. Used by Pro Code Glue post-dispatch snippets to write returned data back into WordPress (e.g. store a remote resource id in post meta)
 
 = Admin UX Improvements =
 
@@ -442,7 +479,15 @@ Yes. The core plugin is completely free and licensed under GPL. Webhook Actions 
 
 = Can I use conditions to filter which webhooks fire? =
 
-Yes. Each webhook can have conditions evaluated against the incoming payload before dispatch. Free plan supports one condition with AND match. Pro plan supports unlimited conditions, condition groups, and AND/OR logic per group.
+Yes. Each webhook can have conditions evaluated against the incoming payload before dispatch. Free plan supports one condition with AND match. Pro plan supports unlimited conditions, condition groups, and AND/OR logic per group. Each trigger can choose whether conditions evaluate against the original (pre-mapping) payload or the transformed (post-mapping, post-Code-Glue) payload.
+
+= Can the endpoint URL change per event? =
+
+Yes. The endpoint URL supports dot-notation placeholders like `https://api.example.com/v1/resources/{{ resource_id }}/notes`. Placeholders are resolved at dispatch time against the live payload and `rawurlencode()`'d before substitution. Resolution tries the outgoing (post-mapping) payload first and falls back to the original captured payload, so paths from the captured event keep working even after mapping rewrites top-level fields.
+
+= Can I sync WooCommerce orders to HubSpot, Pipedrive, or another CRM that requires a deal id in the URL? =
+
+Yes. Use two webhooks: the first creates the remote resource on payment completion and stores the returned id in WordPress (e.g. post meta on the order). The second updates the resource on subsequent events using a URL like `https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}` and injects the stored id back into the payload. The injection can be done with the `fswa_webhook_payload` filter, or **(Pro)** with no code at all using [Webhook Actions Pro Code Glue](https://wpwebhooks.org/pricing/).
 
 == Screenshots ==
 
