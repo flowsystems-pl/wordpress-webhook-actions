@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.12.0
+Stable tag: 1.12.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -31,6 +31,7 @@ You already think in events, payloads, idempotency, and observability. Webhook A
 👉 Step-by-step example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/cf7-to-webhook/)
 👉 Step-by-step example: [Send Gravity Forms Submissions to n8n](https://wpwebhooks.org/examples/gravity-forms-webhooks/)
 👉 Step-by-step example: [Send IvyForms submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/ivyforms-to-webhook/)
+👉 Step-by-step example: [Send WooCommerce orders to n8n on completion, only when the total is over $999 — wired up with a Claude Code agent](https://wpwebhooks.org/examples/woocommerce-order-webhook-claude-code/)
 
 = ⚡ Webhook Actions Pro =
 
@@ -118,7 +119,7 @@ Each trigger schema exposes a toggle to choose which payload conditions are eval
 
 **Operators include:** equals, not equals, contains, starts with, ends with, is empty, has value, greater than, less than, `array_contains`, `object_contains`
 
-**Type casting before comparison:** auto-detect, number, string, boolean, or `stringify` (JSON-encodes arrays and objects into a string for pattern matching). **(Pro)** Typed casts (number, boolean) — the free plan compares values as captured.
+**Type casting before comparison:** auto-detect, number, string, boolean, or `stringify` (JSON-encodes arrays and objects into a string for pattern matching)
 
 **Example — WooCommerce: fire only when a specific product is in the order**
 
@@ -177,7 +178,7 @@ Adapt outgoing JSON payloads to match any external API:
 - Rename fields using dot notation
 - Restructure nested objects
 - Exclude sensitive or unnecessary data
-- **(Pro)** Cast field values to number, string, or boolean before sending (e.g. WooCommerce price `"100.50"` → `100.5`)
+- Cast field values to number, string, or boolean before sending (e.g. WooCommerce price `"100.50"` → `100.5`)
 - Store example payloads for configuration
 - Modify via `fswa_payload` filter
 
@@ -209,15 +210,13 @@ Every delivery log stores the exact headers sent and the fully resolved URL (inc
 
 Many REST APIs require an object id directly in the path — HubSpot, Pipedrive, Stripe, Notion, custom internal services. The free plugin exposes the `fswa_webhook_url` filter so you can rewrite the endpoint URL per event from PHP, with full access to the outgoing payload, the webhook configuration, the trigger name, and the original pre-mapping payload.
 
-```
-add_filter( 'fswa_webhook_url', function ( $url, $payload, $webhook, $trigger, $original ) {
-    if ( $webhook['id'] === 30 ) {
-        $deal_id = $payload['_hs_deal_id'] ?? '';
-        return "https://api.hubapi.com/crm/objects/2026-03/deals/{$deal_id}";
-    }
-    return $url;
-}, 10, 5 );
-```
+`add_filter( 'fswa_webhook_url', function ( $url, $payload, $webhook, $trigger, $original ) {`
+`    if ( (int) $webhook['id'] === 30 ) {`
+`        $deal_id = $payload['_hs_deal_id'] ?? '';`
+`        return "https://api.hubapi.com/crm/objects/2026-03/deals/{$deal_id}";`
+`    }`
+`    return $url;`
+`}, 10, 5 );`
 
 The same filter powers the **(Pro)** template syntax described below, so any URL you can build with `{{ }}` placeholders you can also build by hand on the free plan.
 
@@ -301,8 +300,6 @@ This allows WordPress automation pipelines to be controlled entirely through HTT
 Webhook Actions Pro extends the plugin with advanced features for production workflows. Every feature in this section requires an active Pro license.
 
 - **(Pro)** Unlimited conditions and condition groups with AND/OR logic
-- **(Pro)** Type casting in conditions — cast field values to number, string, or boolean before comparison
-- **(Pro)** Type casting in payload mapping — cast values before sending to external APIs
 - **(Pro)** Per-webhook retry settings — override maximum retry attempts at the webhook level
 - **(Pro)** Per-webhook backoff strategy — override retry delay behavior per webhook
 - **(Pro) Code Glue** — attach short PHP snippets per webhook+trigger to enrich the outgoing payload (pre-dispatch) or react to the response (post-dispatch); supports reading WordPress data, looking up remote IDs from post/user meta, and writing back response data; pairs naturally with dynamic URL templates for round-trip integrations like WooCommerce ↔ HubSpot deal sync — no separate plugin or theme code required
@@ -515,6 +512,12 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 10. Test webhook drawer — send a test delivery and inspect request details inline
 
 == Changelog ==
+
+= 1.12.1 — 2026-05-12 =
+- Docs: corrected README to reflect that type casting (in both payload mapping and conditions) is a free-plan feature; removed misleading Pro markers
+- Docs: added WooCommerce → n8n step-by-step example showing conditional dispatch wired up via a Claude Code agent
+- Docs: reformatted `fswa_webhook_url` PHP code sample so it renders as a single code block on the wordpress.org plugin page
+- No code changes
 
 = 1.12.0 — 2026-05-12 =
 - Added `fswa_webhook_payload` filter — Pro-extensible enrichment of the outgoing payload before dispatch; receives the mapped payload, webhook id, trigger name, and pre-mapping original payload
