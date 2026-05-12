@@ -8,29 +8,25 @@ Stable tag: 1.12.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Reliable WordPress webhooks with retries, queue, Action Scheduler support, delivery logs, and replayable events for n8n, APIs, and integrations.
+Operate WordPress like modern infrastructure — turn any WordPress action into a real API event your CRMs, n8n flows, AI agents, and internal services can consume.
 
 == Description ==
 
-Webhook Actions by Flow Systems is a developer-focused WordPress webhook delivery layer designed for reliable automation workflows.
+Most WordPress integrations are glue code. A `wp_remote_post()` here, a custom plugin there, an Action Scheduler job nobody else on the team understands. Webhook Actions by Flow Systems replaces that pile with a single, configurable event layer — so you can ship integrations at the pace the rest of your stack moves.
 
-It adds a persistent queue, automatic retries, and Action Scheduler support for production-grade background processing — so your webhooks don’t get lost when external APIs fail.
+Any `do_action` becomes a first-class API event: queued, retried, logged, replayable, and reachable over a token-authenticated REST API. The WooCommerce-to-HubSpot round-trip that used to be a two-week project is now an afternoon of configuration. The "can n8n pick this up?" question gets a yes before the meeting ends.
 
-Works great with WooCommerce, n8n, Zapier alternatives, and custom APIs.
+- **Ship full CRM and SaaS integrations in an afternoon.** Two webhooks and a dynamic URL template (`https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}`) turn a WooCommerce order lifecycle into a HubSpot deal lifecycle. Same pattern for Pipedrive, Notion, Airtable, internal services — any REST API that puts ids in the URL path. **(Pro)** for the `{{ }}` template syntax, or use the `fswa_webhook_url` filter on the free plan to rewrite the URL from PHP.
+- **Speak n8n, Make, Zapier, and AI-agent fluent.** Send any WordPress event into n8n; pull a Claude Code or Cursor agent into your wp-admin via scoped API tokens and let it inspect logs, retry deliveries, and toggle integrations during deploys — without ever touching WordPress credentials.
+- **Operate WordPress like a real backend.** Every event has a UUID, a full request/response log, a replay button, and an HTTP-addressable REST endpoint. Conditional dispatch, custom headers, query parameters, all five HTTP methods, dynamic URL templates — match exactly what each external API expects.
+- **Replace expensive automation subscriptions with code you own.** Move the Zapier/Make tasks that bill per-run back into WordPress. Same triggers, same destinations, no per-zap pricing, no third-party data hop.
+- **Let the rest of the team ship without asking for help.** Junior devs and ops folks configure webhooks in the admin panel. Filters and a **(Pro)** Code Glue snippet system are there when something custom is genuinely needed. The integrations stay readable, observable, and yours.
 
-Any WordPress `do_action` hook can become a reliable event source — register it as a trigger and the plugin handles queuing, retries, payload mapping, and delivery from there. No custom delivery code required.
+Backed by a dedicated persistent queue with intelligent retry and exponential backoff — the queue lives in your database, under your control. Action Scheduler is auto-detected as the optional trigger (the same job runner WooCommerce uses for production stores) and gracefully falls back to WP-Cron when it isn't available. Same plugin scales from a Contact Form 7 lead form to a high-traffic Black Friday store without changing a line.
 
-Includes built-in Contact Form 7 integration — send CF7 form submissions to webhooks instantly with clean, structured payloads. Replace fragile CF7 email workflows with reliable webhook-based automation.
+= The integration architect's toolkit =
 
-
-Unlike basic “fire-and-forget” webhook implementations, this plugin ensures:
-
-- Delivery attempts are tracked
-- Failures are visible
-- Retries are automatic and intelligent
-- Events include stable identity metadata for idempotency
-
-Built for production environments where losing events is not acceptable.
+You already think in events, payloads, idempotency, and observability. Webhook Actions by Flow Systems is the kit that matches: a persistent queue, a full delivery log, replay, scoped REST API tokens, an extensible filter and action surface (`fswa_webhook_payload`, `fswa_webhook_url`, `fswa_glue_post_dispatch` and more), and an event surface AI agents can safely talk to. Plug it in, and the WordPress side of your stack starts to look like the rest of it.
 
 👉 Step-by-step example: [Send Contact Form 7 submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/cf7-to-webhook/)
 👉 Step-by-step example: [Send Gravity Forms Submissions to n8n](https://wpwebhooks.org/examples/gravity-forms-webhooks/)
@@ -209,14 +205,30 @@ For GET and DELETE requests — where a request body is not appropriate — quer
 
 Every delivery log stores the exact headers sent and the fully resolved URL (including all query parameters), so you can inspect precisely what was dispatched.
 
-= Dynamic URL Templates =
+= Per-Event Dynamic URLs (Free, via filter) =
 
-Endpoint URLs can contain dot-notation placeholders that are resolved per-event against the outgoing payload at dispatch time. Useful for REST APIs that require an object id directly in the path — HubSpot, Pipedrive, Stripe, Notion, custom internal services.
+Many REST APIs require an object id directly in the path — HubSpot, Pipedrive, Stripe, Notion, custom internal services. The free plugin exposes the `fswa_webhook_url` filter so you can rewrite the endpoint URL per event from PHP, with full access to the outgoing payload, the webhook configuration, the trigger name, and the original pre-mapping payload.
+
+```
+add_filter( 'fswa_webhook_url', function ( $url, $payload, $webhook, $trigger, $original ) {
+    if ( $webhook['id'] === 30 ) {
+        $deal_id = $payload['_hs_deal_id'] ?? '';
+        return "https://api.hubapi.com/crm/objects/2026-03/deals/{$deal_id}";
+    }
+    return $url;
+}, 10, 5 );
+```
+
+The same filter powers the **(Pro)** template syntax described below, so any URL you can build with `{{ }}` placeholders you can also build by hand on the free plan.
+
+= Dynamic URL Templates (Pro) =
+
+**(Pro)** Endpoint URLs can contain `{{ field.path }}` placeholders that are resolved per event against the live payload at dispatch time — no PHP required. Configure entirely from the webhook edit screen.
 
 **Syntax**
 
-`https://api.example.com/v1/resources/{{ resource_id }}/notes`
 `https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}`
+`https://api.example.com/v1/resources/{{ resource_id }}/notes`
 `https://api.example.com/users/{{ user.id }}/orders/{{ order.id }}`
 
 Same dot-notation as custom headers and URL parameters. Values are `rawurlencode()`'d before substitution to keep the URL valid.
@@ -230,7 +242,7 @@ The template is resolved against the outgoing (post-mapping) payload first. If a
 1. On `woocommerce_payment_complete`, send a POST to `https://api.hubapi.com/crm/objects/2026-03/deals` to create the deal. Store the returned deal id in the WooCommerce order's post meta.
 2. On `woocommerce_order_status_changed`, configure a second webhook with endpoint URL `https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}` and method `PATCH`. Inject `_hs_deal_id` into the payload (read from order meta), and the URL resolves to the right HubSpot deal on every event.
 
-This pattern works for any REST API that uses resource ids in the URL path. The free plugin handles the URL template expansion and dual-resolution; injecting the id from external storage (post meta, options, transients) is straightforward with the `fswa_webhook_payload` filter, or **(Pro)** with no code at all using [Webhook Actions Pro Code Glue](https://wpwebhooks.org/pricing/).
+This pattern works for any REST API that uses resource ids in the URL path. Injecting the id from external storage (post meta, options, transients) can be done with the `fswa_webhook_payload` filter on the free plan, or **(Pro)** with no code at all using [Webhook Actions Pro Code Glue](https://wpwebhooks.org/pricing/).
 
 = REST API Access with Token Authentication =
 
