@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.12.1
+Stable tag: 1.12.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -513,6 +513,11 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 
 == Changelog ==
 
+= 1.12.2 — 2026-05-14 =
+- Fixed "Queue appears stuck" health banner staying visible when delivery logs were left in `pending` state with no live queue row (e.g. legacy rows from older queue-status semantics, or worker crashes between updating queue and log state); the queue processor now reconciles such orphaned pending logs on every run and marks them `permanently_failed`
+- Improved trigger conditions UI — renamed the "Evaluate against" toggle to "Evaluate conditions against" and added an inline info tooltip explaining the Original (pre-mapping) vs Transformed (post-mapping) choice
+- Removed misleading Pro upgrade badge from the conditions evaluate-against toggle — choosing between original and transformed payload for conditions has always been a free-plan feature
+
 = 1.12.1 — 2026-05-12 =
 - Docs: corrected README to reflect that type casting (in both payload mapping and conditions) is a free-plan feature; removed misleading Pro markers
 - Docs: added WooCommerce → n8n step-by-step example showing conditional dispatch wired up via a Claude Code agent
@@ -662,6 +667,9 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.12.2 =
+Fixes a stale "Queue appears stuck" health banner caused by orphaned pending log rows; the queue worker now self-reconciles such rows. Clarifies the conditions evaluate-against toggle label and removes a misleading Pro badge. No database changes — no manual steps required.
 
 = 1.11.0 =
 Adds two new condition operators (`array_contains`, `object_contains`) and a `stringify` type cast for matching complex array and object fields. Improves the conditions editor layout for mobile screens. No database changes — no manual steps required.
