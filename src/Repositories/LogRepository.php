@@ -624,6 +624,45 @@ class LogRepository {
   }
 
   /**
+   * Reconcile orphaned pending logs.
+   *
+   * A pending log is "orphaned" when its queue row is in a terminal state
+   * (completed / permanently_failed / failed) or no queue row exists at all,
+   * yet the log is still flagged as pending. This can happen across plugin
+   * upgrades where queue status semantics change, or if a worker crashes
+   * between updating queue state and updating log state. Such logs are
+   * marked permanently_failed so the "queue stuck" health check reflects
+   * actual queue health and stale rows do not linger forever.
+   *
+   * @param int $minAgeMinutes Only reconcile logs older than this (avoids racing live work)
+   * @return int Number of logs reconciled
+   */
+  public function reconcileOrphanedPendingLogs(int $minAgeMinutes = 10): int {
+    global $wpdb;
+
+    $queueTable = $wpdb->prefix . 'fswa_queue';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $affected = $wpdb->query(
+      $wpdb->prepare(
+        "UPDATE {$this->logsTable} l
+         SET l.status = 'permanently_failed', l.next_attempt_at = NULL
+         WHERE l.status = 'pending'
+           AND l.created_at < (UTC_TIMESTAMP() - INTERVAL %d MINUTE)
+           AND NOT EXISTS (
+             SELECT 1 FROM {$queueTable} q
+             WHERE q.log_id = l.id
+               AND q.status IN ('pending', 'processing')
+           )",
+        $minAgeMinutes
+      )
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    return (int) $affected;
+  }
+
+  /**
    * Get age in seconds of the oldest pending log
    *
    * @return int|null Null if no pending logs

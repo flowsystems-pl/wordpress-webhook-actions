@@ -13,8 +13,9 @@ import {
   Waypoints,
   Code2,
   Pencil,
+  Info,
 } from 'lucide-vue-next';
-import { Button, Card, Badge, Switch, Label, Alert, UpgradeBadge } from '@/components/ui';
+import { Button, Card, Badge, Switch, Label, Alert, Tooltip, UpgradeBadge } from '@/components/ui';
 import { formatUtcDate } from '@/lib/dates';
 import MappingEditor from '@/components/MappingEditor.vue';
 import ConditionsEditor from '@/components/ConditionsEditor.vue';
@@ -601,9 +602,11 @@ watch(
             </button>
             <div v-if="isSectionExpanded(trigger, 'conditions')" class="pt-2 space-y-2">
               <div class="flex items-center justify-between px-1">
-                <p class="text-xs text-muted-foreground flex items-center flex-wrap gap-1">
-                  Evaluate against
-                  <template v-if="!proActive"> <UpgradeBadge /></template>
+                <p class="text-xs text-muted-foreground flex items-center gap-1.5">
+                  Evaluate conditions against
+                  <Tooltip content="Choose which payload the conditions read from: Original is the raw payload before field mapping; Transformed is the payload after mapping is applied." side="right">
+                    <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
+                  </Tooltip>
                 </p>
                 <div class="flex items-center gap-1 rounded-md border p-0.5 text-xs">
                   <button

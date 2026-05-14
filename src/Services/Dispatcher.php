@@ -280,11 +280,12 @@ class Dispatcher {
    */
   public function process(int $batchSize = 10): array {
     $result = [
-      'processed'     => 0,
-      'succeeded'     => 0,
-      'failed'        => 0,
-      'rescheduled'   => 0,
-      'stale_cleaned' => 0,
+      'processed'      => 0,
+      'succeeded'      => 0,
+      'failed'         => 0,
+      'rescheduled'    => 0,
+      'stale_cleaned'  => 0,
+      'orphans_closed' => 0,
     ];
 
     // Record that the queue processor has run (used by health observability)
@@ -292,6 +293,11 @@ class Dispatcher {
 
     // Step 1: Cleanup stale locks
     $result['stale_cleaned'] = $this->queueService->cleanupStaleJobs(5);
+
+    // Step 1b: Reconcile orphaned pending logs whose queue row is gone or terminal.
+    // Without this, legacy or crash-orphaned rows keep the "queue stuck" banner
+    // visible forever even though the queue itself is healthy.
+    $result['orphans_closed'] = $this->logService->getRepository()->reconcileOrphanedPendingLogs(10);
 
     // Step 2: Get batch of pending jobs
     $jobs = $this->queueService->getNextBatch($batchSize);

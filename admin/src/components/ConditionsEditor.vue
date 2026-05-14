@@ -449,7 +449,7 @@ const overallResult = computed(() => {
         @update:model-value="toggleEnabled"
       />
       <Label class="cursor-pointer select-none">Enable conditional dispatch</Label>
-      <Tooltip content="Conditions are evaluated against the payload — use the 'Evaluate against' toggle above to choose original or transformed." side="right">
+      <Tooltip content="Conditions are evaluated against the payload — use the 'Evaluate conditions against' toggle above to choose original or transformed." side="right">
         <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
       </Tooltip>
     </div>
