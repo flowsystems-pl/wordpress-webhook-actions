@@ -1,9 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2, Copy, Check } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2, Copy, Check, Network } from 'lucide-vue-next'
 import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 import { formatUtcDate } from '@/lib/dates'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
+import { useChainTriggerLabel } from '@/composables/useChainTriggerLabel'
 
 const props = defineProps({
   logs: {
@@ -36,6 +37,8 @@ const props = defineProps({
 const emit = defineEmits(['page-change', 'delete', 'retry', 'replay', 'update:selectedIds'])
 
 const totalPages = computed(() => Math.ceil(props.total / props.perPage))
+
+const { triggerLabel } = useChainTriggerLabel()
 
 const selectedLog = ref(null)
 const showDetails = ref(false)
@@ -257,8 +260,23 @@ const { copiedKey, copy } = useCopyToClipboard()
                 </Badge>
               </div>
             </td>
-            <td class="px-4 py-3 text-sm font-mono">
-              {{ log.trigger_name }}
+            <td class="px-4 py-3 text-sm">
+              <template v-if="triggerLabel(log.trigger_name)">
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs"
+                  :title="`Chain link #${triggerLabel(log.trigger_name).linkId} — ${log.trigger_name}`"
+                >
+                  <Network class="h-3 w-3 text-accent shrink-0" />
+                  <template v-if="!triggerLabel(log.trigger_name).missing">
+                    <span class="font-medium">{{ triggerLabel(log.trigger_name).chainName }}</span>
+                    <span class="text-muted-foreground">← {{ triggerLabel(log.trigger_name).sourceName }}</span>
+                  </template>
+                  <span v-else class="text-muted-foreground italic">
+                    Chain link #{{ triggerLabel(log.trigger_name).linkId }} (deleted)
+                  </span>
+                </span>
+              </template>
+              <span v-else class="font-mono">{{ log.trigger_name }}</span>
             </td>
             <td class="px-4 py-3">
               <Badge
@@ -628,7 +646,22 @@ const { copiedKey, copy } = useCopyToClipboard()
           </div>
           <div>
             <div class="font-medium">Trigger</div>
-            <div class="text-muted-foreground break-all">{{ selectedLog.trigger_name }}</div>
+            <div class="text-muted-foreground break-all">
+              <template v-if="triggerLabel(selectedLog.trigger_name)">
+                <span class="inline-flex items-center gap-1.5">
+                  <Network class="h-3.5 w-3.5 text-accent shrink-0" />
+                  <template v-if="!triggerLabel(selectedLog.trigger_name).missing">
+                    <span class="font-medium text-foreground">{{ triggerLabel(selectedLog.trigger_name).chainName }}</span>
+                    <span>← {{ triggerLabel(selectedLog.trigger_name).sourceName }}</span>
+                  </template>
+                  <span v-else class="italic">
+                    Chain link #{{ triggerLabel(selectedLog.trigger_name).linkId }} (deleted)
+                  </span>
+                </span>
+                <div class="text-xs font-mono text-muted-foreground/60 mt-0.5">{{ selectedLog.trigger_name }}</div>
+              </template>
+              <span v-else>{{ selectedLog.trigger_name }}</span>
+            </div>
           </div>
           <div>
             <div class="font-medium">Created</div>

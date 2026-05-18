@@ -1,14 +1,17 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox } from '@/components/ui';
-import { Info } from 'lucide-vue-next';
+import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox, Badge } from '@/components/ui';
+import { Info, Link2, Network } from 'lucide-vue-next';
 import TriggerSelect from '@/components/TriggerSelect.vue';
+import ChainPicker from '@/components/ChainPicker.vue';
 import KeyValueEditor from '@/components/KeyValueEditor.vue';
 import { usePro } from '@/composables/usePro';
 import { useSyncWarning } from '@/composables/useSyncWarning';
+import { useChains, useWebhookChainInvolvement } from '@/composables/useChains';
 
 const { proActive } = usePro();
 const { dontShowAgain, isWarningDismissed, applyDismiss, resetDontShowAgain } = useSyncWarning();
+const { chains, fetchChains } = useChains();
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -39,6 +42,7 @@ const props = defineProps({
   loading: Boolean,
   examplePayload: { type: Object, default: null },
   gluePayload: { type: Object, default: null },
+  initialChainMode: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['submit', 'cancel', 'change']);
@@ -59,14 +63,29 @@ const form = ref({
   is_synchronous: false,
 });
 
+const useChainTrigger = ref(false);
+const chainConfig = ref({
+  chain_id: null,
+  new_chain_name: '',
+  source_webhook_ids: [],
+});
+
 const errors = ref({});
 const showSyncWarning = ref(false);
 const pendingSyncValue = ref(false);
+const showChainSaveFirstDialog = ref(false);
+
+const webhookIdRef = computed(() => props.webhook?.id ?? null);
+const chainInvolvement = useWebhookChainInvolvement(webhookIdRef);
 
 // ── watches ───────────────────────────────────────────────────────────────────
 
-watch(() => props.webhook, (webhook) => {
+watch(() => props.webhook, async (webhook) => {
   if (webhook) {
+    const rawTriggers = webhook.triggers || [];
+    const wpTriggers = rawTriggers.filter((t) => !String(t).startsWith('fswa_chain_link:'));
+    const hasChainTriggers = rawTriggers.some((t) => String(t).startsWith('fswa_chain_link:'));
+
     form.value = {
       name:               webhook.name || '',
       endpoint_url:       webhook.endpoint_url || '',
@@ -75,13 +94,43 @@ watch(() => props.webhook, (webhook) => {
       custom_headers:     webhook.custom_headers || [],
       url_params:         webhook.url_params || [],
       is_enabled:         webhook.is_enabled ?? true,
-      triggers:           webhook.triggers || [],
+      triggers:           wpTriggers,
       retry_limit:        webhook.retry_limit != null ? String(webhook.retry_limit) : '',
       backoff_strategy:   webhook.backoff_strategy ?? 'default',
       backoff_base_delay: webhook.backoff_base_delay != null ? String(webhook.backoff_base_delay) : '',
       backoff_max_delay:  webhook.backoff_max_delay != null ? String(webhook.backoff_max_delay) : '',
       is_synchronous:     webhook.is_synchronous ?? false,
     };
+
+    useChainTrigger.value = hasChainTriggers;
+
+    // Hydrate chainConfig from existing chain involvement (webhook as TARGET).
+    await fetchChains();
+    const id = Number(webhook.id);
+    let targetChainId = null;
+    const sourceIds = new Set();
+    for (const c of chains.value) {
+      for (const l of (c.links || [])) {
+        if (Number(l.target_webhook_id) === id) {
+          targetChainId = Number(c.id);
+          sourceIds.add(Number(l.source_webhook_id));
+        }
+      }
+    }
+    chainConfig.value = {
+      chain_id: targetChainId,
+      new_chain_name: '',
+      source_webhook_ids: Array.from(sourceIds),
+    };
+
+    // Auto-enable chain mode if the parent passed initialChainMode (e.g. user
+    // clicked "Save & enable chain mode" on the create page, was redirected
+    // here, and we want to land them in chain mode immediately).
+    if (props.initialChainMode && !hasChainTriggers) {
+      useChainTrigger.value = true;
+      form.value.triggers = [];
+      if (!form.value.is_synchronous) form.value.is_synchronous = true;
+    }
   }
 }, { immediate: true });
 
@@ -199,11 +248,57 @@ const validate = () => {
     }
   }
 
-  if (form.value.triggers.length === 0) {
-    errors.value.triggers = 'At least one trigger is required';
+  if (useChainTrigger.value) {
+    if (chainConfig.value.chain_id == null && !chainConfig.value.new_chain_name?.trim()) {
+      errors.value.triggers = 'Select an existing chain or enter a new chain name';
+    } else if ((chainConfig.value.source_webhook_ids || []).length === 0) {
+      errors.value.triggers = 'Select at least one upstream webhook to trigger this one';
+    }
   }
+  // Triggerless webhooks are allowed — they simply show as orphans in the
+  // list view until WP-hook triggers or chain links are configured.
 
   return Object.keys(errors.value).length === 0;
+};
+
+const toggleChainMode = (val) => {
+  // In create mode, chain config can't be saved (no webhook ID exists yet).
+  // Intercept the ON path and prompt the user to save the webhook first.
+  if (val && !props.webhook) {
+    showChainSaveFirstDialog.value = true;
+    return;
+  }
+  useChainTrigger.value = val;
+  if (val) {
+    form.value.triggers = [];
+    if (!form.value.is_synchronous) {
+      form.value.is_synchronous = true;
+    }
+  } else {
+    chainConfig.value = { chain_id: null, new_chain_name: '', source_webhook_ids: [] };
+  }
+};
+
+const handleSaveFirstAndContinue = () => {
+  // Validate the standard fields. Chain mode is not yet on, so the
+  // validator requires at least one WP-hook trigger — which is what we
+  // want for the initial save.
+  if (!validate()) {
+    showChainSaveFirstDialog.value = false;
+    return;
+  }
+  showChainSaveFirstDialog.value = false;
+
+  const data = { ...form.value };
+  data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+  data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
+  data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
+  data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
+  data.custom_headers     = data.custom_headers ?? [];
+  data.url_params         = data.url_params ?? [];
+  data.__chain_config     = { enabled: false };
+  data.__continue_to_chain = true;
+  emit('submit', data);
 };
 
 const handleSyncToggle = (newVal) => {
@@ -240,6 +335,19 @@ const handleSubmit = () => {
     data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
     data.custom_headers     = data.custom_headers ?? [];
     data.url_params         = data.url_params ?? [];
+
+    // Chain config: tells the parent (WebhookEdit) how to sync chain links
+    // after the webhook save. When useChainTrigger is OFF and webhook
+    // currently has chain links, parent should call clearTargetLinks.
+    data.__chain_config = useChainTrigger.value
+      ? {
+          enabled: true,
+          chain_id: chainConfig.value.chain_id,
+          new_chain_name: chainConfig.value.new_chain_name?.trim() || '',
+          source_webhook_ids: chainConfig.value.source_webhook_ids || [],
+        }
+      : { enabled: false };
+
     emit('submit', data);
   }
 };
@@ -247,6 +355,21 @@ const handleSubmit = () => {
 
 <template>
   <form class="space-y-6" @submit.prevent="handleSubmit">
+    <!-- Chain involvement banner (top of form) -->
+    <div
+      v-if="chainInvolvement.length"
+      class="rounded-md border-l-4 border-accent bg-muted/40 px-3 py-2 space-y-1"
+    >
+      <div class="flex items-center gap-1.5 text-sm font-medium">
+        <Network class="h-4 w-4 text-accent" />
+        <span>Part of {{ chainInvolvement.length === 1 ? 'chain' : 'chains' }}:</span>
+        <span v-for="(c, idx) in chainInvolvement" :key="c.id" class="inline-flex items-center gap-1">
+          <Badge variant="secondary">{{ c.name }}</Badge>
+          <span v-if="idx < chainInvolvement.length - 1" class="text-muted-foreground">·</span>
+        </span>
+      </div>
+    </div>
+
     <!-- Name -->
     <div class="space-y-2">
       <Label for="name">Name</Label>
@@ -346,11 +469,35 @@ const handleSubmit = () => {
     </div>
 
     <!-- Triggers -->
-    <div class="space-y-2 border-t pt-5">
-      <Label>Triggers</Label>
-      <TriggerSelect v-model="form.triggers" />
+    <div class="space-y-3 border-t pt-5">
+      <div class="flex items-center justify-between gap-2">
+        <Label>Triggers</Label>
+        <div class="flex items-center gap-2">
+          <Switch
+            :model-value="useChainTrigger"
+            @update:model-value="toggleChainMode"
+          />
+          <Label class="font-normal text-sm flex">
+            <span class="inline-flex items-center gap-1">
+              <Link2 class="h-3.5 w-3.5" />
+              Use other Webhooks as triggers
+            </span>
+          </Label>
+        </div>
+      </div>
+
+      <template v-if="!useChainTrigger">
+        <TriggerSelect v-model="form.triggers" />
+        <p class="text-sm text-muted-foreground">WordPress actions that will trigger this webhook</p>
+      </template>
+      <template v-else>
+        <ChainPicker
+          v-model="chainConfig"
+          :current-webhook-id="props.webhook?.id ?? null"
+        />
+      </template>
+
       <p v-if="errors.triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
-      <p class="text-sm text-muted-foreground">WordPress actions that will trigger this webhook</p>
     </div>
 
     <!-- Max Attempts (Pro) -->
@@ -476,6 +623,25 @@ const handleSubmit = () => {
         Disabled webhooks still capture payload examples for mapping and conditions configuration.
       </div>
     </div>
+
+    <!-- Save-first-to-enable-chain dialog -->
+    <Dialog
+      :open="showChainSaveFirstDialog"
+      title="Save webhook first"
+      @close="showChainSaveFirstDialog = false"
+    >
+      <div class="space-y-2 text-sm text-muted-foreground">
+        <p>
+          Chain mode links this webhook to upstream webhooks, which requires a saved webhook record.
+          <strong class="text-foreground">Save the webhook first</strong>
+          (with or without WP-hook triggers — they'll be cleared when you pick upstream webhooks), then choose your chain sources on the next screen.
+        </p>
+      </div>
+      <template #footer>
+        <Button variant="outline" type="button" @click="showChainSaveFirstDialog = false">Cancel</Button>
+        <Button type="button" @click="handleSaveFirstAndContinue">Save &amp; continue to chain setup</Button>
+      </template>
+    </Dialog>
 
     <!-- Synchronous Execution warning dialog -->
     <Dialog

@@ -10,6 +10,7 @@ use WP_REST_Request;
 use WP_Error;
 use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\HooksHandler;
+use FlowSystems\WebhookActions\Services\ChainDispatcher;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\Scheduler;
@@ -25,6 +26,7 @@ class DispatcherController {
     $this->dispatcher = new Dispatcher($transport, $this->queueService);
 
     new HooksHandler($this->dispatcher);
+    new ChainDispatcher($this->dispatcher);
 
     // Register REST API endpoints
     add_action('rest_api_init', [$this, 'registerRoutes']);

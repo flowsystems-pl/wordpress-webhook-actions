@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.12.2
+Stable tag: 1.13.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -16,6 +16,7 @@ Most WordPress integrations are glue code. A `wp_remote_post()` here, a custom p
 
 Any `do_action` becomes a first-class API event: queued, retried, logged, replayable, and reachable over a token-authenticated REST API. The WooCommerce-to-HubSpot round-trip that used to be a two-week project is now an afternoon of configuration. The "can n8n pick this up?" question gets a yes before the meeting ends.
 
+- **Build multi-step automations natively, no Zapier required.** New in 1.13.0 — Webhook Chains. A webhook completing successfully (2xx) can now trigger downstream webhooks, each receiving the upstream response, sent payload, and pre-mapping original payload as their starting `args`. Wire a WooCommerce order → HubSpot deal → HubSpot line items → contact-to-deal association sequence inside one plugin, with every hop fully logged, retried, conditional, and replayable.
 - **Ship full CRM and SaaS integrations in an afternoon.** Two webhooks and a dynamic URL template (`https://api.hubapi.com/crm/objects/2026-03/deals/{{ _hs_deal_id }}`) turn a WooCommerce order lifecycle into a HubSpot deal lifecycle. Same pattern for Pipedrive, Notion, Airtable, internal services — any REST API that puts ids in the URL path. **(Pro)** for the `{{ }}` template syntax, or use the `fswa_webhook_url` filter on the free plan to rewrite the URL from PHP.
 - **Speak n8n, Make, Zapier, and AI-agent fluent.** Send any WordPress event into n8n; pull a Claude Code or Cursor agent into your wp-admin via scoped API tokens and let it inspect logs, retry deliveries, and toggle integrations during deploys — without ever touching WordPress credentials.
 - **Operate WordPress like a real backend.** Every event has a UUID, a full request/response log, a replay button, and an HTTP-addressable REST endpoint. Conditional dispatch, custom headers, query parameters, all five HTTP methods, dynamic URL templates — match exactly what each external API expects.
@@ -510,8 +511,22 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 8. REST API Tokens configuration screen
 9. Conditional webhook dispatch — conditions editor
 10. Test webhook drawer — send a test delivery and inspect request details inline
+11. Webhook Chains — pick an existing chain or create a new one, then select which upstream webhooks should fire this one on their 2xx response
 
 == Changelog ==
+
+= 1.13.0 — 2026-05-18 =
+- New: **Webhook Chains** — a webhook completing successfully (2xx) can now trigger one or more downstream webhooks. Chains are first-class entities with names and links; each chained webhook receives the upstream response body, sent payload, and pre-mapping original payload as its starting `args`, so the next step can map fields off the previous step's response (e.g. capture a HubSpot deal ID and pass it to a Create Line Items webhook). Replaces ad-hoc `wp_remote_post` calls in post-dispatch snippets with proper webhooks that get logs, retries, conditions, headers, and URL templates
+- New: Triggers section on Edit Webhook now offers a "Use other Webhooks as triggers" toggle. When enabled the webhook is wired as a chain target — pick an existing chain or create a new one, then select which upstream webhooks should fire it (with a search box for filtering long lists). Defaults to synchronous execution so the response is available immediately
+- New: Webhooks list view groups webhooks by chain with a left accent border and chain icon; a webhook involved in multiple chains is rendered in each group. An "Unchained" section holds webhooks with no chain involvement
+- New: Chain group headers now have inline **Rename** and **Delete** buttons. Deleting a chain shows an impact callout listing which downstream webhooks would become orphans, and a chain is automatically removed when its last link is deleted
+- New: Orphan badge — any webhook left with no triggers (after a chain or link deletion, for instance) shows a destructive-styled broken-link icon and "No trigger assigned" label so it stays visible and editable in the list
+- New: Deleting a webhook involved in any chain shows an enhanced confirmation modal listing the affected chains and downstream impact, then cascade-removes the chain links and their synthetic trigger rows
+- New: Logs and Queue views render chain-link triggers as human-readable pills (`Chain name ← Source webhook`) instead of the raw `fswa_chain_link:N` synthetic name, and gain a "Filter by chain" dropdown that narrows the list to deliveries triggered by a specific chain
+- New: REST endpoints `/fswa/v1/chains` (CRUD) and `/fswa/v1/chains/{id}/links` (manage source→target edges). Cycles are rejected at save time across all chains. Both `/logs` and `/queue` list endpoints now accept a `chain_id` query parameter
+- Fixed: `X-Event-Id` and `X-Event-Timestamp` request headers were emitted empty when Payload Mapping or Code Glue pre-dispatch reshaped the payload and dropped the `event` block. Headers now resolve from the log row first (single source of truth) and only fall back to the payload if needed
+- Fixed: payload preview in the Payload Mapping editor could break the page layout when a captured payload string contained HTML (e.g. a chain-link trigger carrying an upstream HTML response body in `args.0.response.raw_body`). String values are now properly HTML-escaped before being injected into the highlighted JSON preview — also closes a stored-XSS surface in the admin UI
+- DB migration to 1.13.0 — new `fswa_chains` and `fswa_chain_links` tables; idempotent, safe to run on existing installs
 
 = 1.12.2 — 2026-05-14 =
 - Fixed "Queue appears stuck" health banner staying visible when delivery logs were left in `pending` state with no live queue row (e.g. legacy rows from older queue-status semantics, or worker crashes between updating queue and log state); the queue processor now reconciles such orphaned pending logs on every run and marks them `permanently_failed`
@@ -667,6 +682,9 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.13.0 =
+Introduces Webhook Chains — a webhook completing successfully (2xx) can now trigger downstream webhooks, replacing ad-hoc `wp_remote_post` calls in post-dispatch snippets with proper, observable webhooks. Adds chain grouping with rename/delete in the list view, a "Filter by chain" dropdown on Logs and Queue with humanized trigger pills, an orphan badge for triggerless webhooks, and a fix for empty `X-Event-Id` headers after Payload Mapping. Also fixes a layout-breaking XSS surface in the mapping preview. Includes a DB migration (idempotent) that adds the `fswa_chains` and `fswa_chain_links` tables.
 
 = 1.12.2 =
 Fixes a stale "Queue appears stuck" health banner caused by orphaned pending log rows; the queue worker now self-reconciles such rows. Clarifies the conditions evaluate-against toggle label and removes a misleading Pro badge. No database changes — no manual steps required.

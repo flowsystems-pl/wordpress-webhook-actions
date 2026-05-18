@@ -6,6 +6,7 @@ import { pickerLocalToUtcDb } from '@/lib/dates'
 import { Loader2 } from 'lucide-vue-next'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
+import { useChains } from '@/composables/useChains'
 
 const router = useRouter()
 
@@ -40,6 +41,13 @@ const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
 const dateFromFilter = ref('')
 const dateToFilter = ref('')
+const chainFilter = ref('')
+
+const { chains, refresh: refreshChains } = useChains()
+const chainFilterSelect = computed({
+  get: () => chainFilter.value || 'all',
+  set: (val) => { chainFilter.value = val === 'all' ? '' : val },
+})
 
 const selectedIds = ref([])
 const bulkRetrying = ref(false)
@@ -80,6 +88,10 @@ const loadLogs = async () => {
 
     if (dateToFilter.value) {
       params.date_to = pickerLocalToUtcDb(dateToFilter.value)
+    }
+
+    if (chainFilter.value) {
+      params.chain_id = chainFilter.value
     }
 
     const result = await api.logs.list(params)
@@ -211,10 +223,12 @@ watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
 watch(dateFromFilter, resetPage)
 watch(dateToFilter, resetPage)
+watch(chainFilter, resetPage)
 
 onMounted(() => {
   loadLogs()
   loadStats()
+  refreshChains().catch(() => {})
 })
 </script>
 
@@ -259,6 +273,17 @@ onMounted(() => {
         <SelectContent>
           <SelectItem v-for="option in statusOptions" :key="option.value" :value="option.value">
             {{ option.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <Select v-if="chains.length" v-model="chainFilterSelect">
+        <SelectTrigger class="w-full sm:w-56">
+          <SelectValue placeholder="All chains" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All chains</SelectItem>
+          <SelectItem v-for="c in chains" :key="c.id" :value="String(c.id)">
+            {{ c.name }}
           </SelectItem>
         </SelectContent>
       </Select>

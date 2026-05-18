@@ -29,6 +29,8 @@ class Activation {
     $queueTable     = $wpdb->prefix . 'fswa_queue';
     $statsTable     = $wpdb->prefix . 'fswa_stats';
     $apiTokensTable = $wpdb->prefix . 'fswa_api_tokens';
+    $chainsTable    = $wpdb->prefix . 'fswa_chains';
+    $chainLinksTable = $wpdb->prefix . 'fswa_chain_links';
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -155,7 +157,36 @@ class Activation {
 
     dbDelta($sqlApiTokens);
 
-    update_option('fswa_db_version', '1.11.0');
+    // Chains table
+    $sqlChains = "CREATE TABLE {$chainsTable} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_name (name)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlChains);
+
+    // Chain links table
+    $sqlChainLinks = "CREATE TABLE {$chainLinksTable} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            chain_id BIGINT UNSIGNED NOT NULL,
+            source_webhook_id BIGINT UNSIGNED NOT NULL,
+            target_webhook_id BIGINT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_chain_edge (chain_id, source_webhook_id, target_webhook_id),
+            KEY idx_source (source_webhook_id),
+            KEY idx_target (target_webhook_id),
+            KEY idx_chain (chain_id)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlChainLinks);
+
+    update_option('fswa_db_version', '1.13.0');
   }
 
   /**
@@ -193,6 +224,8 @@ class Activation {
 
     // Drop tables (order matters for foreign key constraints)
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_chain_links");
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_chains");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_api_tokens");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_stats");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_queue");

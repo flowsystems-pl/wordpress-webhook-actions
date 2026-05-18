@@ -269,6 +269,20 @@ class QueueRepository {
       $params[] = $filters['trigger_name'];
     }
 
+    if (isset($filters['trigger_names']) && is_array($filters['trigger_names'])) {
+      $names = array_values(array_filter($filters['trigger_names'], 'is_string'));
+      if (!empty($names)) {
+        $placeholders = implode(',', array_fill(0, count($names), '%s'));
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $where[] = "trigger_name IN ({$placeholders})";
+        foreach ($names as $n) {
+          $params[] = $n;
+        }
+      } else {
+        $where[] = '1=0';
+      }
+    }
+
     if (!empty($filters['event_uuid'])) {
       $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.payload.event.id')) LIKE %s";
       $params[] = '%' . $wpdb->esc_like($filters['event_uuid']) . '%';
@@ -347,6 +361,20 @@ class QueueRepository {
     if (!empty($filters['target_url'])) {
       $where[] = "JSON_UNQUOTE(JSON_EXTRACT(payload, '$.webhook.endpoint_url')) LIKE %s";
       $params[] = '%' . $wpdb->esc_like($filters['target_url']) . '%';
+    }
+
+    if (isset($filters['trigger_names']) && is_array($filters['trigger_names'])) {
+      $names = array_values(array_filter($filters['trigger_names'], 'is_string'));
+      if (!empty($names)) {
+        $placeholders = implode(',', array_fill(0, count($names), '%s'));
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $where[] = "trigger_name IN ({$placeholders})";
+        foreach ($names as $n) {
+          $params[] = $n;
+        }
+      } else {
+        $where[] = '1=0';
+      }
     }
 
     if (!empty($filters['date_from'])) {

@@ -390,6 +390,13 @@ const transformedPreview = computed(() => {
 });
 
 // Format JSON for display with syntax highlighting
+const escapeHtml = (s) => String(s)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
 const formatJsonWithHighlight = (obj, indent = 0) => {
   if (obj === null) return '<span class="text-orange-500">null</span>';
   if (obj === undefined) return '<span class="text-gray-400">undefined</span>';
@@ -398,7 +405,11 @@ const formatJsonWithHighlight = (obj, indent = 0) => {
   const nextIndent = '  '.repeat(indent + 1);
 
   if (typeof obj === 'string') {
-    const escaped = obj.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+    // Escape HTML BEFORE JSON-escaping the visible quotes/newlines, so that
+    // user payloads containing literal HTML (e.g. an upstream response body
+    // in a chain-link trigger payload) render as text instead of injecting
+    // tags through v-html.
+    const escaped = escapeHtml(obj).replace(/"/g, '\\"').replace(/\n/g, '\\n');
 
     return `<span class="text-green-600 dark:text-green-400">"${escaped}"</span>`;
   }
@@ -426,13 +437,13 @@ const formatJsonWithHighlight = (obj, indent = 0) => {
     if (keys.length === 0) return '{}';
     const entries = keys.map((key) => {
       const value = formatJsonWithHighlight(obj[key], indent + 1);
-      return `${nextIndent}<span class="text-red-600 dark:text-red-400">"${key}"</span>: ${value}`;
+      return `${nextIndent}<span class="text-red-600 dark:text-red-400">"${escapeHtml(key)}"</span>: ${value}`;
     });
 
     return `{\n${entries.join(',\n')}\n${indentStr}}`;
   }
 
-  return String(obj);
+  return escapeHtml(obj);
 };
 
 const previewHtml = computed(() => {

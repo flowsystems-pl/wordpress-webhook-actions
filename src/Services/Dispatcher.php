@@ -525,9 +525,34 @@ class Dispatcher {
       $headers['Authorization'] = $authHeader;
     }
 
-    // Add event identity headers before fswa_headers filter
-    $headers['X-Event-Id']        = $payload['event']['id'] ?? '';
-    $headers['X-Event-Timestamp'] = $payload['event']['timestamp'] ?? '';
+    // Add event identity headers before fswa_headers filter.
+    // The `event` block can be stripped by field mapping (includeUnmapped=false,
+    // event excluded) or by Pro Code Glue pre-dispatch snippets that reshape the
+    // payload entirely. Read from the log row first (single source of truth),
+    // then fall back to the original (pre-mapping) payload, then the live one.
+    $eventId        = '';
+    $eventTimestamp = '';
+    if ($logId !== null) {
+      $logRow = $this->logService->getRepository()->find($logId);
+      if ($logRow) {
+        $eventId        = (string) ($logRow['event_uuid'] ?? '');
+        // Log column is MySQL DATETIME (UTC) — normalize to ISO 8601 'Z'
+        // so the wire format matches Dispatcher::dispatch (`gmdate('Y-m-d\TH:i:s\Z')`).
+        $rawTs = (string) ($logRow['event_timestamp'] ?? '');
+        if ($rawTs !== '') {
+          $ts = strtotime($rawTs . ' UTC');
+          $eventTimestamp = $ts !== false ? gmdate('Y-m-d\TH:i:s\Z', $ts) : $rawTs;
+        }
+      }
+    }
+    if ($eventId === '') {
+      $eventId = (string) ($originalPayload['event']['id'] ?? $payload['event']['id'] ?? '');
+    }
+    if ($eventTimestamp === '') {
+      $eventTimestamp = (string) ($originalPayload['event']['timestamp'] ?? $payload['event']['timestamp'] ?? '');
+    }
+    $headers['X-Event-Id']        = $eventId;
+    $headers['X-Event-Timestamp'] = $eventTimestamp;
     $headers['X-Webhook-Id']      = $webhook['webhook_uuid'] ?? '';
 
     /**

@@ -169,6 +169,15 @@ class QueueController extends WP_REST_Controller {
       $filters['target_url'] = sanitize_text_field($request->get_param('target_url'));
     }
 
+    $chainId = (int) $request->get_param('chain_id');
+    if ($chainId > 0) {
+      $linkRepo = new \FlowSystems\WebhookActions\Repositories\ChainLinkRepository();
+      $filters['trigger_names'] = array_map(
+        static fn($l) => 'fswa_chain_link:' . (int) $l['id'],
+        $linkRepo->findByChain($chainId)
+      );
+    }
+
     if ($request->get_param('date_from')) {
       $filters['date_from'] = sanitize_text_field($request->get_param('date_from'));
     }

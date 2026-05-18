@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.12.0';
+  private const CURRENT_VERSION = '1.13.0';
 
   /**
    * Run pending migrations
@@ -45,6 +45,8 @@ class Migrator {
       $wpdb->prefix . 'fswa_trigger_schemas',
       $wpdb->prefix . 'fswa_stats',
       $wpdb->prefix . 'fswa_api_tokens',
+      $wpdb->prefix . 'fswa_chains',
+      $wpdb->prefix . 'fswa_chain_links',
     ];
 
     foreach ($requiredTables as $table) {
@@ -79,6 +81,7 @@ class Migrator {
       '1.10.0' => [self::class, 'migration_1_10_0'],
       '1.11.0' => [self::class, 'migration_1_11_0'],
       '1.12.0' => [self::class, 'migration_1_12_0'],
+      '1.13.0' => [self::class, 'migration_1_13_0'],
     ];
   }
 
@@ -551,6 +554,46 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$table} ADD COLUMN conditions_evaluate_on VARCHAR(20) NOT NULL DEFAULT 'original'");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 1.13.0 - Add chains + chain_links tables (Webhook Chains feature)
+   */
+  public static function migration_1_13_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+    $chainsTable    = $wpdb->prefix . 'fswa_chains';
+    $linksTable     = $wpdb->prefix . 'fswa_chain_links';
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $sqlChains = "CREATE TABLE {$chainsTable} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_name (name)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlChains);
+
+    $sqlLinks = "CREATE TABLE {$linksTable} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            chain_id BIGINT UNSIGNED NOT NULL,
+            source_webhook_id BIGINT UNSIGNED NOT NULL,
+            target_webhook_id BIGINT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_chain_edge (chain_id, source_webhook_id, target_webhook_id),
+            KEY idx_source (source_webhook_id),
+            KEY idx_target (target_webhook_id),
+            KEY idx_chain (chain_id)
+        ) {$charsetCollate};";
+
+    dbDelta($sqlLinks);
   }
 
   /**

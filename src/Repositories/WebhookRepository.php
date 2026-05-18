@@ -383,23 +383,34 @@ class WebhookRepository {
   private function syncTriggers(int $webhookId, array $triggers): void {
     global $wpdb;
 
-    // Delete existing triggers
-    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-    $wpdb->delete($this->triggersTable, ['webhook_id' => $webhookId], ['%d']);
+    // Delete existing non-synthetic triggers. Chain link triggers
+    // (fswa_chain_link:*) are managed by ChainLinkRepository and must
+    // survive a WP-hook trigger sync from WebhooksController.
+    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $wpdb->query($wpdb->prepare(
+      "DELETE FROM {$this->triggersTable} WHERE webhook_id = %d AND trigger_name NOT LIKE %s",
+      $webhookId,
+      $wpdb->esc_like('fswa_chain_link:') . '%'
+    ));
 
-    // Insert new triggers
+    // Insert new triggers, skipping any synthetic names that may have
+    // leaked in from the client.
     foreach ($triggers as $triggerName) {
-      if (!empty($triggerName)) {
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-        $wpdb->insert(
-          $this->triggersTable,
-          [
-            'webhook_id' => $webhookId,
-            'trigger_name' => $triggerName,
-          ],
-          ['%d', '%s']
-        );
+      if (empty($triggerName)) {
+        continue;
       }
+      if (strncmp($triggerName, 'fswa_chain_link:', 16) === 0) {
+        continue;
+      }
+      // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+      $wpdb->insert(
+        $this->triggersTable,
+        [
+          'webhook_id'   => $webhookId,
+          'trigger_name' => $triggerName,
+        ],
+        ['%d', '%s']
+      );
     }
   }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ArrowLeft, FlaskConical } from 'lucide-vue-next';
 import { Button, Card, Alert } from '@/components/ui';
@@ -9,6 +9,9 @@ import TestWebhookDrawer from '@/components/TestWebhookDrawer.vue';
 import api from '@/lib/api';
 import { useHealthStats } from '@/composables/useHealthStats';
 import { useSchemas } from '@/composables/useSchemas';
+import { useChains } from '@/composables/useChains';
+
+const { createChain, syncTargetSources, clearTargetLinks, refresh: refreshChains } = useChains();
 
 const { fetchStats: refreshHealthStats } = useHealthStats();
 
@@ -41,6 +44,11 @@ const error = ref(null);
 const showTest = ref(false);
 const hasUnsavedChanges = ref(false);
 
+// Set to true right before we navigate from /webhooks/new → /webhooks/{id}
+// after a Save & continue. The route watcher checks this so it doesn't
+// re-fetch the webhook we already have in hand from the create response.
+const skipNextRouteReload = ref(false);
+
 const isEdit = computed(() => !!route.params.id);
 const pageTitle = computed(() =>
   isEdit.value ? 'Edit Webhook' : 'Create Webhook',
@@ -66,19 +74,63 @@ const loadWebhook = async (silent = false) => {
   }
 };
 
+const resolveChainId = async (chainCfg) => {
+  if (chainCfg.chain_id != null) return Number(chainCfg.chain_id);
+  if (chainCfg.new_chain_name) {
+    const created = await createChain({ name: chainCfg.new_chain_name });
+    return Number(created.id);
+  }
+  return null;
+};
+
 const handleSubmit = async (data) => {
   saving.value = true;
   error.value = null;
 
+  const chainCfg = data.__chain_config || { enabled: false };
+  const continueToChain = !!data.__continue_to_chain;
+  delete data.__chain_config;
+  delete data.__continue_to_chain;
+
   try {
+    let webhookId;
+
     if (isEdit.value) {
-      await api.webhooks.update(route.params.id, data);
+      webhookId = Number(route.params.id);
+      // Sync chain links BEFORE webhook update so the backend validation
+      // never sees a triggerless state for a chain-mode webhook.
+      if (chainCfg.enabled) {
+        const chainId = await resolveChainId(chainCfg);
+        if (chainId) {
+          await syncTargetSources(chainId, webhookId, chainCfg.source_webhook_ids || []);
+        }
+      } else {
+        await clearTargetLinks(webhookId);
+      }
+
+      await api.webhooks.update(webhookId, data);
       hasUnsavedChanges.value = false;
       // Silently reload webhook to refresh triggers for TriggerSchemaPanel
       await loadWebhook(true);
+      await refreshChains();
     } else {
-      await api.webhooks.create(data);
-      router.push('/webhooks');
+      // Create flow: save webhook first to obtain its ID. Chain mode cannot
+      // be configured in the same call — the user is sent to the edit page
+      // for the freshly created webhook with chain mode pre-enabled when
+      // they clicked "Save & continue to chain setup".
+      const created = await api.webhooks.create(data);
+      webhookId = Number(created.id);
+      hasUnsavedChanges.value = false;
+      if (continueToChain) {
+        // In-place transition: silently swap URL to /webhooks/{id}?chain=1
+        // and hand the freshly-created record to the form. The route
+        // watcher skips its reload since we already have the data.
+        skipNextRouteReload.value = true;
+        await router.replace({ path: `/webhooks/${webhookId}`, query: { chain: '1' } });
+        webhook.value = created;
+      } else {
+        router.push('/webhooks');
+      }
     }
     refreshHealthStats();
   } catch (e) {
@@ -93,7 +145,23 @@ const handleCancel = () => {
   router.push('/webhooks');
 };
 
-onMounted(loadWebhook);
+// Re-load when the route ID changes. Vue Router reuses the same component
+// instance across same-component routes, so onMounted alone won't fire on
+// the second navigation. Save & continue sets skipNextRouteReload so the
+// freshly-created webhook (already in `webhook.value`) is preserved across
+// the silent URL swap and the user doesn't see a loading flicker.
+watch(() => route.params.id, (newId) => {
+  if (skipNextRouteReload.value) {
+    skipNextRouteReload.value = false;
+    return;
+  }
+  if (newId) {
+    webhook.value = null;
+    loadWebhook();
+  } else {
+    webhook.value = null;
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -150,6 +218,7 @@ onMounted(loadWebhook);
           :loading="saving"
           :examplePayload="firstExamplePayload"
           :gluePayload="firstGluePayload"
+          :initialChainMode="route.query.chain === '1'"
           @submit="handleSubmit"
           @cancel="handleCancel"
           @change="hasUnsavedChanges = true"

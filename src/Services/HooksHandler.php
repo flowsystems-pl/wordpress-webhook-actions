@@ -31,6 +31,11 @@ class HooksHandler {
       ->getAllTriggers();
 
     foreach ($allTriggers as $trigger) {
+      // Skip synthetic chain triggers — they are not WP actions and are
+      // dispatched directly by ChainDispatcher, not by add_action callbacks.
+      if (strncmp($trigger, 'fswa_chain_link:', 16) === 0) {
+        continue;
+      }
       add_action($trigger, [$this, 'registerTriggerHandler'], 10, PHP_INT_MAX);
     }
 

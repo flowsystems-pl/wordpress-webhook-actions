@@ -201,6 +201,18 @@ class LogsController extends WP_REST_Controller {
       $filters['webhook_uuid'] = sanitize_text_field($request->get_param('webhook_uuid'));
     }
 
+    $chainId = (int) $request->get_param('chain_id');
+    if ($chainId > 0) {
+      $linkRepo = new \FlowSystems\WebhookActions\Repositories\ChainLinkRepository();
+      $names = array_map(
+        static fn($l) => 'fswa_chain_link:' . (int) $l['id'],
+        $linkRepo->findByChain($chainId)
+      );
+      // Pass even if empty — repo translates to 1=0 (zero results), which is
+      // the right semantic for "filter by a chain that has no links".
+      $filters['trigger_names'] = $names;
+    }
+
     $page = (int) ($request->get_param('page') ?: 1);
     $perPage = (int) ($request->get_param('per_page') ?: 20);
 

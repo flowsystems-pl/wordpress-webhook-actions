@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
-import { Card, Button, Badge, Alert, Input, DateTimePicker } from '@/components/ui'
+import { Card, Button, Badge, Alert, Input, DateTimePicker, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui'
 import { pickerLocalToUtcDb } from '@/lib/dates'
-import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2, Copy, Check } from 'lucide-vue-next'
+import { Play, Trash2, RefreshCw, Clock, RotateCcw, ChevronLeft, ChevronRight, Loader2, Copy, Check, Network } from 'lucide-vue-next'
 import api from '@/lib/api'
 import { useHealthStats } from '@/composables/useHealthStats'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
+import { useChains } from '@/composables/useChains'
+import { useChainTriggerLabel } from '@/composables/useChainTriggerLabel'
 
 const { fetchStats: refreshHealthStats } = useHealthStats()
 const { copiedKey, copy } = useCopyToClipboard()
@@ -19,6 +21,14 @@ const eventUuidFilter = ref('')
 const targetUrlFilter = ref('')
 const dateFromFilter = ref('')
 const dateToFilter = ref('')
+const chainFilter = ref('')
+
+const { chains, refresh: refreshChains } = useChains()
+const { triggerLabel } = useChainTriggerLabel()
+const chainFilterSelect = computed({
+  get: () => chainFilter.value || 'all',
+  set: (val) => { chainFilter.value = val === 'all' ? '' : val },
+})
 const stats = ref({ pending: 0, processing: 0, completed: 0, permanently_failed: 0, total: 0, due_now: 0 })
 const loading = ref(true)
 const statsLoading = ref(false)
@@ -53,6 +63,7 @@ const loadQueue = async () => {
     if (targetUrlFilter.value) params.target_url = targetUrlFilter.value
     if (dateFromFilter.value) params.date_from = pickerLocalToUtcDb(dateFromFilter.value)
     if (dateToFilter.value) params.date_to = pickerLocalToUtcDb(dateToFilter.value)
+    if (chainFilter.value) params.chain_id = chainFilter.value
 
     const queueResponse = await api.queue.list(params)
     items.value = queueResponse.items || queueResponse || []
@@ -161,10 +172,12 @@ watch(eventUuidFilter, resetPage)
 watch(targetUrlFilter, resetPage)
 watch(dateFromFilter, resetPage)
 watch(dateToFilter, resetPage)
+watch(chainFilter, resetPage)
 
 onMounted(() => {
   loadQueue()
   loadStats()
+  refreshChains().catch(() => {})
 })
 </script>
 
@@ -219,6 +232,17 @@ onMounted(() => {
 
     <!-- Filters -->
     <div class="flex flex-wrap items-center gap-3 mb-4">
+      <Select v-if="chains.length" v-model="chainFilterSelect">
+        <SelectTrigger class="w-full sm:w-56">
+          <SelectValue placeholder="All chains" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All chains</SelectItem>
+          <SelectItem v-for="c in chains" :key="c.id" :value="String(c.id)">
+            {{ c.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
       <Input
         v-model="webhookUuidFilter"
         placeholder="Filter by X-Webhook-ID..."
@@ -287,9 +311,24 @@ onMounted(() => {
             </div>
 
             <div class="text-sm text-muted-foreground space-y-1">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-medium">Trigger:</span>
-                <code class="px-1.5 py-0.5 bg-muted rounded text-xs">{{ item.trigger_name }}</code>
+                <template v-if="triggerLabel(item.trigger_name)">
+                  <span
+                    class="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs"
+                    :title="`Chain link #${triggerLabel(item.trigger_name).linkId} — ${item.trigger_name}`"
+                  >
+                    <Network class="h-3 w-3 text-accent shrink-0" />
+                    <template v-if="!triggerLabel(item.trigger_name).missing">
+                      <span class="font-medium">{{ triggerLabel(item.trigger_name).chainName }}</span>
+                      <span class="text-muted-foreground">← {{ triggerLabel(item.trigger_name).sourceName }}</span>
+                    </template>
+                    <span v-else class="text-muted-foreground italic">
+                      Chain link #{{ triggerLabel(item.trigger_name).linkId }} (deleted)
+                    </span>
+                  </span>
+                </template>
+                <code v-else class="px-1.5 py-0.5 bg-muted rounded text-xs">{{ item.trigger_name }}</code>
                 <button @click="copy(item.trigger_name, `q-trigger-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy trigger name">
                   <Check v-if="copiedKey === `q-trigger-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />

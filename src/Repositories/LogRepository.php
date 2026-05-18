@@ -43,6 +43,21 @@ class LogRepository {
       $whereValues[] = $filters['trigger_name'];
     }
 
+    if (isset($filters['trigger_names']) && is_array($filters['trigger_names'])) {
+      $names = array_values(array_filter($filters['trigger_names'], 'is_string'));
+      if (!empty($names)) {
+        $placeholders = implode(',', array_fill(0, count($names), '%s'));
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $whereClauses[] = "l.trigger_name IN ({$placeholders})";
+        foreach ($names as $n) {
+          $whereValues[] = $n;
+        }
+      } else {
+        // Caller wanted a chain filter but resolved to zero links — return nothing.
+        $whereClauses[] = "1=0";
+      }
+    }
+
     if (!empty($filters['date_from'])) {
       $whereClauses[] = "l.created_at >= %s";
       $whereValues[] = $filters['date_from'];

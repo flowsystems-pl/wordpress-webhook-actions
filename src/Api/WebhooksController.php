@@ -238,8 +238,13 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    // Sanitize triggers
-    $data['triggers'] = array_map('sanitize_text_field', $data['triggers']);
+    // Sanitize triggers and strip synthetic chain-link names. Empty is OK —
+    // the webhook will simply show as an orphan (no trigger assigned) in
+    // the list view until WP-hook triggers or chain links are set up.
+    $data['triggers'] = array_values(array_filter(
+      array_map('sanitize_text_field', $data['triggers']),
+      fn(string $t): bool => $t !== '' && strncmp($t, 'fswa_chain_link:', 16) !== 0
+    ));
 
     $webhookId = $this->repository->create($data);
 
@@ -306,7 +311,14 @@ class WebhooksController extends WP_REST_Controller {
     }
 
     if ($request->has_param('triggers')) {
-      $data['triggers'] = array_map('sanitize_text_field', $request->get_param('triggers'));
+      $rawTriggers = $request->get_param('triggers') ?? [];
+      // Strip synthetic chain-link names — those are managed by ChainsController.
+      // Empty WP-hook triggers list is allowed; a triggerless webhook surfaces
+      // as an orphan in the list view.
+      $data['triggers'] = array_values(array_filter(
+        array_map('sanitize_text_field', $rawTriggers),
+        fn(string $t): bool => $t !== '' && strncmp($t, 'fswa_chain_link:', 16) !== 0
+      ));
     }
 
     if ($request->has_param('http_method')) {
@@ -362,6 +374,18 @@ class WebhooksController extends WP_REST_Controller {
         ['status' => 404]
       );
     }
+
+    // Cascade-remove chain links involving this webhook (as source or target)
+    // and their matching synthetic trigger rows. Downstream targets may end
+    // up triggerless and surface as orphans in the list view — that is the
+    // intended UX. Chains that end up with zero links are auto-deleted.
+    $linkRepo = new \FlowSystems\WebhookActions\Repositories\ChainLinkRepository();
+    $affectedChainIds = array_map(
+      static fn($l) => (int) $l['chain_id'],
+      $linkRepo->findInvolvingWebhook($id)
+    );
+    $linkRepo->deleteByWebhook($id);
+    $linkRepo->cleanupEmptyChains($affectedChainIds);
 
     $result = $this->repository->delete($id);
 

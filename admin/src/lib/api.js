@@ -196,6 +196,16 @@ export const api = {
     resetCapture: (webhookId, triggerName) => post(`schemas/webhook/${webhookId}/trigger/${encodeURIComponent(encodeURIComponent(triggerName))}/capture`),
     getUserTriggers: () => get('schemas/user-triggers'),
   },
+  chains: {
+    list: () => get('chains'),
+    get: (id) => get(`chains/${id}`),
+    create: (data) => post('chains', data),
+    update: (id, data) => put(`chains/${id}`, data),
+    delete: (id) => del(`chains/${id}`),
+    listLinks: (id) => get(`chains/${id}/links`),
+    createLink: (id, data) => post(`chains/${id}/links`, data),
+    deleteLink: (id, linkId) => del(`chains/${id}/links/${linkId}`),
+  },
   snippets: {
     list: (params = {}) => get('pro/snippets', params),
     get: (id) => get(`pro/snippets/${id}`),
