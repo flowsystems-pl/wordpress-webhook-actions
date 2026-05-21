@@ -33,31 +33,22 @@ You already think in events, payloads, idempotency, and observability. Webhook A
 👉 Step-by-step example: [Send Gravity Forms Submissions to n8n](https://wpwebhooks.org/examples/gravity-forms-webhooks/)
 👉 Step-by-step example: [Send IvyForms submissions to a webhook (n8n demo)](https://wpwebhooks.org/examples/ivyforms-to-webhook/)
 👉 Step-by-step example: [Send WooCommerce orders to n8n on completion, only when the total is over $999 — wired up with a Claude Code agent](https://wpwebhooks.org/examples/woocommerce-order-webhook-claude-code/)
+👉 Step-by-step example: [WooCommerce to HubSpot integration — sync orders, contacts, and deals with no custom code](https://wpwebhooks.org/examples/hubspot-woocommerce-integration/)
+
+= Typical Use Cases =
+
+- Send Contact Form 7, Gravity Forms, or IvyForms submissions to n8n, Make, or any CRM
+- Sync WooCommerce orders to HubSpot, Pipedrive, or any REST API — create a deal on payment, then PATCH it when the order status changes
+- Dynamic per-event endpoints — resolve `{{ resource_id }}` from the live payload into the URL at dispatch time
+- Replace fragile custom `wp_remote_post()` integrations with a queued, retried, fully logged delivery layer
+- Sync WordPress users to external CRMs on registration or profile update
+- Query logs, trigger retries, or manage webhooks from CI/CD pipelines or AI agents via the REST API
 
 = ⚡ Webhook Actions Pro =
 
 Unlock unlimited conditions, per-webhook retry and backoff settings, type casting in payload mapping, and more.
 
 [See pricing and upgrade →](https://wpwebhooks.org/pricing/)
-
-= Typical Use Cases =
-
-- CF7 to Webhook: Send Contact Form 7 Data to n8n or external APIs
-- Gravity Forms webhooks for sending submission to CRM
-- Send IvyForms submissions to n8n or external APIs
-- Build reliable form-to-CRM integrations with retry protection
-- Process high-volume WooCommerce webhooks using Action Scheduler
-- Send WooCommerce orders to n8n with retry protection
-- Sync WordPress users to external CRMs safely
-- Trigger backend microservices from WP hooks
-- Send event-driven data to internal APIs
-- Replace fragile custom `wp_remote_post()` integrations
-- Build idempotent WordPress automation pipelines
-- Sync WooCommerce orders to HubSpot CRM, Pipedrive, or any REST API — create a deal on payment, then PATCH the same deal when the order completes, by storing the remote ID locally and replaying it into the URL on later events
-- Dynamic per-event endpoints — point a webhook at `https://api.example.com/resources/{{ resource_id }}` and the URL is resolved at dispatch time against the live payload
-- Query delivery logs, trigger retries, or manage webhooks programmatically from CI/CD pipelines or external dashboards using API tokens
-- Allow AI coding assistants (e.g. Claude Code) to inspect webhook logs and retry failed events automatically
-- Use AI agents to monitor webhook delivery health and operate the queue through the REST API
 
 = Event Identity & Idempotency =
 
