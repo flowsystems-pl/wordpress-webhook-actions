@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
-import { Button, Card, Alert } from '@/components/ui'
+import { Button, Card, Alert, Dialog } from '@/components/ui'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
 
@@ -17,6 +17,11 @@ const perPage = ref(20)
 const loading = ref(true)
 const error = ref(null)
 const stats = ref(null)
+
+const showReplaySuccess = ref(false)
+const replayedJobId = ref(null)
+const replayedLogId = ref(null)
+const logsTable = ref(null)
 
 const webhookId = route.params.id
 
@@ -66,6 +71,48 @@ const handleDelete = async (id) => {
     await loadStats()
   } catch (e) {
     console.error('Failed to delete log:', e)
+  }
+}
+
+const handleRetry = async (id) => {
+  try {
+    await api.logs.retry(id)
+    await loadLogs()
+  } catch (e) {
+    console.error('Failed to retry log:', e)
+    error.value = e.message
+  }
+}
+
+const handleReplay = async (log) => {
+  try {
+    const res = await api.logs.replay(log.id)
+    replayedJobId.value = res?.job_id ?? null
+    replayedLogId.value = log.id
+    await loadLogs()
+    showReplaySuccess.value = true
+  } catch (e) {
+    error.value = e.message
+  }
+}
+
+const executeReplayedJob = async () => {
+  if (!replayedJobId.value) return
+  try {
+    await api.queue.execute({ id: replayedJobId.value })
+    showReplaySuccess.value = false
+    await loadLogs()
+    const log = logs.value.find(l => l.id === replayedLogId.value)
+    if (log) logsTable.value?.openDetails(log)
+  } catch (e) {
+    if (e.code === 'rest_job_completed') {
+      showReplaySuccess.value = false
+      await loadLogs()
+      const log = logs.value.find(l => l.id === replayedLogId.value)
+      if (log) logsTable.value?.openDetails(log)
+    } else {
+      error.value = e.message
+    }
   }
 }
 
@@ -119,8 +166,25 @@ onMounted(() => {
       {{ error }}
     </Alert>
 
+    <!-- Replay success dialog -->
+    <Dialog
+      :open="showReplaySuccess"
+      title="Event Replayed"
+      description="A new delivery attempt has been queued. The result will appear in this log's attempt history on the next cron run."
+      @close="showReplaySuccess = false"
+    >
+      <template #footer>
+        <div class="flex gap-2">
+          <Button @click="executeReplayedJob">Execute Now</Button>
+          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">Go to Queue</Button>
+          <Button variant="outline" @click="showReplaySuccess = false">Close</Button>
+        </div>
+      </template>
+    </Dialog>
+
     <!-- Table -->
     <LogsTable
+      ref="logsTable"
       :logs="logs"
       :total="total"
       :page="page"
@@ -129,6 +193,8 @@ onMounted(() => {
       :show-webhook="false"
       @page-change="handlePageChange"
       @delete="handleDelete"
+      @retry="handleRetry"
+      @replay="handleReplay"
     />
   </div>
 </template>
