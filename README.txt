@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.13.0
+Stable tag: 1.13.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -506,6 +506,10 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 
 == Changelog ==
 
+= 1.13.1 — 2026-05-21 =
+- Fixed: Replay and Retry buttons on the single-webhook logs page (`#/webhooks/:id/logs`) did nothing — the events emitted by the table were never handled. Both the row button and the Log Details panel button now work correctly, including the "Execute Now" flow and the replay success dialog
+- Fixed: bumped tested-up-to WordPress version to 7.0
+
 = 1.13.0 — 2026-05-18 =
 - New: **Webhook Chains** — a webhook completing successfully (2xx) can now trigger one or more downstream webhooks. Chains are first-class entities with names and links; each chained webhook receives the upstream response body, sent payload, and pre-mapping original payload as its starting `args`, so the next step can map fields off the previous step's response (e.g. capture a HubSpot deal ID and pass it to a Create Line Items webhook). Replaces ad-hoc `wp_remote_post` calls in post-dispatch snippets with proper webhooks that get logs, retries, conditions, headers, and URL templates
 - New: Triggers section on Edit Webhook now offers a "Use other Webhooks as triggers" toggle. When enabled the webhook is wired as a chain target — pick an existing chain or create a new one, then select which upstream webhooks should fire it (with a search box for filtering long lists). Defaults to synchronous execution so the response is available immediately
@@ -673,6 +677,9 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.13.1 =
+Fixes Replay and Retry on the single-webhook logs page — both the row button and Log Details panel button were silently dropped. Also bumps tested-up-to to WordPress 7.0. No database changes — no manual steps required.
 
 = 1.13.0 =
 Introduces Webhook Chains — a webhook completing successfully (2xx) can now trigger downstream webhooks, replacing ad-hoc `wp_remote_post` calls in post-dispatch snippets with proper, observable webhooks. Adds chain grouping with rename/delete in the list view, a "Filter by chain" dropdown on Logs and Queue with humanized trigger pills, an orphan badge for triggerless webhooks, and a fix for empty `X-Event-Id` headers after Payload Mapping. Also fixes a layout-breaking XSS surface in the mapping preview. Includes a DB migration (idempotent) that adds the `fswa_chains` and `fswa_chain_links` tables.
