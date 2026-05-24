@@ -52,6 +52,11 @@ const routes = [
     name: 'Pro',
     component: () => import('@/views/ProView.vue'),
   },
+  {
+    path: '/external-cron',
+    name: 'ExternalCron',
+    component: () => import('@/views/ExternalCronView.vue'),
+  },
 ]
 
 const router = createRouter({

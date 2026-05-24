@@ -9,6 +9,7 @@ import {
   Clock,
   KeyRound,
   Sparkles,
+  Timer,
 } from 'lucide-vue-next';
 import { useTheme } from './composables/useTheme';
 import { usePro } from './composables/usePro';
@@ -23,6 +24,7 @@ const navItems = [
   { path: '/logs', label: 'Logs', icon: ScrollText },
   { path: '/queue', label: 'Queue', icon: Clock },
   { path: '/tokens', label: 'API Tokens', icon: KeyRound },
+  { path: '/external-cron', label: 'External Cron', icon: Timer },
   { path: '/settings', label: 'Settings', icon: Settings },
   { path: '/pro', label: 'Pro', icon: Sparkles },
 ];

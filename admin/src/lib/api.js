@@ -206,6 +206,13 @@ export const api = {
     createLink: (id, data) => post(`chains/${id}/links`, data),
     deleteLink: (id, linkId) => del(`chains/${id}/links/${linkId}`),
   },
+  externalCron: {
+    getSettings: () => get('pro/external-cron/settings'),
+    saveSettings: (data) => put('pro/external-cron/settings', data),
+    getStats: () => get('pro/external-cron/stats'),
+    pause: () => post('pro/external-cron/pause'),
+    resume: () => post('pro/external-cron/resume'),
+  },
   snippets: {
     list: (params = {}) => get('pro/snippets', params),
     get: (id) => get(`pro/snippets/${id}`),
