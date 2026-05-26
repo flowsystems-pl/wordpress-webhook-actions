@@ -433,7 +433,8 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    $newStatus = !$webhook['is_enabled'];
+    $oldStatus = (bool) $webhook['is_enabled'];
+    $newStatus = !$oldStatus;
     $result = $this->repository->setEnabled($id, $newStatus);
 
     if (!$result) {
@@ -451,7 +452,7 @@ class WebhooksController extends WP_REST_Controller {
       'webhook',
       $id,
       $webhook['name'] ?? null,
-      ['enabled' => $newStatus]
+      ['old' => ['is_enabled' => $oldStatus], 'new' => ['is_enabled' => $newStatus]]
     );
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
