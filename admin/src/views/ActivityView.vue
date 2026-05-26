@@ -213,8 +213,21 @@ onMounted(loadItems)
                 <td class="py-2 px-3 text-muted-foreground">{{ formatObject(item) }}</td>
               </tr>
               <tr v-if="expandedRows.has(item.id)" class="bg-muted/20">
-                <td colspan="5" class="py-3 px-6">
-                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs mb-3">
+                <td colspan="5" class="py-3 px-6 space-y-3">
+                  <!-- AI prompt & reasoning (shown first if present) -->
+                  <div v-if="item.context?._prompt || item.context?._reason" class="rounded border border-primary/30 bg-primary/5 p-3 space-y-2">
+                    <div v-if="item.context._prompt">
+                      <div class="text-xs font-semibold text-primary mb-0.5">User prompt</div>
+                      <div class="text-sm">{{ item.context._prompt }}</div>
+                    </div>
+                    <div v-if="item.context._reason">
+                      <div class="text-xs font-semibold text-primary mb-0.5">AI reasoning</div>
+                      <div class="text-sm text-muted-foreground">{{ item.context._reason }}</div>
+                    </div>
+                  </div>
+
+                  <!-- Actor metadata -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                     <div v-if="item.ip_address">
                       <div class="text-muted-foreground">IP</div>
                       <div class="font-mono">{{ item.ip_address }}</div>
@@ -228,9 +241,11 @@ onMounted(loadItems)
                       <div>{{ item.user_id }}</div>
                     </div>
                   </div>
-                  <div v-if="item.context && Object.keys(item.context).length">
-                    <div class="text-xs text-muted-foreground mb-1">Context</div>
-                    <pre class="text-xs bg-muted rounded p-3 overflow-x-auto whitespace-pre-wrap break-all">{{ JSON.stringify(item.context, null, 2) }}</pre>
+
+                  <!-- Change context (old/new or meta), excluding AI fields -->
+                  <div v-if="item.context && Object.keys(item.context).filter(k => !k.startsWith('_')).length">
+                    <div class="text-xs text-muted-foreground mb-1">Changes</div>
+                    <pre class="text-xs bg-muted rounded p-3 overflow-x-auto whitespace-pre-wrap break-all">{{ JSON.stringify(Object.fromEntries(Object.entries(item.context).filter(([k]) => !k.startsWith('_'))), null, 2) }}</pre>
                   </div>
                 </td>
               </tr>

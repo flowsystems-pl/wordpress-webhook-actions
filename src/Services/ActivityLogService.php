@@ -40,6 +40,16 @@ class ActivityLogService {
       $tokenId   = $tokenData ? (int) $tokenData['id']  : null;
       $tokenHint = $tokenData ? ($tokenData['name'] ?? $tokenData['token_hint'] ?? null) : null;
 
+      // Capture AI-assistant metadata if the caller supplied it via headers
+      $prompt = $this->resolveHeader('X-FSWA-Prompt');
+      $reason = $this->resolveHeader('X-FSWA-Reason');
+      if ($prompt !== null) {
+        $context['_prompt'] = substr($prompt, 0, 2000);
+      }
+      if ($reason !== null) {
+        $context['_reason'] = substr($reason, 0, 2000);
+      }
+
       if (!empty($context)) {
         $context = $this->redactSensitive($context);
       }
@@ -103,6 +113,19 @@ class ActivityLogService {
     } catch (\Throwable $e) {
       return null;
     }
+  }
+
+  /**
+   * Read a single request header value, returning null if absent.
+   */
+  private function resolveHeader(string $name): ?string {
+    $headers = getallheaders() ?: [];
+    foreach ($headers as $key => $value) {
+      if (strcasecmp($key, $name) === 0) {
+        return sanitize_text_field(wp_unslash($value)) ?: null;
+      }
+    }
+    return null;
   }
 
   /**
