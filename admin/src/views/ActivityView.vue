@@ -25,6 +25,7 @@ const deleteSuccess = ref(null)
 const actionPrefixOptions = [
   { value: 'all', label: 'All actions' },
   { value: 'webhook', label: 'Webhooks' },
+  { value: 'snippet', label: 'Snippets' },
   { value: 'token', label: 'API Tokens' },
   { value: 'settings', label: 'Settings' },
   { value: 'log', label: 'Logs' },

@@ -23,10 +23,10 @@ const { proActive } = usePro();
 const navItems = [
   { path: '/webhooks', label: 'Webhooks', icon: Webhook },
   { path: '/logs', label: 'Logs', icon: ScrollText },
-  { path: '/activity', label: 'Activity', icon: History },
   { path: '/queue', label: 'Queue', icon: Clock },
   { path: '/tokens', label: 'API Tokens', icon: KeyRound },
   { path: '/external-cron', label: 'External Cron', icon: Timer },
+  { path: '/activity', label: 'Activity', icon: History },
   { path: '/settings', label: 'Settings', icon: Settings },
   { path: '/pro', label: 'Pro', icon: Sparkles },
 ];
