@@ -26,6 +26,7 @@ const actionPrefixOptions = [
   { value: 'all', label: 'All actions' },
   { value: 'webhook', label: 'Webhooks' },
   { value: 'snippet', label: 'Snippets' },
+  { value: 'chain', label: 'Chains' },
   { value: 'token', label: 'API Tokens' },
   { value: 'settings', label: 'Settings' },
   { value: 'log', label: 'Logs' },

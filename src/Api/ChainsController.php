@@ -12,6 +12,7 @@ use FlowSystems\WebhookActions\Api\AuthHelper;
 use FlowSystems\WebhookActions\Repositories\ChainRepository;
 use FlowSystems\WebhookActions\Repositories\ChainLinkRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class ChainsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -20,11 +21,13 @@ class ChainsController extends WP_REST_Controller {
   private ChainRepository $chainRepository;
   private ChainLinkRepository $linkRepository;
   private WebhookRepository $webhookRepository;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
     $this->chainRepository   = new ChainRepository();
     $this->linkRepository    = new ChainLinkRepository();
     $this->webhookRepository = new WebhookRepository();
+    $this->activityLog       = new ActivityLogService();
   }
 
   public function registerRoutes(): void {
@@ -138,6 +141,11 @@ class ChainsController extends WP_REST_Controller {
     $chain                       = $this->chainRepository->find($id);
     $chain['links']              = [];
     $chain['member_webhook_ids'] = [];
+
+    $this->activityLog->log('chain.created', 'chain', $id, $chain['name'] ?? null, [
+      'new' => ['name' => $chain['name'] ?? null, 'description' => $chain['description'] ?? null],
+    ]);
+
     return rest_ensure_response($chain);
   }
 
@@ -165,11 +173,19 @@ class ChainsController extends WP_REST_Controller {
       $data['description'] = $desc === null ? null : sanitize_textarea_field((string) $desc);
     }
 
+    $oldValues = array_intersect_key($chain, $data);
+
     $this->chainRepository->update($id, $data);
     $updated                       = $this->chainRepository->find($id);
     $updated['links']              = $this->linkRepository->findByChain($id);
     $members                       = $this->chainRepository->getMembersByChain();
     $updated['member_webhook_ids'] = array_map('intval', $members[$id] ?? []);
+
+    $this->activityLog->log('chain.updated', 'chain', $id, $updated['name'] ?? null, [
+      'old' => $oldValues,
+      'new' => $data,
+    ]);
+
     return rest_ensure_response($updated);
   }
 
@@ -181,6 +197,11 @@ class ChainsController extends WP_REST_Controller {
     }
     $linksRemoved = $this->linkRepository->deleteByChain($id);
     $this->chainRepository->delete($id);
+
+    $this->activityLog->log('chain.deleted', 'chain', $id, $chain['name'] ?? null, [
+      'old' => ['name' => $chain['name'] ?? null, 'description' => $chain['description'] ?? null, 'links_removed' => $linksRemoved],
+    ]);
+
     return rest_ensure_response(['deleted' => true, 'id' => $id, 'links_removed' => $linksRemoved]);
   }
 
@@ -220,6 +241,10 @@ class ChainsController extends WP_REST_Controller {
       return new WP_Error('rest_chain_link_create_failed', __('Failed to create chain link (it may already exist).', 'flowsystems-webhook-actions'), ['status' => 409]);
     }
 
+    $this->activityLog->log('chain.link_added', 'chain', $chainId, $chain['name'] ?? null, [
+      'new' => ['source_webhook_id' => $sourceId, 'target_webhook_id' => $targetId],
+    ]);
+
     return rest_ensure_response($this->linkRepository->find($linkId));
   }
 
@@ -230,8 +255,14 @@ class ChainsController extends WP_REST_Controller {
       return new WP_Error('rest_chain_link_not_found', __('Chain link not found.', 'flowsystems-webhook-actions'), ['status' => 404]);
     }
     $chainId = (int) $link['chain_id'];
+    $chain   = $this->chainRepository->find($chainId);
     $this->linkRepository->delete($linkId);
     $chainDeleted = $this->linkRepository->cleanupEmptyChains([$chainId]) > 0;
+
+    $this->activityLog->log('chain.link_deleted', 'chain', $chainId, $chain['name'] ?? null, [
+      'old' => ['source_webhook_id' => (int) $link['source_webhook_id'], 'target_webhook_id' => (int) $link['target_webhook_id']],
+    ]);
+
     return rest_ensure_response([
       'deleted'       => true,
       'id'            => $linkId,
