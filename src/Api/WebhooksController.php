@@ -269,7 +269,17 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($webhookId);
 
-    $this->activityLog->log('webhook.created', 'webhook', $webhookId, $webhook['name'] ?? null);
+    $this->activityLog->log('webhook.created', 'webhook', $webhookId, $webhook['name'] ?? null, [
+      'new' => [
+        'name'         => $webhook['name'] ?? null,
+        'endpoint_url' => $webhook['endpoint_url'] ?? null,
+        'http_method'  => $webhook['http_method'] ?? null,
+        'triggers'     => $webhook['triggers'] ?? [],
+        'auth_header'  => $webhook['auth_header'] ?? null,
+        'is_enabled'   => (bool) ($webhook['is_enabled'] ?? true),
+        'is_synchronous' => (bool) ($webhook['is_synchronous'] ?? false),
+      ],
+    ]);
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
@@ -413,7 +423,17 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    $this->activityLog->log('webhook.deleted', 'webhook', $id, $webhook['name'] ?? null);
+    $this->activityLog->log('webhook.deleted', 'webhook', $id, $webhook['name'] ?? null, [
+      'old' => [
+        'name'           => $webhook['name'] ?? null,
+        'endpoint_url'   => $webhook['endpoint_url'] ?? null,
+        'http_method'    => $webhook['http_method'] ?? null,
+        'triggers'       => $webhook['triggers'] ?? [],
+        'auth_header'    => $webhook['auth_header'] ?? null,
+        'is_enabled'     => (bool) ($webhook['is_enabled'] ?? false),
+        'is_synchronous' => (bool) ($webhook['is_synchronous'] ?? false),
+      ],
+    ]);
 
     return rest_ensure_response(['deleted' => true, 'id' => $id]);
   }

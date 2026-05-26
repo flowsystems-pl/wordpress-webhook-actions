@@ -170,7 +170,13 @@ class ApiTokensController extends WP_REST_Controller {
 
     $token = $this->repository->find($id);
 
-    $this->activityLog->log('token.created', 'token', $id, $token['name'] ?? null, ['scope' => $scope]);
+    $this->activityLog->log('token.created', 'token', $id, $token['name'] ?? null, [
+      'new' => [
+        'name'       => $token['name'] ?? null,
+        'scope'      => $scope,
+        'expires_at' => $token['expires_at'] ?? null,
+      ],
+    ]);
 
     return rest_ensure_response(array_merge($token, [
       'plaintext_token' => $plain,
@@ -275,7 +281,13 @@ class ApiTokensController extends WP_REST_Controller {
       );
     }
 
-    $this->activityLog->log('token.deleted', 'token', $id, $token['name'] ?? null);
+    $this->activityLog->log('token.deleted', 'token', $id, $token['name'] ?? null, [
+      'old' => [
+        'name'       => $token['name'] ?? null,
+        'scope'      => $token['scope'] ?? null,
+        'expires_at' => $token['expires_at'] ?? null,
+      ],
+    ]);
 
     return rest_ensure_response(['deleted' => true, 'id' => $id]);
   }
