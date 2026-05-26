@@ -17,6 +17,7 @@ use FlowSystems\WebhookActions\Services\PayloadTransformer;
 use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Api\AuthHelper;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class WebhooksController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -27,6 +28,7 @@ class WebhooksController extends WP_REST_Controller {
   private QueueService $queueService;
   private LogService $logService;
   private PayloadTransformer $payloadTransformer;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
     $this->repository         = new WebhookRepository();
@@ -34,6 +36,7 @@ class WebhooksController extends WP_REST_Controller {
     $this->queueService       = new QueueService();
     $this->logService         = new LogService();
     $this->payloadTransformer = new PayloadTransformer();
+    $this->activityLog        = new ActivityLogService();
   }
 
   /**
@@ -266,6 +269,8 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($webhookId);
 
+    $this->activityLog->log('webhook.created', 'webhook', $webhookId, $webhook['name'] ?? null);
+
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
@@ -357,6 +362,15 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($id);
 
+    $changedKeys = array_keys($data);
+    $this->activityLog->log(
+      'webhook.updated',
+      'webhook',
+      $id,
+      $webhook['name'] ?? null,
+      ['changed' => $changedKeys]
+    );
+
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }
 
@@ -397,6 +411,8 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
+    $this->activityLog->log('webhook.deleted', 'webhook', $id, $webhook['name'] ?? null);
+
     return rest_ensure_response(['deleted' => true, 'id' => $id]);
   }
 
@@ -427,6 +443,14 @@ class WebhooksController extends WP_REST_Controller {
     }
 
     $webhook = $this->repository->find($id);
+
+    $this->activityLog->log(
+      'webhook.toggled',
+      'webhook',
+      $id,
+      $webhook['name'] ?? null,
+      ['enabled' => $newStatus]
+    );
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));
   }

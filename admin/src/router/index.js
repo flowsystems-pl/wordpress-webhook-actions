@@ -38,6 +38,11 @@ const routes = [
     component: () => import('@/views/QueueView.vue'),
   },
   {
+    path: '/activity',
+    name: 'ActivityView',
+    component: () => import('@/views/ActivityView.vue'),
+  },
+  {
     path: '/tokens',
     name: 'ApiTokens',
     component: () => import('@/views/ApiTokensView.vue'),

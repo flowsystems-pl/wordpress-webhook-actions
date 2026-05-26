@@ -11,6 +11,7 @@ use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\ApiTokenRepository;
 use FlowSystems\WebhookActions\Services\ApiTokenService;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class ApiTokensController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -18,10 +19,12 @@ class ApiTokensController extends WP_REST_Controller {
 
   private ApiTokenRepository $repository;
   private ApiTokenService    $service;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
-    $this->repository = new ApiTokenRepository();
-    $this->service    = new ApiTokenService();
+    $this->repository  = new ApiTokenRepository();
+    $this->service     = new ApiTokenService();
+    $this->activityLog = new ActivityLogService();
   }
 
   /**
@@ -167,6 +170,8 @@ class ApiTokensController extends WP_REST_Controller {
 
     $token = $this->repository->find($id);
 
+    $this->activityLog->log('token.created', 'token', $id, $token['name'] ?? null, ['scope' => $scope]);
+
     return rest_ensure_response(array_merge($token, [
       'plaintext_token' => $plain,
     ]));
@@ -211,6 +216,8 @@ class ApiTokensController extends WP_REST_Controller {
     }
 
     $updated = $this->repository->find($id);
+
+    $this->activityLog->log('token.rotated', 'token', $id, $updated['name'] ?? null);
 
     return rest_ensure_response(array_merge($updated, [
       'plaintext_token' => $plain,
@@ -267,6 +274,8 @@ class ApiTokensController extends WP_REST_Controller {
         ['status' => 500]
       );
     }
+
+    $this->activityLog->log('token.deleted', 'token', $id, $token['name'] ?? null);
 
     return rest_ensure_response(['deleted' => true, 'id' => $id]);
   }

@@ -9,6 +9,7 @@ use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Services\LogArchiver;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class SettingsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -17,6 +18,7 @@ class SettingsController extends WP_REST_Controller {
   private const DEFAULT_RETENTION_DAYS = 30;
   private const DEFAULT_ARCHIVE_LOGS = true;
   private const DEFAULT_MENU_UNDER_TOOLS = false;
+  private const DEFAULT_ACTIVITY_RETENTION_DAYS = 90;
 
   /**
    * Register routes
@@ -44,6 +46,11 @@ class SettingsController extends WP_REST_Controller {
           ],
           'menu_under_tools' => [
             'type' => 'boolean',
+          ],
+          'activity_log_retention_days' => [
+            'type'    => 'integer',
+            'minimum' => 1,
+            'maximum' => 365,
           ],
         ],
       ],
@@ -90,9 +97,10 @@ class SettingsController extends WP_REST_Controller {
    */
   public function getSettings($request): WP_REST_Response {
     $settings = [
-      'log_retention_days' => (int) get_option('fswa_log_retention_days', self::DEFAULT_RETENTION_DAYS),
-      'archive_logs' => (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS),
-      'menu_under_tools' => (bool) get_option('fswa_menu_under_tools', self::DEFAULT_MENU_UNDER_TOOLS),
+      'log_retention_days'          => (int) get_option('fswa_log_retention_days', self::DEFAULT_RETENTION_DAYS),
+      'archive_logs'                => (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS),
+      'menu_under_tools'            => (bool) get_option('fswa_menu_under_tools', self::DEFAULT_MENU_UNDER_TOOLS),
+      'activity_log_retention_days' => (int) get_option('fswa_activity_log_retention_days', self::DEFAULT_ACTIVITY_RETENTION_DAYS),
     ];
 
     return rest_ensure_response($settings);
@@ -114,6 +122,22 @@ class SettingsController extends WP_REST_Controller {
 
     if ($request->has_param('menu_under_tools')) {
       update_option('fswa_menu_under_tools', (bool) $request->get_param('menu_under_tools'));
+    }
+
+    if ($request->has_param('activity_log_retention_days')) {
+      $actDays = (int) $request->get_param('activity_log_retention_days');
+      $actDays = max(1, min(365, $actDays));
+      update_option('fswa_activity_log_retention_days', $actDays);
+    }
+
+    $changed = array_keys(array_filter([
+      'log_retention_days'          => $request->has_param('log_retention_days'),
+      'archive_logs'                => $request->has_param('archive_logs'),
+      'menu_under_tools'            => $request->has_param('menu_under_tools'),
+      'activity_log_retention_days' => $request->has_param('activity_log_retention_days'),
+    ]));
+    if (!empty($changed)) {
+      (new ActivityLogService())->log('settings.updated', 'settings', null, null, ['changed' => $changed]);
     }
 
     return $this->getSettings($request);

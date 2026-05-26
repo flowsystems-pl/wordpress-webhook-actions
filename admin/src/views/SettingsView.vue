@@ -12,6 +12,7 @@ const settings = ref({
   log_retention_days: 30,
   archive_logs: true,
   menu_under_tools: false,
+  activity_log_retention_days: 90,
 })
 const info = ref(null)
 const archive = ref(null)
@@ -102,6 +103,11 @@ const retentionOptions = [
 const retentionDays = computed({
   get: () => String(settings.value.log_retention_days ?? 30),
   set: (val) => { settings.value.log_retention_days = parseInt(val, 10) },
+})
+
+const activityRetentionDays = computed({
+  get: () => String(settings.value.activity_log_retention_days ?? 90),
+  set: (val) => { settings.value.activity_log_retention_days = parseInt(val, 10) },
 })
 
 const savedMenuUnderTools = ref(false)
@@ -412,7 +418,7 @@ onMounted(loadData)
 
             <div class="space-y-4">
               <div class="space-y-2">
-                <Label>Keep logs for</Label>
+                <Label>Keep webhook logs for</Label>
                 <Select v-model="retentionDays">
                   <SelectTrigger class="w-48">
                     <SelectValue />
@@ -424,7 +430,24 @@ onMounted(loadData)
                   </SelectContent>
                 </Select>
                 <p class="text-sm text-muted-foreground">
-                  Logs older than this will be automatically deleted.
+                  Webhook delivery logs older than this will be automatically deleted.
+                </p>
+              </div>
+
+              <div class="space-y-2">
+                <Label>Keep activity log for</Label>
+                <Select v-model="activityRetentionDays">
+                  <SelectTrigger class="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="option in retentionOptions" :key="option.value" :value="option.value">
+                      {{ option.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-sm text-muted-foreground">
+                  Admin action history older than this will be automatically deleted.
                 </p>
               </div>
 

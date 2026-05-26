@@ -13,6 +13,7 @@ use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\PayloadTransformer;
 use FlowSystems\WebhookActions\Api\AuthHelper;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class SchemasController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -21,11 +22,13 @@ class SchemasController extends WP_REST_Controller {
   private SchemaRepository $schemaRepository;
   private WebhookRepository $webhookRepository;
   private PayloadTransformer $payloadTransformer;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
-    $this->schemaRepository = new SchemaRepository();
+    $this->schemaRepository  = new SchemaRepository();
     $this->webhookRepository = new WebhookRepository();
     $this->payloadTransformer = new PayloadTransformer();
+    $this->activityLog        = new ActivityLogService();
   }
 
   /**
@@ -300,6 +303,8 @@ class SchemasController extends WP_REST_Controller {
     $schema = $this->schemaRepository->findByWebhookAndTrigger($webhookId, $trigger);
     $schema['supports_user_enrichment'] = $this->payloadTransformer->supportsUserEnrichment($trigger);
 
+    $this->activityLog->log('schema.updated', 'webhook', $webhookId, $webhook['name'] ?? null, ['trigger' => $trigger]);
+
     return rest_ensure_response($schema);
   }
 
@@ -329,6 +334,8 @@ class SchemasController extends WP_REST_Controller {
         ['status' => 500]
       );
     }
+
+    $this->activityLog->log('schema.deleted', 'webhook', $webhookId, $webhook['name'] ?? null, ['trigger' => $trigger]);
 
     return rest_ensure_response(['deleted' => true]);
   }

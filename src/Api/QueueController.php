@@ -14,15 +14,18 @@ use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Api\AuthHelper;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class QueueController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
   protected $rest_base = 'queue';
 
   private QueueService $queueService;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
     $this->queueService = new QueueService();
+    $this->activityLog  = new ActivityLogService();
   }
 
   public function registerRoutes(): void {
@@ -282,6 +285,7 @@ class QueueController extends WP_REST_Controller {
 
     if ($result['success']) {
       $this->queueService->markCompleted($jobId);
+      $this->activityLog->log('queue.executed', 'queue', $jobId);
       return rest_ensure_response([
         'success' => true,
         'message' => __('Job executed successfully.', 'flowsystems-webhook-actions'),
@@ -343,6 +347,8 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
+    $this->activityLog->log('queue.deleted', 'queue', $jobId);
+
     return rest_ensure_response([
       'success' => true,
       'message' => __('Job deleted successfully.', 'flowsystems-webhook-actions'),
@@ -382,6 +388,8 @@ class QueueController extends WP_REST_Controller {
         ['status' => 500]
       );
     }
+
+    $this->activityLog->log('queue.retried', 'queue', $jobId);
 
     return rest_ensure_response([
       'success' => true,

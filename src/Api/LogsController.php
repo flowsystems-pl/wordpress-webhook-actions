@@ -17,6 +17,7 @@ use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\ConditionEvaluator;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Api\AuthHelper;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class LogsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
@@ -29,6 +30,7 @@ class LogsController extends WP_REST_Controller {
   private QueueService    $queueService;
   private StatsRepository $statsRepository;
   private ConditionEvaluator $conditionEvaluator;
+  private ActivityLogService $activityLog;
 
   public function __construct() {
     $this->repository         = new LogRepository();
@@ -38,6 +40,7 @@ class LogsController extends WP_REST_Controller {
     $this->queueService       = new QueueService($this->queueRepository);
     $this->statsRepository    = new StatsRepository();
     $this->conditionEvaluator = new ConditionEvaluator();
+    $this->activityLog        = new ActivityLogService();
   }
 
   /**
@@ -269,6 +272,8 @@ class LogsController extends WP_REST_Controller {
       );
     }
 
+    $this->activityLog->log('log.deleted', 'log', $id);
+
     return rest_ensure_response(['deleted' => true, 'id' => $id]);
   }
 
@@ -288,6 +293,8 @@ class LogsController extends WP_REST_Controller {
 
     $date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
     $deleted = $this->repository->deleteOlderThan($date);
+
+    $this->activityLog->log('log.bulk_deleted', 'log', null, null, ['older_than_days' => (int) $days, 'deleted' => $deleted]);
 
     return rest_ensure_response([
       'deleted' => $deleted,
@@ -338,6 +345,8 @@ class LogsController extends WP_REST_Controller {
         ['status' => 500]
       );
     }
+
+    $this->activityLog->log('log.retried', 'log', $logId);
 
     return rest_ensure_response([
       'success' => true,
@@ -410,6 +419,8 @@ class LogsController extends WP_REST_Controller {
     // Pass $logId as both the payload field and the queue log_id column so
     // processJob() reuses the existing log entry instead of creating a new one.
     $jobId = $this->queueService->enqueue((int) $log['webhook_id'], $log['trigger_name'], $payload, null, $logId);
+
+    $this->activityLog->log('log.replayed', 'log', $logId);
 
     return rest_ensure_response([
       'success' => true,

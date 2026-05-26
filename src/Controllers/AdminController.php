@@ -15,6 +15,7 @@ use FlowSystems\WebhookActions\Api\SchemasController;
 use FlowSystems\WebhookActions\Api\ApiTokensController;
 use FlowSystems\WebhookActions\Api\ProStatusController;
 use FlowSystems\WebhookActions\Api\ChainsController;
+use FlowSystems\WebhookActions\Api\ActivityLogController;
 
 class AdminController {
   public function __construct() {
@@ -179,6 +180,7 @@ class AdminController {
     (new ApiTokensController())->registerRoutes();
     (new ProStatusController())->registerRoutes();
     (new ChainsController())->registerRoutes();
+    (new ActivityLogController())->registerRoutes();
   }
 
   /**

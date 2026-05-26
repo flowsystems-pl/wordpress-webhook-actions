@@ -206,6 +206,11 @@ export const api = {
     createLink: (id, data) => post(`chains/${id}/links`, data),
     deleteLink: (id, linkId) => del(`chains/${id}/links/${linkId}`),
   },
+  activity: {
+    list: (params) => get('activity', params),
+    get: (id) => get(`activity/${id}`),
+    deleteOld: (days) => del('activity', { older_than_days: days }),
+  },
   externalCron: {
     getSettings: () => get('pro/external-cron/settings'),
     saveSettings: (data) => put('pro/external-cron/settings', data),

@@ -9,6 +9,7 @@ use FlowSystems\WebhookActions\Controllers\AdminController;
 use FlowSystems\WebhookActions\Database\Migrator;
 use FlowSystems\WebhookActions\Services\LogArchiver;
 use FlowSystems\WebhookActions\Services\QueueService;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
 use FlowSystems\WebhookActions\Services\Scheduler;
 use FlowSystems\WebhookActions\Integrations\IntegrationLoader;
@@ -119,6 +120,10 @@ class App {
     // Also cleanup old completed queue jobs (keep for 7 days)
     $queueService = new QueueService();
     $queueService->cleanupCompletedJobs(7);
+
+    // Prune activity logs
+    $activityRetentionDays = (int) get_option('fswa_activity_log_retention_days', 90);
+    (new ActivityLogService())->pruneOlderThan($activityRetentionDays);
   }
 
   /**

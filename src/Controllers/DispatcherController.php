@@ -14,6 +14,7 @@ use FlowSystems\WebhookActions\Services\ChainDispatcher;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\Scheduler;
+use FlowSystems\WebhookActions\Services\ActivityLogService;
 
 class DispatcherController {
 
@@ -180,6 +181,8 @@ class DispatcherController {
 
     // Let the Pro plugin update the Kuma monitor URL with the new token
     do_action('fswa_cron_token_regenerated');
+
+    (new ActivityLogService())->log('cron.token_regenerated', 'cron');
 
     return rest_ensure_response([
       'success' => true,

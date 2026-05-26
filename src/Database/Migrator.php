@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.13.0';
+  private const CURRENT_VERSION = '1.14.0';
 
   /**
    * Run pending migrations
@@ -47,6 +47,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_api_tokens',
       $wpdb->prefix . 'fswa_chains',
       $wpdb->prefix . 'fswa_chain_links',
+      $wpdb->prefix . 'fswa_activity_logs',
     ];
 
     foreach ($requiredTables as $table) {
@@ -82,6 +83,7 @@ class Migrator {
       '1.11.0' => [self::class, 'migration_1_11_0'],
       '1.12.0' => [self::class, 'migration_1_12_0'],
       '1.13.0' => [self::class, 'migration_1_13_0'],
+      '1.14.0' => [self::class, 'migration_1_14_0'],
     ];
   }
 
@@ -594,6 +596,40 @@ class Migrator {
         ) {$charsetCollate};";
 
     dbDelta($sqlLinks);
+  }
+
+  /**
+   * Migration 1.14.0 - Create activity_logs table
+   */
+  public static function migration_1_14_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $table = $wpdb->prefix . 'fswa_activity_logs';
+    $sql   = "CREATE TABLE {$table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            user_id BIGINT UNSIGNED DEFAULT NULL,
+            token_id BIGINT UNSIGNED DEFAULT NULL,
+            token_hint VARCHAR(64) DEFAULT NULL,
+            action VARCHAR(64) NOT NULL,
+            object_type VARCHAR(32) DEFAULT NULL,
+            object_id BIGINT UNSIGNED DEFAULT NULL,
+            object_name VARCHAR(255) DEFAULT NULL,
+            context LONGTEXT DEFAULT NULL,
+            ip_address VARCHAR(45) DEFAULT NULL,
+            user_agent TEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY idx_created (created_at),
+            KEY idx_user (user_id),
+            KEY idx_action (action),
+            KEY idx_object (object_type, object_id)
+        ) {$charsetCollate};";
+
+    dbDelta($sql);
   }
 
   /**
