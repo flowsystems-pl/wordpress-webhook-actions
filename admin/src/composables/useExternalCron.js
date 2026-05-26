@@ -3,11 +3,12 @@ import { useIntervalFn } from '@vueuse/core'
 import api from '@/lib/api'
 
 export function useExternalCron(enabled = ref(true)) {
-  const settings = ref({ mode: 'wp', interval: 60, monitor_id: null, monitor_active: false })
-  const stats    = ref({ beats: [], uptime_24h: null, avg_ping: null })
-  const loading  = ref(false)
-  const saving   = ref(false)
-  const error    = ref(null)
+  const settings   = ref({ mode: 'wp', interval: 60, monitor_id: null, monitor_active: false })
+  const stats      = ref({ beats: [], uptime_24h: null, avg_ping: null })
+  const loading    = ref(false)
+  const saving     = ref(false)
+  const error      = ref(null)
+  const statsStale = ref(false)
 
   const fetchSettings = async () => {
     try {
@@ -17,9 +18,16 @@ export function useExternalCron(enabled = ref(true)) {
     }
   }
 
-  const fetchStats = async () => {
+  const fetchStats = async (manual = false) => {
     try {
-      stats.value = await api.externalCron.getStats()
+      const fresh = await api.externalCron.getStats()
+      if (!fresh.beats?.length && stats.value.beats?.length && !manual) {
+        // Auto-poll returned empty while we have data — keep existing, flag stale
+        statsStale.value = true
+      } else {
+        stats.value      = fresh
+        statsStale.value = false
+      }
     } catch (_) {}
   }
 
@@ -68,5 +76,5 @@ export function useExternalCron(enabled = ref(true)) {
 
   onUnmounted(stopInterval)
 
-  return { settings, stats, loading, saving, error, load, fetchStats, saveSettings, pause, resume }
+  return { settings, stats, loading, saving, error, statsStale, load, fetchStats, saveSettings, pause, resume }
 }

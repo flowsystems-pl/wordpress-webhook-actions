@@ -178,6 +178,9 @@ class DispatcherController {
     $newToken = $this->generateCronSecret();
     update_option('fswa_cron_secret', $newToken);
 
+    // Let the Pro plugin update the Kuma monitor URL with the new token
+    do_action('fswa_cron_token_regenerated');
+
     return rest_ensure_response([
       'success' => true,
       'token' => $newToken,

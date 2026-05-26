@@ -74,8 +74,8 @@ const isActive = (path) => {
         :class="[
           'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap',
           isActive(item.path)
-            ? 'border-primary text-primary'
-            : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted',
+            ? '!border-primary !text-primary'
+            : 'border-transparent text-muted-foreground hover:!text-foreground hover:!border-muted',
         ]"
       >
         <component :is="item.icon" class="w-4 h-4" />

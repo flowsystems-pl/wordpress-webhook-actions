@@ -1,13 +1,13 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { Timer, Play, Pause, RefreshCw, Info } from 'lucide-vue-next'
+import { Timer, Play, Pause, RefreshCw, Info, AlertTriangle } from 'lucide-vue-next'
 import { Button, Card, Input, Label, Alert, UpgradeBadge, RadioGroup, RadioGroupItem, Switch, Slider } from '@/components/ui'
 import ExternalCronChart from '@/components/ExternalCronChart.vue'
 import { usePro } from '@/composables/usePro'
 import { useExternalCron } from '@/composables/useExternalCron'
 
 const { proActive } = usePro()
-const { settings, stats, loading, saving, error, load, fetchStats, saveSettings, pause, resume } = useExternalCron(proActive)
+const { settings, stats, loading, saving, error, statsStale, load, fetchStats, saveSettings, pause, resume } = useExternalCron(proActive)
 
 const localEnabled   = ref(true)
 const localMode      = ref('plugin_endpoint')
@@ -66,6 +66,12 @@ watch(localMode, (mode) => {
   if (localInterval.value < min) localInterval.value = min
 })
 
+const lastPingError = computed(() => {
+  const beat = stats.value.beats?.[0]
+  if (beat && beat.status !== 1) return beat.msg || 'Unknown error'
+  return null
+})
+
 const monitorStatusLabel = computed(() => {
   if (!settings.value.monitor_id) return 'Not configured'
   return settings.value.monitor_active ? 'Active' : 'Paused'
@@ -98,12 +104,21 @@ watch(proActive, (active) => { if (active) load() })
         <h2 class="text-lg font-semibold">External Cron</h2>
         <UpgradeBadge v-if="!proActive" />
       </div>
-      <Button v-if="proActive" variant="ghost" size="sm" @click="fetchStats" :disabled="loading">
-        <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
-      </Button>
+      <div v-if="proActive" class="flex items-center gap-2">
+        <span v-if="statsStale" class="text-xs text-amber-500 flex items-center gap-1">
+          <AlertTriangle class="w-3 h-3" /> Stats unavailable
+        </span>
+        <Button variant="ghost" size="sm" @click="fetchStats(true)" :disabled="loading">
+          <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading, 'text-amber-500': statsStale }" />
+        </Button>
+      </div>
     </div>
 
     <Alert v-if="error" variant="destructive">{{ error }}</Alert>
+
+    <Alert v-if="proActive && lastPingError" variant="destructive">
+      Last ping failed: <span class="font-mono text-xs">{{ lastPingError }}</span>
+    </Alert>
 
     <!-- Monitor status bar (pro only, monitor must exist) -->
     <Card v-if="proActive && settings.monitor_id" class="p-4">
@@ -113,7 +128,7 @@ watch(proActive, (active) => { if (active) load() })
             {{ monitorStatusLabel }}
           </span>
           <span v-if="stats.beats?.length" class="text-sm text-muted-foreground">
-            Last ping: {{ new Date(stats.beats[0].time).toLocaleString() }}
+            Last stats pull: {{ new Date(stats.beats[0].time).toLocaleString() }}
           </span>
         </div>
         <div class="flex gap-2">
@@ -130,7 +145,7 @@ watch(proActive, (active) => { if (active) load() })
     <!-- Heartbeat history -->
     <Card class="p-6 space-y-3">
       <div class="flex items-center justify-between">
-        <Label class="text-base">Heartbeat history</Label>
+        <Label class="text-base">External Cron History</Label>
         <UpgradeBadge v-if="!proActive" />
       </div>
       <div :class="{ 'opacity-50 pointer-events-none select-none': !proActive }">

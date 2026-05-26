@@ -1,15 +1,24 @@
 <script setup>
 import { computed } from 'vue'
-import { Bar } from 'vue-chartjs'
+import { Line } from 'vue-chartjs'
 import {
+  BarController,
+  BarElement,
   Chart as ChartJS,
   CategoryScale,
+  Filler,
+  Legend,
   LinearScale,
-  BarElement,
+  LineController,
+  LineElement,
+  PointElement,
   Tooltip,
 } from 'chart.js'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip)
+ChartJS.register(
+  BarController, BarElement, CategoryScale, Filler, Legend,
+  LinearScale, LineController, LineElement, PointElement, Tooltip
+)
 
 const props = defineProps({
   beats:     { type: Array, default: () => [] },
@@ -17,57 +26,160 @@ const props = defineProps({
   avgPing:   { type: Number, default: null },
 })
 
-const reversed = computed(() => [...props.beats].reverse())
-
-const chartData = computed(() => ({
-  labels: reversed.value.map((b, i) => i + 1),
-  datasets: [
-    {
-      data: reversed.value.map((b) => b.ping ?? 0),
-      backgroundColor: reversed.value.map((b) =>
-        b.status === 1 ? 'rgba(34,197,94,0.8)' : 'rgba(239,68,68,0.8)'
-      ),
-      borderRadius: 2,
-      borderSkipped: false,
-    },
-  ],
-}))
-
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  animation: false,
-  plugins: { legend: { display: false }, tooltip: {
-    callbacks: {
-      label: (ctx) => {
-        const b = reversed.value[ctx.dataIndex]
-        const status = b?.status === 1 ? 'Up' : 'Down'
-        const ping   = b?.ping != null ? ` — ${b.ping}ms` : ''
-        return `${status}${ping}`
-      },
-      title: (items) => {
-        const b = reversed.value[items[0]?.dataIndex]
-        return b?.time ? new Date(b.time).toLocaleString() : ''
-      },
-    },
-  }},
-  scales: {
-    x: { display: false },
-    y: {
-      display: true,
-      ticks: { color: 'var(--color-muted-foreground)', font: { size: 11 } },
-      grid:  { color: 'var(--color-border)' },
-      title: { display: true, text: 'ms', color: 'var(--color-muted-foreground)', font: { size: 11 } },
-    },
-  },
+// Vars are on #fswa-app (.dark / .light class), not <html>
+function appEl() {
+  return document.getElementById('fswa-app') ?? document.documentElement
 }
+function hsl(varName) {
+  const raw = getComputedStyle(appEl()).getPropertyValue(varName).trim()
+  return `hsl(${raw})`
+}
+function hsla(varName, alpha) {
+  const raw = getComputedStyle(appEl()).getPropertyValue(varName).trim()
+  const [h, s, l] = raw.split(' ')
+  return `hsl(${h} ${s} ${l} / ${alpha})`
+}
+
+const chartData = computed(() => {
+  // API returns newest-first; reverse for chronological display
+  const beats = [...props.beats].reverse()
+
+  const labels    = []
+  const pingData  = []
+  const downData  = []
+
+  for (const beat of beats) {
+    const d = new Date(beat.time)
+    labels.push(d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    pingData.push(beat.status === 1 ? (beat.ping ?? null) : null)
+    downData.push(beat.status === 0 ? 1 : 0)
+  }
+
+  const accent     = hsl('--accent')
+  const accentFill = hsla('--accent', 0.15)
+  const downFill   = hsla('--destructive', 0.35)
+
+  return {
+    labels,
+    datasets: [
+      {
+        type: 'line',
+        data: pingData,
+        fill: 'origin',
+        tension: 0.2,
+        borderColor: accent,
+        backgroundColor: accentFill,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHitRadius: 100,
+        yAxisID: 'y',
+        label: 'Response (ms)',
+        order: 1,
+      },
+      {
+        type: 'bar',
+        data: downData,
+        backgroundColor: downFill,
+        borderColor: 'transparent',
+        yAxisID: 'y1',
+        barThickness: 'flex',
+        barPercentage: 1,
+        categoryPercentage: 1,
+        inflateAmount: 0.05,
+        label: 'status',
+        order: 2,
+      },
+    ],
+  }
+})
+
+const chartOptions = computed(() => {
+  // Re-evaluate when beats change so colors pick up current theme
+  void props.beats
+
+  const isDark    = appEl().classList.contains('dark')
+  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'
+  const textColor = isDark ? 'rgba(220,220,220,0.65)' : 'rgba(20,20,20,0.85)'
+  const bgTooltip = isDark ? 'rgba(17,24,39,0.95)' : 'rgba(240,248,255,0.97)'
+  const fgTooltip = isDark ? '#e5e7eb' : '#111827'
+
+  // beats reversed for display (same as chartData)
+  const chronological = [...props.beats].reverse()
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 250 },
+    elements: { point: { radius: 0, hitRadius: 100 } },
+    layout: { padding: { top: 8, right: 16, bottom: 0, left: 0 } },
+    scales: {
+      x: {
+        ticks: {
+          color: textColor,
+          font: { size: 11 },
+          maxRotation: 0,
+          autoSkipPadding: 28,
+          maxTicksLimit: 8,
+        },
+        grid: { color: gridColor },
+      },
+      y: {
+        title: { display: true, text: 'ms', color: textColor, font: { size: 11 } },
+        ticks: { color: textColor, font: { size: 11 } },
+        grid:  { color: gridColor },
+        offset: false,
+      },
+      y1: {
+        display: false,
+        min: 0,
+        max: 1,
+        offset: false,
+        grid: { drawOnChartArea: false },
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        align: 'start',
+        labels: {
+          color: textColor,
+          boxWidth: 12,
+          filter: (item, data) => data.datasets[item.datasetIndex]?.type !== 'bar',
+        },
+      },
+      tooltip: {
+        mode: 'nearest',
+        intersect: false,
+        backgroundColor: bgTooltip,
+        bodyColor: fgTooltip,
+        titleColor: fgTooltip,
+        filter: (item) => item?.chart?.data?.datasets?.[item.datasetIndex]?.type !== 'bar',
+        callbacks: {
+          title: (items) => {
+            const beat = chronological[items[0]?.dataIndex]
+            return beat ? new Date(beat.time).toLocaleString() : ''
+          },
+          label: (ctx) => {
+            const beat = chronological[ctx.dataIndex]
+            const status = beat?.status === 1 ? 'Success' : 'Fail'
+            const line = ctx.parsed.y != null ? `${status} — ${ctx.parsed.y}ms` : status
+            if (beat?.msg && beat.status !== 1) return [line, beat.msg]
+            return line
+          },
+        },
+      },
+    },
+  }
+})
 </script>
 
 <template>
-  <div class="space-y-3">
+  <div class="ping-chart-wrapper space-y-3">
+    <!-- Stats row -->
     <div class="flex gap-6 text-sm">
       <div>
-        <span class="text-muted-foreground">Uptime 24h</span>
+        <span class="text-muted-foreground">Success rate 24h</span>
         <span class="ml-2 font-semibold text-foreground">
           {{ uptime24h != null ? `${uptime24h}%` : '—' }}
         </span>
@@ -84,10 +196,10 @@ const chartOptions = {
       </div>
     </div>
 
-    <div v-if="beats.length" class="h-32">
-      <Bar :data="chartData" :options="chartOptions" />
+    <div v-if="beats.length" class="h-44">
+      <Line :data="chartData" :options="chartOptions" />
     </div>
-    <div v-else class="h-32 flex items-center justify-center text-sm text-muted-foreground border border-dashed border-border rounded-md">
+    <div v-else class="h-14 flex items-center justify-center text-sm text-muted-foreground border border-dashed border-border rounded-md">
       No heartbeat data yet
     </div>
   </div>
