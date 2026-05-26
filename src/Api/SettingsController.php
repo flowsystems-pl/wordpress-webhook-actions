@@ -110,34 +110,39 @@ class SettingsController extends WP_REST_Controller {
    * Update settings
    */
   public function updateSettings($request): WP_REST_Response {
+    $oldValues = [];
+    $newValues = [];
+
     if ($request->has_param('log_retention_days')) {
-      $days = (int) $request->get_param('log_retention_days');
-      $days = max(1, min(365, $days));
+      $days = max(1, min(365, (int) $request->get_param('log_retention_days')));
+      $oldValues['log_retention_days'] = (int) get_option('fswa_log_retention_days', self::DEFAULT_RETENTION_DAYS);
       update_option('fswa_log_retention_days', $days);
+      $newValues['log_retention_days'] = $days;
     }
 
     if ($request->has_param('archive_logs')) {
-      update_option('fswa_archive_logs', (bool) $request->get_param('archive_logs'));
+      $val = (bool) $request->get_param('archive_logs');
+      $oldValues['archive_logs'] = (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS);
+      update_option('fswa_archive_logs', $val);
+      $newValues['archive_logs'] = $val;
     }
 
     if ($request->has_param('menu_under_tools')) {
-      update_option('fswa_menu_under_tools', (bool) $request->get_param('menu_under_tools'));
+      $val = (bool) $request->get_param('menu_under_tools');
+      $oldValues['menu_under_tools'] = (bool) get_option('fswa_menu_under_tools', self::DEFAULT_MENU_UNDER_TOOLS);
+      update_option('fswa_menu_under_tools', $val);
+      $newValues['menu_under_tools'] = $val;
     }
 
     if ($request->has_param('activity_log_retention_days')) {
-      $actDays = (int) $request->get_param('activity_log_retention_days');
-      $actDays = max(1, min(365, $actDays));
+      $actDays = max(1, min(365, (int) $request->get_param('activity_log_retention_days')));
+      $oldValues['activity_log_retention_days'] = (int) get_option('fswa_activity_log_retention_days', self::DEFAULT_ACTIVITY_RETENTION_DAYS);
       update_option('fswa_activity_log_retention_days', $actDays);
+      $newValues['activity_log_retention_days'] = $actDays;
     }
 
-    $changed = array_keys(array_filter([
-      'log_retention_days'          => $request->has_param('log_retention_days'),
-      'archive_logs'                => $request->has_param('archive_logs'),
-      'menu_under_tools'            => $request->has_param('menu_under_tools'),
-      'activity_log_retention_days' => $request->has_param('activity_log_retention_days'),
-    ]));
-    if (!empty($changed)) {
-      (new ActivityLogService())->log('settings.updated', 'settings', null, null, ['changed' => $changed]);
+    if (!empty($newValues)) {
+      (new ActivityLogService())->log('settings.updated', 'settings', null, null, ['old' => $oldValues, 'new' => $newValues]);
     }
 
     return $this->getSettings($request);

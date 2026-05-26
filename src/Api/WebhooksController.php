@@ -342,6 +342,9 @@ class WebhooksController extends WP_REST_Controller {
       $data['is_synchronous'] = (bool) $request->get_param('is_synchronous');
     }
 
+    // Capture old values for audit log before overwriting
+    $oldValues = array_intersect_key($webhook, $data);
+
     $result = $this->repository->update($id, $data);
 
     if (!$result) {
@@ -362,13 +365,12 @@ class WebhooksController extends WP_REST_Controller {
 
     $webhook = $this->repository->find($id);
 
-    $changedKeys = array_keys($data);
     $this->activityLog->log(
       'webhook.updated',
       'webhook',
       $id,
       $webhook['name'] ?? null,
-      ['changed' => $changedKeys]
+      ['old' => $oldValues, 'new' => $data]
     );
 
     return rest_ensure_response($this->prepareWebhook($webhook, $request));

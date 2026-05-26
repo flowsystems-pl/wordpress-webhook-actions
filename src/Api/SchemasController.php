@@ -290,6 +290,9 @@ class SchemasController extends WP_REST_Controller {
       );
     }
 
+    $existingSchema = $this->schemaRepository->findByWebhookAndTrigger($webhookId, $trigger);
+    $oldValues = $existingSchema ? array_intersect_key($existingSchema, $data) : [];
+
     $result = $this->schemaRepository->upsert($webhookId, $trigger, $data);
 
     if ($result === false) {
@@ -303,7 +306,7 @@ class SchemasController extends WP_REST_Controller {
     $schema = $this->schemaRepository->findByWebhookAndTrigger($webhookId, $trigger);
     $schema['supports_user_enrichment'] = $this->payloadTransformer->supportsUserEnrichment($trigger);
 
-    $this->activityLog->log('schema.updated', 'webhook', $webhookId, $webhook['name'] ?? null, ['trigger' => $trigger]);
+    $this->activityLog->log('schema.updated', 'webhook', $webhookId, $webhook['name'] ?? null, ['trigger' => $trigger, 'old' => $oldValues, 'new' => $data]);
 
     return rest_ensure_response($schema);
   }
