@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.13.1
+Stable tag: 1.14.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -506,6 +506,17 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 
 == Changelog ==
 
+= 1.14.0 — 2026-06-03 =
+- New: **Activity History** — persistent audit log of every admin and API-token action across webhooks, tokens, settings, logs, queue, schemas, chains, and cron. Each entry records the actor (session user or API token with a name hint), the action type, a structured context diff (old → new values for updates), and a timestamp. Designed to trace automated and AI-assisted changes end-to-end
+- New: **AI prompt and reasoning capture** — REST requests carrying `X-FSWA-Prompt` or `X-FSWA-Reason` headers have those values stored in the activity log context and surfaced in the Activity view as a highlighted card above the change diff; intended for AI agents that perform admin actions via API tokens
+- New: **External Cron page** *(Pro)* — dedicated admin page for managing the external cron trigger: enable/disable toggle, mode selector, configurable interval and batch-size sliders, a live heartbeat chart (line + bar combo), monitor status bar, and an alert banner when the last ping failed or is stale
+- New: `fswa_cron_token_regenerated` action hook — fires after the cron secret is regenerated, allowing integrations (e.g. Pro Uptime Kuma sync) to update their stored monitor URL
+- Fixed: created and deleted activity log entries for webhooks and tokens now include the full entity data (name, URL, scope, etc.) in context instead of an empty object
+- Fixed: webhook toggle events now correctly capture old and new `is_enabled` state; webhook, settings, and schema update events capture a full old/new diff
+- Fixed: chain and chain-link CRUD actions (create, update, delete, link add/remove) are now covered by Activity History
+- Improved: Snippets (Pro) added to the Activity History filter list; Activity tab repositioned after External Cron in the navigation
+- DB migration to 1.14.0 — adds `fswa_activity_logs` table; idempotent, safe to run on existing installs
+
 = 1.13.1 — 2026-05-21 =
 - Fixed: Replay and Retry buttons on the single-webhook logs page (`#/webhooks/:id/logs`) did nothing — the events emitted by the table were never handled. Both the row button and the Log Details panel button now work correctly, including the "Execute Now" flow and the replay success dialog
 - Fixed: bumped tested-up-to WordPress version to 7.0
@@ -677,6 +688,9 @@ Yes. Use two webhooks: the first creates the remote resource on payment completi
 - Logging of webhook deliveries
 
 == Upgrade Notice ==
+
+= 1.14.0 =
+Adds Activity History — a persistent audit log of admin and API-token actions with actor identity, structured old/new diffs, and AI prompt capture. Also adds the External Cron admin page (Pro) with a heartbeat chart and monitor status bar, and a new `fswa_cron_token_regenerated` action hook. Database migration runs automatically — adds the `fswa_activity_logs` table. No manual steps required.
 
 = 1.13.1 =
 Fixes Replay and Retry on the single-webhook logs page — both the row button and Log Details panel button were silently dropped. Also bumps tested-up-to to WordPress 7.0. No database changes — no manual steps required.

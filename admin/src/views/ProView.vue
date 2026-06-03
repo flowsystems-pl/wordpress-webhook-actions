@@ -123,11 +123,14 @@ onMounted(loadStatus)
       <Card class="p-6 mb-6">
         <ul class="space-y-3">
           <li v-for="feature in [
+            { text: 'Automation Chains', pro: false },
             { text: 'Reliable webhooks with queue & retries', pro: false },
             { text: 'Delivery logs & replay', pro: false },
             { text: 'Test webhook delivery on demand', pro: false },
             { text: 'Payload mapping', pro: false },
             { text: 'Full REST API with API token authentication', pro: false },
+            { text: 'Activity Log', pro: false },
+            { text: 'External Cron (bypass WP-Cron)', pro: true },
             { text: 'Unlimited conditions per trigger', pro: true },
             { text: 'Condition groups with AND / OR logic', pro: true },
             { text: 'Per-webhook retry limit override', pro: true },
