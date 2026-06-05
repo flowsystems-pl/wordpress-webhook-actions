@@ -147,7 +147,7 @@ onMounted(loadStatus)
         </ul>
       </Card>
 
-      <a href="https://wpwebhooks.org/#pricing" target="_blank" rel="noopener noreferrer">
+      <a href="https://wpwebhooks.org/pricing/" target="_blank" rel="noopener noreferrer">
         <Button class="gap-2">
           <Sparkles class="w-4 h-4" />
           Get Pro
@@ -214,7 +214,7 @@ onMounted(loadStatus)
         <div class="mt-4 space-y-1.5">
           <p class="text-xs text-muted-foreground">
             Don't have a license yet?
-            <a href="https://wpwebhooks.org/#pricing" target="_blank" rel="noopener noreferrer"
+            <a href="https://wpwebhooks.org/pricing/" target="_blank" rel="noopener noreferrer"
                class="underline underline-offset-2 hover:text-foreground transition-colors">
               Get Pro
             </a>

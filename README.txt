@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.14.0
+Stable tag: 1.14.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -36,7 +36,7 @@ Operate WordPress like modern infrastructure — turn any WordPress do_action in
 = Pro features =
 
 - Code Glue — attach PHP snippets to any webhook+trigger (pre-dispatch payload enrichment, post-dispatch side effects)
-- External Cron — replace WP-Cron with Uptime Kuma-based heartbeat monitoring
+- External Cron — replace unreliable visitor-triggered WP-Cron with a managed external pinger, provisioned automatically on license activation. Two modes: plugin queue endpoint (down to 20 s interval, configurable batch size) or WP-Cron endpoint (60 s, covers all WordPress background work). No server crontab or external dashboard — controlled entirely from wp-admin, with a live heartbeat chart and inline error alerts
 - Unlimited conditions per trigger with AND/OR groups
 - Per-webhook retry limit and backoff strategy overrides
 - Dynamic URL templates — `{{ }}` syntax with no custom PHP required
@@ -98,14 +98,8 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 1.14.0 — 2026-06-03 =
-- New: **Activity History** — persistent audit log of every admin and API-token action across webhooks, tokens, settings, logs, queue, schemas, chains, and cron. Each entry records the actor (session user or API token with a name hint), the action type, a structured context diff (old → new values for updates), and a timestamp. Designed to trace automated and AI-assisted changes end-to-end
-- New: **AI prompt and reasoning capture** — REST requests carrying `X-FSWA-Prompt` or `X-FSWA-Reason` headers have those values stored in the activity log context and surfaced in the Activity view as a highlighted card above the change diff; intended for AI agents that perform admin actions via API tokens
-- New: **External Cron page** *(Pro)* — dedicated admin page for managing the external cron trigger: enable/disable toggle, mode selector, configurable interval and batch-size sliders, a live heartbeat chart (line + bar combo), monitor status bar, and an alert banner when the last ping failed or is stale
-- New: `fswa_cron_token_regenerated` action hook — fires after the cron secret is regenerated, allowing integrations (e.g. Pro Uptime Kuma sync) to update their stored monitor URL
-- Fixed: created and deleted activity log entries for webhooks and tokens now include the full entity data (name, URL, scope, etc.) in context instead of an empty object
-- Fixed: webhook toggle events now correctly capture old and new `is_enabled` state; webhook, settings, and schema update events capture a full old/new diff
-- Fixed: chain and chain-link CRUD actions (create, update, delete, link add/remove) are now covered by Activity History
-- Improved: Snippets (Pro) added to the Activity History filter list; Activity tab repositioned after External Cron in the navigation
-- DB migration to 1.14.0 — adds `fswa_activity_logs` table; idempotent, safe to run on existing installs
+= 1.14.1 — 2026-06-05 =
+- Fixed: "Get Pro" links updated to `/pricing/` page
+- Improved: Admin Menu moved to its own settings card
+- Improved: External Cron description expanded in README
 

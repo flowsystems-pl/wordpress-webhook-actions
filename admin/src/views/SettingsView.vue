@@ -111,6 +111,7 @@ const activityRetentionDays = computed({
 })
 
 const savedMenuUnderTools = ref(false)
+const isPlayground = window.location.hostname === 'playground.wordpress.net'
 
 const loadData = async () => {
   loading.value = true
@@ -185,7 +186,7 @@ const saveSettings = async () => {
 
   try {
     await api.settings.update(settings.value)
-    if (menuPositionChanged) {
+    if (menuPositionChanged && !isPlayground) {
       window.location.reload()
       return
     }
@@ -459,12 +460,29 @@ onMounted(loadData)
                 When enabled, logs are exported to JSON files before being deleted.
               </p>
 
-              <div class="flex items-center space-x-2 pt-2">
+            </div>
+
+            <div class="mt-6">
+              <Button :loading="saving" @click="saveSettings">
+                Save Settings
+              </Button>
+            </div>
+          </Card>
+
+          <!-- Admin Menu -->
+          <Card class="p-6">
+            <h3 class="text-lg font-medium mb-4">Admin Menu</h3>
+
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2">
                 <Switch v-model="settings.menu_under_tools" />
                 <Label>Show menu under Tools</Label>
               </div>
               <p class="text-sm text-muted-foreground">
                 Move the admin menu item under Tools instead of the top-level sidebar.
+                <span v-if="isPlayground" class="block mt-1 text-yellow-600">
+                  Page reload is disabled on WordPress Playground — the menu will update on next WP menu item click.
+                </span>
               </p>
             </div>
 
