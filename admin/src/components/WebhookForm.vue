@@ -80,14 +80,21 @@ const loadCredentials = async () => {
 
 onMounted(loadCredentials);
 
-// Keep the two auth inputs mutually exclusive so dispatch is unambiguous.
+// Switch the active auth input without discarding the other one's value —
+// mutual exclusivity is applied at save time (see normalizeAuth), so toggling
+// back and forth keeps whatever the user typed.
 const setAuthMode = (mode) => {
   authMode.value = mode;
-  if (mode === 'vault') {
-    form.value.auth_header = '';
+};
+
+// At save time, only the active mode's value is persisted.
+const normalizeAuth = (data) => {
+  if (authMode.value === 'vault') {
+    data.auth_header = '';
   } else {
-    form.value.auth_credential_id = null;
+    data.auth_credential_id = null;
   }
+  return data;
 };
 
 // radix-vue Select works with string values; proxy to the numeric form field.
@@ -392,6 +399,7 @@ const handleSaveFirstAndContinue = () => {
   data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
   data.custom_headers     = data.custom_headers ?? [];
   data.url_params         = data.url_params ?? [];
+  normalizeAuth(data);
   data.__chain_config     = { enabled: false };
   data.__continue_to_chain = true;
   emit('submit', data);
@@ -431,6 +439,7 @@ const handleSubmit = () => {
     data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
     data.custom_headers     = data.custom_headers ?? [];
     data.url_params         = data.url_params ?? [];
+    normalizeAuth(data);
 
     // Chain config: tells the parent (WebhookEdit) how to sync chain links
     // after the webhook save. When useChainTrigger is OFF and webhook
