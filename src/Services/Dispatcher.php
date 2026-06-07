@@ -526,48 +526,24 @@ class Dispatcher {
     // Header keys that must be redacted before persisting to logs.
     $sensitiveHeaderKeys = ['Authorization'];
 
-    // Vault credential takes precedence over the legacy auth_header.
-    $credentialId = isset($webhook['auth_credential_id']) ? (int) $webhook['auth_credential_id'] : 0;
-    if ($credentialId > 0) {
-      $credential = (new CredentialRepository())->findWithSecret($credentialId);
-      if ($credential) {
-        $secret = (new CredentialCipher())->decrypt((string) ($credential['secret_ciphertext'] ?? ''));
-        if ($secret === null) {
-          // Refuse to send unauthenticated — surface a config error instead.
-          $this->logError(
-            $trigger,
-            $url,
-            'Credential could not be decrypted (check FSWA_SECRET_KEY / WordPress salts).',
-            $webhookId,
-            $payload,
-            null,
-            null,
-            null,
-            $logId,
-            $isTest
-          );
-          do_action('fswa_error', $trigger, $url, 'Credential could not be decrypted.');
-          return ['success' => false, 'shouldRetry' => false];
-        }
-
-        $headerName = $credential['header_name'] ?: 'Authorization';
-        switch ($credential['type']) {
-          case 'basic':
-            $headers['Authorization'] = 'Basic ' . base64_encode($secret);
-            break;
-          case 'api_key':
-          case 'custom':
-            $headers[$headerName]  = $secret;
-            $sensitiveHeaderKeys[] = $headerName;
-            break;
-          case 'bearer':
-          default:
-            $headers['Authorization'] = 'Bearer ' . $secret;
-            break;
-        }
-      }
-    } elseif (!empty($authHeader)) {
-      $headers['Authorization'] = $authHeader;
+    // Resolve auth headers (vault credential, else legacy auth_header). A
+    // referenced-but-undecryptable credential aborts the delivery rather than
+    // sending unauthenticated.
+    if (!$this->applyAuthHeaders($headers, $sensitiveHeaderKeys, $webhook, $authHeader)) {
+      $this->logError(
+        $trigger,
+        $url,
+        'Credential could not be decrypted (check FSWA_SECRET_KEY / WordPress salts).',
+        $webhookId,
+        $payload,
+        null,
+        null,
+        null,
+        $logId,
+        $isTest
+      );
+      do_action('fswa_error', $trigger, $url, 'Credential could not be decrypted.');
+      return ['success' => false, 'shouldRetry' => false];
     }
 
     // Add event identity headers before fswa_headers filter.
@@ -932,6 +908,61 @@ class Dispatcher {
    * @return void
    */
   /**
+   * Resolve the outgoing authorization header(s) for a delivery.
+   *
+   * A vault credential (`auth_credential_id`) takes precedence over the legacy
+   * plaintext `auth_header`. Mutates $headers in place and appends any custom
+   * header name to $sensitiveHeaderKeys so it can be redacted in logs.
+   *
+   * @param array<string, string> $headers             Outgoing headers (mutated).
+   * @param array<int, string>    $sensitiveHeaderKeys  Keys to redact in logs (mutated).
+   * @param array<string, mixed>  $webhook              Webhook config row.
+   * @param string                $authHeader           Legacy plaintext auth header.
+   * @return bool True to proceed; false when a referenced credential cannot be
+   *              decrypted and the delivery must be aborted.
+   */
+  private function applyAuthHeaders(array &$headers, array &$sensitiveHeaderKeys, array $webhook, string $authHeader): bool {
+    $credentialId = isset($webhook['auth_credential_id']) ? (int) $webhook['auth_credential_id'] : 0;
+
+    // No vault credential — fall back to the legacy plaintext header.
+    if ($credentialId <= 0) {
+      if ($authHeader !== '') {
+        $headers['Authorization'] = $authHeader;
+      }
+      return true;
+    }
+
+    $credential = (new CredentialRepository())->findWithSecret($credentialId);
+    if (!$credential) {
+      // Referenced credential no longer exists — deliver without auth.
+      return true;
+    }
+
+    $secret = (new CredentialCipher())->decrypt((string) ($credential['secret_ciphertext'] ?? ''));
+    if ($secret === null) {
+      return false;
+    }
+
+    $headerName = $credential['header_name'] ?: 'Authorization';
+    switch ($credential['type']) {
+      case 'basic':
+        $headers['Authorization'] = 'Basic ' . base64_encode($secret);
+        break;
+      case 'api_key':
+      case 'custom':
+        $headers[$headerName]  = $secret;
+        $sensitiveHeaderKeys[] = $headerName;
+        break;
+      case 'bearer':
+      default:
+        $headers['Authorization'] = 'Bearer ' . $secret;
+        break;
+    }
+
+    return true;
+  }
+
+  /**
    * Redact auth headers before they are persisted to the delivery log, so a
    * decrypted vault secret (or a manual auth_header) never lands in
    * fswa_logs.request_headers. Matching is case-insensitive on the header name.
@@ -947,7 +978,7 @@ class Dispatcher {
 
     $lowerSensitive = array_map('strtolower', $sensitiveKeys);
 
-    foreach ($headers as $key => $value) {
+    foreach (array_keys($headers) as $key) {
       if (in_array(strtolower((string) $key), $lowerSensitive, true)) {
         $headers[$key] = '[redacted]';
       }
