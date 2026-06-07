@@ -50,7 +50,7 @@ class ApiTokensController extends WP_REST_Controller {
           'scope'      => [
             'required' => true,
             'type'     => 'string',
-            'enum'     => ['read', 'operational', 'full'],
+            'enum'     => ['read', 'operational', 'full', 'agent'],
             'default'  => 'read',
           ],
           'expires_at' => [
@@ -140,10 +140,10 @@ class ApiTokensController extends WP_REST_Controller {
       );
     }
 
-    if (!in_array($scope, ['read', 'operational', 'full'], true)) {
+    if (!in_array($scope, ['read', 'operational', 'full', 'agent'], true)) {
       return new WP_Error(
         'rest_invalid_scope',
-        __('Invalid scope. Must be read, operational, or full.', 'flowsystems-webhook-actions'),
+        __('Invalid scope. Must be read, operational, full, or agent.', 'flowsystems-webhook-actions'),
         ['status' => 400]
       );
     }

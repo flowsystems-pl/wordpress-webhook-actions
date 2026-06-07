@@ -12,6 +12,10 @@ class AuthHelper {
   const SCOPE_READ        = 'read';
   const SCOPE_OPERATIONAL = 'operational';
   const SCOPE_FULL        = 'full';
+  // Agent: full write power (CRUD webhooks/credentials) but may NEVER reveal
+  // secret values. Ranks equal to full for write-gating; excluded from
+  // canRevealSecrets(). Intended for the AI assistant token.
+  const SCOPE_AGENT       = 'agent';
 
   /**
    * Dual-auth permission check.
@@ -72,5 +76,29 @@ class AuthHelper {
     }
 
     return $service->tokenHasScope($token, $scope);
+  }
+
+  /**
+   * Whether the current request may see decrypted secrets / the legacy
+   * auth_header in plaintext.
+   *
+   * True only for WP admin sessions or a token whose stored scope is strictly
+   * 'full'. The 'agent' scope is intentionally excluded even though it ranks as
+   * full for write-gating — this is the single chokepoint that keeps secrets
+   * away from the AI assistant token.
+   */
+  public static function canRevealSecrets(WP_REST_Request $request): bool {
+    if (current_user_can('manage_options')) {
+      return true;
+    }
+
+    $service = new ApiTokenService();
+    $token   = $service->validateFromRequest($request);
+
+    if ($token === false) {
+      return false;
+    }
+
+    return ($token['scope'] ?? '') === self::SCOPE_FULL;
   }
 }

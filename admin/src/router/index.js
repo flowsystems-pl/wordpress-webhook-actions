@@ -48,6 +48,11 @@ const routes = [
     component: () => import('@/views/ApiTokensView.vue'),
   },
   {
+    path: '/vault',
+    name: 'Vault',
+    component: () => import('@/views/VaultView.vue'),
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: () => import('@/views/SettingsView.vue'),

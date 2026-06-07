@@ -254,10 +254,11 @@ class WebhookRepository {
         'custom_headers' => !empty($data['custom_headers']) ? wp_json_encode($data['custom_headers']) : null,
         'url_params'     => !empty($data['url_params']) ? wp_json_encode($data['url_params']) : null,
         'auth_header'    => $data['auth_header'] ?? null,
+        'auth_credential_id' => !empty($data['auth_credential_id']) ? (int) $data['auth_credential_id'] : null,
         'is_enabled'     => isset($data['is_enabled']) ? (int) $data['is_enabled'] : 1,
         'is_synchronous' => isset($data['is_synchronous']) ? (int)(bool)$data['is_synchronous'] : 0,
       ],
-      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d']
+      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d']
     );
 
     if (!$result) {
@@ -300,6 +301,11 @@ class WebhookRepository {
     if (array_key_exists('auth_header', $data)) {
       $updateData['auth_header'] = $data['auth_header'] ?: null;
       $format[] = '%s';
+    }
+
+    if (array_key_exists('auth_credential_id', $data)) {
+      $updateData['auth_credential_id'] = !empty($data['auth_credential_id']) ? (int) $data['auth_credential_id'] : null;
+      $format[] = '%d';
     }
 
     if (isset($data['is_enabled'])) {

@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.14.0';
+  private const CURRENT_VERSION = '1.15.0';
 
   /**
    * Run pending migrations
@@ -48,6 +48,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_chains',
       $wpdb->prefix . 'fswa_chain_links',
       $wpdb->prefix . 'fswa_activity_logs',
+      $wpdb->prefix . 'fswa_credentials',
     ];
 
     foreach ($requiredTables as $table) {
@@ -84,6 +85,7 @@ class Migrator {
       '1.12.0' => [self::class, 'migration_1_12_0'],
       '1.13.0' => [self::class, 'migration_1_13_0'],
       '1.14.0' => [self::class, 'migration_1_14_0'],
+      '1.15.0' => [self::class, 'migration_1_15_0'],
     ];
   }
 
@@ -630,6 +632,48 @@ class Migrator {
         ) {$charsetCollate};";
 
     dbDelta($sql);
+  }
+
+  /**
+   * Migration 1.15.0 - Credentials vault: create fswa_credentials table and add
+   * auth_credential_id reference column to webhooks.
+   */
+  public static function migration_1_15_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $credentialsTable = $wpdb->prefix . 'fswa_credentials';
+    $sql              = "CREATE TABLE {$credentialsTable} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            type VARCHAR(20) NOT NULL DEFAULT 'bearer',
+            header_name VARCHAR(255) NOT NULL DEFAULT 'Authorization',
+            secret_ciphertext TEXT NOT NULL,
+            hint VARCHAR(64) NOT NULL DEFAULT '',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_name (name)
+        ) {$charsetCollate};";
+
+    dbDelta($sql);
+
+    // Add auth_credential_id reference to webhooks (guarded ALTER).
+    $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$webhooksTable} LIKE %s",
+      'auth_credential_id'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN auth_credential_id BIGINT UNSIGNED NULL DEFAULT NULL");
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD KEY idx_auth_credential (auth_credential_id)");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
   }
 
   /**

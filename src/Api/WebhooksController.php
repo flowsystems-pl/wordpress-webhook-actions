@@ -155,10 +155,12 @@ class WebhooksController extends WP_REST_Controller {
   }
 
   /**
-   * Strip auth_header for non-full-scope callers and allow extensions to append fields.
+   * Strip auth_header for callers that may not reveal secrets (read/operational
+   * tokens and the agent scope) and allow extensions to append fields.
+   * auth_credential_id is a non-secret reference and is always returned.
    */
   private function prepareWebhook(array $webhook, WP_REST_Request $request): array {
-    if (!AuthHelper::requestHasScope($request, AuthHelper::SCOPE_FULL)) {
+    if (!AuthHelper::canRevealSecrets($request)) {
       $webhook['auth_header'] = __('You don\'t have permissions to see it.', 'flowsystems-webhook-actions');
     }
 
@@ -208,6 +210,7 @@ class WebhooksController extends WP_REST_Controller {
       'name'           => sanitize_text_field($request->get_param('name')),
       'endpoint_url'   => $this->sanitizeTemplateUrl($request->get_param('endpoint_url') ?? ''),
       'auth_header'    => sanitize_text_field($request->get_param('auth_header') ?? ''),
+      'auth_credential_id' => (int) ($request->get_param('auth_credential_id') ?? 0) ?: null,
       'is_enabled'     => (bool) $request->get_param('is_enabled'),
       'triggers'       => $request->get_param('triggers') ?? [],
       'http_method'    => strtoupper(sanitize_text_field($request->get_param('http_method') ?? 'POST')),
@@ -276,6 +279,7 @@ class WebhooksController extends WP_REST_Controller {
         'http_method'  => $webhook['http_method'] ?? null,
         'triggers'     => $webhook['triggers'] ?? [],
         'auth_header'  => $webhook['auth_header'] ?? null,
+        'auth_credential_id' => $webhook['auth_credential_id'] ?? null,
         'is_enabled'   => (bool) ($webhook['is_enabled'] ?? true),
         'is_synchronous' => (bool) ($webhook['is_synchronous'] ?? false),
       ],
@@ -319,6 +323,10 @@ class WebhooksController extends WP_REST_Controller {
 
     if ($request->has_param('auth_header')) {
       $data['auth_header'] = sanitize_text_field($request->get_param('auth_header'));
+    }
+
+    if ($request->has_param('auth_credential_id')) {
+      $data['auth_credential_id'] = (int) ($request->get_param('auth_credential_id') ?? 0) ?: null;
     }
 
     if ($request->has_param('is_enabled')) {
@@ -717,6 +725,11 @@ class WebhooksController extends WP_REST_Controller {
         'auth_header' => [
           'description' => __('Authorization header value.', 'flowsystems-webhook-actions'),
           'type' => 'string',
+          'context' => ['view', 'edit'],
+        ],
+        'auth_credential_id' => [
+          'description' => __('ID of a vault credential to use for authorization. Takes precedence over auth_header.', 'flowsystems-webhook-actions'),
+          'type' => ['integer', 'null'],
           'context' => ['view', 'edit'],
         ],
         'http_method' => [

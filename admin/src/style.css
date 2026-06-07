@@ -145,6 +145,37 @@ textarea {
   color-scheme: dark;
 }
 
+/*
+ * Force form-field text to the theme foreground. The #fswa-app id out-specifies
+ * wp-admin's `.wp-core-ui input { color:#2c3338 }`, which otherwise turns text
+ * black the moment Chrome drops the :-webkit-autofill pseudo on focus/edit.
+ */
+#fswa-app input,
+#fswa-app textarea,
+#fswa-app select {
+  color: hsl(var(--foreground)) !important;
+}
+
+/*
+ * Browser autofill (saved values) paints its own background/text that ignores
+ * background-color. Chrome only lets us cover it with an inset box-shadow and
+ * recolor the text via -webkit-text-fill-color. Scoped to #fswa-app so we don't
+ * touch native wp-admin fields.
+ */
+#fswa-app input:-webkit-autofill,
+#fswa-app input:-webkit-autofill:hover,
+#fswa-app input:-webkit-autofill:focus,
+#fswa-app input:-webkit-autofill:active,
+#fswa-app textarea:-webkit-autofill,
+#fswa-app select:-webkit-autofill {
+  -webkit-text-fill-color: hsl(var(--foreground)) !important;
+  caret-color: hsl(var(--foreground)) !important;
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+  box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+  /* Belt-and-suspenders: delay the UA background swap effectively forever. */
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 .light input[type='time'],
 .light input[type='date'],
 .light input[type='datetime-local'] {

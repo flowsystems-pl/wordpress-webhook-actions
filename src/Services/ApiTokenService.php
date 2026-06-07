@@ -89,10 +89,12 @@ class ApiTokenService {
 
   /**
    * Check if a token row has the required scope.
-   * Hierarchy: full > operational > read
+   * Hierarchy: full = agent > operational > read.
+   * 'agent' ranks equal to 'full' for write-gating, but cannot reveal secrets
+   * (see AuthHelper::canRevealSecrets()).
    */
   public function tokenHasScope(array $token, string $required): bool {
-    $hierarchy = ['read' => 1, 'operational' => 2, 'full' => 3];
+    $hierarchy = ['read' => 1, 'operational' => 2, 'full' => 3, 'agent' => 3];
 
     $tokenLevel    = $hierarchy[$token['scope']] ?? 0;
     $requiredLevel = $hierarchy[$required] ?? 999;

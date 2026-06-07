@@ -6,7 +6,9 @@ defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Repositories\CredentialRepository;
 use FlowSystems\WebhookActions\Services\ConditionEvaluator;
+use FlowSystems\WebhookActions\Services\CredentialCipher;
 use WP_Error;
 
 class Dispatcher {
@@ -521,7 +523,50 @@ class Dispatcher {
       'Content-Type' => 'application/json',
     ];
 
-    if (!empty($authHeader)) {
+    // Header keys that must be redacted before persisting to logs.
+    $sensitiveHeaderKeys = ['Authorization'];
+
+    // Vault credential takes precedence over the legacy auth_header.
+    $credentialId = isset($webhook['auth_credential_id']) ? (int) $webhook['auth_credential_id'] : 0;
+    if ($credentialId > 0) {
+      $credential = (new CredentialRepository())->findWithSecret($credentialId);
+      if ($credential) {
+        $secret = (new CredentialCipher())->decrypt((string) ($credential['secret_ciphertext'] ?? ''));
+        if ($secret === null) {
+          // Refuse to send unauthenticated — surface a config error instead.
+          $this->logError(
+            $trigger,
+            $url,
+            'Credential could not be decrypted (check FSWA_SECRET_KEY / WordPress salts).',
+            $webhookId,
+            $payload,
+            null,
+            null,
+            null,
+            $logId,
+            $isTest
+          );
+          do_action('fswa_error', $trigger, $url, 'Credential could not be decrypted.');
+          return ['success' => false, 'shouldRetry' => false];
+        }
+
+        $headerName = $credential['header_name'] ?: 'Authorization';
+        switch ($credential['type']) {
+          case 'basic':
+            $headers['Authorization'] = 'Basic ' . base64_encode($secret);
+            break;
+          case 'api_key':
+          case 'custom':
+            $headers[$headerName]  = $secret;
+            $sensitiveHeaderKeys[] = $headerName;
+            break;
+          case 'bearer':
+          default:
+            $headers['Authorization'] = 'Bearer ' . $secret;
+            break;
+        }
+      }
+    } elseif (!empty($authHeader)) {
       $headers['Authorization'] = $authHeader;
     }
 
@@ -601,7 +646,7 @@ class Dispatcher {
 
     if (is_wp_error($result)) {
       $errorMessage = $result->get_error_message();
-      $this->logError($trigger, $url, (string) $errorMessage, $webhookId, $payload, null, null, $durationMs, $logId, $isTest, $headers);
+      $this->logError($trigger, $url, (string) $errorMessage, $webhookId, $payload, null, null, $durationMs, $logId, $isTest, $this->redactHeadersForLog($headers, $sensitiveHeaderKeys));
 
       if ($logId !== null) {
         $this->logService->appendAttemptHistory($logId, [
@@ -634,11 +679,12 @@ class Dispatcher {
     $success = $responseCode >= 200 && $responseCode < 300;
     $shouldRetry = !$isTest && !$success && ($responseCode >= 500 || $responseCode === 429);
 
+    $loggableHeaders = $this->redactHeadersForLog($headers, $sensitiveHeaderKeys);
     if ($success) {
-      $this->logSuccess($trigger, $url, $payload, $result, $webhookId, $durationMs, $logId, $isTest, $headers);
+      $this->logSuccess($trigger, $url, $payload, $result, $webhookId, $durationMs, $logId, $isTest, $loggableHeaders);
     } else {
       $errorMessage = sprintf("HTTP %d: %s", $responseCode, (string) $responseBody);
-      $this->logError($trigger, $url, $errorMessage, $webhookId, $payload, $responseCode, $responseBody, $durationMs, $logId, $isTest, $headers);
+      $this->logError($trigger, $url, $errorMessage, $webhookId, $payload, $responseCode, $responseBody, $durationMs, $logId, $isTest, $loggableHeaders);
     }
 
     if ($logId !== null) {
@@ -885,6 +931,31 @@ class Dispatcher {
    * @param int|null $logId Existing log ID to update
    * @return void
    */
+  /**
+   * Redact auth headers before they are persisted to the delivery log, so a
+   * decrypted vault secret (or a manual auth_header) never lands in
+   * fswa_logs.request_headers. Matching is case-insensitive on the header name.
+   *
+   * @param array<string, string>|null $headers
+   * @param array<int, string>         $sensitiveKeys
+   * @return array<string, string>|null
+   */
+  private function redactHeadersForLog(?array $headers, array $sensitiveKeys): ?array {
+    if (empty($headers)) {
+      return $headers;
+    }
+
+    $lowerSensitive = array_map('strtolower', $sensitiveKeys);
+
+    foreach ($headers as $key => $value) {
+      if (in_array(strtolower((string) $key), $lowerSensitive, true)) {
+        $headers[$key] = '[redacted]';
+      }
+    }
+
+    return $headers;
+  }
+
   private function logError(
     string $trigger,
     string $url,

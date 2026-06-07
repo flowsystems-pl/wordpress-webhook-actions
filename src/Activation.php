@@ -44,13 +44,15 @@ class Activation {
             custom_headers TEXT NULL,
             url_params TEXT NULL,
             auth_header VARCHAR(1024) DEFAULT NULL,
+            auth_credential_id BIGINT UNSIGNED NULL DEFAULT NULL,
             is_enabled TINYINT(1) NOT NULL DEFAULT 1,
             is_synchronous TINYINT(1) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY idx_webhook_uuid (webhook_uuid),
-            KEY idx_enabled (is_enabled)
+            KEY idx_enabled (is_enabled),
+            KEY idx_auth_credential (auth_credential_id)
         ) {$charsetCollate};";
 
     dbDelta($sqlWebhooks);
@@ -224,6 +226,8 @@ class Activation {
 
     // Drop tables (order matters for foreign key constraints)
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_credentials");
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_activity_logs");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_chain_links");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_chains");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_api_tokens");
@@ -240,5 +244,6 @@ class Activation {
     delete_option('fswa_log_retention_days');
     delete_option('fswa_archive_logs');
     delete_option('fswa_archived_stats');
+    delete_option('fswa_vault_key');
   }
 }
