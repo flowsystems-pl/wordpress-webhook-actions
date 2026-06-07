@@ -1,10 +1,12 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { Button, Input, Label, Switch, UpgradeBadge, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox, Badge } from '@/components/ui';
-import { Info, Link2, Network } from 'lucide-vue-next';
+import { Info, Link2, Network, ShieldCheck } from 'lucide-vue-next';
+import { RouterLink } from 'vue-router';
 import TriggerSelect from '@/components/TriggerSelect.vue';
 import ChainPicker from '@/components/ChainPicker.vue';
 import KeyValueEditor from '@/components/KeyValueEditor.vue';
+import api from '@/lib/api';
 import { usePro } from '@/composables/usePro';
 import { useSyncWarning } from '@/composables/useSyncWarning';
 import { useChains, useWebhookChainInvolvement } from '@/composables/useChains';
@@ -52,6 +54,7 @@ const form = ref({
   endpoint_url: '',
   http_method: 'POST',
   auth_header: '',
+  auth_credential_id: null,
   custom_headers: [],
   url_params: [],
   is_enabled: true,
@@ -62,6 +65,103 @@ const form = ref({
   backoff_max_delay: '',
   is_synchronous: false,
 });
+
+// Authorization mode: a saved vault credential (preferred) or a manual header.
+const authMode = ref('manual');
+const credentials = ref([]);
+
+const loadCredentials = async () => {
+  try {
+    credentials.value = await api.credentials.list();
+  } catch (e) {
+    credentials.value = [];
+  }
+};
+
+onMounted(loadCredentials);
+
+// Switch the active auth input without discarding the other one's value —
+// mutual exclusivity is applied at save time (see normalizeAuth), so toggling
+// back and forth keeps whatever the user typed.
+const setAuthMode = (mode) => {
+  authMode.value = mode;
+};
+
+// At save time, only the active mode's value is persisted.
+const normalizeAuth = (data) => {
+  if (authMode.value === 'vault') {
+    data.auth_header = '';
+  } else {
+    data.auth_credential_id = null;
+  }
+  return data;
+};
+
+// radix-vue Select works with string values; proxy to the numeric form field.
+const selectedCredentialId = computed({
+  get: () => (form.value.auth_credential_id != null ? String(form.value.auth_credential_id) : undefined),
+  set: (val) => { form.value.auth_credential_id = val ? Number(val) : null; },
+});
+
+// ── Migrate a manual header into the vault ──────────────────────────────────
+const showSaveToVaultDialog = ref(false);
+const vaultSaveName = ref('');
+const vaultSaveError = ref(null);
+const vaultSaving = ref(false);
+
+const openSaveToVault = () => {
+  vaultSaveError.value = null;
+  vaultSaveName.value = (form.value.name ? `${form.value.name} auth` : 'Webhook auth');
+  showSaveToVaultDialog.value = true;
+};
+
+const confirmSaveToVault = async () => {
+  const raw = (form.value.auth_header || '').trim();
+  if (!raw) {
+    vaultSaveError.value = 'Enter an Authorization header value first.';
+    return;
+  }
+  if (!vaultSaveName.value.trim()) {
+    vaultSaveError.value = 'Give this credential a name.';
+    return;
+  }
+
+  // Bearer is the common case and round-trips cleanly; everything else
+  // (incl. Basic) is stored verbatim as a custom Authorization value.
+  let payload;
+  if (/^Bearer\s+/i.test(raw)) {
+    payload = { name: vaultSaveName.value.trim(), type: 'bearer', secret: raw.replace(/^Bearer\s+/i, '') };
+  } else {
+    payload = { name: vaultSaveName.value.trim(), type: 'custom', header_name: 'Authorization', secret: raw };
+  }
+
+  vaultSaving.value = true;
+  vaultSaveError.value = null;
+  try {
+    const created = await api.credentials.create(payload);
+    await loadCredentials();
+    form.value.auth_credential_id = Number(created.id);
+    form.value.auth_header = '';
+    authMode.value = 'vault';
+
+    // On an existing webhook, persist the assignment immediately so the
+    // webhook actually references the new credential (and drops the plaintext
+    // header) without requiring a separate save.
+    const webhookId = props.webhook?.id;
+    if (webhookId) {
+      await api.webhooks.update(webhookId, {
+        auth_credential_id: Number(created.id),
+        auth_header: '',
+      });
+    }
+
+    showSaveToVaultDialog.value = false;
+  } catch (e) {
+    vaultSaveError.value = e.message;
+  } finally {
+    vaultSaving.value = false;
+  }
+};
 
 const useChainTrigger = ref(false);
 const chainConfig = ref({
@@ -91,6 +191,7 @@ watch(() => props.webhook, async (webhook) => {
       endpoint_url:       webhook.endpoint_url || '',
       http_method:        webhook.http_method || 'POST',
       auth_header:        webhook.auth_header || '',
+      auth_credential_id: webhook.auth_credential_id != null ? Number(webhook.auth_credential_id) : null,
       custom_headers:     webhook.custom_headers || [],
       url_params:         webhook.url_params || [],
       is_enabled:         webhook.is_enabled ?? true,
@@ -101,6 +202,8 @@ watch(() => props.webhook, async (webhook) => {
       backoff_max_delay:  webhook.backoff_max_delay != null ? String(webhook.backoff_max_delay) : '',
       is_synchronous:     webhook.is_synchronous ?? false,
     };
+
+    authMode.value = form.value.auth_credential_id ? 'vault' : 'manual';
 
     useChainTrigger.value = hasChainTriggers;
 
@@ -296,6 +399,7 @@ const handleSaveFirstAndContinue = () => {
   data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
   data.custom_headers     = data.custom_headers ?? [];
   data.url_params         = data.url_params ?? [];
+  normalizeAuth(data);
   data.__chain_config     = { enabled: false };
   data.__continue_to_chain = true;
   emit('submit', data);
@@ -335,6 +439,7 @@ const handleSubmit = () => {
     data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
     data.custom_headers     = data.custom_headers ?? [];
     data.url_params         = data.url_params ?? [];
+    normalizeAuth(data);
 
     // Chain config: tells the parent (WebhookEdit) how to sync chain links
     // after the webhook save. When useChainTrigger is OFF and webhook
@@ -426,19 +531,113 @@ const handleSubmit = () => {
       </Select>
     </div>
 
-    <!-- Auth Header -->
-    <div class="space-y-2 border-t pt-5">
-      <Label for="auth_header">Authorization Header (optional)</Label>
-      <Input
-        id="auth_header"
-        v-model="form.auth_header"
-        placeholder="Bearer your_token_goes_here"
-      />
-      <p class="text-sm text-muted-foreground break-all md:break-normal">
-        Value for the Authorization header (e.g., "Bearer your_token_goes_here"
-        or "Basic your_encoded_base64(username:password)")
-      </p>
+    <!-- Authorization -->
+    <div class="space-y-3 border-t pt-5">
+      <Label>Authorization (optional)</Label>
+
+      <div class="flex gap-2">
+        <Button
+          type="button"
+          size="sm"
+          :variant="authMode === 'vault' ? 'default' : 'outline'"
+          @click="setAuthMode('vault')"
+        >
+          <ShieldCheck class="mr-1.5 h-4 w-4" />
+          Saved credential
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          :variant="authMode === 'manual' ? 'default' : 'outline'"
+          @click="setAuthMode('manual')"
+        >
+          Manual header
+        </Button>
+      </div>
+
+      <!-- Vault mode -->
+      <template v-if="authMode === 'vault'">
+        <div v-if="credentials.length > 0" class="space-y-2">
+          <Select v-model="selectedCredentialId">
+            <SelectTrigger>
+              <SelectValue placeholder="Select a saved credential" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="cred in credentials" :key="cred.id" :value="String(cred.id)">
+                <div>
+                  <div class="font-medium">{{ cred.name }}</div>
+                  <div class="text-xs text-muted-foreground font-mono">{{ cred.hint }}</div>
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p class="text-sm text-muted-foreground">
+            The secret is resolved securely at delivery time and never exposed.
+            Manage credentials in the
+            <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>.
+          </p>
+        </div>
+        <p v-else class="text-sm text-muted-foreground">
+          No saved credentials yet. Add one in the
+          <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>,
+          then select it here.
+        </p>
+      </template>
+
+      <!-- Manual mode -->
+      <template v-else>
+        <div class="flex gap-2">
+          <Input
+            id="auth_header"
+            v-model="form.auth_header"
+            placeholder="Bearer your_token_goes_here"
+            class="flex-1"
+          />
+          <Button
+            v-if="form.auth_header"
+            type="button"
+            variant="outline"
+            @click="openSaveToVault"
+            title="Move this value into the encrypted Credentials Vault"
+          >
+            <ShieldCheck class="mr-1.5 h-4 w-4" />
+            Save to vault
+          </Button>
+        </div>
+        <p class="text-sm text-muted-foreground break-all md:break-normal">
+          Value for the Authorization header (e.g., "Bearer your_token_goes_here"
+          or "Basic your_encoded_base64(username:password)"). For better security,
+          store secrets in the
+          <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>
+          instead.
+        </p>
+      </template>
     </div>
+
+    <!-- Save manual header to vault dialog -->
+    <Dialog
+      :open="showSaveToVaultDialog"
+      title="Save credential to vault"
+      description="This moves the Authorization value into the encrypted vault and references it by name. The webhook keeps working unchanged."
+      @close="showSaveToVaultDialog = false"
+    >
+      <div class="space-y-4">
+        <div v-if="vaultSaveError" class="text-sm text-destructive">{{ vaultSaveError }}</div>
+        <div class="space-y-1.5">
+          <Label for="vault-save-name">Credential name</Label>
+          <Input id="vault-save-name" v-model="vaultSaveName" placeholder="e.g. HubSpot PAT" @keyup.enter="confirmSaveToVault" />
+        </div>
+        <p class="text-xs text-muted-foreground">
+          After saving, the value is encrypted at rest and never shown again.
+        </p>
+      </div>
+      <template #footer>
+        <Button variant="outline" @click="showSaveToVaultDialog = false" :disabled="vaultSaving">Cancel</Button>
+        <Button @click="confirmSaveToVault" :disabled="vaultSaving">
+          {{ vaultSaving ? 'Saving…' : 'Save & use credential' }}
+        </Button>
+      </template>
+    </Dialog>
 
     <!-- Custom Request Headers -->
     <div class="space-y-2 border-t pt-5">

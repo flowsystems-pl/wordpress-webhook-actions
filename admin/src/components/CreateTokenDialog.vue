@@ -20,6 +20,7 @@ const scopeOptions = [
   { value: 'read', label: 'Read', description: 'View webhooks, logs, queue, health, triggers, schemas' },
   { value: 'operational', label: 'Operational', description: 'Read + toggle webhooks, retry/replay logs, execute queue jobs' },
   { value: 'full', label: 'Full', description: 'Operational + create/update/delete webhooks, schemas, queue jobs' },
+  { value: 'agent', label: 'Agent (AI)', description: 'Full write power, but can never reveal auth headers or vault secrets' },
 ]
 
 const reset = () => {

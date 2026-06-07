@@ -178,6 +178,15 @@ export const api = {
     updateExpiry: (id, expiresAt) => patch(`tokens/${id}`, { expires_at: expiresAt }),
     delete: (id) => del(`tokens/${id}`),
   },
+  credentials: {
+    list: () => get('credentials'),
+    get: (id) => get(`credentials/${id}`),
+    create: (data) => post('credentials', data),
+    update: (id, data) => put(`credentials/${id}`, data),
+    delete: (id, force = false) => del(`credentials/${id}`, force ? { force: true } : {}),
+    keyStatus: () => get('credentials/key-status'),
+    reencrypt: () => post('credentials/reencrypt'),
+  },
   pro: {
     status: () => get('pro/status'),
     activatePlugin: () => post('pro/activate-plugin'),

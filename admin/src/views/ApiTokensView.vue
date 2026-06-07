@@ -30,6 +30,7 @@ const deleting = ref(false)
 
 const scopeBadgeVariant = (scope) => {
   if (scope === 'full') return 'destructive'
+  if (scope === 'agent') return 'default'
   if (scope === 'operational') return 'warning'
   return 'secondary'
 }
@@ -247,6 +248,7 @@ onMounted(loadTokens)
         <li><Badge variant="secondary" class="mr-2">read</Badge>GET webhooks, logs, queue, health, triggers, schemas</li>
         <li><Badge variant="warning" class="mr-2">operational</Badge>Read + toggle webhooks, retry/replay logs, execute/retry queue jobs</li>
         <li><Badge variant="destructive" class="mr-2">full</Badge>Operational + create/update/delete webhooks, schemas, and queue jobs</li>
+        <li><Badge variant="default" class="mr-2">agent</Badge>Full write power for AI assistants — but can never reveal auth headers or vault secrets</li>
       </ul>
     </div>
 

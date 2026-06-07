@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.14.1
+Stable tag: 1.15.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -27,10 +27,11 @@ Operate WordPress like modern infrastructure — turn any WordPress do_action in
 - HTTP method, custom headers, and URL query parameters per webhook
 - Dynamic endpoint URLs — `{{ field.path }}` placeholders resolved at dispatch time (free via `fswa_webhook_url` filter)
 - Webhook Chains — wire 2xx completions to downstream webhooks with full observability
+- Credentials Vault — store reusable auth secrets (Bearer, Basic, API key, custom) encrypted at rest; reference them from webhooks instead of pasting raw Authorization headers. Secrets are write-only over the API — never returned, only a masked hint
 - Activity History — persistent audit log of every admin and API-token action
 - Built-in CF7 and IvyForms integrations — structured payloads, no extra plugins
 - Action Scheduler auto-detection — more reliable delivery on high-traffic sites
-- Full REST API with scoped API token authentication (`read` / `operational` / `full`)
+- Full REST API with scoped API token authentication (`read` / `operational` / `full` / `agent`) — the `agent` scope grants full write access for AI assistants while never exposing stored secrets
 - Developer extensibility — 16 filters and 7 action hooks ([reference](https://wpwebhooks.org/docs/))
 
 = Pro features =
@@ -93,13 +94,18 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 9. Conditional webhook dispatch — conditions editor
 10. Test webhook drawer — send a test delivery and inspect request details inline
 11. Webhook Chains — pick an existing chain or create a new one, then select which upstream webhooks should fire this one on their 2xx response
+12. Credentials Vault — store reusable authentication secrets (Bearer, Basic, API key, custom) encrypted at rest and reference them from webhooks instead of pasting raw Authorization headers
 
 == Changelog ==
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 1.14.1 — 2026-06-05 =
-- Fixed: "Get Pro" links updated to `/pricing/` page
-- Improved: Admin Menu moved to its own settings card
-- Improved: External Cron description expanded in README
+= 1.15.0 — 2026-06-07 =
+- New: Credentials Vault — store reusable authentication secrets (Bearer token, Basic auth, API key, custom header) encrypted at rest with AES-256-GCM, and reference them from webhooks via a saved credential instead of a raw Authorization header
+- New: Write-only secrets — vault values are never returned by the REST API; only a masked hint is shown. Decrypted only at dispatch time to build the outgoing header
+- New: `agent` API token scope — full write access (create/update/delete webhooks and credentials) for AI assistants, but can never reveal auth headers or vault secrets
+- New: `FSWA_SECRET_KEY` wp-config constant (optional) — move the encryption key out of the database for stronger protection, with a one-click in-app migration that re-encrypts existing credentials and removes the database key
+- New: "Save to vault" action on the webhook form — migrate an existing manual Authorization header into the vault in one step
+- Improved: Resolved Authorization/custom auth headers are redacted in delivery logs
+- Developer: New REST endpoints under `/fswa/v1/credentials` (CRUD, `key-status`, `reencrypt`); webhooks accept an `auth_credential_id` reference
 
