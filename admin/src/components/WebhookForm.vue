@@ -136,6 +136,18 @@ const confirmSaveToVault = async () => {
     form.value.auth_credential_id = Number(created.id);
     form.value.auth_header = '';
     authMode.value = 'vault';
+
+    // On an existing webhook, persist the assignment immediately so the
+    // webhook actually references the new credential (and drops the plaintext
+    // header) without requiring a separate save.
+    const webhookId = props.webhook?.id;
+    if (webhookId) {
+      await api.webhooks.update(webhookId, {
+        auth_credential_id: Number(created.id),
+        auth_header: '',
+      });
+    }
+
     showSaveToVaultDialog.value = false;
   } catch (e) {
     vaultSaveError.value = e.message;
