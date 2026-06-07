@@ -94,6 +94,7 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 9. Conditional webhook dispatch — conditions editor
 10. Test webhook drawer — send a test delivery and inspect request details inline
 11. Webhook Chains — pick an existing chain or create a new one, then select which upstream webhooks should fire this one on their 2xx response
+12. Credentials Vault — store reusable authentication secrets (Bearer, Basic, API key, custom) encrypted at rest and reference them from webhooks instead of pasting raw Authorization headers
 
 == Changelog ==
 
