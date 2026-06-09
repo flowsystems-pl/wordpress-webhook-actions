@@ -15,13 +15,14 @@ use FlowSystems\WebhookActions\Services\Scheduler;
 use FlowSystems\WebhookActions\Integrations\IntegrationLoader;
 
 class App {
-  const VERSION = '1.1.0';
+  /** Plugin version — single source of truth is FSWA_VERSION in the main file. */
+  const VERSION = FSWA_VERSION;
   const SLUG = 'flowsystems-webhook-actions';
 
   public static string $path = '';
   public static string $url = '';
 
-  private static $_instance;
+  private static ?self $_instance = null;
 
   public static function instance(): void {
     if (null === self::$_instance) {
