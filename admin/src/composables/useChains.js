@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { api } from '../lib/api'
+import { __ } from '@/i18n'
 
 const chains = ref([])
 const loading = ref(false)
@@ -14,7 +15,7 @@ async function fetchChains(force = false) {
     try {
       chains.value = await api.chains.list()
     } catch (e) {
-      error.value = e.message || 'Failed to fetch chains'
+      error.value = e.message || __('Failed to fetch chains')
       chains.value = []
     } finally {
       loading.value = false

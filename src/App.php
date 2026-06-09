@@ -49,6 +49,10 @@ class App {
    * @return void
    */
   public function init(): void {
+    // Load translations. Hooked on `init` to satisfy WP 6.7+ just-in-time loading
+    // expectations (calling earlier triggers a _doing_it_wrong notice).
+    add_action('init', [$this, 'loadTextdomain']);
+
     // Register custom cron schedules (only needed when Action Scheduler is not active)
     if (!Scheduler::hasActionScheduler()) {
       add_filter('cron_schedules', [$this, 'registerCronSchedules']);
@@ -77,6 +81,17 @@ class App {
     // Schedule queue processor and cleanup if not already scheduled.
     // Deferred to `init` so Action Scheduler is fully initialized before we call as_* functions.
     add_action('init', [$this, 'ensureScheduled'], 1);
+  }
+
+  /**
+   * Load the plugin text domain so translations resolve.
+   */
+  public function loadTextdomain(): void {
+    load_plugin_textdomain(
+      'flowsystems-webhook-actions',
+      false,
+      dirname(plugin_basename(FSWA_FILE)) . '/languages'
+    );
   }
 
   /**

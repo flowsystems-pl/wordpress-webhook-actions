@@ -1,0 +1,2041 @@
+# Copyright (C) 2026 Mateusz Skorupa
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Webhook Actions by Flow Systems 1.15.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-09T22:30:39+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: flowsystems-webhook-actions\n"
+"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && "
+"(n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dh %2$dm"
+msgstr "%1$dh %2$dm"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dm %2$ds"
+msgstr "%1$dm %2$ds"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — runs all WordPress scheduled tasks. "
+"Min interval: 60s. %1$sDISABLE_WP_CRON%2$s is added to "
+"%1$swp-config.php%2$s automatically."
+msgstr ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — uruchamia wszystkie zaplanowane "
+"zadania WordPress. Min. interwał: 60 s. %1$sDISABLE_WP_CRON%2$s jest "
+"automatycznie dodawane do %1$swp-config.php%2$s."
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — processes only the webhook "
+"queue. Min interval: 20s."
+msgstr ""
+"%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — przetwarza tylko kolejkę "
+"webhooków. Min. interwał: 20 s."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s is active — WP-Cron auto-spawn is disabled."
+msgstr ""
+"%1$sDISABLE_WP_CRON%2$s jest aktywne — automatyczne uruchamianie WP-Cron "
+"jest wyłączone."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s will be written to %1$swp-config.php%2$s on save."
+msgstr ""
+"%1$sDISABLE_WP_CRON%2$s zostanie zapisane w %1$swp-config.php%2$s podczas "
+"zapisywania."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFSWA_SECRET_KEY%2$s is defined and your credentials still work, but a "
+"copy of the old key remains in the database — so you don't yet get the full "
+"benefit. Re-encrypt now to seal every secret with the wp-config key and "
+"delete the database key."
+msgstr ""
+"%1$sFSWA_SECRET_KEY%2$s jest zdefiniowany i Twoje poświadczenia nadal "
+"działają, ale kopia starego klucza pozostaje w bazie danych — więc nie "
+"korzystasz jeszcze z pełnej ochrony. Zaszyfruj ponownie, aby zabezpieczyć "
+"każdy sekret kluczem z wp-config i usunąć klucz z bazy danych."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFormat:%2$s any long, random, secret string (64+ characters "
+"recommended). Generate one from the %3$sWordPress salt generator%4$s or "
+"with %5$swp_generate_password(64, true, true)%6$s."
+msgstr ""
+"%1$sFormat:%2$s dowolny długi, losowy, tajny ciąg (zalecane 64+ znaków). "
+"Wygeneruj go za pomocą %3$sgeneratora soli WordPress%4$s lub funkcji "
+"%5$swp_generate_password(64, true, true)%6$s."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sKeep it stable &amp; backed up:%2$s don't change or lose this value "
+"once credentials are sealed with it, or they become unrecoverable."
+msgstr ""
+"%1$sUtrzymuj go stabilnie i twórz kopie zapasowe:%2$s nie zmieniaj ani nie "
+"trać tej wartości po zabezpieczeniu nią poświadczeń, w przeciwnym razie "
+"staną się nieodzyskiwalne."
+
+#: admin/src/views/ProView.vue
+msgid "%1$sPriority support%2$s — Pro subscribers get a direct response via email."
+msgstr ""
+"%1$sPriorytetowe wsparcie%2$s — subskrybenci Pro otrzymują bezpośrednią "
+"odpowiedź e-mailem."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sSafe to add anytime:%2$s existing credentials keep working immediately. "
+"After adding it, return here and click the %3$sRe-encrypt%4$s button that "
+"appears to finish the move and remove the database key."
+msgstr ""
+"%1$sMożna dodać w każdej chwili:%2$s istniejące poświadczenia od razu "
+"działają. Po dodaniu wróć tutaj i kliknij przycisk %3$sZaszyfruj "
+"ponownie%4$s, który się pojawi, aby dokończyć przeniesienie i usunąć klucz "
+"z bazy danych."
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$swp-config.php%2$s is not writable. Add this line manually before the "
+"“That’s all” comment: %3$sdefine( 'DISABLE_WP_CRON', true );%4$s"
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "%d credential cannot be decrypted with the current key."
+msgid_plural "%d credentials cannot be decrypted with the current key."
+msgstr[0] "%d poświadczenia nie można odszyfrować bieżącym kluczem."
+msgstr[1] "%d poświadczeń nie można odszyfrować bieżącym kluczem."
+msgstr[2] "%d poświadczeń nie można odszyfrować bieżącym kluczem."
+
+#: admin/src/views/ActivityView.vue
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d dzień"
+msgstr[1] "%d dni"
+msgstr[2] "%d dni"
+
+#: admin/src/views/ActivityView.vue
+msgid "%d entry"
+msgid_plural "%d entries"
+msgstr[0] "%d wpis"
+msgstr[1] "%d wpisy"
+msgstr[2] "%d wpisów"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d link will be removed"
+msgid_plural "%d links will be removed"
+msgstr[0] "%d połączenie zostanie usunięte"
+msgstr[1] "%d połączenia zostaną usunięte"
+msgstr[2] "%d połączeń zostanie usuniętych"
+
+#: admin/src/views/LogsList.vue
+msgid "%d selected"
+msgstr "%d zaznaczonych"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d webhook"
+msgid_plural "%d webhooks"
+msgstr[0] "%d webhook"
+msgstr[1] "%d webhooki"
+msgstr[2] "%d webhooków"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dh"
+msgstr "%dh"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dm"
+msgstr "%dm"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%ds"
+msgstr "%ds"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "%s…"
+msgstr "%s…"
+
+#: admin/src/views/ProView.vue
+msgid "(local, not counted)"
+msgstr "(lokalna, nie wliczana)"
+
+#: src/Api/ChainsController.php:134
+#: src/Api/ChainsController.php:167
+msgid "A chain with that name already exists."
+msgstr "Łańcuch o tej nazwie już istnieje."
+
+#: src/Api/CredentialsController.php:237
+#: src/Api/CredentialsController.php:286
+msgid "A credential with this name already exists."
+msgstr "Poświadczenie o tej nazwie już istnieje."
+
+#: admin/src/views/VaultView.vue
+msgid "A named header such as X-API-Key"
+msgstr "Nazwany nagłówek, taki jak X-API-Key"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid ""
+"A new delivery attempt has been queued. The result will appear in this "
+"log's attempt history on the next cron run."
+msgstr ""
+"Nowa próba dostarczenia została dodana do kolejki. Wynik pojawi się w "
+"historii prób tego wpisu po następnym uruchomieniu crona."
+
+#: src/Api/WebhooksController.php:529
+msgid "A payload object is required for custom source."
+msgstr ""
+
+#: src/Api/CredentialsController.php:400
+msgid "A secret value is required."
+msgstr "Wartość sekretu jest wymagana."
+
+#: src/Api/ChainsController.php:226
+msgid "A webhook cannot trigger itself."
+msgstr "Webhook nie może wyzwolić sam siebie."
+
+#: admin/src/views/ActivityView.vue
+msgid "AI reasoning"
+msgstr "Rozumowanie AI"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue
+msgid "API Tokens"
+msgstr "Tokeny API"
+
+#: admin/src/views/VaultView.vue
+msgid "API key (custom header)"
+msgstr "Klucz API (własny nagłówek)"
+
+#: src/Api/ApiTokensController.php:199
+#: src/Api/ApiTokensController.php:245
+#: src/Api/ApiTokensController.php:269
+msgid "API token not found."
+msgstr "Nie znaleziono tokena API."
+
+#: admin/src/views/ActivityView.vue
+msgid "Action"
+msgstr "Akcja"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Actions"
+msgstr "Akcje"
+
+#: admin/src/views/ProView.vue
+msgid "Activate %1$sWebhook Actions Pro%2$s to continue."
+msgstr "Aktywuj %1$sWebhook Actions Pro%2$s, aby kontynuować."
+
+#: admin/src/views/ProView.vue
+msgid "Activate License"
+msgstr "Aktywuj licencję"
+
+#: admin/src/views/ProView.vue
+msgid "Activate Plugin"
+msgstr "Aktywuj wtyczkę"
+
+#: admin/src/views/ProView.vue
+msgid "Activating…"
+msgstr "Aktywowanie…"
+
+#: admin/src/views/ExternalCronView.vue admin/src/views/ProView.vue
+msgid "Active"
+msgstr "Aktywna"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Activity"
+msgstr "Aktywność"
+
+#: admin/src/views/ProView.vue
+msgid "Activity Log"
+msgstr "Dziennik aktywności"
+
+#: admin/src/views/ActivityView.vue
+msgid "Activity entries older than %d day have been deleted."
+msgid_plural "Activity entries older than %d days have been deleted."
+msgstr[0] "Usunięto wpisy aktywności starsze niż %d dzień."
+msgstr[1] "Usunięto wpisy aktywności starsze niż %d dni."
+msgstr[2] "Usunięto wpisy aktywności starsze niż %d dni."
+
+#: src/Api/ActivityLogController.php:54
+msgid "Activity log entry ID."
+msgstr ""
+
+#: src/Api/ActivityLogController.php:120
+msgid "Activity log entry not found."
+msgstr "Nie znaleziono wpisu dziennika aktywności."
+
+#: admin/src/views/ActivityView.vue
+msgid "Actor"
+msgstr "Wykonawca"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Add Webhook"
+msgstr "Dodaj webhook"
+
+#: admin/src/views/VaultView.vue
+msgid "Add a credential to securely reuse it across webhooks."
+msgstr "Dodaj poświadczenie, aby bezpiecznie używać go w wielu webhookach."
+
+#: admin/src/views/VaultView.vue
+msgid "Add first credential"
+msgstr "Dodaj pierwsze poświadczenie"
+
+#: admin/src/views/ActivityView.vue
+msgid "Admin and API action history"
+msgstr "Historia działań administratora i API"
+
+#: admin/src/views/ProView.vue
+msgid "Agency"
+msgstr "Agency"
+
+#: admin/src/views/ActivityView.vue
+msgid "All actions"
+msgstr "Wszystkie akcje"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "All chains"
+msgstr "Wszystkie łańcuchy"
+
+#: src/Api/SettingsController.php:200
+msgid "All logs have been cleared."
+msgstr "Wszystkie dzienniki zostały wyczyszczone."
+
+#: admin/src/views/LogsList.vue
+msgid "All statuses"
+msgstr "Wszystkie statusy"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"An %1$sagent%2$s API token can assign credentials to webhooks but can never "
+"read their values."
+msgstr ""
+"Token API %1$sagent%2$s może przypisywać poświadczenia do webhooków, ale "
+"nigdy nie może odczytać ich wartości."
+
+#: src/Api/LogsController.php:110
+msgid "Array of log IDs to retry."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "Attempt %1$d/%2$d"
+msgstr "Próba %1$d/%2$d"
+
+#: src/Api/AuthHelper.php:42
+msgid ""
+"Authentication required. Provide a valid API token via X-FSWA-Token header, "
+"Authorization: Bearer token, or api_token query parameter."
+msgstr ""
+
+#: src/Api/WebhooksController.php:726
+msgid "Authorization header value."
+msgstr "Wartość nagłówka Authorization."
+
+#: admin/src/views/VaultView.vue
+msgid "Authorization: Basic <base64(user:pass)> — incl. WP Application Passwords"
+msgstr "Authorization: Basic <base64(user:pass)> — w tym hasła aplikacji WP"
+
+#: admin/src/views/ProView.vue
+msgid "Automation Chains"
+msgstr "Łańcuchy automatyzacji"
+
+#: admin/src/views/WebhookEdit.vue admin/src/views/WebhookLogs.vue
+msgid "Back to webhooks"
+msgstr "Powrót do webhooków"
+
+#: admin/src/views/VaultView.vue
+msgid "Basic auth (user + password)"
+msgstr "Uwierzytelnianie Basic (użytkownik + hasło)"
+
+#: src/Api/CredentialsController.php:389
+msgid "Basic auth requires a username and password."
+msgstr "Uwierzytelnianie Basic wymaga nazwy użytkownika i hasła."
+
+#: admin/src/views/VaultView.vue
+msgid "Bearer token (PAT)"
+msgstr "Token Bearer (PAT)"
+
+#: src/Api/ChainsController.php:223
+msgid "Both source_webhook_id and target_webhook_id are required."
+msgstr "Wymagane są zarówno source_webhook_id, jak i target_webhook_id."
+
+#: admin/src/views/ProView.vue
+msgid "Business"
+msgstr "Business"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"By default the encryption key is generated and stored in the database. For "
+"stronger protection — so a database-only dump can't decrypt secrets — move "
+"the key into %1$swp-config.php%2$s:"
+msgstr ""
+"Domyślnie klucz szyfrowania jest generowany i przechowywany w bazie danych. "
+"Aby uzyskać silniejszą ochronę — tak, by zrzut samej bazy danych nie "
+"odszyfrował sekretów — przenieś klucz do %1$swp-config.php%2$s:"
+
+#: admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: src/Api/QueueController.php:335
+msgid "Cannot delete a job that is currently being processed."
+msgstr "Nie można usunąć zadania, które jest aktualnie przetwarzane."
+
+#: admin/src/views/QueueView.vue
+msgid "Chain link #%1$s — %2$s"
+msgstr "Połączenie łańcucha #%1$s — %2$s"
+
+#: admin/src/views/QueueView.vue
+msgid "Chain link #%s (deleted)"
+msgstr "Połączenie łańcucha #%s (usunięte)"
+
+#: src/Api/ChainsController.php:255
+msgid "Chain link not found."
+msgstr "Nie znaleziono połączenia łańcucha."
+
+#: admin/src/views/WebhooksList.vue
+msgid "Chain name"
+msgstr "Nazwa łańcucha"
+
+#: src/Api/ChainsController.php:131
+#: src/Api/ChainsController.php:163
+msgid "Chain name is required."
+msgstr "Nazwa łańcucha jest wymagana."
+
+#: src/Api/ChainsController.php:117
+#: src/Api/ChainsController.php:156
+#: src/Api/ChainsController.php:196
+#: src/Api/ChainsController.php:217
+msgid "Chain not found."
+msgstr "Nie znaleziono łańcucha."
+
+#: admin/src/views/ActivityView.vue
+msgid "Chains"
+msgstr "Łańcuchy"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Change expiry"
+msgstr "Zmień datę wygaśnięcia"
+
+#: admin/src/views/ActivityView.vue
+msgid "Changes"
+msgstr "Zmiany"
+
+#: admin/src/views/ActivityView.vue
+msgid "Clear filters"
+msgstr "Wyczyść filtry"
+
+#: admin/src/views/LogsList.vue
+msgid "Clear selection"
+msgstr "Wyczyść zaznaczenie"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Close"
+msgstr "Zamknij"
+
+#: src/Api/TriggersController.php:228
+msgid "Comments"
+msgstr ""
+
+#: admin/src/views/ProView.vue
+msgid "Community support forum"
+msgstr "Forum wsparcia społeczności"
+
+#: src/Api/SchemasController.php:259
+msgid "Condition groups require a Pro license."
+msgstr "Grupy warunków wymagają licencji Pro."
+
+#: admin/src/views/ProView.vue
+msgid "Condition groups with AND / OR logic"
+msgstr "Grupy warunków z logiką AND / OR"
+
+#: src/Api/LogsController.php:404
+msgid "Conditions are not met with current settings — event would be skipped."
+msgstr ""
+"Warunki nie są spełnione przy obecnych ustawieniach — zdarzenie zostałoby "
+"pominięte."
+
+#: admin/src/views/QueueView.vue
+msgid "Copy Event UUID"
+msgstr "Kopiuj UUID zdarzenia"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy URL"
+msgstr "Kopiuj URL"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy X-Webhook-Id"
+msgstr "Kopiuj X-Webhook-Id"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy scheduled time"
+msgstr "Kopiuj zaplanowany czas"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy trigger name"
+msgstr "Kopiuj nazwę wyzwalacza"
+
+#: src/Api/QueueController.php:270
+msgid "Could not lock job for processing."
+msgstr "Nie udało się zablokować zadania do przetworzenia."
+
+#: admin/src/views/WebhookEdit.vue
+msgid "Create Webhook"
+msgstr "Utwórz webhook"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create a token to enable programmatic API access."
+msgstr "Utwórz token, aby umożliwić programowy dostęp do API."
+
+#: admin/src/views/VaultView.vue
+msgid "Create credential"
+msgstr "Utwórz poświadczenie"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create first token"
+msgstr "Utwórz pierwszy token"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Create your first webhook"
+msgstr "Utwórz swój pierwszy webhook"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Created"
+msgstr "Utworzono"
+
+#: src/Api/WebhooksController.php:785
+msgid "Creation date."
+msgstr ""
+
+#: src/Api/CredentialsController.php:229
+#: src/Api/CredentialsController.php:283
+msgid "Credential name is required."
+msgstr "Nazwa poświadczenia jest wymagana."
+
+#: src/Api/CredentialsController.php:431
+msgid "Credential not found."
+msgstr "Nie znaleziono poświadczenia."
+
+#: admin/src/App.vue admin/src/views/VaultView.vue
+msgid "Credentials Vault"
+msgstr "Sejf poświadczeń"
+
+#: admin/src/views/ActivityView.vue
+msgid "Cron"
+msgstr "Cron"
+
+#: src/Controllers/DispatcherController.php:117
+msgid "Cron secret not configured."
+msgstr "Sekret crona nie został skonfigurowany."
+
+#: src/Api/LogsController.php:517
+msgid "Current page of results."
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "Custom Authorization value"
+msgstr "Własna wartość Authorization"
+
+#: admin/src/views/ProView.vue
+msgid "Custom backoff strategy (exponential, linear, fixed)"
+msgstr "Własna strategia opóźnień (wykładnicza, liniowa, stała)"
+
+#: src/Api/WebhooksController.php:120
+msgid "Custom payload JSON (required when payload_source is custom)."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "Database-backed webhook job queue"
+msgstr "Kolejka zadań webhooków oparta na bazie danych"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate"
+msgstr "Dezaktywuj"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate License"
+msgstr "Dezaktywuj licencję"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate license?"
+msgstr "Dezaktywować licencję?"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivating…"
+msgstr "Dezaktywowanie…"
+
+#: admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Delete"
+msgstr "Usuń"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete Old Activity"
+msgstr "Usuń starą aktywność"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain"
+msgstr "Usuń łańcuch"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain “%s”?"
+msgstr "Usunąć łańcuch „%s”?"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential"
+msgstr "Usuń poświadczenie"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential: %s"
+msgstr "Usuń poświadczenie: %s"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete entries older than"
+msgstr "Usuń wpisy starsze niż"
+
+#: src/Api/ActivityLogController.php:39
+msgid "Delete entries older than specified days."
+msgstr ""
+
+#: src/Api/LogsController.php:64
+msgid "Delete logs older than specified days."
+msgstr ""
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete old"
+msgstr "Usuń stare"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token"
+msgstr "Usuń token"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token: %s"
+msgstr "Usuń token: %s"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete “%s”?"
+msgstr "Usunąć „%s”?"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Deleting with force will detach it from %d webhook; that webhook will send "
+"no Authorization header until reconfigured."
+msgid_plural ""
+"Deleting with force will detach it from %d webhooks; those webhooks will "
+"send no Authorization header until reconfigured."
+msgstr[0] ""
+"Wymuszone usunięcie odłączy je od %d webhooka; ten webhook nie wyśle "
+"nagłówka Authorization do czasu ponownej konfiguracji."
+msgstr[1] ""
+"Wymuszone usunięcie odłączy je od %d webhooków; te webhooki nie wyślą "
+"nagłówka Authorization do czasu ponownej konfiguracji."
+msgstr[2] ""
+"Wymuszone usunięcie odłączy je od %d webhooków; te webhooki nie wyślą "
+"nagłówka Authorization do czasu ponownej konfiguracji."
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Deleting…"
+msgstr "Usuwanie…"
+
+#: admin/src/views/ProView.vue
+msgid "Delivery logs & replay"
+msgstr "Dzienniki dostarczania i odtwarzanie"
+
+#: admin/src/views/ProView.vue
+msgid "Don't have a license yet?"
+msgstr "Nie masz jeszcze licencji?"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Don't show this again"
+msgstr "Nie pokazuj tego ponownie"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"Downstream webhooks that lose their only trigger will be marked as orphans "
+"(no trigger assigned)."
+msgstr ""
+"Webhooki w dół łańcucha, które stracą swój jedyny wyzwalacz, zostaną "
+"oznaczone jako osierocone (bez przypisanego wyzwalacza)."
+
+#: admin/src/views/QueueView.vue
+msgid "Due"
+msgstr "Należne"
+
+#: admin/src/views/QueueView.vue
+msgid "Due Now"
+msgstr "Należne teraz"
+
+#: admin/src/views/WebhookEdit.vue
+msgid "Edit Webhook"
+msgstr "Edytuj webhook"
+
+#: admin/src/views/VaultView.vue
+msgid "Edit credential"
+msgstr "Edytuj poświadczenie"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Enable Anyway"
+msgstr "Włącz mimo to"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Enable External Cron"
+msgstr "Włącz zewnętrzny cron"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Enable Synchronous Execution?"
+msgstr "Włączyć wykonywanie synchroniczne?"
+
+#: src/Api/WebhooksController.php:234
+msgid "Endpoint URL is required."
+msgstr ""
+
+#: admin/src/views/ProView.vue
+msgid "Enter your license key to unlock Pro features on this site."
+msgstr "Wprowadź klucz licencyjny, aby odblokować funkcje Pro na tej witrynie."
+
+#: admin/src/views/LogsList.vue
+msgid "Error"
+msgstr "Błąd"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Errors"
+msgstr "Błędy"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Event Replayed"
+msgstr "Zdarzenie odtworzone"
+
+#: admin/src/views/QueueView.vue
+msgid "Event UUID:"
+msgstr "UUID zdarzenia:"
+
+#: src/App.php:104
+msgid "Every Minute"
+msgstr "Co minutę"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute"
+msgstr "Wykonaj"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Execute Now"
+msgstr "Wykonaj teraz"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute now"
+msgstr "Wykonaj teraz"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expired"
+msgstr "Wygasł"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expires"
+msgstr "Wygasa"
+
+#: admin/src/App.vue admin/src/views/ExternalCronView.vue
+msgid "External Cron"
+msgstr "Zewnętrzny cron"
+
+#: admin/src/views/ProView.vue
+msgid "External Cron (bypass WP-Cron)"
+msgstr "Zewnętrzny cron (pominięcie WP-Cron)"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "External Cron History"
+msgstr "Historia zewnętrznego crona"
+
+#: src/Api/WebhooksController.php:743
+msgid "Extra request headers as key-value pairs."
+msgstr ""
+
+#: src/Api/ApiTokensController.php:166
+msgid "Failed to create API token."
+msgstr "Nie udało się utworzyć tokena API."
+
+#: src/Api/ChainsController.php:241
+msgid "Failed to create chain link (it may already exist)."
+msgstr "Nie udało się utworzyć połączenia łańcucha (być może już istnieje)."
+
+#: src/Api/ChainsController.php:139
+msgid "Failed to create chain."
+msgstr "Nie udało się utworzyć łańcucha."
+
+#: src/Api/CredentialsController.php:256
+msgid "Failed to create credential."
+msgstr "Nie udało się utworzyć poświadczenia."
+
+#: src/Api/WebhooksController.php:260
+msgid "Failed to create webhook."
+msgstr "Nie udało się utworzyć webhooka."
+
+#: src/Api/ApiTokensController.php:279
+msgid "Failed to delete API token."
+msgstr "Nie udało się usunąć tokena API."
+
+#: src/Api/CredentialsController.php:368
+msgid "Failed to delete credential."
+msgstr "Nie udało się usunąć poświadczenia."
+
+#: src/Api/LogsController.php:270
+msgid "Failed to delete log."
+msgstr "Nie udało się usunąć wpisu dziennika."
+
+#: src/Api/QueueController.php:345
+msgid "Failed to delete queue job."
+msgstr "Nie udało się usunąć zadania kolejki."
+
+#: src/Api/SchemasController.php:336
+msgid "Failed to delete schema."
+msgstr "Nie udało się usunąć schematu."
+
+#: src/Api/WebhooksController.php:429
+msgid "Failed to delete webhook."
+msgstr "Nie udało się usunąć webhooka."
+
+#: src/Services/WPHttpTransport.php:27
+msgid "Failed to encode payload as JSON"
+msgstr "Nie udało się zakodować ładunku jako JSON"
+
+#: admin/src/composables/useChains.js
+msgid "Failed to fetch chains"
+msgstr "Nie udało się pobrać łańcuchów"
+
+#: admin/src/composables/useHealthStats.js
+msgid "Failed to fetch health stats"
+msgstr "Nie udało się pobrać statystyk kondycji"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch schemas"
+msgstr "Nie udało się pobrać schematów"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch snippets"
+msgstr "Nie udało się pobrać fragmentów"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch trigger snippet"
+msgstr "Nie udało się pobrać fragmentu wyzwalacza"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch user triggers"
+msgstr "Nie udało się pobrać wyzwalaczy użytkownika"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Failed to rename chain."
+msgstr "Nie udało się zmienić nazwy łańcucha."
+
+#: src/Api/SchemasController.php:368
+msgid "Failed to reset capture."
+msgstr "Nie udało się zresetować przechwytywania."
+
+#: src/Api/LogsController.php:344
+msgid "Failed to retry job."
+msgstr "Nie udało się ponowić zadania."
+
+#: src/Api/QueueController.php:387
+msgid "Failed to retry queue job."
+msgstr "Nie udało się ponowić zadania kolejki."
+
+#: src/Api/ApiTokensController.php:213
+msgid "Failed to rotate API token."
+msgstr "Nie udało się rotować tokena API."
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to save trigger snippet"
+msgstr "Nie udało się zapisać fragmentu wyzwalacza"
+
+#: src/Api/WebhooksController.php:471
+msgid "Failed to toggle webhook status."
+msgstr "Nie udało się przełączyć statusu webhooka."
+
+#: src/Api/SchemasController.php:301
+msgid "Failed to update schema."
+msgstr "Nie udało się zaktualizować schematu."
+
+#: src/Api/WebhooksController.php:371
+msgid "Failed to update webhook."
+msgstr "Nie udało się zaktualizować webhooka."
+
+#: src/Api/SchemasController.php:89
+msgid "Field mapping configuration."
+msgstr ""
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by X-Webhook-ID…"
+msgstr "Filtruj po X-Webhook-ID…"
+
+#: src/Api/ActivityLogController.php:148
+msgid "Filter by action prefix (e.g. \"webhook\")."
+msgstr ""
+
+#: src/Api/LogsController.php:551
+msgid "Filter by event UUID (exact match)."
+msgstr ""
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by event UUID…"
+msgstr "Filtruj po UUID zdarzenia…"
+
+#: src/Api/ActivityLogController.php:147
+msgid "Filter by exact action string."
+msgstr ""
+
+#: src/Api/LogsController.php:534
+msgid "Filter by status."
+msgstr ""
+
+#: src/Api/LogsController.php:555
+msgid "Filter by target URL (partial match)."
+msgstr ""
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by target URL…"
+msgstr "Filtruj po docelowym URL…"
+
+#: src/Api/LogsController.php:539
+msgid "Filter by trigger name."
+msgstr ""
+
+#: src/Api/LogsController.php:134
+#: src/Api/LogsController.php:530
+msgid "Filter by webhook ID."
+msgstr ""
+
+#: src/Api/LogsController.php:559
+msgid "Filter by webhook UUID (X-Webhook-Id header value)."
+msgstr ""
+
+#: src/Api/ActivityLogController.php:152
+msgid "Filter from UTC datetime (Y-m-d H:i:s)."
+msgstr ""
+
+#: src/Api/LogsController.php:543
+msgid "Filter logs from this date."
+msgstr ""
+
+#: src/Api/LogsController.php:547
+msgid "Filter logs until this date."
+msgstr ""
+
+#: src/Api/ActivityLogController.php:153
+msgid "Filter until UTC datetime (Y-m-d H:i:s)."
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "Finish moving the key into wp-config.php"
+msgstr "Dokończ przenoszenie klucza do wp-config.php"
+
+#: admin/src/views/VaultView.vue
+msgid "Force delete & detach"
+msgstr "Wymuś usunięcie i odłącz"
+
+#: admin/src/views/ActivityView.vue
+msgid "From date"
+msgstr "Od daty"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "From date & time"
+msgstr "Od daty i godziny"
+
+#: admin/src/views/ProView.vue
+msgid "Full REST API with API token authentication"
+msgstr "Pełne REST API z uwierzytelnianiem tokenem API"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Full write power for AI assistants — but can never reveal auth headers or "
+"vault secrets"
+msgstr ""
+"Pełne uprawnienia zapisu dla asystentów AI — ale nigdy nie ujawnia "
+"nagłówków uwierzytelniania ani sekretów sejfu"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "GET webhooks, logs, queue, health, triggers, schemas"
+msgstr "GET webhooków, dzienników, kolejki, kondycji, wyzwalaczy, schematów"
+
+#: admin/src/views/ProView.vue
+msgid "Get Pro"
+msgstr "Kup Pro"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Go to Queue"
+msgstr "Przejdź do kolejki"
+
+#: src/Api/WebhooksController.php:736
+msgid "HTTP method used for delivery."
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "Header"
+msgstr "Nagłówek"
+
+#: admin/src/views/VaultView.vue
+msgid "Header name"
+msgstr "Nazwa nagłówka"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide"
+msgstr "Ukryj"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide password"
+msgstr "Ukryj hasło"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide secret"
+msgstr "Ukryj sekret"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Hint"
+msgstr "Wskazówka"
+
+#: admin/src/views/VaultView.vue
+msgid "How secrets are protected"
+msgstr "Jak chronione są sekrety"
+
+#: src/Api/WebhooksController.php:124
+msgid "How to run the test: now (synchronous) or queue (async)."
+msgstr ""
+
+#: src/Api/WebhooksController.php:731
+msgid ""
+"ID of a vault credential to use for authorization. Takes precedence over "
+"auth_header."
+msgstr ""
+
+#: admin/src/views/ActivityView.vue
+msgid "IP"
+msgstr "IP"
+
+#: src/Api/AuthHelper.php:52
+#. translators: %s: required scope name
+#, php-format
+msgid "Insufficient token scope. This endpoint requires \"%s\" scope or higher."
+msgstr ""
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Interval"
+msgstr "Interwał"
+
+#: src/Api/CredentialsController.php:233
+#: src/Api/CredentialsController.php:294
+msgid "Invalid credential type."
+msgstr "Nieprawidłowy typ poświadczenia."
+
+#: src/Controllers/DispatcherController.php:125
+msgid "Invalid cron token."
+msgstr "Nieprawidłowy token crona."
+
+#: src/Api/WebhooksController.php:242
+#: src/Api/WebhooksController.php:318
+msgid "Invalid endpoint URL."
+msgstr "Nieprawidłowy URL punktu końcowego."
+
+#: src/Api/ApiTokensController.php:146
+msgid "Invalid scope. Must be read, operational, full, or agent."
+msgstr "Nieprawidłowy zakres. Musi być read, operational, full lub agent."
+
+#: src/Api/QueueController.php:354
+msgid "Job deleted successfully."
+msgstr "Zadanie usunięte pomyślnie."
+
+#: src/Api/QueueController.php:291
+msgid "Job executed successfully."
+msgstr "Zadanie wykonane pomyślnie."
+
+#: src/Api/QueueController.php:301
+msgid "Job failed and has been rescheduled for retry."
+msgstr "Zadanie nie powiodło się i zostało ponownie zaplanowane do ponowienia."
+
+#: src/Api/QueueController.php:302
+msgid "Job failed and has exceeded maximum retry attempts."
+msgstr "Zadanie nie powiodło się i przekroczyło maksymalną liczbę prób ponowienia."
+
+#: src/Api/QueueController.php:312
+msgid "Job failed with a non-retryable error."
+msgstr "Zadanie nie powiodło się z błędem niepodlegającym ponowieniu."
+
+#: src/Api/QueueController.php:250
+msgid "Job has already been completed."
+msgstr "Zadanie zostało już ukończone."
+
+#: src/Api/QueueController.php:396
+msgid "Job has been queued for retry."
+msgstr "Zadanie zostało dodane do kolejki w celu ponowienia."
+
+#: src/Api/QueueController.php:260
+msgid "Job has invalid payload data."
+msgstr "Zadanie ma nieprawidłowe dane ładunku."
+
+#: src/Api/QueueController.php:242
+msgid "Job is currently being processed."
+msgstr "Zadanie jest aktualnie przetwarzane."
+
+#: admin/src/views/QueueView.vue
+msgid ""
+"Jobs are processed every minute by WP-Cron. Failed jobs are automatically "
+"retried with exponential backoff. Use “Process Now” to manually trigger "
+"batch processing."
+msgstr ""
+"Zadania są przetwarzane co minutę przez WP-Cron. Nieudane zadania są "
+"automatycznie ponawiane z wykładniczym opóźnieniem. Użyj „Przetwórz teraz”, "
+"aby ręcznie uruchomić przetwarzanie wsadowe."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Jobs processed per cron run."
+msgstr "Liczba zadań przetwarzanych na jedno uruchomienie crona."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last ping failed:"
+msgstr "Ostatni ping nieudany:"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last stats pull: %s"
+msgstr "Ostatnie pobranie statystyk: %s"
+
+#: src/Api/WebhooksController.php:792
+msgid "Last update date."
+msgstr ""
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Last used"
+msgstr "Ostatnio użyto"
+
+#: admin/src/App.vue
+msgid "Leave a review on WordPress.org"
+msgstr "Zostaw opinię na WordPress.org"
+
+#: admin/src/views/VaultView.vue
+msgid "Leave blank to keep current"
+msgstr "Pozostaw puste, aby zachować obecne"
+
+#: admin/src/views/ProView.vue
+msgid "License Key"
+msgstr "Klucz licencyjny"
+
+#: src/Api/WebhooksController.php:779
+msgid "List of trigger actions."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "Loading queue…"
+msgstr "Wczytywanie kolejki…"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Loading webhooks…"
+msgstr "Wczytywanie webhooków…"
+
+#: admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
+msgid "Loading…"
+msgstr "Wczytywanie…"
+
+#: admin/src/views/QueueView.vue
+msgid "Locked by: %s"
+msgstr "Zablokowane przez: %s"
+
+#: src/Api/LogsController.php:242
+#: src/Api/LogsController.php:260
+#: src/Api/LogsController.php:316
+#: src/Api/LogsController.php:368
+msgid "Log not found."
+msgstr "Nie znaleziono wpisu dziennika."
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/LogsList.vue
+msgid "Logs"
+msgstr "Dzienniki"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Logs: %s"
+msgstr "Dzienniki: %s"
+
+#: admin/src/App.vue
+msgid "Love the plugin?"
+msgstr "Podoba Ci się wtyczka?"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Manage your webhook endpoints"
+msgstr "Zarządzaj punktami końcowymi webhooków"
+
+#: flowsystems-webhook-actions.php
+#. Author of the plugin
+msgid "Mateusz Skorupa"
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "Maximum protection"
+msgstr "Maksymalna ochrona"
+
+#: src/Api/TriggersController.php:230
+msgid "Media"
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "Migrated %1$s · failed %2$s"
+msgstr "Zmigrowano %1$s · nieudane %2$s"
+
+#: admin/src/views/ProView.vue
+msgid "More sites, advanced conditions, and priority support."
+msgstr "Więcej witryn, zaawansowane warunki i priorytetowe wsparcie."
+
+#: src/Api/SchemasController.php:268
+msgid "More than 1 condition requires a Pro license."
+msgstr "Więcej niż 1 warunek wymaga licencji Pro."
+
+#: admin/src/views/WebhooksList.vue
+msgid "My chain"
+msgstr "Mój łańcuch"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Name"
+msgstr "Nazwa"
+
+#: admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Name is required."
+msgstr "Nazwa jest wymagana."
+
+#: src/Api/WebhooksController.php:713
+msgid "Name of the webhook."
+msgstr ""
+
+#: admin/src/views/ProView.vue
+msgid "Need help?"
+msgstr "Potrzebujesz pomocy?"
+
+#: admin/src/views/VaultView.vue
+msgid "New credential"
+msgstr "Nowe poświadczenie"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "New token"
+msgstr "Nowy token"
+
+#: admin/src/views/ActivityView.vue
+msgid "Next"
+msgstr "Następna"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "No API tokens"
+msgstr "Brak tokenów API"
+
+#: admin/src/views/ActivityView.vue
+msgid "No activity recorded yet."
+msgstr "Nie zarejestrowano jeszcze żadnej aktywności."
+
+#: src/Api/SettingsController.php:171
+msgid "No archive files found or failed to create ZIP."
+msgstr "Nie znaleziono plików archiwum lub nie udało się utworzyć pliku ZIP."
+
+#: src/Api/WebhooksController.php:544
+#: src/Api/WebhooksController.php:562
+#: src/Api/WebhooksController.php:582
+msgid ""
+"No captured payload found for this trigger. Fire the trigger at least once "
+"first."
+msgstr ""
+
+#: src/Api/SchemasController.php:288
+msgid "No data to update."
+msgstr "Brak danych do aktualizacji."
+
+#: src/Api/LogsController.php:326
+msgid "No queue job found for this log entry."
+msgstr "Nie znaleziono zadania kolejki dla tego wpisu dziennika."
+
+#: admin/src/views/QueueView.vue
+msgid "No queued jobs"
+msgstr "Brak zadań w kolejce"
+
+#: admin/src/views/VaultView.vue
+msgid "No saved credentials"
+msgstr "Brak zapisanych poświadczeń"
+
+#: admin/src/views/WebhooksList.vue
+msgid "No webhooks configured yet"
+msgstr "Nie skonfigurowano jeszcze żadnych webhooków"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Not configured"
+msgstr "Nie skonfigurowano"
+
+#: src/Api/LogsController.php:127
+msgid "Number of days to look back."
+msgstr ""
+
+#: src/Api/LogsController.php:523
+msgid "Number of results per page."
+msgstr ""
+
+#: admin/src/views/ActivityView.vue
+msgid "Object"
+msgstr "Obiekt"
+
+#: src/Api/LogsController.php:334
+msgid "Only failed log entries can be retried."
+msgstr "Tylko nieudane wpisy dziennika mogą być ponawiane."
+
+#: src/Api/QueueController.php:377
+msgid "Only pending or permanently failed jobs can be retried."
+msgstr "Tylko oczekujące lub trwale nieudane zadania mogą być ponawiane."
+
+#: src/Api/WebhooksController.php:686
+msgid "Only return enabled webhooks."
+msgstr ""
+
+#: src/Api/LogsController.php:376
+msgid "Only successful or skipped log entries can be replayed."
+msgstr "Tylko udane lub pominięte wpisy dziennika mogą być odtwarzane."
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Operational + create/update/delete webhooks, schemas, and queue jobs"
+msgstr ""
+"Operacyjny + tworzenie/aktualizacja/usuwanie webhooków, schematów i zadań "
+"kolejki"
+
+#: admin/src/views/VaultView.vue
+msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
+msgstr "Opcjonalnie: wzmocnij za pomocą %1$sFSWA_SECRET_KEY%2$s"
+
+#: src/Api/TriggersController.php:232
+msgid "Options"
+msgstr ""
+
+#: src/Api/TriggersController.php:234
+msgid "Other"
+msgstr ""
+
+#: src/Api/TriggersController.php:227
+msgid "Pages"
+msgstr ""
+
+#: src/Api/LogsController.php:289
+msgid "Parameter older_than_days is required."
+msgstr "Parametr older_than_days jest wymagany."
+
+#: admin/src/views/VaultView.vue
+msgid "Password"
+msgstr "Hasło"
+
+#: admin/src/views/VaultView.vue
+msgid "Password or application password"
+msgstr "Hasło lub hasło aplikacji"
+
+#: admin/src/views/VaultView.vue
+msgid "Paste the token / key"
+msgstr "Wklej token / klucz"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Pause"
+msgstr "Wstrzymaj"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Paused"
+msgstr "Wstrzymane"
+
+#: admin/src/views/ProView.vue
+msgid "Payload mapping"
+msgstr "Mapowanie ładunku"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Pending"
+msgstr "Oczekujące"
+
+#: admin/src/views/ProView.vue
+msgid "Per-webhook retry limit override"
+msgstr "Nadpisanie limitu ponowień dla webhooka"
+
+#: admin/src/views/QueueView.vue
+msgid "Perm. Failed"
+msgstr "Trwale nieud."
+
+#: admin/src/views/LogsList.vue
+msgid "Permanently Failed"
+msgstr "Trwale nieudane"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Plugin queue endpoint"
+msgstr "Punkt końcowy kolejki wtyczki"
+
+#: src/Api/TriggersController.php:231
+msgid "Plugins"
+msgstr ""
+
+#: src/Api/TriggersController.php:226
+msgid "Posts"
+msgstr ""
+
+#: admin/src/views/ActivityView.vue
+msgid "Previous"
+msgstr "Poprzednia"
+
+#: admin/src/views/ProView.vue
+msgid "Priority support"
+msgstr "Priorytetowe wsparcie"
+
+#: admin/src/App.vue admin/src/views/ProView.vue
+msgid "Pro"
+msgstr "Pro"
+
+#: admin/src/views/ProView.vue
+msgid "Pro License"
+msgstr "Licencja Pro"
+
+#: admin/src/views/ProView.vue
+msgid "Pro Plugin Installed"
+msgstr "Wtyczka Pro zainstalowana"
+
+#: src/Api/ProStatusController.php:48
+msgid "Pro plugin not found."
+msgstr "Nie znaleziono wtyczki Pro."
+
+#: admin/src/views/QueueView.vue
+msgid "Process Now"
+msgstr "Przetwórz teraz"
+
+#: src/Controllers/DispatcherController.php:146
+#. translators: %1$d: total jobs processed, %2$d: succeeded count, %3$d: failed count, %4$d: rescheduled count
+#, php-format
+msgid "Processed %1$d jobs: %2$d succeeded, %3$d failed, %4$d rescheduled."
+msgstr ""
+"Przetworzono %1$d zadań: %2$d powiodło się, %3$d nie powiodło się, %4$d "
+"przełożono."
+
+#: admin/src/views/QueueView.vue
+msgid "Processing"
+msgstr "Przetwarzanie"
+
+#: admin/src/views/LogsList.vue
+msgid "Processing…"
+msgstr "Przetwarzanie…"
+
+#: src/Api/WebhooksController.php:755
+msgid "Query parameters appended to the URL."
+msgstr ""
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/QueueView.vue
+msgid "Queue"
+msgstr "Kolejka"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Queue batch size"
+msgstr "Rozmiar partii kolejki"
+
+#: src/Api/QueueController.php:234
+#: src/Api/QueueController.php:327
+#: src/Api/QueueController.php:369
+msgid "Queue job not found."
+msgstr "Nie znaleziono zadania kolejki."
+
+#: admin/src/views/VaultView.vue
+msgid "Raw value for any header — escape hatch"
+msgstr "Surowa wartość dla dowolnego nagłówka — opcja awaryjna"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypt & remove database key"
+msgstr "Zaszyfruj ponownie i usuń klucz z bazy danych"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypting…"
+msgstr "Ponowne szyfrowanie…"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Read + toggle webhooks, retry/replay logs, execute/retry queue jobs"
+msgstr ""
+"Odczyt + przełączanie webhooków, ponawianie/odtwarzanie dzienników, "
+"wykonywanie/ponawianie zadań kolejki"
+
+#: admin/src/views/QueueView.vue
+msgid "Refresh"
+msgstr "Odśwież"
+
+#: flowsystems-webhook-actions.php
+#. Description of the plugin
+msgid ""
+"Reliable WordPress webhooks with retries, queue, Action Scheduler support, "
+"delivery logs, and replayable events for n8n, APIs, and integrations."
+msgstr ""
+
+#: admin/src/views/ProView.vue
+msgid "Reliable webhooks with queue & retries"
+msgstr "Niezawodne webhooki z kolejką i ponowieniami"
+
+#: admin/src/views/ActivityView.vue
+msgid "Remove activity entries older than the specified number of days."
+msgstr "Usuń wpisy aktywności starsze niż podana liczba dni."
+
+#: admin/src/views/QueueView.vue
+msgid "Remove from queue"
+msgstr "Usuń z kolejki"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Rename chain"
+msgstr "Zmień nazwę łańcucha"
+
+#: admin/src/views/ProView.vue
+msgid "Renews / expires"
+msgstr "Odnawia się / wygasa"
+
+#: admin/src/views/LogsList.vue
+msgid "Replay %d selected"
+msgstr "Odtwórz %d zaznaczonych"
+
+#: admin/src/views/QueueView.vue
+msgid "Reset and retry"
+msgstr "Zresetuj i ponów"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Resume"
+msgstr "Wznów"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Retries"
+msgstr "Ponowienia"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Retry"
+msgstr "Ponów"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry %d selected"
+msgstr "Ponów %d zaznaczonych"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry / Replay %d selected"
+msgstr "Ponów / odtwórz %d zaznaczonych"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Rotate token"
+msgstr "Rotuj token"
+
+#: admin/src/views/ExternalCronView.vue admin/src/views/WebhooksList.vue
+msgid "Save"
+msgstr "Zapisz"
+
+#: admin/src/views/VaultView.vue
+msgid "Save changes"
+msgstr "Zapisz zmiany"
+
+#: admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Saving…"
+msgstr "Zapisywanie…"
+
+#: admin/src/views/ActivityView.vue
+msgid "Schemas"
+msgstr "Schematy"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Scope"
+msgstr "Zakres"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Scope reference"
+msgstr "Opis zakresów"
+
+#: admin/src/views/VaultView.vue
+msgid "Secret value"
+msgstr "Wartość sekretu"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Secrets are encrypted at rest (AES-256-GCM) and never returned by the API — "
+"only a masked hint is shown."
+msgstr ""
+"Sekrety są szyfrowane w spoczynku (AES-256-GCM) i nigdy nie są zwracane "
+"przez API — wyświetlana jest tylko zamaskowana wskazówka."
+
+#: admin/src/views/VaultView.vue
+msgid "Secrets are encrypted on save and never shown again."
+msgstr "Sekrety są szyfrowane przy zapisie i nigdy więcej nie są wyświetlane."
+
+#: admin/src/views/VaultView.vue
+msgid "Sent as Authorization: Bearer <token>"
+msgstr "Wysyłane jako Authorization: Bearer <token>"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Settings"
+msgstr "Ustawienia"
+
+#: admin/src/views/VaultView.vue
+msgid "Show"
+msgstr "Pokaż"
+
+#: admin/src/views/VaultView.vue
+msgid "Show password"
+msgstr "Pokaż hasło"
+
+#: admin/src/views/VaultView.vue
+msgid "Show secret"
+msgstr "Pokaż sekret"
+
+#: admin/src/views/QueueView.vue
+msgid "Showing %1$d to %2$d of %3$d"
+msgstr "Wyświetlanie od %1$d do %2$d z %3$d"
+
+#: admin/src/views/ProView.vue
+msgid "Sites allowed"
+msgstr "Dozwolone witryny"
+
+#: admin/src/views/ProView.vue
+msgid "Sites used"
+msgstr "Wykorzystane witryny"
+
+#: admin/src/views/LogsList.vue
+msgid "Skipped"
+msgstr "Pominięte"
+
+#: admin/src/views/ActivityView.vue
+msgid "Snippets"
+msgstr "Fragmenty"
+
+#: src/Api/ChainsController.php:229
+msgid "Source webhook does not exist."
+msgstr "Źródłowy webhook nie istnieje."
+
+#: admin/src/views/ProView.vue
+msgid "Starter"
+msgstr "Starter"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Stats unavailable"
+msgstr "Statystyki niedostępne"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Store reusable authentication secrets once, then reference them from your "
+"webhooks. Secrets are encrypted at rest and are never shown again after "
+"saving — not even to you."
+msgstr ""
+"Zapisz wielokrotnego użytku sekrety uwierzytelniania raz, a następnie "
+"odwołuj się do nich z webhooków. Sekrety są szyfrowane w spoczynku i nigdy "
+"nie są ponownie wyświetlane po zapisaniu — nawet Tobie."
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Success"
+msgstr "Sukces"
+
+#: admin/src/App.vue
+msgid "Switch to dark mode"
+msgstr "Przełącz na tryb ciemny"
+
+#: admin/src/App.vue
+msgid "Switch to light mode"
+msgstr "Przełącz na tryb jasny"
+
+#: admin/src/views/ActivityView.vue
+msgid "System"
+msgstr "System"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Target"
+msgstr "Cel"
+
+#: src/Api/ChainsController.php:232
+msgid "Target webhook does not exist."
+msgstr "Docelowy webhook nie istnieje."
+
+#: src/Api/TriggersController.php:229
+msgid "Taxonomy"
+msgstr ""
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
+msgid "Test"
+msgstr "Testuj"
+
+#: admin/src/views/ProView.vue
+msgid "Test webhook delivery on demand"
+msgstr "Testowanie dostarczania webhooków na żądanie"
+
+#: src/Api/ChainsController.php:236
+msgid "That link would create a cycle in the chain graph."
+msgstr "To połączenie utworzyłoby cykl w grafie łańcucha."
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"The %1$srecommended approach is asynchronous delivery%2$s via the built-in "
+"system cron or an external cron job."
+msgstr ""
+"%1$sZalecanym podejściem jest dostarczanie asynchroniczne%2$s za pomocą "
+"wbudowanego crona systemowego lub zewnętrznego zadania cron."
+
+#: admin/src/views/ProView.vue
+msgid "The Pro plugin is installed but not activated in WordPress."
+msgstr "Wtyczka Pro jest zainstalowana, ale nie aktywowana w WordPress."
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"The chain and all its links will be removed. Member webhooks stay, but lose "
+"their chain-link triggers."
+msgstr ""
+"Łańcuch i wszystkie jego połączenia zostaną usunięte. Webhooki pozostaną, "
+"ale stracą wyzwalacze połączeń łańcucha."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"The encryption key lives in %1$swp-config.php%2$s (%1$sFSWA_SECRET_KEY%2$s) "
+"and is not stored in the database. A database-only dump cannot decrypt your "
+"secrets."
+msgstr ""
+"Klucz szyfrowania znajduje się w %1$swp-config.php%2$s "
+"(%1$sFSWA_SECRET_KEY%2$s) i nie jest przechowywany w bazie danych. Zrzut "
+"samej bazy danych nie odszyfruje Twoich sekretów."
+
+#: admin/src/views/WebhooksList.vue
+msgid "They will move to the Unchained section with “No trigger assigned”."
+msgstr ""
+"Zostaną przeniesione do sekcji „Bez łańcucha” z etykietą „Brak przypisanego "
+"wyzwalacza”."
+
+#: src/Api/CredentialsController.php:351
+#. translators: %d: number of webhooks using this credential
+#, php-format
+msgid "This credential is used by %d webhook. Detach it or delete with force."
+msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
+msgstr[0] ""
+"To poświadczenie jest używane przez %d webhook. Odłącz je lub usuń "
+"wymuszając."
+msgstr[1] ""
+"To poświadczenie jest używane przez %d webhooki. Odłącz je lub usuń "
+"wymuszając."
+msgstr[2] ""
+"To poświadczenie jest używane przez %d webhooków. Odłącz je lub usuń "
+"wymuszając."
+
+#: admin/src/views/VaultView.vue
+msgid "This permanently removes the stored secret."
+msgstr "Spowoduje to trwałe usunięcie przechowywanego sekretu."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"This usually means the encryption key changed (e.g. %1$sFSWA_SECRET_KEY%2$s "
+"or WordPress salts). Edit each affected credential and re-enter its secret "
+"to fix it."
+msgstr ""
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook participates in a chain:"
+msgid_plural "This webhook participates in chains:"
+msgstr[0] "Ten webhook należy do łańcucha:"
+msgstr[1] "Ten webhook należy do łańcuchów:"
+msgstr[2] "Ten webhook należy do łańcuchów:"
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook will become an orphan:"
+msgid_plural "These webhooks will become orphans:"
+msgstr[0] "Ten webhook stanie się osierocony:"
+msgstr[1] "Te webhooki staną się osierocone:"
+msgstr[2] "Te webhooki staną się osierocone:"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"This webhook will fire inline during the WordPress request that triggers "
+"it, bypassing the queue. Slow or unreachable endpoints can %1$sdelay page "
+"loads, form submissions, and other frontend interactions.%2$s"
+msgstr ""
+"Ten webhook zostanie wywołany bezpośrednio podczas żądania WordPress, które "
+"go uruchamia, z pominięciem kolejki. Wolne lub niedostępne punkty końcowe "
+"mogą %1$sopóźniać ładowanie stron, wysyłanie formularzy i inne interakcje "
+"frontendu.%2$s"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"This will permanently delete the webhook and all associated data. This "
+"action cannot be undone."
+msgstr ""
+"Spowoduje to trwałe usunięcie webhooka i wszystkich powiązanych danych. Tej "
+"operacji nie można cofnąć."
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"This will permanently revoke the token. Any integrations using it will stop "
+"working immediately."
+msgstr ""
+"Spowoduje to trwałe unieważnienie tokena. Wszystkie integracje, które go "
+"używają, natychmiast przestaną działać."
+
+#: admin/src/views/ProView.vue
+msgid ""
+"This will remove the license from this site and free up a slot. You can "
+"reactivate at any time."
+msgstr ""
+"Spowoduje to usunięcie licencji z tej witryny i zwolnienie miejsca. Możesz "
+"ją ponownie aktywować w dowolnym momencie."
+
+#: admin/src/views/ActivityView.vue
+msgid "Timestamp"
+msgstr "Znacznik czasu"
+
+#: admin/src/views/ActivityView.vue
+msgid "To date"
+msgstr "Do daty"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "To date & time"
+msgstr "Do daty i godziny"
+
+#: admin/src/views/ActivityView.vue
+msgid "Token"
+msgstr "Token"
+
+#: src/Api/ApiTokensController.php:138
+msgid "Token name is required."
+msgstr "Nazwa tokena jest wymagana."
+
+#: admin/src/views/ActivityView.vue
+msgid "Token: %s"
+msgstr "Token: %s"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Tokens allow external systems to access the REST API without a browser "
+"session. Token management is always admin-only regardless of scope."
+msgstr ""
+"Tokeny pozwalają systemom zewnętrznym uzyskać dostęp do REST API bez sesji "
+"przeglądarki. Zarządzanie tokenami jest zawsze dostępne tylko dla "
+"administratora, niezależnie od zakresu."
+
+#: admin/src/views/QueueView.vue
+msgid "Total"
+msgstr "Łącznie"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Total (7 days)"
+msgstr "Łącznie (7 dni)"
+
+#: src/Api/WebhooksController.php:116
+msgid "Trigger name to use for the test."
+msgstr ""
+
+#: src/Api/SchemasController.php:67
+#: src/Api/SchemasController.php:84
+#: src/Api/SchemasController.php:109
+#: src/Api/SchemasController.php:130
+msgid "Trigger name."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "Trigger:"
+msgstr "Wyzwalacz:"
+
+#: admin/src/views/VaultView.vue
+msgid "Type"
+msgstr "Typ"
+
+#: src/Api/WebhooksController.php:719
+msgid "URL to send the webhook to."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "URL:"
+msgstr "URL:"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Unchained"
+msgstr "Bez łańcucha"
+
+#: src/Api/WebhooksController.php:69
+#: src/Api/WebhooksController.php:94
+#: src/Api/WebhooksController.php:106
+#: src/Api/WebhooksController.php:707
+msgid "Unique identifier for the webhook."
+msgstr ""
+
+#: admin/src/views/QueueView.vue
+msgid "Unknown Webhook"
+msgstr "Nieznany webhook"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Unknown error"
+msgstr "Nieznany błąd"
+
+#: admin/src/views/ProView.vue
+msgid "Unlimited conditions per trigger"
+msgstr "Nieograniczona liczba warunków na wyzwalacz"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Update this credential. Leave secret fields blank to keep the existing "
+"value."
+msgstr ""
+"Zaktualizuj to poświadczenie. Pozostaw pola sekretów puste, aby zachować "
+"istniejącą wartość."
+
+#: admin/src/views/ProView.vue
+msgid "Upgrade to Pro"
+msgstr "Przejdź na Pro"
+
+#: admin/src/views/ActivityView.vue
+msgid "User #%s"
+msgstr "Użytkownik #%s"
+
+#: admin/src/views/ActivityView.vue
+msgid "User ID"
+msgstr "ID użytkownika"
+
+#: admin/src/views/ActivityView.vue
+msgid "User prompt"
+msgstr "Polecenie użytkownika"
+
+#: admin/src/views/VaultView.vue
+msgid "Username"
+msgstr "Nazwa użytkownika"
+
+#: src/Api/TriggersController.php:225
+msgid "Users"
+msgstr ""
+
+#: admin/src/views/LogsList.vue
+msgid "View webhook delivery logs"
+msgstr "Przeglądaj dzienniki dostarczania webhooków"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "WP-Cron"
+msgstr "WP-Cron"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Webhook #%s"
+msgstr "Webhook #%s"
+
+#: src/Controllers/AdminController.php:36
+#: src/Controllers/AdminController.php:37
+#: src/Controllers/AdminController.php:44
+#: src/Controllers/AdminController.php:45
+msgid "Webhook Actions"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin Name of the plugin
+msgid "Webhook Actions by Flow Systems"
+msgstr ""
+
+#: src/Controllers/AdminController.php:200
+msgid ""
+"Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
+"new database format."
+msgstr ""
+
+#: src/Api/SchemasController.php:46
+#: src/Api/SchemasController.php:62
+#: src/Api/SchemasController.php:79
+#: src/Api/SchemasController.php:104
+#: src/Api/SchemasController.php:125
+msgid "Webhook ID."
+msgstr ""
+
+#: src/Api/WebhooksController.php:508
+msgid "Webhook has no triggers configured."
+msgstr "Webhook nie ma skonfigurowanych wyzwalaczy."
+
+#: src/Api/WebhooksController.php:226
+msgid "Webhook name is required."
+msgstr "Nazwa webhooka jest wymagana."
+
+#: src/Api/LogsController.php:386
+#: src/Api/SchemasController.php:167
+#: src/Api/SchemasController.php:195
+#: src/Api/SchemasController.php:231
+#: src/Api/SchemasController.php:326
+#: src/Api/SchemasController.php:358
+#: src/Api/WebhooksController.php:197
+#: src/Api/WebhooksController.php:301
+#: src/Api/WebhooksController.php:407
+#: src/Api/WebhooksController.php:459
+#: src/Api/WebhooksController.php:499
+msgid "Webhook not found."
+msgstr "Nie znaleziono webhooka."
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Webhooks"
+msgstr "Webhooki"
+
+#: admin/src/views/QueueView.vue
+msgid "When webhooks are triggered, jobs will appear here for processing."
+msgstr "Gdy webhooki zostaną wyzwolone, zadania pojawią się tutaj do przetworzenia."
+
+#: src/Api/WebhooksController.php:110
+msgid "Where to source the test payload from."
+msgstr ""
+
+#: src/Api/WebhooksController.php:773
+msgid "Whether the webhook executes synchronously (blocking, bypasses queue)."
+msgstr ""
+
+#: src/Api/WebhooksController.php:767
+msgid "Whether the webhook is enabled."
+msgstr ""
+
+#: src/Api/SchemasController.php:93
+msgid "Whether to include user data."
+msgstr ""
+
+#: src/Api/TriggersController.php:233
+msgid "WooCommerce"
+msgstr ""
+
+#: src/Api/TriggersController.php:224
+msgid "WordPress"
+msgstr ""
+
+#: admin/src/views/VaultView.vue
+msgid "WordPress username or API user"
+msgstr "Nazwa użytkownika WordPress lub użytkownik API"
+
+#: admin/src/views/QueueView.vue
+msgid "X-Webhook-Id:"
+msgstr "X-Webhook-Id:"
+
+#: src/Api/WebhooksController.php:164
+msgid "You don't have permissions to see it."
+msgstr "Nie masz uprawnień, aby to zobaczyć."
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"You might want to whitelist the External Cron IP for your WAF or server "
+"security: %1$s72.62.157.193%2$s"
+msgstr ""
+"Możesz dodać IP zewnętrznego crona do białej listy w swoim WAF lub "
+"zabezpieczeniach serwera: %1$s72.62.157.193%2$s"
+
+#: admin/src/views/ProView.vue
+msgid "Your license is active on this site."
+msgstr "Twoja licencja jest aktywna na tej witrynie."
+
+#: admin/src/views/VaultView.vue
+msgid "e.g. HubSpot PAT, Stripe key"
+msgstr "np. PAT HubSpot, klucz Stripe"
+
+#: flowsystems-webhook-actions.php
+#. Author URI of the plugin
+msgid "https://flowsystems.pl"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin URI of the plugin
+msgid "https://wpwebhooks.org/wordpress-webhook-plugin"
+msgstr ""
+
+#: admin/src/views/WebhooksList.vue
+msgid "no remaining triggers"
+msgstr "brak pozostałych wyzwalaczy"
+
+#: admin/src/views/VaultView.vue
+msgid "· database key removed"
+msgstr "· klucz z bazy danych usunięty"
+
+#: admin/src/main.js
+msgid "…"
+msgstr ""
+
+#: admin/src/views/ProView.vue
+msgid ""
+"💡 Local installs (%1$slocalhost%2$s, %1$s*.local%2$s, %1$s*.test%2$s) "
+"don't count toward your site limit."
+msgstr ""
+"💡 Instalacje lokalne (%1$slocalhost%2$s, %1$s*.local%2$s, %1$s*.test%2$s) "
+"nie są wliczane do limitu witryn."
