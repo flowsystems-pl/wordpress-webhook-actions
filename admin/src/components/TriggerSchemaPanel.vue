@@ -24,6 +24,7 @@ import { useSchemas, useUserTriggers } from '@/composables/useSchemas';
 import { usePro } from '@/composables/usePro';
 import { useTriggerSnippet } from '@/composables/useSnippets';
 import { applyMappingTransform } from '@/utils/payloadTransform';
+import { __, sprintf } from '@/i18n';
 
 const props = defineProps({
   webhookId: {
@@ -398,7 +399,7 @@ watch(
 
         <Waypoints class="h-6 w-6" />
         <h3 class="text-lg font-medium flex items-center gap-2">
-          Mapping & Conditions
+          {{ __('Mapping & Conditions') }}
         </h3>
       </div>
 
@@ -415,7 +416,7 @@ watch(
       v-if="triggers.length === 0"
       class="text-center py-6 text-muted-foreground"
     >
-      No triggers configured for this webhook.
+      {{ __('No triggers configured for this webhook.') }}
     </div>
 
     <div v-else class="space-y-2">
@@ -439,11 +440,11 @@ watch(
               class="text-xs"
             >
               <Check class="h-3 w-3 mr-1" />
-              Payload Example Captured
+              {{ __('Payload Example Captured') }}
             </Badge>
             <Badge v-else variant="secondary" class="text-xs">
               <Clock class="h-3 w-3 mr-1" />
-              No Payload Captured Yet
+              {{ __('No Payload Captured Yet') }}
             </Badge>
 
             <Badge
@@ -452,7 +453,7 @@ watch(
               class="text-xs"
             >
               <User class="h-3 w-3 mr-1" />
-              User trigger
+              {{ __('User trigger') }}
             </Badge>
 
             <Badge
@@ -461,7 +462,7 @@ watch(
               class="text-xs"
             >
               <Braces class="h-3 w-3 mr-1" />
-              Mapped
+              {{ __('Mapped') }}
             </Badge>
 
             <Badge
@@ -470,7 +471,7 @@ watch(
               class="text-xs"
             >
               <EqualNot class="h-3 w-3 mr-1" />
-              Conditions
+              {{ __('Conditions') }}
             </Badge>
 
             <Badge
@@ -479,7 +480,7 @@ watch(
               class="text-xs"
             >
               <Code2 class="h-3 w-3 mr-1" />
-              Pre Glue
+              {{ __('Pre Glue') }}
             </Badge>
 
             <Badge
@@ -488,7 +489,7 @@ watch(
               class="text-xs"
             >
               <Code2 class="h-3 w-3 mr-1" />
-              Post Glue
+              {{ __('Post Glue') }}
             </Badge>
           </div>
         </button>
@@ -503,7 +504,7 @@ watch(
             <div class="text-sm">
               <template v-if="getCaptureStatus(trigger).status === 'captured'">
                 <span class="text-green-600 dark:text-green-400"
-                  >Example payload captured</span
+                  >{{ __('Example payload captured') }}</span
                 >
                 <span class="text-muted-foreground ml-2">{{
                   formatDate(getCaptureStatus(trigger).date)
@@ -511,7 +512,7 @@ watch(
               </template>
               <template v-else>
                 <span class="text-muted-foreground"
-                  >Waiting for trigger to capture example payload...</span
+                  >{{ __('Waiting for trigger to capture example payload...') }}</span
                 >
               </template>
             </div>
@@ -526,7 +527,7 @@ watch(
                 class="h-4 w-4 mr-1"
                 :class="{ 'animate-spin': isSaving(trigger) }"
               />
-              Re-capture
+              {{ __('Re-capture') }}
             </Button>
           </div>
 
@@ -534,20 +535,20 @@ watch(
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5 text-sm">
               <Code2 class="h-4 w-4 text-muted-foreground shrink-0" />
-              <span>Pre-dispatch Code Glue</span>
+              <span>{{ __('Pre-dispatch Code Glue') }}</span>
               <UpgradeBadge v-if="!proActive" />
               <Badge v-else-if="triggerSnippetAssignments[trigger]?.pre_snippet_id" variant="default" class="text-xs">
-                Active
+                {{ __('Active') }}
               </Badge>
             </div>
             <div class="flex items-center gap-2">
               <div v-if="proActive && gluePreviewPayloads[trigger]" class="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <Check class="h-3 w-3 shrink-0" />
-                Preview active
+                {{ __('Preview active') }}
               </div>
               <Button size="sm" variant="outline" class="gap-1" :disabled="!proActive" @click.stop="openGlueDrawer(trigger, 'pre')">
                 <Pencil class="h-3.5 w-3.5" />
-                {{ triggerSnippetAssignments[trigger]?.pre_snippet_id ? 'Edit' : 'Add' }}
+                {{ triggerSnippetAssignments[trigger]?.pre_snippet_id ? __('Edit') : __('Add') }}
               </Button>
             </div>
           </div>
@@ -558,9 +559,9 @@ watch(
             class="flex items-center justify-between p-3 border rounded-md bg-background"
           >
             <div>
-              <Label class="text-sm font-medium">Include User Data</Label>
+              <Label class="text-sm font-medium">{{ __('Include User Data') }}</Label>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Automatically enrich payload with user profile information
+                {{ __('Automatically enrich payload with user profile information') }}
               </p>
             </div>
             <Switch
@@ -577,7 +578,7 @@ watch(
             >
               <component :is="isSectionExpanded(trigger, 'mapping') ? ChevronDown : ChevronRight" class="h-4 w-4 text-muted-foreground shrink-0" />
               <Braces class="h-5 w-5 shrink-0" />
-              <span class="text-sm font-semibold">Payload Mapping</span>
+              <span class="text-sm font-semibold">{{ __('Payload Mapping') }}</span>
             </button>
             <div v-if="isSectionExpanded(trigger, 'mapping')" class="pt-2">
               <MappingEditor
@@ -598,13 +599,13 @@ watch(
             >
               <component :is="isSectionExpanded(trigger, 'conditions') ? ChevronDown : ChevronRight" class="h-4 w-4 text-muted-foreground shrink-0" />
               <EqualNot class="h-5 w-5 shrink-0" />
-              <span class="text-sm font-semibold">Conditions</span>
+              <span class="text-sm font-semibold">{{ __('Conditions') }}</span>
             </button>
             <div v-if="isSectionExpanded(trigger, 'conditions')" class="pt-2 space-y-2">
               <div class="flex items-center justify-between px-1">
                 <p class="text-xs text-muted-foreground flex items-center gap-1.5">
-                  Evaluate conditions against
-                  <Tooltip content="Choose which payload the conditions read from: Original is the raw payload before field mapping; Transformed is the payload after mapping is applied." side="right">
+                  {{ __('Evaluate conditions against') }}
+                  <Tooltip :content="__('Choose which payload the conditions read from: Original is the raw payload before field mapping; Transformed is the payload after mapping is applied.')" side="right">
                     <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
                   </Tooltip>
                 </p>
@@ -613,12 +614,12 @@ watch(
                     class="px-2 py-0.5 rounded transition-colors"
                     :class="getConditionsEvaluateOn(trigger) === 'original' ? 'bg-background shadow text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'"
                     @click="handleConditionsEvaluateOnChange(trigger, 'original')"
-                  >Original</button>
+                  >{{ __('Original') }}</button>
                   <button
                     class="px-2 py-0.5 rounded transition-colors"
                     :class="getConditionsEvaluateOn(trigger) === 'transformed' ? 'bg-background shadow text-foreground font-medium' : 'text-muted-foreground hover:text-foreground'"
                     @click="handleConditionsEvaluateOnChange(trigger, 'transformed')"
-                  >Transformed</button>
+                  >{{ __('Transformed') }}</button>
                 </div>
               </div>
               <ConditionsEditor
@@ -639,21 +640,21 @@ watch(
             >
               <component :is="isSectionExpanded(trigger, 'post-glue') ? ChevronDown : ChevronRight" class="h-4 w-4 text-muted-foreground shrink-0" />
               <Code2 class="h-5 w-5 shrink-0" />
-              <span class="text-sm font-semibold">Post-dispatch Code Glue</span>
+              <span class="text-sm font-semibold">{{ __('Post-dispatch Code Glue') }}</span>
               <UpgradeBadge v-if="!proActive" class="ml-1" />
               <Badge v-else-if="triggerSnippetAssignments[trigger]?.post_snippet_id" variant="default" class="text-xs ml-1">
-                Active
+                {{ __('Active') }}
               </Badge>
             </button>
             <div v-if="proActive && isSectionExpanded(trigger, 'post-glue')" class="pt-2">
               <div class="flex items-center justify-between p-3 border rounded-md bg-background">
                 <div>
-                  <p class="text-xs text-muted-foreground">PHP runs after successful dispatch; <code class="font-mono">$responseBody</code> and <code class="font-mono">$originalPayload</code> available</p>
+                  <p class="text-xs text-muted-foreground" v-html="sprintf(__('PHP runs after successful dispatch; %1$s$responseBody%2$s and %1$s$originalPayload%2$s available'), '<code class=&quot;font-mono&quot;>', '</code>')"></p>
                 </div>
                 <div class="flex items-center gap-2 ml-4">
                   <Button size="sm" variant="outline" class="gap-1" @click.stop="openGlueDrawer(trigger, 'post')">
                     <Pencil class="h-3.5 w-3.5" />
-                    {{ triggerSnippetAssignments[trigger]?.post_snippet_id ? 'Edit' : 'Add' }}
+                    {{ triggerSnippetAssignments[trigger]?.post_snippet_id ? __('Edit') : __('Add') }}
                   </Button>
                 </div>
               </div>
@@ -668,7 +669,7 @@ watch(
               class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950 px-3 py-2.5 text-sm text-yellow-800 dark:text-yellow-300"
             >
               <AlertCircle class="h-4 w-4 shrink-0" />
-              <span class="flex-1">Pre-dispatch Code Glue preview is active. Save or discard it before saving Mapping &amp; Conditions.</span>
+              <span class="flex-1">{{ __('Pre-dispatch Code Glue preview is active. Save or discard it before saving Mapping & Conditions.') }}</span>
               <div class="flex gap-2 shrink-0">
                 <Button
                   size="sm"
@@ -677,7 +678,7 @@ watch(
                   @click.stop="openGlueDrawer(trigger, 'pre')"
                 >
                   <Code2 class="h-3.5 w-3.5 mr-1" />
-                  Save Glue
+                  {{ __('Save Glue') }}
                 </Button>
                 <Button
                   size="sm"
@@ -685,7 +686,7 @@ watch(
                   class="text-yellow-800 dark:text-yellow-300"
                   @click.stop="() => { gluePreviewPayloads = { ...gluePreviewPayloads, [trigger]: undefined }; gluePreviewSaved = { ...gluePreviewSaved, [trigger]: undefined }; }"
                 >
-                  Discard
+                  {{ __('Discard') }}
                 </Button>
               </div>
             </div>
@@ -696,7 +697,7 @@ watch(
               class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950 px-3 py-2.5 text-sm text-yellow-800 dark:text-yellow-300"
             >
               <AlertCircle class="h-4 w-4 shrink-0" />
-              <span class="flex-1">Post-dispatch Code Glue preview ran but is not saved. Save or discard before continuing.</span>
+              <span class="flex-1">{{ __('Post-dispatch Code Glue preview ran but is not saved. Save or discard before continuing.') }}</span>
               <div class="flex gap-2 shrink-0">
                 <Button
                   size="sm"
@@ -705,7 +706,7 @@ watch(
                   @click.stop="openGlueDrawer(trigger, 'post')"
                 >
                   <Code2 class="h-3.5 w-3.5 mr-1" />
-                  Save Glue
+                  {{ __('Save Glue') }}
                 </Button>
                 <Button
                   size="sm"
@@ -713,7 +714,7 @@ watch(
                   class="text-yellow-800 dark:text-yellow-300"
                   @click.stop="postGluePreviewPending = { ...postGluePreviewPending, [trigger]: undefined }"
                 >
-                  Discard
+                  {{ __('Discard') }}
                 </Button>
               </div>
             </div>
@@ -725,7 +726,7 @@ watch(
                 class="mr-auto w-full sm:w-auto justify-center"
               >
                 <AlertCircle class="h-3 w-3 mr-1" />
-                Unsaved changes
+                {{ __('Unsaved changes') }}
               </Badge>
               <Button
                 :disabled="!hasChanges(trigger) || isSaving(trigger) || (!!gluePreviewPayloads[trigger] && !gluePreviewSaved[trigger]) || !!postGluePreviewPending[trigger]"
@@ -735,7 +736,7 @@ watch(
                   v-if="isSaving(trigger)"
                   class="h-4 w-4 mr-1 animate-spin"
                 />
-                Save
+                {{ __('Save') }}
               </Button>
             </div>
           </div>

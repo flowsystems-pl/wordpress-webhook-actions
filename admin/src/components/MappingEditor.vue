@@ -12,6 +12,7 @@ import {
   AlertTriangle,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Label, Badge, Select, SelectTrigger, SelectContent, SelectItem } from '@/components/ui';
+import { __, sprintf } from '@/i18n';
 
 const props = defineProps({
   examplePayload: {
@@ -154,10 +155,10 @@ watch(
 );
 
 const CAST_OPTIONS = [
-  { value: 'auto',    label: 'auto' },
-  { value: 'number',  label: 'number' },
-  { value: 'string',  label: 'string' },
-  { value: 'boolean', label: 'bool' },
+  { value: 'auto',    label: __('auto') },
+  { value: 'number',  label: __('number') },
+  { value: 'string',  label: __('string') },
+  { value: 'boolean', label: __('bool') },
 ]
 
 const castToSelect = (cast) => cast || 'auto'
@@ -457,9 +458,9 @@ const previewHtml = computed(() => {
   <div class="space-y-6">
     <!-- No example payload state -->
     <div v-if="!examplePayload" class="text-center py-8 text-muted-foreground">
-      <p>No example payload captured yet.</p>
+      <p>{{ __('No example payload captured yet.') }}</p>
       <p class="text-sm mt-1">
-        Trigger this event to capture an example payload for mapping.
+        {{ __('Trigger this event to capture an example payload for mapping.') }}
       </p>
     </div>
 
@@ -467,10 +468,10 @@ const previewHtml = computed(() => {
       <!-- Available Fields -->
       <div>
         <div class="flex flex-wrap items-center justify-between mb-3">
-          <Label class="text-sm font-medium">Available Fields</Label>
+          <Label class="text-sm font-medium">{{ __('Available Fields') }}</Label>
           <div class="flex items-center gap-2">
             <Label class="text-xs text-muted-foreground"
-              >Include unmapped fields</Label
+              >{{ __('Include unmapped fields') }}</Label
             >
             <Switch
               :modelValue="localIncludeUnmapped"
@@ -522,10 +523,10 @@ const previewHtml = computed(() => {
                 class="h-5 w-5"
                 :title="
                   isDirectlyExcluded(field.path)
-                    ? 'Include field'
+                    ? __('Include field')
                     : field.isExpandable
-                      ? 'Exclude entire ' + field.type
-                      : 'Exclude field'
+                      ? sprintf(__('Exclude entire %s'), field.type)
+                      : __('Exclude field')
                 "
                 @click="toggleExcluded(field.path)"
               >
@@ -538,7 +539,7 @@ const previewHtml = computed(() => {
               <span
                 v-if="isExcluded(field.path) && !isDirectlyExcluded(field.path)"
                 class="text-[10px] text-muted-foreground italic"
-                >excluded via parent</span
+                >{{ __('excluded via parent') }}</span
               >
               <Button
                 v-if="
@@ -549,7 +550,7 @@ const previewHtml = computed(() => {
                 size="icon"
                 variant="ghost"
                 class="h-5 w-5"
-                title="Add mapping for this field"
+                :title="__('Add mapping for this field')"
                 @click="addMappingFromField(field.path)"
               >
                 <ArrowRight class="h-3 w-3" />
@@ -558,7 +559,7 @@ const previewHtml = computed(() => {
                 v-if="isMapped(field.path)"
                 variant="success"
                 class="text-[10px] px-1 py-0"
-                >mapped</Badge
+                >{{ __('mapped') }}</Badge
               >
             </div>
           </div>
@@ -566,7 +567,7 @@ const previewHtml = computed(() => {
             v-if="visibleFields.length === 0"
             class="px-3 py-4 text-center text-muted-foreground text-sm"
           >
-            No fields found in payload
+            {{ __('No fields found in payload') }}
           </div>
         </div>
       </div>
@@ -574,10 +575,10 @@ const previewHtml = computed(() => {
       <!-- Field Mappings -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <Label class="text-sm font-medium">Field Mappings</Label>
+          <Label class="text-sm font-medium">{{ __('Field Mappings') }}</Label>
           <Button size="sm" variant="outline" @click="addEmptyMapping">
             <Plus class="h-4 w-4 mr-1" />
-            Add Mapping
+            {{ __('Add Mapping') }}
           </Button>
         </div>
 
@@ -585,17 +586,17 @@ const previewHtml = computed(() => {
           v-if="localMappings.length === 0"
           class="text-center py-6 text-muted-foreground text-sm border rounded-md"
         >
-          No field mappings configured. Fields will be sent as-is.
+          {{ __('No field mappings configured. Fields will be sent as-is.') }}
         </div>
 
         <div v-else class="space-y-2">
           <!-- Column legend -->
           <div class="hidden sm:flex items-center gap-2 px-2 text-xs text-muted-foreground">
             <span class="w-4 shrink-0" />
-            <span class="flex-1">Source <span class="opacity-60">(value)</span></span>
-            <span class="w-24 shrink-0">Cast</span>
+            <span class="flex-1">{{ __('Source') }} <span class="opacity-60">{{ __('(value)') }}</span></span>
+            <span class="w-24 shrink-0">{{ __('Cast') }}</span>
             <span class="w-4 shrink-0" />
-            <span class="flex-0 sm:flex-1">Target <span class="opacity-60">(param name)</span></span>
+            <span class="flex-0 sm:flex-1">{{ __('Target') }} <span class="opacity-60">{{ __('(param name)') }}</span></span>
             <span class="w-8 shrink-0" />
           </div>
 
@@ -627,7 +628,7 @@ const previewHtml = computed(() => {
                   :modelValue="mapping.source"
                   :disabled="mapping.locked"
                   :placeholder="
-                    mapping.locked ? '' : 'Source path (e.g., args.0.user_id)'
+                    mapping.locked ? '' : __('Source path (e.g., args.0.user_id)')
                   "
                   :class="[
                     'text-sm font-mono',
@@ -648,7 +649,7 @@ const previewHtml = computed(() => {
                 class="absolute flex items-center gap-1 mt-1 text-orange-500 text-xs"
               >
                 <AlertTriangle class="size-3" />
-                <span>Path not found in payload</span>
+                <span>{{ __('Path not found in payload') }}</span>
               </div>
             </div>
 
@@ -658,7 +659,7 @@ const previewHtml = computed(() => {
             >
               <SelectTrigger class="w-24 shrink-0">
                 <span class="truncate text-xs" :class="!mapping.cast ? 'text-muted-foreground' : ''">
-                  {{ CAST_OPTIONS.find(c => c.value === castToSelect(mapping.cast))?.label ?? 'auto' }}
+                  {{ CAST_OPTIONS.find(c => c.value === castToSelect(mapping.cast))?.label ?? __('auto') }}
                 </span>
               </SelectTrigger>
               <SelectContent to="#fswa-app">
@@ -673,7 +674,7 @@ const previewHtml = computed(() => {
             <!-- Target field - always editable -->
             <Input
               :modelValue="mapping.target"
-              placeholder="Target path (e.g., user_id)"
+              :placeholder="__('Target path (e.g., user_id)')"
               class="flex-0 sm:flex-1 text-sm font-mono"
               @update:modelValue="updateMappingTarget(index, $event)"
             />
@@ -692,7 +693,7 @@ const previewHtml = computed(() => {
 
       <!-- Excluded Fields -->
       <div v-if="localExcluded.length > 0">
-        <Label class="text-sm font-medium mb-2 block">Excluded Fields</Label>
+        <Label class="text-sm font-medium mb-2 block">{{ __('Excluded Fields') }}</Label>
         <div class="flex flex-wrap gap-2">
           <Badge
             v-for="path in localExcluded"
@@ -710,10 +711,10 @@ const previewHtml = computed(() => {
       <!-- JSON Preview -->
       <div>
         <div class="flex items-center justify-between mb-3">
-          <Label class="text-sm font-medium">Transformed Payload Preview</Label>
+          <Label class="text-sm font-medium">{{ __('Transformed Payload Preview') }}</Label>
           <Button size="sm" variant="ghost" @click="previewExpanded = !previewExpanded">
             <component :is="previewExpanded ? ChevronDown : ChevronRight" class="h-4 w-4 mr-1" />
-            {{ previewExpanded ? 'Show less' : 'Show full' }}
+            {{ previewExpanded ? __('Show less') : __('Show full') }}
           </Button>
         </div>
 
@@ -731,10 +732,10 @@ const previewHtml = computed(() => {
       <!-- Original Payload -->
       <div v-if="originalPayload">
         <div class="flex items-center justify-between mb-3">
-          <Label class="text-sm font-medium">Original Payload</Label>
+          <Label class="text-sm font-medium">{{ __('Original Payload') }}</Label>
           <Button size="sm" variant="ghost" @click="originalExpanded = !originalExpanded">
             <component :is="originalExpanded ? ChevronDown : ChevronRight" class="h-4 w-4 mr-1" />
-            {{ originalExpanded ? 'Show less' : 'Show full' }}
+            {{ originalExpanded ? __('Show less') : __('Show full') }}
           </Button>
         </div>
 

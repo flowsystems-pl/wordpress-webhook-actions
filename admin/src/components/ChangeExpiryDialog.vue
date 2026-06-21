@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { Button, Dialog, Label, DateTimePicker, Switch } from '@/components/ui'
 import { utcDbToPickerLocal, pickerLocalToUtcDb } from '@/lib/dates'
+import { __, sprintf } from '@/i18n'
 
 const props = defineProps({
   open: Boolean,
@@ -40,8 +41,8 @@ const handleSubmit = () => {
 <template>
   <Dialog
     :open="open"
-    :title="`Change expiry: ${token?.name}`"
-    description="Update when this token expires. Removing the expiry makes it valid indefinitely."
+    :title="sprintf(__('Change expiry: %s'), token?.name)"
+    :description="__('Update when this token expires. Removing the expiry makes it valid indefinitely.')"
     @close="handleClose"
   >
     <div class="space-y-4">
@@ -49,23 +50,23 @@ const handleSubmit = () => {
 
       <div class="flex items-center gap-2">
         <Switch id="change-expiry-toggle" v-model="hasExpiry" />
-        <Label for="change-expiry-toggle" class="cursor-pointer">Set expiration date</Label>
+        <Label for="change-expiry-toggle" class="cursor-pointer">{{ __('Set expiration date') }}</Label>
       </div>
 
       <div v-if="hasExpiry" class="space-y-1.5">
-        <Label>Expires at</Label>
+        <Label>{{ __('Expires at') }}</Label>
         <DateTimePicker v-model="expiresAt" />
       </div>
 
       <p v-if="!hasExpiry" class="text-sm text-muted-foreground">
-        Token will never expire.
+        {{ __('Token will never expire.') }}
       </p>
     </div>
 
     <template #footer>
-      <Button variant="outline" @click="handleClose" :disabled="submitting">Cancel</Button>
+      <Button variant="outline" @click="handleClose" :disabled="submitting">{{ __('Cancel') }}</Button>
       <Button @click="handleSubmit" :disabled="submitting">
-        {{ submitting ? 'Saving…' : 'Save' }}
+        {{ submitting ? __('Saving…') : __('Save') }}
       </Button>
     </template>
   </Dialog>

@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown, X, Plus } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 import { Badge, Button, Input } from '@/components/ui'
 import api from '@/lib/api'
+import { __, _n, sprintf } from '@/i18n'
 
 const props = defineProps({
   modelValue: {
@@ -108,7 +109,7 @@ onMounted(async () => {
       <Input
         v-model="customTrigger"
         type="text"
-        placeholder="Enter custom hook name..."
+        :placeholder="__('Enter custom hook name...')"
         class="flex-1"
         @keyup.enter="addCustomTrigger"
       />
@@ -120,7 +121,7 @@ onMounted(async () => {
         @click="addCustomTrigger"
       >
         <Plus class="h-4 w-4 mr-1" />
-        Add
+        {{ __('Add') }}
       </Button>
     </div>
 
@@ -135,13 +136,13 @@ onMounted(async () => {
         @click="open = !open"
       >
         <span v-if="selectedTriggers.length === 0" class="text-muted-foreground">
-          Or select from available hooks...
+          {{ __('Or select from available hooks...') }}
         </span>
         <span v-else>
-          {{ selectedTriggers.length }} trigger{{ selectedTriggers.length !== 1 ? 's' : '' }} selected
+          {{ sprintf(_n('%d trigger selected', '%d triggers selected', selectedTriggers.length), selectedTriggers.length) }}
         </span>
         <span v-if="!loading" class="ml-auto mr-2 text-xs text-muted-foreground font-normal">
-          {{ totalCount }} available
+          {{ sprintf(__('%d available'), totalCount) }}
         </span>
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
@@ -156,7 +157,7 @@ onMounted(async () => {
           <input
             v-model="search"
             type="text"
-            placeholder="Search triggers..."
+            :placeholder="__('Search triggers...')"
             :class="cn('w-full px-2 py-1 text-sm !border rounded !outline-none !shadow-none !bg-background !text-foreground ring-offset-background',
               searchFocused ? '!border-input !ring-2 !ring-ring !ring-offset-2' : '!border-input'
             )"
@@ -168,7 +169,7 @@ onMounted(async () => {
         <!-- List -->
         <div class="max-h-64 overflow-y-auto p-1">
           <div v-if="loading" class="p-4 text-center text-muted-foreground">
-            Loading...
+            {{ __('Loading...') }}
           </div>
 
           <template v-else>
@@ -209,7 +210,7 @@ onMounted(async () => {
               v-if="Object.keys(filteredGrouped).length === 0"
               class="p-4 text-center text-muted-foreground"
             >
-              No triggers found
+              {{ __('No triggers found') }}
             </div>
           </template>
         </div>

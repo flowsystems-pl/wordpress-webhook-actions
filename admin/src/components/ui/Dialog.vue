@@ -1,6 +1,7 @@
 <script setup>
 import { X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
+import { __ } from '@/i18n'
 
 defineProps({
   open: Boolean,
@@ -61,7 +62,7 @@ const handleOverlayClick = (e) => {
           @click="close"
         >
           <X class="h-4 w-4" />
-          <span class="sr-only">Close</span>
+          <span class="sr-only">{{ __('Close') }}</span>
         </button>
       </div>
     </div>

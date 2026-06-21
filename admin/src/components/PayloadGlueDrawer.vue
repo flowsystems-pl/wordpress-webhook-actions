@@ -9,6 +9,7 @@ import SnippetEditor from '@/components/SnippetEditor.vue'
 import { useSnippets, useTriggerSnippet } from '@/composables/useSnippets'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 import api from '@/lib/api'
+import { __, sprintf } from '@/i18n'
 
 const props = defineProps({
   open: Boolean,
@@ -122,7 +123,7 @@ const runPreview = async () => {
         emit('glue-preview', { trigger: props.trigger, result: res.result })
       }
     } catch (e) {
-      preError.value = e.message || 'Preview failed'
+      preError.value = e.message || __('Preview failed')
     } finally {
       preRunning.value = false
     }
@@ -145,7 +146,7 @@ const runPreview = async () => {
       postError.value = res.error || null
       if (!res.error) emit('glue-post-preview', { trigger: props.trigger })
     } catch (e) {
-      postError.value = e.message || 'Preview failed'
+      postError.value = e.message || __('Preview failed')
     } finally {
       postRunning.value = false
     }
@@ -192,7 +193,7 @@ const saveAndAssign = async () => {
     setTimeout(() => { saveSuccess.value = false }, 3000)
     emit('glue-saved', { trigger: props.trigger, mode: isPre ? 'pre' : 'post' })
   } catch (e) {
-    saveErrorMsg.value = e.message || 'Save failed'
+    saveErrorMsg.value = e.message || __('Save failed')
   } finally {
     savingSnippet.value = false
   }
@@ -303,7 +304,7 @@ const copyCode = () => {
         <div class="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div class="flex items-center gap-2">
             <Code2 class="h-4 w-4 text-muted-foreground" />
-            <span class="font-semibold text-sm">Code Glue</span>
+            <span class="font-semibold text-sm">{{ __('Code Glue') }}</span>
             <span class="text-muted-foreground text-xs truncate max-w-[260px] font-mono">— {{ trigger }}</span>
           </div>
           <button class="rounded-sm opacity-70 hover:opacity-100 transition-opacity" @click="emit('close')">
@@ -317,13 +318,13 @@ const copyCode = () => {
             :class="['flex-1 py-2.5 text-sm font-medium transition-colors border-b-2', activeTab === 'pre' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground']"
             @click="activeTab = 'pre'; ensureDefaultCode('pre')"
           >
-            Pre-dispatch
+            {{ __('Pre-dispatch') }}
           </button>
           <button
             :class="['flex-1 py-2.5 text-sm font-medium transition-colors border-b-2', activeTab === 'post' ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground']"
             @click="activeTab = 'post'; ensureDefaultCode('post')"
           >
-            Post-dispatch
+            {{ __('Post-dispatch') }}
           </button>
         </div>
 
@@ -333,7 +334,7 @@ const copyCode = () => {
           <!-- Loading state -->
           <div v-if="assignmentLoading" class="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 class="h-4 w-4 animate-spin" />
-            Loading…
+            {{ __('Loading…') }}
           </div>
 
           <template v-else>
@@ -343,11 +344,11 @@ const copyCode = () => {
                 <CheckCircle2 class="h-3 w-3 text-green-500" />
                 {{ currentSnippetName }}
               </Badge>
-              <span v-else class="text-xs text-muted-foreground">No snippet assigned</span>
+              <span v-else class="text-xs text-muted-foreground">{{ __('No snippet assigned') }}</span>
 
               <Button size="sm" variant="outline" class="ml-auto gap-1.5" @click="toggleLibrary">
                 <Library class="h-3.5 w-3.5" />
-                Browse Library
+                {{ __('Browse Library') }}
                 <component :is="showLibrary ? ChevronUp : ChevronDown" class="h-3 w-3" />
               </Button>
             </div>
@@ -359,14 +360,14 @@ const copyCode = () => {
                 <input
                   v-model="librarySearch"
                   type="text"
-                  placeholder="Search snippets…"
+                  :placeholder="__('Search snippets…')"
                   class="flex-1 !bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 />
                 <Loader2 v-if="libraryLoading" class="h-3.5 w-3.5 animate-spin text-muted-foreground" />
               </div>
               <div class="max-h-48 overflow-y-auto">
                 <div v-if="!filteredLibrary.length" class="px-3 py-4 text-sm text-muted-foreground text-center">
-                  {{ libraryLoading ? 'Loading…' : 'No snippets found' }}
+                  {{ libraryLoading ? __('Loading…') : __('No snippets found') }}
                 </div>
                 <button
                   v-for="s in filteredLibrary"
@@ -375,51 +376,51 @@ const copyCode = () => {
                   @click="loadFromLibrary(s)"
                 >
                   <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium truncate">{{ s.name || 'Untitled' }}</div>
+                    <div class="text-sm font-medium truncate">{{ s.name || __('Untitled') }}</div>
                     <div v-if="s.tags?.length" class="flex gap-1 mt-0.5 flex-wrap">
                       <span v-for="tag in s.tags" :key="tag" class="text-xs bg-muted px-1.5 py-0.5 rounded">{{ tag }}</span>
                     </div>
                   </div>
-                  <span class="text-xs text-muted-foreground shrink-0 mt-0.5">Load</span>
+                  <span class="text-xs text-muted-foreground shrink-0 mt-0.5">{{ __('Load') }}</span>
                 </button>
               </div>
             </div>
 
             <!-- Context info for each tab -->
             <div v-if="activeTab === 'pre'" class="text-xs text-muted-foreground rounded-md border px-3 py-2 bg-muted/20 space-y-1">
-              <p><strong>Available variables:</strong> <code class="font-mono">$payload</code> (mapped array), <code class="font-mono">$args</code> (<code>$payload['args']</code>)</p>
-              <p><strong>Shorthand:</strong> works for any variable, e.g. <code class="font-mono">&#123;&#123; $args.0.field &#125;&#125;</code> → <code class="font-mono">$args[0]['field']</code>, <code class="font-mono">&#123;&#123; $payload.key &#125;&#125;</code> → <code class="font-mono">$payload['key']</code></p>
-              <p>Must <code class="font-mono">return $payload;</code> — the returned array replaces the payload before dispatch.</p>
+              <p v-html="sprintf(__('%1$sAvailable variables:%2$s %3$s$payload%4$s (mapped array), %3$s$args%4$s (%5$s$payload[\'args\']%6$s)'), '<strong>', '</strong>', '<code class=&quot;font-mono&quot;>', '</code>', '<code>', '</code>')"></p>
+              <p v-html="sprintf(__('%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ $args.0.field }}%4$s → %3$s$args[0][\'field\']%4$s, %3$s{{ $payload.key }}%4$s → %3$s$payload[\'key\']%4$s'), '<strong>', '</strong>', '<code class=&quot;font-mono&quot;>', '</code>')"></p>
+              <p v-html="sprintf(__('Must %1$sreturn $payload;%2$s — the returned array replaces the payload before dispatch.'), '<code class=&quot;font-mono&quot;>', '</code>')"></p>
             </div>
             <div v-else class="text-xs text-muted-foreground rounded-md border px-3 py-2 bg-muted/20 space-y-1">
-              <p><strong>Available variables:</strong> <code class="font-mono">$payload</code> (sent), <code class="font-mono">$originalPayload</code> (pre-mapping), <code class="font-mono">$responseCode</code>, <code class="font-mono">$responseBody</code></p>
-              <p><strong>Shorthand:</strong> works for any variable, e.g. <code class="font-mono">&#123;&#123; $originalPayload.args.0.id &#125;&#125;</code> → <code class="font-mono">$originalPayload['args'][0]['id']</code></p>
-              <p>Return value is ignored — use for side effects: <code class="font-mono">update_post_meta()</code>, <code class="font-mono">wp_mail()</code>, <code class="font-mono">error_log()</code>, follow-up API calls, etc.</p>
+              <p v-html="sprintf(__('%1$sAvailable variables:%2$s %3$s$payload%4$s (sent), %3$s$originalPayload%4$s (pre-mapping), %3$s$responseCode%4$s, %3$s$responseBody%4$s'), '<strong>', '</strong>', '<code class=&quot;font-mono&quot;>', '</code>')"></p>
+              <p v-html="sprintf(__('%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ $originalPayload.args.0.id }}%4$s → %3$s$originalPayload[\'args\'][0][\'id\']%4$s'), '<strong>', '</strong>', '<code class=&quot;font-mono&quot;>', '</code>')"></p>
+              <p v-html="sprintf(__('Return value is ignored — use for side effects: %1$supdate_post_meta()%2$s, %1$swp_mail()%2$s, %1$serror_log()%2$s, follow-up API calls, etc.'), '<code class=&quot;font-mono&quot;>', '</code>')"></p>
             </div>
 
             <!-- Post-dispatch: last successful log context -->
             <div v-if="activeTab === 'post'" class="space-y-1.5">
-              <Label class="text-xs text-muted-foreground">Last successful response (used as preview context)</Label>
+              <Label class="text-xs text-muted-foreground">{{ __('Last successful response (used as preview context)') }}</Label>
               <div v-if="loadingLastLog" class="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 class="h-3 w-3 animate-spin" /> Loading last log…
+                <Loader2 class="h-3 w-3 animate-spin" /> {{ __('Loading last log…') }}
               </div>
               <div v-else-if="lastSuccessLog" class="rounded-md border overflow-hidden">
                 <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-950 border-b border-green-200 dark:border-green-800 text-xs text-green-800 dark:text-green-300">
                   <CheckCircle2 class="h-3 w-3" />
-                  HTTP {{ lastSuccessLog.http_code }} — {{ lastSuccessLog.event_timestamp ?? '' }}
+                  {{ sprintf(__('HTTP %s'), lastSuccessLog.http_code) }} — {{ lastSuccessLog.event_timestamp ?? '' }}
                 </div>
                 <pre class="text-xs font-mono px-3 py-2 overflow-x-auto max-h-32 whitespace-pre-wrap break-all bg-muted/20">{{ formatJson(lastSuccessLog.response_body) }}</pre>
               </div>
-              <p v-else class="text-xs text-muted-foreground italic">No successful dispatches found for this webhook — run a test first.</p>
+              <p v-else class="text-xs text-muted-foreground italic">{{ __('No successful dispatches found for this webhook — run a test first.') }}</p>
             </div>
 
             <!-- Code editor -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
-                <Label>PHP Code</Label>
+                <Label>{{ __('PHP Code') }}</Label>
                 <button
                   class="shrink-0 rounded p-1 hover:bg-muted transition-colors"
-                  title="Copy code"
+                  :title="__('Copy code')"
                   @click="copyCode"
                 >
                   <Check v-if="copiedKey === 'glue-code'" class="h-3.5 w-3.5 text-green-500" />
@@ -441,7 +442,7 @@ const copyCode = () => {
             <!-- No payload warning -->
             <div v-if="!examplePayload" class="flex items-center gap-2 text-xs text-muted-foreground border rounded-md px-3 py-2 bg-muted/20">
               <AlertCircle class="h-3.5 w-3.5 shrink-0" />
-              Capture an example payload to enable live preview.
+              {{ __('Capture an example payload to enable live preview.') }}
             </div>
 
             <!-- Run preview button -->
@@ -454,27 +455,27 @@ const copyCode = () => {
             >
               <Loader2 v-if="activeTab === 'pre' ? preRunning : postRunning" class="h-3.5 w-3.5 animate-spin" />
               <Play v-else class="h-3.5 w-3.5" />
-              {{ (activeTab === 'pre' ? preRunning : postRunning) ? 'Running…' : 'Run Preview' }}
+              {{ (activeTab === 'pre' ? preRunning : postRunning) ? __('Running…') : __('Run Preview') }}
             </Button>
 
             <!-- Pre-dispatch result -->
             <template v-if="activeTab === 'pre'">
               <div v-if="preError" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5">
-                <div class="text-xs font-semibold text-destructive mb-1">Error</div>
+                <div class="text-xs font-semibold text-destructive mb-1">{{ __('Error') }}</div>
                 <pre class="text-xs font-mono text-destructive whitespace-pre-wrap break-all">{{ preError }}</pre>
               </div>
               <div v-else-if="preResult !== null" class="space-y-1.5">
                 <div class="flex items-center gap-2">
-                  <Label class="text-xs">Result Preview</Label>
+                  <Label class="text-xs">{{ __('Result Preview') }}</Label>
                   <Badge variant="success" class="text-xs gap-1">
                     <CheckCircle2 class="h-3 w-3" />
-                    OK
+                    {{ __('OK') }}
                   </Badge>
                 </div>
                 <pre class="text-xs font-mono bg-muted rounded-md p-3 overflow-x-auto max-h-64 whitespace-pre-wrap break-all border">{{ formatJson(preResult) }}</pre>
                 <div class="flex items-center gap-1.5 text-xs text-green-700 dark:text-green-400">
                   <CheckCircle2 class="h-3 w-3 shrink-0" />
-                  Result preview is now used as the effective payload for Mapping &amp; Conditions below.
+                  {{ __('Result preview is now used as the effective payload for Mapping & Conditions below.') }}
                 </div>
               </div>
             </template>
@@ -482,12 +483,12 @@ const copyCode = () => {
             <!-- Post-dispatch result -->
             <template v-if="activeTab === 'post'">
               <div v-if="postError" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5">
-                <div class="text-xs font-semibold text-destructive mb-1">Error</div>
+                <div class="text-xs font-semibold text-destructive mb-1">{{ __('Error') }}</div>
                 <pre class="text-xs font-mono text-destructive whitespace-pre-wrap break-all">{{ postError }}</pre>
               </div>
               <div v-else-if="postResult !== null" class="space-y-1.5">
-                <Label class="text-xs">Output (stdout)</Label>
-                <pre class="text-xs font-mono bg-muted rounded-md p-3 overflow-x-auto max-h-40 whitespace-pre-wrap break-all border">{{ postResult || '(no output)' }}</pre>
+                <Label class="text-xs">{{ __('Output (stdout)') }}</Label>
+                <pre class="text-xs font-mono bg-muted rounded-md p-3 overflow-x-auto max-h-40 whitespace-pre-wrap break-all border">{{ postResult || __('(no output)') }}</pre>
               </div>
             </template>
 
@@ -495,7 +496,7 @@ const copyCode = () => {
             <div class="border-t pt-4 space-y-3">
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                  <Label class="text-xs">Snippet Name</Label>
+                  <Label class="text-xs">{{ __('Snippet Name') }}</Label>
                   <Input
                     :value="activeTab === 'pre' ? preSnippetName : postSnippetName"
                     :placeholder="`${trigger} ${activeTab} glue`"
@@ -503,7 +504,7 @@ const copyCode = () => {
                   />
                 </div>
                 <div class="space-y-1">
-                  <Label class="text-xs">Tags (comma-separated)</Label>
+                  <Label class="text-xs">{{ __('Tags (comma-separated)') }}</Label>
                   <Input
                     :value="activeTab === 'pre' ? preSnippetTags : postSnippetTags"
                     placeholder="woocommerce, enrich"
@@ -515,7 +516,7 @@ const copyCode = () => {
               <Alert v-if="saveErrorMsg" variant="destructive" class="text-xs">{{ saveErrorMsg }}</Alert>
               <div v-if="saveSuccess" class="flex items-center gap-1.5 text-xs text-green-700 dark:text-green-400">
                 <CheckCircle2 class="h-3.5 w-3.5" />
-                Snippet saved and assigned.
+                {{ __('Snippet saved and assigned.') }}
               </div>
 
               <div class="flex gap-2">
@@ -526,13 +527,13 @@ const copyCode = () => {
                 >
                   <Loader2 v-if="savingSnippet || assignmentSaving" class="h-4 w-4 animate-spin" />
                   <Save v-else class="h-4 w-4" />
-                  {{ (savingSnippet || assignmentSaving) ? 'Saving…' : (hasAssignment ? 'Update Snippet' : 'Save & Assign') }}
+                  {{ (savingSnippet || assignmentSaving) ? __('Saving…') : (hasAssignment ? __('Update Snippet') : __('Save & Assign')) }}
                 </Button>
                 <Button
                   v-if="hasAssignment"
                   variant="outline"
                   size="icon"
-                  title="Clear assignment"
+                  :title="__('Clear assignment')"
                   :disabled="savingSnippet || assignmentSaving"
                   @click="clearAssignment"
                 >
@@ -545,7 +546,7 @@ const copyCode = () => {
 
         <!-- Footer -->
         <div class="px-6 py-3 border-t border-border shrink-0 flex justify-end">
-          <Button variant="ghost" @click="emit('close')">Close</Button>
+          <Button variant="ghost" @click="emit('close')">{{ __('Close') }}</Button>
         </div>
       </div>
     </div>

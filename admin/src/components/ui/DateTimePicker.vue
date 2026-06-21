@@ -9,6 +9,7 @@ import { CalendarIcon, X } from 'lucide-vue-next'
 import Popover from './Popover.vue'
 import Calendar from './Calendar.vue'
 import { cn } from '@/lib/utils'
+import { __ } from '@/i18n'
 
 const props = defineProps({
   modelValue: {
@@ -17,7 +18,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: 'Pick date & time',
+    default: () => __('Pick date & time'),
   },
 })
 
@@ -114,7 +115,7 @@ const displayLabel = computed(() => {
       <!-- Time input -->
       <div class="border-t px-3 pb-3 pt-2 flex items-center gap-2">
         <CalendarIcon class="h-4 w-4 text-muted-foreground shrink-0" />
-        <span class="text-sm text-muted-foreground">Time</span>
+        <span class="text-sm text-muted-foreground">{{ __('Time') }}</span>
         <input
           type="time"
           :value="timeValue"

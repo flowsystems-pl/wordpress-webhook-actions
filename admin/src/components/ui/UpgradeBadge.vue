@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { Sparkles } from 'lucide-vue-next'
 import Dialog from './Dialog.vue'
 import Button from './Button.vue'
+import { __ } from '@/i18n'
 
 const router = useRouter()
 const open = ref(false)
@@ -21,18 +22,18 @@ const navigate = () => {
     @click="open = true"
   >
     <Sparkles class="h-3 w-3" />
-    Upgrade
+    {{ __('Upgrade') }}
   </button>
 
   <Dialog
     :open="open"
-    title="Head to the Pro tab?"
-    description="Any unsaved changes on this form will be lost."
+    :title="__('Head to the Pro tab?')"
+    :description="__('Any unsaved changes on this form will be lost.')"
     @close="open = false"
   >
     <template #footer>
-      <Button variant="outline" @click="open = false">Cancel</Button>
-      <Button @click="navigate">Go to Pro</Button>
+      <Button variant="outline" @click="open = false">{{ __('Cancel') }}</Button>
+      <Button @click="navigate">{{ __('Go to Pro') }}</Button>
     </template>
   </Dialog>
 </template>
