@@ -1,0 +1,3589 @@
+# Copyright (C) 2026 Mateusz Skorupa
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Webhook Actions by Flow Systems 1.15.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-21T19:35:27+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: flowsystems-webhook-actions\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dh %2$dm"
+msgstr "%1$d 时 %2$d 分"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dm %2$ds"
+msgstr "%1$d 分 %2$d 秒"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s %2$d min"
+msgstr "%1$s %2$d 分"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s %2$ds"
+msgstr "%1$s %2$d 秒"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — runs all WordPress scheduled tasks. "
+"Min interval: 60s. %1$sDISABLE_WP_CRON%2$s is added to "
+"%1$swp-config.php%2$s automatically."
+msgstr ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — 运行所有 WordPress 计划任务。最小间隔：60 "
+"秒。%1$sDISABLE_WP_CRON%2$s 会自动添加到 %1$swp-config.php%2$s。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — processes only the webhook "
+"queue. Min interval: 20s."
+msgstr "%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — 仅处理 Webhook 队列。最小间隔：20 秒。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sAvailable variables:%2$s %3$s$payload%4$s (mapped array), %3$s$args%4$s "
+"(%5$s$payload['args']%6$s)"
+msgstr "%1$s可用变量：%2$s %3$s$payload%4$s（映射数组）、%3$s$args%4$s（%5$s$payload['args']%6$s）"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sAvailable variables:%2$s %3$s$payload%4$s (sent), "
+"%3$s$originalPayload%4$s (pre-mapping), %3$s$responseCode%4$s, "
+"%3$s$responseBody%4$s"
+msgstr ""
+"%1$s可用变量：%2$s "
+"%3$s$payload%4$s（已发送）、%3$s$originalPayload%4$s（映射前）、%3$s$responseCode%4$s、%3"
+"$s$responseBody%4$s"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s is active — WP-Cron auto-spawn is disabled."
+msgstr "%1$sDISABLE_WP_CRON%2$s 已生效 — WP-Cron 自动触发已禁用。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s will be written to %1$swp-config.php%2$s on save."
+msgstr "保存时 %1$sDISABLE_WP_CRON%2$s 将被写入 %1$swp-config.php%2$s。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFSWA_SECRET_KEY%2$s is defined and your credentials still work, but a "
+"copy of the old key remains in the database — so you don't yet get the full "
+"benefit. Re-encrypt now to seal every secret with the wp-config key and "
+"delete the database key."
+msgstr ""
+"%1$sFSWA_SECRET_KEY%2$s 已定义且你的凭据仍可用，但数据库中仍保留旧密钥的副本 — 因此你尚未获得完整的保护。立即重新加密，用 "
+"wp-config 密钥封存每个密钥并删除数据库中的密钥。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFormat:%2$s any long, random, secret string (64+ characters "
+"recommended). Generate one from the %3$sWordPress salt generator%4$s or "
+"with %5$swp_generate_password(64, true, true)%6$s."
+msgstr ""
+"%1$s格式：%2$s 任意长的随机机密字符串（推荐 64 个以上字符）。可使用 %3$sWordPress 盐值生成器%4$s 或 "
+"%5$swp_generate_password(64, true, true)%6$s 生成。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sKeep it stable &amp; backed up:%2$s don't change or lose this value "
+"once credentials are sealed with it, or they become unrecoverable."
+msgstr "%1$s保持稳定并备份：%2$s 一旦凭据用此值封存，请勿更改或丢失它，否则将无法恢复。"
+
+#: admin/src/views/ProView.vue
+msgid "%1$sPriority support%2$s — Pro subscribers get a direct response via email."
+msgstr "%1$s优先支持%2$s — Pro 订阅者可通过电子邮件获得直接回复。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sSafe to add anytime:%2$s existing credentials keep working immediately. "
+"After adding it, return here and click the %3$sRe-encrypt%4$s button that "
+"appears to finish the move and remove the database key."
+msgstr "%1$s随时可安全添加：%2$s 现有凭据会立即继续工作。添加后，返回此处并点击出现的 %3$s重新加密%4$s 按钮以完成迁移并移除数据库密钥。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ $args.0.field }}%4$s "
+"→ %3$s$args[0]['field']%4$s, %3$s{{ $payload.key }}%4$s → "
+"%3$s$payload['key']%4$s"
+msgstr ""
+"%1$s简写：%2$s 适用于任意变量，例如 %3$s{{ $args.0.field }}%4$s → "
+"%3$s$args[0]['field']%4$s、%3$s{{ $payload.key }}%4$s → "
+"%3$s$payload['key']%4$s"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ "
+"$originalPayload.args.0.id }}%4$s → "
+"%3$s$originalPayload['args'][0]['id']%4$s"
+msgstr ""
+"%1$s简写：%2$s 适用于任意变量，例如 %3$s{{ $originalPayload.args.0.id }}%4$s → "
+"%3$s$originalPayload['args'][0]['id']%4$s"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$swp-config.php%2$s is not writable. Add this line manually before the "
+"“That’s all” comment: %3$sdefine( 'DISABLE_WP_CRON', true );%4$s"
+msgstr ""
+"%1$swp-config.php%2$s 不可写。请在“That’s all”注释之前手动添加这一行：%3$sdefine( "
+"'DISABLE_WP_CRON', true );%4$s"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "%d available"
+msgstr "%d 个可用"
+
+#: admin/src/views/VaultView.vue
+msgid "%d credential cannot be decrypted with the current key."
+msgid_plural "%d credentials cannot be decrypted with the current key."
+msgstr[0] "有 %d 个凭据无法用当前密钥解密。"
+
+#: admin/src/views/ActivityView.vue
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d 天"
+
+#: admin/src/views/ActivityView.vue
+msgid "%d entry"
+msgid_plural "%d entries"
+msgstr[0] "%d 个条目"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d 小时"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d link will be removed"
+msgid_plural "%d links will be removed"
+msgstr[0] "将移除 %d 个连接"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d 分钟"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d second"
+msgid_plural "%d seconds"
+msgstr[0] "%d 秒"
+
+#: admin/src/views/LogsList.vue
+msgid "%d selected"
+msgstr "已选择 %d 项"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "%d trigger selected"
+msgid_plural "%d triggers selected"
+msgstr[0] "已选择 %d 个触发器"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d webhook"
+msgid_plural "%d webhooks"
+msgstr[0] "%d 个 Webhook"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dh"
+msgstr "%d 时"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dm"
+msgstr "%d 分"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%ds"
+msgstr "%d 秒"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%s Retry"
+msgstr "第 %s 次重试"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%s auth"
+msgstr "%s 认证"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "%s…"
+msgstr "%s…"
+
+#: admin/src/components/LogsTable.vue
+msgid "(last attempt)"
+msgstr "（上次尝试）"
+
+#: admin/src/views/ProView.vue
+msgid "(local, not counted)"
+msgstr "（本地，不计入）"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "(no output)"
+msgstr "（无输出）"
+
+#: admin/src/components/MappingEditor.vue
+msgid "(param name)"
+msgstr "（参数名称）"
+
+#: admin/src/components/MappingEditor.vue
+msgid "(value)"
+msgstr "（值）"
+
+#: src/Api/ChainsController.php:134
+#: src/Api/ChainsController.php:167
+msgid "A chain with that name already exists."
+msgstr "已存在同名的链。"
+
+#: src/Api/CredentialsController.php:237
+#: src/Api/CredentialsController.php:286
+msgid "A credential with this name already exists."
+msgstr "已存在同名的凭据。"
+
+#: admin/src/views/VaultView.vue
+msgid "A named header such as X-API-Key"
+msgstr "命名标头，例如 X-API-Key"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid ""
+"A new delivery attempt has been queued. The result will appear in this "
+"log's attempt history on the next cron run."
+msgstr "新的投递尝试已加入队列。结果将在下次 cron 运行时出现在该日志的尝试历史中。"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid ""
+"A new token will be generated. The current token will be %1$simmediately "
+"invalidated%2$s and all existing integrations using it will stop working."
+msgstr "将生成一个新令牌。当前令牌将%1$s立即失效%2$s，所有使用它的现有集成都将停止工作。"
+
+#: src/Api/WebhooksController.php:529
+msgid "A payload object is required for custom source."
+msgstr "自定义源需要一个负载对象。"
+
+#: src/Api/CredentialsController.php:400
+msgid "A secret value is required."
+msgstr "密钥值为必填项。"
+
+#: src/Api/ChainsController.php:226
+msgid "A webhook cannot trigger itself."
+msgstr "Webhook 不能触发自身。"
+
+#: admin/src/views/ActivityView.vue
+msgid "AI reasoning"
+msgstr "AI 推理"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "ALL (AND)"
+msgstr "全部（AND）"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "AND"
+msgstr "AND"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "ANY (OR)"
+msgstr "任意（OR）"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue
+msgid "API Tokens"
+msgstr "API 令牌"
+
+#: admin/src/views/VaultView.vue
+msgid "API key (custom header)"
+msgstr "API 密钥（自定义标头）"
+
+#: src/Api/ApiTokensController.php:199
+#: src/Api/ApiTokensController.php:245
+#: src/Api/ApiTokensController.php:269
+msgid "API token not found."
+msgstr "未找到 API 令牌。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Action"
+msgstr "操作"
+
+#: admin/src/components/LogsTable.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Actions"
+msgstr "操作"
+
+#: admin/src/views/ProView.vue
+msgid "Activate %1$sWebhook Actions Pro%2$s to continue."
+msgstr "启用 %1$sWebhook Actions Pro%2$s 以继续。"
+
+#: admin/src/views/ProView.vue
+msgid "Activate License"
+msgstr "激活许可证"
+
+#: admin/src/views/ProView.vue
+msgid "Activate Plugin"
+msgstr "启用插件"
+
+#: admin/src/views/ProView.vue
+msgid "Activating…"
+msgstr "正在启用…"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/views/ExternalCronView.vue admin/src/views/ProView.vue
+msgid "Active"
+msgstr "已激活"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Active/Total"
+msgstr "活动/总计"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Activity"
+msgstr "活动"
+
+#: admin/src/views/ProView.vue
+msgid "Activity Log"
+msgstr "活动日志"
+
+#: admin/src/views/ActivityView.vue
+msgid "Activity entries older than %d day have been deleted."
+msgid_plural "Activity entries older than %d days have been deleted."
+msgstr[0] "已删除早于 %d 天的活动条目。"
+
+#: src/Api/ActivityLogController.php:54
+msgid "Activity log entry ID."
+msgstr "活动日志条目 ID。"
+
+#: src/Api/ActivityLogController.php:120
+msgid "Activity log entry not found."
+msgstr "未找到活动日志条目。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Actor"
+msgstr "操作者"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/TriggerSelect.vue
+msgid "Add"
+msgstr "添加"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Add Mapping"
+msgstr "添加映射"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Add Webhook"
+msgstr "添加 Webhook"
+
+#: admin/src/views/VaultView.vue
+msgid "Add a credential to securely reuse it across webhooks."
+msgstr "添加凭据，以便在各个 Webhook 中安全地重复使用。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add condition"
+msgstr "添加条件"
+
+#: admin/src/views/VaultView.vue
+msgid "Add first credential"
+msgstr "添加第一个凭据"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add group"
+msgstr "添加组"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Add mapping for this field"
+msgstr "为该字段添加映射"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Add row"
+msgstr "添加行"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add rule"
+msgstr "添加规则"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Additional URL Query Parameters"
+msgstr "额外的 URL 查询参数"
+
+#: admin/src/views/ActivityView.vue
+msgid "Admin and API action history"
+msgstr "管理员和 API 操作历史"
+
+#: admin/src/components/WebhookForm.vue
+msgid "After saving, the value is encrypted at rest and never shown again."
+msgstr "保存后，该值将被静态加密，且绝不会再次显示。"
+
+#: admin/src/views/ProView.vue
+msgid "Agency"
+msgstr "代理版"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Agent (AI)"
+msgstr "Agent（AI）"
+
+#: admin/src/views/ActivityView.vue
+msgid "All actions"
+msgstr "所有操作"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "All chains"
+msgstr "所有链"
+
+#: src/Api/SettingsController.php:200
+msgid "All logs have been cleared."
+msgstr "所有日志已清除。"
+
+#: admin/src/views/LogsList.vue
+msgid "All statuses"
+msgstr "所有状态"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Also update expiry"
+msgstr "同时更新到期时间"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid ""
+"Alternatively, %1$sAuthorization: Bearer &lt;token&gt;%2$s works on most "
+"servers (requires %1$sCGIPassAuth On%2$s on Apache)."
+msgstr ""
+"或者，%1$sAuthorization: Bearer &lt;token&gt;%2$s 在大多数服务器上有效（在 Apache 上需要 "
+"%1$sCGIPassAuth On%2$s）。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"An %1$sagent%2$s API token can assign credentials to webhooks but can never "
+"read their values."
+msgstr "%1$sagent%2$s API 令牌可以将凭据分配给 Webhook，但绝不能读取它们的值。"
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Any unsaved changes on this form will be lost."
+msgstr "此表单上任何未保存的更改都将丢失。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Appended to the URL alongside the JSON body. Values support dot-notation "
+"paths or static strings."
+msgstr "与 JSON 主体一起附加到 URL。值支持点号路径或静态字符串。"
+
+#: src/Api/LogsController.php:110
+msgid "Array of log IDs to retry."
+msgstr "要重试的日志 ID 数组。"
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempt #%d"
+msgstr "第 #%d 次尝试"
+
+#: admin/src/views/QueueView.vue
+msgid "Attempt %1$d/%2$d"
+msgstr "第 %1$d/%2$d 次尝试"
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempt History"
+msgstr "尝试历史"
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempted At"
+msgstr "尝试时间"
+
+#: src/Api/AuthHelper.php:42
+msgid ""
+"Authentication required. Provide a valid API token via X-FSWA-Token header, "
+"Authorization: Bearer token, or api_token query parameter."
+msgstr ""
+"需要身份验证。请通过 X-FSWA-Token 标头、Authorization: Bearer token 或 api_token "
+"查询参数提供有效的 API 令牌。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Authorization (optional)"
+msgstr "授权（可选）"
+
+#: src/Api/WebhooksController.php:726
+msgid "Authorization header value."
+msgstr "Authorization 标头值。"
+
+#: admin/src/views/VaultView.vue
+msgid "Authorization: Basic <base64(user:pass)> — incl. WP Application Passwords"
+msgstr "Authorization: Basic <base64(user:pass)> — 包含 WP 应用程序密码"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Automatically enrich payload with user profile information"
+msgstr "自动用用户资料信息丰富负载"
+
+#: admin/src/views/ProView.vue
+msgid "Automation Chains"
+msgstr "自动化链"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Available Fields"
+msgstr "可用字段"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Avg attempts"
+msgstr "平均尝试次数"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Avg ping"
+msgstr "平均 ping"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Avg response"
+msgstr "平均响应"
+
+#: admin/src/views/WebhookEdit.vue admin/src/views/WebhookLogs.vue
+msgid "Back to webhooks"
+msgstr "返回 Webhook 列表"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Backoff Strategy"
+msgstr "退避策略"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Base Delay (s)"
+msgstr "基础延迟（秒）"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Base seconds used to calculate the retry delay. Acts as a multiplier for "
+"exponential, interval for linear, and constant wait for fixed."
+msgstr "用于计算重试延迟的基础秒数。在指数策略中作为乘数，在线性策略中作为间隔，在固定策略中作为恒定等待。"
+
+#: admin/src/views/VaultView.vue
+msgid "Basic auth (user + password)"
+msgstr "Basic 认证（用户名 + 密码）"
+
+#: src/Api/CredentialsController.php:389
+msgid "Basic auth requires a username and password."
+msgstr "Basic 认证需要用户名和密码。"
+
+#: admin/src/views/VaultView.vue
+msgid "Bearer token (PAT)"
+msgstr "Bearer 令牌（PAT）"
+
+#: src/Api/ChainsController.php:223
+msgid "Both source_webhook_id and target_webhook_id are required."
+msgstr "source_webhook_id 和 target_webhook_id 均为必填项。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Browse Library"
+msgstr "浏览库"
+
+#: admin/src/views/ProView.vue
+msgid "Business"
+msgstr "商业版"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"By default the encryption key is generated and stored in the database. For "
+"stronger protection — so a database-only dump can't decrypt secrets — move "
+"the key into %1$swp-config.php%2$s:"
+msgstr ""
+"默认情况下，加密密钥会生成并存储在数据库中。为获得更强的保护 — 使仅有数据库转储无法解密密钥 — 请将密钥移入 "
+"%1$swp-config.php%2$s："
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/WebhookForm.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Cancel"
+msgstr "取消"
+
+#: src/Api/QueueController.php:335
+msgid "Cannot delete a job that is currently being processed."
+msgstr "无法删除正在处理中的任务。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Cannot evaluate"
+msgstr "无法评估"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Cap on the wait between retries. Prevents exponential backoff from growing "
+"indefinitely — any delay above this value is clamped to it."
+msgstr "重试之间等待的上限。防止指数退避无限增长 — 超过此值的任何延迟都会被限制到该值。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Capture an example payload to enable live preview."
+msgstr "捕获示例负载以启用实时预览。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured"
+msgstr "已捕获"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Mapping"
+msgstr "已捕获 + 映射"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Pre-dispatch Glue + Mapping"
+msgstr "已捕获 + 投递前 Glue + 映射"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Pre-dispatch Glue + Mapping + Post-dispatch Glue"
+msgstr "已捕获 + 投递前 Glue + 映射 + 投递后 Glue"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured payload with field mapping applied"
+msgstr "应用了字段映射的已捕获负载"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Cast"
+msgstr "转换"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Chain"
+msgstr "链"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Chain link #%1$s — %2$s"
+msgstr "链接 #%1$s — %2$s"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Chain link #%s (deleted)"
+msgstr "链接 #%s（已删除）"
+
+#: src/Api/ChainsController.php:255
+msgid "Chain link not found."
+msgstr "未找到链接。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Chain mode links this webhook to upstream webhooks, which requires a saved "
+"webhook record. %1$sSave the webhook first%2$s (with or without WP-hook "
+"triggers — they'll be cleared when you pick upstream webhooks), then choose "
+"your chain sources on the next screen."
+msgstr ""
+"链模式将该 Webhook 与上游 Webhook 关联，这需要已保存的 Webhook 记录。%1$s请先保存 Webhook%2$s（是否带 "
+"WP-hook 触发器均可 — 选择上游 Webhook 时它们会被清除），然后在下一屏选择你的链来源。"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Chain name"
+msgstr "链名称"
+
+#: src/Api/ChainsController.php:131
+#: src/Api/ChainsController.php:163
+msgid "Chain name is required."
+msgstr "链名称为必填项。"
+
+#: src/Api/ChainsController.php:117
+#: src/Api/ChainsController.php:156
+#: src/Api/ChainsController.php:196
+#: src/Api/ChainsController.php:217
+msgid "Chain not found."
+msgstr "未找到链。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Chains"
+msgstr "链"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Change expiry"
+msgstr "更改到期时间"
+
+#: admin/src/components/ChangeExpiryDialog.vue
+msgid "Change expiry: %s"
+msgstr "更改到期时间：%s"
+
+#: admin/src/views/ActivityView.vue
+msgid "Changes"
+msgstr "更改"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Choose which payload the conditions read from: Original is the raw payload "
+"before field mapping; Transformed is the payload after mapping is applied."
+msgstr "选择条件读取的负载：原始是字段映射前的原始负载；转换后是应用映射后的负载。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Clear assignment"
+msgstr "清除分配"
+
+#: admin/src/views/ActivityView.vue
+msgid "Clear filters"
+msgstr "清除筛选"
+
+#: admin/src/views/LogsList.vue
+msgid "Clear selection"
+msgstr "清除选择"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Click to select or browse • + to select an array/object"
+msgstr "点击以选择或浏览 • + 选择数组/对象"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Client Error"
+msgstr "客户端错误"
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/components/ui/Dialog.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Close"
+msgstr "关闭"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Code Glue"
+msgstr "Code Glue"
+
+#: src/Api/TriggersController.php:228
+msgid "Comments"
+msgstr "评论"
+
+#: admin/src/views/ProView.vue
+msgid "Community support forum"
+msgstr "社区支持论坛"
+
+#: src/Api/SchemasController.php:259
+msgid "Condition groups require a Pro license."
+msgstr "条件组需要 Pro 许可证。"
+
+#: admin/src/views/ProView.vue
+msgid "Condition groups with AND / OR logic"
+msgstr "支持 AND / OR 逻辑的条件组"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Conditions"
+msgstr "条件"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid ""
+"Conditions are evaluated against the payload — use the 'Evaluate conditions "
+"against' toggle above to choose original or transformed."
+msgstr "条件根据负载进行评估 — 使用上方的“评估条件依据”开关选择原始或转换后。"
+
+#: src/Api/LogsController.php:404
+msgid "Conditions are not met with current settings — event would be skipped."
+msgstr "当前设置不满足条件 — 事件将被跳过。"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Copy Event UUID"
+msgstr "复制事件 UUID"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy URL"
+msgstr "复制 URL"
+
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/QueueView.vue
+msgid "Copy X-Webhook-Id"
+msgstr "复制 X-Webhook-Id"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Copy code"
+msgstr "复制代码"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Copy endpoint URL"
+msgstr "复制端点 URL"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy headers"
+msgstr "复制标头"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy original payload"
+msgstr "复制原始负载"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy payload"
+msgstr "复制负载"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy response body"
+msgstr "复制响应主体"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy scheduled time"
+msgstr "复制计划时间"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Copy to clipboard"
+msgstr "复制到剪贴板"
+
+#: admin/src/components/WebhookCardContent.vue admin/src/views/QueueView.vue
+msgid "Copy trigger name"
+msgstr "复制触发器名称"
+
+#: src/Api/QueueController.php:270
+msgid "Could not lock job for processing."
+msgstr "无法锁定任务以进行处理。"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Create API Token"
+msgstr "创建 API 令牌"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhookEdit.vue
+msgid "Create Webhook"
+msgstr "创建 Webhook"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create a token to enable programmatic API access."
+msgstr "创建令牌以启用程序化 API 访问。"
+
+#: admin/src/views/VaultView.vue
+msgid "Create credential"
+msgstr "创建凭据"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create first token"
+msgstr "创建第一个令牌"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Create token"
+msgstr "创建令牌"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Create your first webhook"
+msgstr "创建你的第一个 Webhook"
+
+#: admin/src/components/LogsTable.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Created"
+msgstr "创建时间"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Creating…"
+msgstr "正在创建…"
+
+#: src/Api/WebhooksController.php:785
+msgid "Creation date."
+msgstr "创建日期。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Credential name"
+msgstr "凭据名称"
+
+#: src/Api/CredentialsController.php:229
+#: src/Api/CredentialsController.php:283
+msgid "Credential name is required."
+msgstr "凭据名称为必填项。"
+
+#: src/Api/CredentialsController.php:431
+msgid "Credential not found."
+msgstr "未找到凭据。"
+
+#: admin/src/App.vue admin/src/components/WebhookForm.vue admin/src/views/VaultView.vue
+msgid "Credentials Vault"
+msgstr "凭据保险库"
+
+#: admin/src/views/ActivityView.vue
+msgid "Cron"
+msgstr "Cron"
+
+#: src/Controllers/DispatcherController.php:117
+msgid "Cron secret not configured."
+msgstr "未配置 cron 密钥。"
+
+#: src/Api/LogsController.php:517
+msgid "Current page of results."
+msgstr "结果的当前页。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Custom"
+msgstr "自定义"
+
+#: admin/src/views/VaultView.vue
+msgid "Custom Authorization value"
+msgstr "自定义 Authorization 值"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Custom Payload"
+msgstr "自定义负载"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Custom Request Headers"
+msgstr "自定义请求标头"
+
+#: admin/src/views/ProView.vue
+msgid "Custom backoff strategy (exponential, linear, fixed)"
+msgstr "自定义退避策略（指数、线性、固定）"
+
+#: src/Api/WebhooksController.php:120
+msgid "Custom payload JSON (required when payload_source is custom)."
+msgstr "自定义负载 JSON（当 payload_source 为 custom 时必填）。"
+
+#: admin/src/views/QueueView.vue
+msgid "Database-backed webhook job queue"
+msgstr "基于数据库的 Webhook 任务队列"
+
+#: admin/src/components/LogsTable.vue
+msgid "Date"
+msgstr "日期"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate"
+msgstr "停用"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate License"
+msgstr "停用许可证"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate license?"
+msgstr "停用许可证？"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivating…"
+msgstr "正在停用…"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Delay preview"
+msgstr "延迟预览"
+
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Delete"
+msgstr "删除"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete Old Activity"
+msgstr "删除旧活动"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain"
+msgstr "删除链"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain “%s”?"
+msgstr "删除链“%s”？"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential"
+msgstr "删除凭据"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential: %s"
+msgstr "删除凭据：%s"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete entries older than"
+msgstr "删除早于以下天数的记录"
+
+#: src/Api/ActivityLogController.php:39
+msgid "Delete entries older than specified days."
+msgstr "删除早于指定天数的条目。"
+
+#: admin/src/components/LogsTable.vue
+msgid "Delete log?"
+msgstr "删除日志？"
+
+#: src/Api/LogsController.php:64
+msgid "Delete logs older than specified days."
+msgstr "删除早于指定天数的日志。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete old"
+msgstr "删除旧记录"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token"
+msgstr "删除令牌"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token: %s"
+msgstr "删除令牌：%s"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete “%s”?"
+msgstr "删除“%s”？"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Deleting with force will detach it from %d webhook; that webhook will send "
+"no Authorization header until reconfigured."
+msgid_plural ""
+"Deleting with force will detach it from %d webhooks; those webhooks will "
+"send no Authorization header until reconfigured."
+msgstr[0] "强制删除会将其从 %d 个 Webhook 分离；在重新配置之前，这些 Webhook 将不发送 Authorization 标头。"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Deleting…"
+msgstr "正在删除…"
+
+#: admin/src/views/ProView.vue
+msgid "Delivery logs & replay"
+msgstr "投递日志和重放"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Disabled"
+msgstr "已禁用"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Disabled webhooks still capture payload examples for mapping and conditions "
+"configuration."
+msgstr "已禁用的 Webhook 仍会捕获负载示例，以供映射和条件配置使用。"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Discard"
+msgstr "放弃"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Does not match example payload"
+msgstr "与示例负载不匹配"
+
+#: admin/src/views/ProView.vue
+msgid "Don't have a license yet?"
+msgstr "还没有许可证？"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Don't show this again"
+msgstr "不再显示"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Done"
+msgstr "完成"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Dot-path (e.g. event.id) or static text"
+msgstr "点号路径（例如 event.id）或静态文本"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"Downstream webhooks that lose their only trigger will be marked as orphans "
+"(no trigger assigned)."
+msgstr "失去唯一触发器的下游 Webhook 将被标记为孤立（未分配触发器）。"
+
+#: admin/src/views/QueueView.vue
+msgid "Due"
+msgstr "到期"
+
+#: admin/src/views/QueueView.vue
+msgid "Due Now"
+msgstr "现在到期"
+
+#: admin/src/components/LogsTable.vue
+msgid "Duration"
+msgstr "耗时"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+msgid "Edit"
+msgstr "编辑"
+
+#: admin/src/views/WebhookEdit.vue
+msgid "Edit Webhook"
+msgstr "编辑 Webhook"
+
+#: admin/src/views/VaultView.vue
+msgid "Edit credential"
+msgstr "编辑凭据"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Enable Anyway"
+msgstr "仍然启用"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Enable External Cron"
+msgstr "启用外部 Cron"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Enable Synchronous Execution?"
+msgstr "启用同步执行？"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Enable conditional dispatch"
+msgstr "启用条件投递"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Enabled Webhook"
+msgstr "已启用 Webhook"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Endpoint URL"
+msgstr "端点 URL"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Endpoint URL is required"
+msgstr "端点 URL 为必填项"
+
+#: src/Api/WebhooksController.php:234
+msgid "Endpoint URL is required."
+msgstr "端点 URL 为必填项。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Enter an Authorization header value first."
+msgstr "请先输入 Authorization 标头值。"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Enter custom hook name..."
+msgstr "输入自定义钩子名称…"
+
+#: admin/src/views/ProView.vue
+msgid "Enter your license key to unlock Pro features on this site."
+msgstr "输入你的许可证密钥以在本站点解锁 Pro 功能。"
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
+msgid "Error"
+msgstr "错误"
+
+#: admin/src/components/LogsTable.vue
+msgid "Error Message"
+msgstr "错误信息"
+
+#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Errors"
+msgstr "错误"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Evaluate conditions against"
+msgstr "评估条件依据"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Event Replayed"
+msgstr "事件已重放"
+
+#: admin/src/components/LogsTable.vue
+msgid "Event UUID"
+msgstr "事件 UUID"
+
+#: admin/src/views/QueueView.vue
+msgid "Event UUID:"
+msgstr "事件 UUID："
+
+#: src/App.php:105
+msgid "Every Minute"
+msgstr "每分钟"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Example payload captured"
+msgstr "已捕获示例负载"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Example payload would %1$s%2$s%3$s"
+msgstr "示例负载将%1$s%2$s%3$s"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Exclude entire %s"
+msgstr "排除整个 %s"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Exclude field"
+msgstr "排除字段"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Excluded Fields"
+msgstr "已排除字段"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute"
+msgstr "执行"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Execute Now"
+msgstr "立即执行"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute now"
+msgstr "立即执行"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Executes synchronously (blocking)"
+msgstr "同步执行（阻塞）"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expired"
+msgstr "已过期"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expires"
+msgstr "到期时间"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Expires at"
+msgstr "到期时间"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Exponential"
+msgstr "指数"
+
+#: admin/src/App.vue admin/src/views/ExternalCronView.vue
+msgid "External Cron"
+msgstr "外部 Cron"
+
+#: admin/src/views/ProView.vue
+msgid "External Cron (bypass WP-Cron)"
+msgstr "外部 Cron（绕过 WP-Cron）"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "External Cron History"
+msgstr "外部 Cron 历史"
+
+#: src/Api/WebhooksController.php:743
+msgid "Extra request headers as key-value pairs."
+msgstr "作为键值对的额外请求标头。"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Fail"
+msgstr "失败"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Failed"
+msgstr "失败"
+
+#: src/Api/ApiTokensController.php:166
+msgid "Failed to create API token."
+msgstr "创建 API 令牌失败。"
+
+#: src/Api/ChainsController.php:241
+msgid "Failed to create chain link (it may already exist)."
+msgstr "创建链接失败（它可能已存在）。"
+
+#: src/Api/ChainsController.php:139
+msgid "Failed to create chain."
+msgstr "创建链失败。"
+
+#: src/Api/CredentialsController.php:256
+msgid "Failed to create credential."
+msgstr "创建凭据失败。"
+
+#: src/Api/WebhooksController.php:260
+msgid "Failed to create webhook."
+msgstr "创建 Webhook 失败。"
+
+#: src/Api/ApiTokensController.php:279
+msgid "Failed to delete API token."
+msgstr "删除 API 令牌失败。"
+
+#: src/Api/CredentialsController.php:368
+msgid "Failed to delete credential."
+msgstr "删除凭据失败。"
+
+#: src/Api/LogsController.php:270
+msgid "Failed to delete log."
+msgstr "删除日志失败。"
+
+#: src/Api/QueueController.php:345
+msgid "Failed to delete queue job."
+msgstr "删除队列任务失败。"
+
+#: src/Api/SchemasController.php:336
+msgid "Failed to delete schema."
+msgstr "删除架构失败。"
+
+#: src/Api/WebhooksController.php:429
+msgid "Failed to delete webhook."
+msgstr "删除 Webhook 失败。"
+
+#: src/Services/WPHttpTransport.php:27
+msgid "Failed to encode payload as JSON"
+msgstr "将负载编码为 JSON 失败"
+
+#: admin/src/composables/useChains.js
+msgid "Failed to fetch chains"
+msgstr "获取链失败"
+
+#: admin/src/composables/useHealthStats.js
+msgid "Failed to fetch health stats"
+msgstr "获取健康统计失败"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch schemas"
+msgstr "获取架构失败"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch snippets"
+msgstr "获取代码片段失败"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch trigger snippet"
+msgstr "获取触发器代码片段失败"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch user triggers"
+msgstr "获取用户触发器失败"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Failed to rename chain."
+msgstr "重命名链失败。"
+
+#: src/Api/SchemasController.php:368
+msgid "Failed to reset capture."
+msgstr "重置捕获失败。"
+
+#: src/Api/LogsController.php:344
+msgid "Failed to retry job."
+msgstr "重试任务失败。"
+
+#: src/Api/QueueController.php:387
+msgid "Failed to retry queue job."
+msgstr "重试队列任务失败。"
+
+#: src/Api/ApiTokensController.php:213
+msgid "Failed to rotate API token."
+msgstr "轮换 API 令牌失败。"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to save trigger snippet"
+msgstr "保存触发器代码片段失败"
+
+#: src/Api/WebhooksController.php:471
+msgid "Failed to toggle webhook status."
+msgstr "切换 Webhook 状态失败。"
+
+#: src/Api/SchemasController.php:301
+msgid "Failed to update schema."
+msgstr "更新架构失败。"
+
+#: src/Api/WebhooksController.php:371
+msgid "Failed to update webhook."
+msgstr "更新 Webhook 失败。"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Field Mappings"
+msgstr "字段映射"
+
+#: src/Api/SchemasController.php:89
+msgid "Field mapping configuration."
+msgstr "字段映射配置。"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by X-Webhook-ID…"
+msgstr "按 X-Webhook-ID 筛选…"
+
+#: src/Api/ActivityLogController.php:148
+msgid "Filter by action prefix (e.g. \"webhook\")."
+msgstr "按操作前缀筛选（例如“webhook”）。"
+
+#: src/Api/LogsController.php:551
+msgid "Filter by event UUID (exact match)."
+msgstr "按事件 UUID 筛选（精确匹配）。"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by event UUID…"
+msgstr "按事件 UUID 筛选…"
+
+#: src/Api/ActivityLogController.php:147
+msgid "Filter by exact action string."
+msgstr "按精确的操作字符串筛选。"
+
+#: src/Api/LogsController.php:534
+msgid "Filter by status."
+msgstr "按状态筛选。"
+
+#: src/Api/LogsController.php:555
+msgid "Filter by target URL (partial match)."
+msgstr "按目标 URL 筛选（部分匹配）。"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by target URL…"
+msgstr "按目标 URL 筛选…"
+
+#: src/Api/LogsController.php:539
+msgid "Filter by trigger name."
+msgstr "按触发器名称筛选。"
+
+#: src/Api/LogsController.php:134
+#: src/Api/LogsController.php:530
+msgid "Filter by webhook ID."
+msgstr "按 Webhook ID 筛选。"
+
+#: src/Api/LogsController.php:559
+msgid "Filter by webhook UUID (X-Webhook-Id header value)."
+msgstr "按 Webhook UUID（X-Webhook-Id 标头值）筛选。"
+
+#: src/Api/ActivityLogController.php:152
+msgid "Filter from UTC datetime (Y-m-d H:i:s)."
+msgstr "从 UTC 日期时间筛选（Y-m-d H:i:s）。"
+
+#: src/Api/LogsController.php:543
+msgid "Filter logs from this date."
+msgstr "从该日期筛选日志。"
+
+#: src/Api/LogsController.php:547
+msgid "Filter logs until this date."
+msgstr "筛选日志至该日期。"
+
+#: src/Api/ActivityLogController.php:153
+msgid "Filter until UTC datetime (Y-m-d H:i:s)."
+msgstr "筛选至 UTC 日期时间（Y-m-d H:i:s）。"
+
+#: admin/src/views/VaultView.vue
+msgid "Finish moving the key into wp-config.php"
+msgstr "完成将密钥移入 wp-config.php"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Fixed"
+msgstr "固定"
+
+#: admin/src/views/VaultView.vue
+msgid "Force delete & detach"
+msgstr "强制删除并分离"
+
+#: admin/src/views/ActivityView.vue
+msgid "From date"
+msgstr "起始日期"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "From date & time"
+msgstr "起始日期和时间"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Full"
+msgstr "完整"
+
+#: admin/src/views/ProView.vue
+msgid "Full REST API with API token authentication"
+msgstr "完整的 REST API，支持 API 令牌身份验证"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Full pipeline — post-dispatch Code Glue fires after delivery"
+msgstr "完整流程 — 投递后 Code Glue 在投递后触发"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Full write power for AI assistants — but can never reveal auth headers or "
+"vault secrets"
+msgstr "为 AI 助手提供完整写入权限 — 但绝不会泄露认证标头或保险库密钥"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Full write power, but can never reveal auth headers or vault secrets"
+msgstr "完整写入权限，但绝不会泄露认证标头或保险库密钥"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "GET webhooks, logs, queue, health, triggers, schemas"
+msgstr "GET Webhook、日志、队列、健康状况、触发器、架构"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Generate a new API token for programmatic access."
+msgstr "生成新的 API 令牌以进行程序化访问。"
+
+#: admin/src/views/ProView.vue
+msgid "Get Pro"
+msgstr "获取 Pro"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Give this credential a name."
+msgstr "为此凭据命名。"
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Go to Pro"
+msgstr "前往 Pro"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Go to Queue"
+msgstr "前往队列"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group does not match example payload"
+msgstr "组与示例负载不匹配"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group matches example payload"
+msgstr "组与示例负载匹配"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group matches example payload: %1$s (based on %2$d rule)"
+msgid_plural "Group matches example payload: %1$s (based on %2$d rules)"
+msgstr[0] "组与示例负载匹配：%1$s（基于 %2$d 条规则）"
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue
+msgid "HTTP %s"
+msgstr "HTTP %s"
+
+#: admin/src/components/LogsTable.vue
+msgid "HTTP Code"
+msgstr "HTTP 代码"
+
+#: admin/src/components/WebhookForm.vue
+msgid "HTTP Method"
+msgstr "HTTP 方法"
+
+#: src/Api/WebhooksController.php:736
+msgid "HTTP method used for delivery."
+msgstr "用于投递的 HTTP 方法。"
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Head to the Pro tab?"
+msgstr "前往 Pro 选项卡？"
+
+#: admin/src/views/VaultView.vue
+msgid "Header"
+msgstr "标头"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/VaultView.vue
+msgid "Header name"
+msgstr "标头名称"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Headers"
+msgstr "标头"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide"
+msgstr "隐藏"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide password"
+msgstr "隐藏密码"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide secret"
+msgstr "隐藏密钥"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Hint"
+msgstr "提示"
+
+#: admin/src/views/VaultView.vue
+msgid "How secrets are protected"
+msgstr "密钥如何受保护"
+
+#: admin/src/components/WebhookForm.vue
+msgid "How to calculate the wait between retries. Overrides the global setting."
+msgstr "如何计算重试之间的等待时间。覆盖全局设置。"
+
+#: src/Api/WebhooksController.php:124
+msgid "How to run the test: now (synchronous) or queue (async)."
+msgstr "如何运行测试：now（同步）或 queue（异步）。"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "I've saved it elsewhere"
+msgstr "我已将其保存到别处"
+
+#: src/Api/WebhooksController.php:731
+msgid ""
+"ID of a vault credential to use for authorization. Takes precedence over "
+"auth_header."
+msgstr "用于授权的保险库凭据 ID。优先于 auth_header。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "IF"
+msgstr "如果"
+
+#: admin/src/views/ActivityView.vue
+msgid "IP"
+msgstr "IP"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Include User Data"
+msgstr "包含用户数据"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Include field"
+msgstr "包含字段"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Include unmapped fields"
+msgstr "包含未映射的字段"
+
+#: src/Api/AuthHelper.php:52
+#. translators: %s: required scope name
+#, php-format
+msgid "Insufficient token scope. This endpoint requires \"%s\" scope or higher."
+msgstr "令牌作用域不足。此端点需要“%s”作用域或更高。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Interval"
+msgstr "间隔"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Invalid JSON"
+msgstr "无效的 JSON"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Invalid URL format"
+msgstr "无效的 URL 格式"
+
+#: src/Api/CredentialsController.php:233
+#: src/Api/CredentialsController.php:294
+msgid "Invalid credential type."
+msgstr "无效的凭据类型。"
+
+#: src/Controllers/DispatcherController.php:125
+msgid "Invalid cron token."
+msgstr "无效的 cron 令牌。"
+
+#: src/Api/WebhooksController.php:242
+#: src/Api/WebhooksController.php:318
+msgid "Invalid endpoint URL."
+msgstr "无效的端点 URL。"
+
+#: src/Api/ApiTokensController.php:146
+msgid "Invalid scope. Must be read, operational, full, or agent."
+msgstr "无效的作用域。必须是 read、operational、full 或 agent。"
+
+#: src/Api/QueueController.php:354
+msgid "Job deleted successfully."
+msgstr "任务删除成功。"
+
+#: src/Api/QueueController.php:291
+msgid "Job executed successfully."
+msgstr "任务执行成功。"
+
+#: src/Api/QueueController.php:301
+msgid "Job failed and has been rescheduled for retry."
+msgstr "任务失败，已重新安排重试。"
+
+#: src/Api/QueueController.php:302
+msgid "Job failed and has exceeded maximum retry attempts."
+msgstr "任务失败，且已超过最大重试次数。"
+
+#: src/Api/QueueController.php:312
+msgid "Job failed with a non-retryable error."
+msgstr "任务因不可重试的错误而失败。"
+
+#: src/Api/QueueController.php:250
+msgid "Job has already been completed."
+msgstr "任务已完成。"
+
+#: src/Api/QueueController.php:396
+msgid "Job has been queued for retry."
+msgstr "任务已加入队列以重试。"
+
+#: src/Api/QueueController.php:260
+msgid "Job has invalid payload data."
+msgstr "任务的负载数据无效。"
+
+#: src/Api/QueueController.php:242
+msgid "Job is currently being processed."
+msgstr "任务正在处理中。"
+
+#: admin/src/views/QueueView.vue
+msgid ""
+"Jobs are processed every minute by WP-Cron. Failed jobs are automatically "
+"retried with exponential backoff. Use “Process Now” to manually trigger "
+"batch processing."
+msgstr "任务由 WP-Cron 每分钟处理一次。失败的任务会以指数退避自动重试。使用“立即处理”可手动触发批量处理。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Jobs processed per cron run."
+msgstr "每次 cron 运行处理的任务数。"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Key"
+msgstr "键"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Key must only contain letters, numbers, hyphens, or underscores"
+msgstr "键只能包含字母、数字、连字符或下划线"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Last captured payload for this trigger"
+msgstr "该触发器上次捕获的负载"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Last hour"
+msgstr "上一小时"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last ping failed:"
+msgstr "上次 ping 失败："
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last stats pull: %s"
+msgstr "上次拉取统计：%s"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Last successful response (used as preview context)"
+msgstr "上次成功的响应（用作预览上下文）"
+
+#: src/Api/WebhooksController.php:792
+msgid "Last update date."
+msgstr "上次更新日期。"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Last used"
+msgstr "上次使用"
+
+#: admin/src/App.vue
+msgid "Leave a review on WordPress.org"
+msgstr "在 WordPress.org 上发表评价"
+
+#: admin/src/views/VaultView.vue
+msgid "Leave blank to keep current"
+msgstr "留空以保留当前值"
+
+#: admin/src/views/ProView.vue
+msgid "License Key"
+msgstr "许可证密钥"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Linear"
+msgstr "线性"
+
+#: src/Api/WebhooksController.php:779
+msgid "List of trigger actions."
+msgstr "触发器操作列表。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Load"
+msgstr "加载"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Loading last log…"
+msgstr "正在加载上一条日志…"
+
+#: admin/src/views/QueueView.vue
+msgid "Loading queue…"
+msgstr "正在加载队列…"
+
+#: admin/src/components/ChainPicker.vue admin/src/views/WebhooksList.vue
+msgid "Loading webhooks…"
+msgstr "正在加载 Webhook…"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TriggerSelect.vue
+msgid "Loading..."
+msgstr "正在加载…"
+
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
+msgid "Loading…"
+msgstr "正在加载…"
+
+#: admin/src/views/QueueView.vue
+msgid "Locked by: %s"
+msgstr "锁定者：%s"
+
+#: admin/src/components/LogsTable.vue
+msgid "Log Details"
+msgstr "日志详情"
+
+#: src/Api/LogsController.php:242
+#: src/Api/LogsController.php:260
+#: src/Api/LogsController.php:316
+#: src/Api/LogsController.php:368
+msgid "Log not found."
+msgstr "未找到日志。"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/LogsList.vue
+msgid "Logs"
+msgstr "日志"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Logs: %s"
+msgstr "日志：%s"
+
+#: admin/src/App.vue
+msgid "Love the plugin?"
+msgstr "喜欢这个插件吗？"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Make sure to update all systems that use this token before rotating."
+msgstr "轮换前请确保更新所有使用该令牌的系统。"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Manage your webhook endpoints"
+msgstr "管理你的 Webhook 端点"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Manual dot-notation for all fields"
+msgstr "对所有字段使用手动点号表示法"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Manual header"
+msgstr "手动标头"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Mapped"
+msgstr "已映射"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Mapping & Conditions"
+msgstr "映射与条件"
+
+#: admin/src/components/LogsTable.vue
+msgid "Mapping Applied"
+msgstr "已应用映射"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Match:"
+msgstr "匹配："
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Matches example payload"
+msgstr "与示例负载匹配"
+
+#: flowsystems-webhook-actions.php
+#. Author of the plugin
+msgid "Mateusz Skorupa"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "Max Attempts"
+msgstr "最大尝试次数"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Max Delay (s)"
+msgstr "最大延迟（秒）"
+
+#: admin/src/views/VaultView.vue
+msgid "Maximum protection"
+msgstr "最高保护"
+
+#: src/Api/TriggersController.php:230
+msgid "Media"
+msgstr "媒体"
+
+#: admin/src/components/LogsTable.vue
+msgid "Method"
+msgstr "方法"
+
+#: admin/src/views/VaultView.vue
+msgid "Migrated %1$s · failed %2$s"
+msgstr "已迁移 %1$s · 失败 %2$s"
+
+#: admin/src/views/ProView.vue
+msgid "More sites, advanced conditions, and priority support."
+msgstr "更多站点、高级条件和优先支持。"
+
+#: src/Api/SchemasController.php:268
+msgid "More than 1 condition requires a Pro license."
+msgstr "超过 1 个条件需要 Pro 许可证。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Move this value into the encrypted Credentials Vault"
+msgstr "将此值移入加密的凭据保险库"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Must %1$sreturn $payload;%2$s — the returned array replaces the payload "
+"before dispatch."
+msgstr "必须 %1$sreturn $payload;%2$s — 返回的数组会在投递前替换负载。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "My Webhook"
+msgstr "我的 Webhook"
+
+#: admin/src/views/WebhooksList.vue
+msgid "My chain"
+msgstr "我的链"
+
+#: admin/src/components/LogsTable.vue
+msgid "N/A"
+msgstr "不适用"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Name"
+msgstr "名称"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Name is required"
+msgstr "名称为必填项"
+
+#: admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Name is required."
+msgstr "名称为必填项。"
+
+#: src/Api/WebhooksController.php:713
+msgid "Name of the webhook."
+msgstr "Webhook 的名称。"
+
+#: admin/src/views/ProView.vue
+msgid "Need help?"
+msgstr "需要帮助？"
+
+#: admin/src/components/ChainPicker.vue
+msgid "New chain name"
+msgstr "新链名称"
+
+#: admin/src/components/ChainPicker.vue
+msgid "New chain…"
+msgstr "新建链…"
+
+#: admin/src/views/VaultView.vue
+msgid "New credential"
+msgstr "新建凭据"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "New token"
+msgstr "新建令牌"
+
+#: admin/src/views/ActivityView.vue
+msgid "Next"
+msgstr "下一页"
+
+#: admin/src/components/LogsTable.vue
+msgid "Next attempt scheduled for %s"
+msgstr "下次尝试计划于 %s"
+
+#: admin/src/components/LogsTable.vue
+msgid "No"
+msgstr "否"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "No API tokens"
+msgstr "没有 API 令牌"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "No Payload Captured Yet"
+msgstr "尚未捕获负载"
+
+#: admin/src/views/ActivityView.vue
+msgid "No activity recorded yet."
+msgstr "尚未记录任何活动。"
+
+#: src/Api/SettingsController.php:171
+msgid "No archive files found or failed to create ZIP."
+msgstr "未找到归档文件或创建 ZIP 失败。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "No body sent"
+msgstr "未发送主体"
+
+#: src/Api/WebhooksController.php:544
+#: src/Api/WebhooksController.php:562
+#: src/Api/WebhooksController.php:582
+msgid ""
+"No captured payload found for this trigger. Fire the trigger at least once "
+"first."
+msgstr "未找到该触发器的已捕获负载。请先至少触发一次。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "No captured payload — trigger the webhook once to preview the resolved URL."
+msgstr "未捕获负载 — 触发一次 Webhook 以预览解析后的 URL。"
+
+#: src/Api/SchemasController.php:288
+msgid "No data to update."
+msgstr "没有要更新的数据。"
+
+#: admin/src/components/MappingEditor.vue
+msgid "No example payload captured yet."
+msgstr "尚未捕获示例负载。"
+
+#: admin/src/components/MappingEditor.vue
+msgid "No field mappings configured. Fields will be sent as-is."
+msgstr "未配置字段映射。字段将原样发送。"
+
+#: admin/src/components/FieldSelector.vue
+msgid "No fields found"
+msgstr "未找到字段"
+
+#: admin/src/components/MappingEditor.vue
+msgid "No fields found in payload"
+msgstr "负载中未找到字段"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "No heartbeat data yet"
+msgstr "尚无心跳数据"
+
+#: admin/src/components/LogsTable.vue
+msgid "No logs found"
+msgstr "未找到日志"
+
+#: admin/src/components/ChainPicker.vue
+msgid ""
+"No other webhooks exist yet — create at least one webhook to use it as a "
+"chain source."
+msgstr "尚不存在其他 Webhook — 请至少创建一个 Webhook 以将其用作链来源。"
+
+#: src/Api/LogsController.php:326
+msgid "No queue job found for this log entry."
+msgstr "未找到该日志条目对应的队列任务。"
+
+#: admin/src/views/QueueView.vue
+msgid "No queued jobs"
+msgstr "没有排队的任务"
+
+#: admin/src/views/VaultView.vue
+msgid "No saved credentials"
+msgstr "没有已保存的凭据"
+
+#: admin/src/components/WebhookForm.vue
+msgid "No saved credentials yet. Add one in the"
+msgstr "尚无已保存的凭据。请在以下位置添加"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No snippet assigned"
+msgstr "未分配代码片段"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No snippets found"
+msgstr "未找到代码片段"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No successful dispatches found for this webhook — run a test first."
+msgstr "未找到该 Webhook 的成功投递 — 请先运行测试。"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "No trigger assigned"
+msgstr "未分配触发器"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "No triggers configured for this webhook."
+msgstr "该 Webhook 未配置触发器。"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "No triggers found"
+msgstr "未找到触发器"
+
+#: admin/src/views/WebhooksList.vue
+msgid "No webhooks configured yet"
+msgstr "尚未配置任何 Webhook"
+
+#: admin/src/components/ChainPicker.vue
+msgid "No webhooks match “%s”."
+msgstr "没有 Webhook 匹配“%s”。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Not configured"
+msgstr "未配置"
+
+#: admin/src/components/LogsTable.vue
+msgid ""
+"Not sent as request body for GET / DELETE. Without URL parameters "
+"configured, the full payload is appended as %1$s?payload=&lt;json&gt;%2$s."
+msgstr ""
+"对于 GET / DELETE 不作为请求主体发送。在未配置 URL 参数的情况下，完整负载会以 "
+"%1$s?payload=&lt;json&gt;%2$s 形式附加。"
+
+#: src/Api/LogsController.php:127
+msgid "Number of days to look back."
+msgstr "回溯的天数。"
+
+#: src/Api/LogsController.php:523
+msgid "Number of results per page."
+msgstr "每页结果数。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "OK"
+msgstr "确定"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "OR"
+msgstr "OR"
+
+#: admin/src/views/ActivityView.vue
+msgid "Object"
+msgstr "对象"
+
+#: admin/src/components/ChainPicker.vue
+msgid ""
+"On a successful (2xx) response from any of these webhooks, this webhook "
+"fires with the upstream response, sent payload, and original pre-mapping "
+"payload available as %1$sargs[0]%2$s."
+msgstr ""
+"当这些 Webhook 中任意一个返回成功（2xx）响应时，该 Webhook 将被触发，上游响应、已发送负载和原始映射前负载均可通过 "
+"%1$sargs[0]%2$s 获得。"
+
+#: src/Api/LogsController.php:334
+msgid "Only failed log entries can be retried."
+msgstr "只有失败的日志条目才能重试。"
+
+#: src/Api/QueueController.php:377
+msgid "Only pending or permanently failed jobs can be retried."
+msgstr "只有待处理或永久失败的任务才能重试。"
+
+#: src/Api/WebhooksController.php:686
+msgid "Only return enabled webhooks."
+msgstr "仅返回已启用的 Webhook。"
+
+#: src/Api/LogsController.php:376
+msgid "Only successful or skipped log entries can be replayed."
+msgstr "只有成功或已跳过的日志条目才能重放。"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Operational"
+msgstr "操作"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Operational + create/update/delete webhooks, schemas, and queue jobs"
+msgstr "操作 + 创建/更新/删除 Webhook、架构和队列任务"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Operational + create/update/delete webhooks, schemas, queue jobs"
+msgstr "操作 + 创建/更新/删除 Webhook、架构、队列任务"
+
+#: admin/src/views/VaultView.vue
+msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
+msgstr "可选：使用 %1$sFSWA_SECRET_KEY%2$s 加固"
+
+#: src/Api/TriggersController.php:232
+msgid "Options"
+msgstr "选项"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Or select from available hooks..."
+msgstr "或从可用钩子中选择…"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Original"
+msgstr "原始"
+
+#: admin/src/components/LogsTable.vue admin/src/components/MappingEditor.vue
+msgid "Original Payload"
+msgstr "原始负载"
+
+#: src/Api/TriggersController.php:234
+msgid "Other"
+msgstr "其他"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Output (stdout)"
+msgstr "输出（stdout）"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Override the global retry limit for this webhook. Leave empty to use the "
+"global setting."
+msgstr "覆盖该 Webhook 的全局重试上限。留空则使用全局设置。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Override the retry delay strategy for this webhook. Leave empty to use the "
+"global setting."
+msgstr "覆盖该 Webhook 的重试延迟策略。留空则使用全局设置。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "PHP Code"
+msgstr "PHP 代码"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"PHP runs after successful dispatch; %1$s$responseBody%2$s and "
+"%1$s$originalPayload%2$s available"
+msgstr "PHP 在成功投递后运行；可使用 %1$s$responseBody%2$s 和 %1$s$originalPayload%2$s"
+
+#: src/Api/TriggersController.php:227
+msgid "Pages"
+msgstr "页面"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Param name"
+msgstr "参数名称"
+
+#: src/Api/LogsController.php:289
+msgid "Parameter older_than_days is required."
+msgstr "参数 older_than_days 为必填项。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Part of chain:"
+msgid_plural "Part of chains:"
+msgstr[0] "属于链："
+
+#: admin/src/views/VaultView.vue
+msgid "Password"
+msgstr "密码"
+
+#: admin/src/views/VaultView.vue
+msgid "Password or application password"
+msgstr "密码或应用程序密码"
+
+#: admin/src/views/VaultView.vue
+msgid "Paste the token / key"
+msgstr "粘贴令牌 / 密钥"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Path not found in captured payload"
+msgstr "在已捕获负载中未找到路径"
+
+#: admin/src/components/FieldSelector.vue admin/src/components/MappingEditor.vue
+msgid "Path not found in payload"
+msgstr "在负载中未找到路径"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Pause"
+msgstr "暂停"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Paused"
+msgstr "已暂停"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Payload"
+msgstr "负载"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Payload Example Captured"
+msgstr "已捕获负载示例"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Payload Mapping"
+msgstr "负载映射"
+
+#: admin/src/views/ProView.vue
+msgid "Payload mapping"
+msgstr "负载映射"
+
+#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Pending"
+msgstr "待处理"
+
+#: admin/src/views/ProView.vue
+msgid "Per-webhook retry limit override"
+msgstr "按 Webhook 覆盖重试上限"
+
+#: admin/src/views/QueueView.vue
+msgid "Perm. Failed"
+msgstr "永久失败"
+
+#: admin/src/views/LogsList.vue
+msgid "Permanently Failed"
+msgstr "永久失败"
+
+#: admin/src/components/ui/DateTimePicker.vue
+msgid "Pick date & time"
+msgstr "选择日期和时间"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Plugin queue endpoint"
+msgstr "插件队列端点"
+
+#: src/Api/TriggersController.php:231
+msgid "Plugins"
+msgstr "插件"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Post Glue"
+msgstr "投递后 Glue"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Post-dispatch"
+msgstr "投递后"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Post-dispatch Code Glue"
+msgstr "投递后 Code Glue"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Post-dispatch Code Glue preview ran but is not saved. Save or discard "
+"before continuing."
+msgstr "投递后 Code Glue 预览已运行但未保存。请在继续前保存或放弃。"
+
+#: src/Api/TriggersController.php:226
+msgid "Posts"
+msgstr "文章"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Pre Glue"
+msgstr "投递前 Glue"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Pre-dispatch"
+msgstr "投递前"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Pre-dispatch Code Glue"
+msgstr "投递前 Code Glue"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Pre-dispatch Code Glue applied before field mapping"
+msgstr "投递前 Code Glue 在字段映射之前应用"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Pre-dispatch Code Glue preview is active. Save or discard it before saving "
+"Mapping & Conditions."
+msgstr "投递前 Code Glue 预览处于活动状态。请在保存映射与条件前保存或放弃它。"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Preview active"
+msgstr "预览已激活"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Preview failed"
+msgstr "预览失败"
+
+#: admin/src/views/ActivityView.vue
+msgid "Previous"
+msgstr "上一页"
+
+#: admin/src/views/ProView.vue
+msgid "Priority support"
+msgstr "优先支持"
+
+#: admin/src/App.vue admin/src/views/ProView.vue
+msgid "Pro"
+msgstr "Pro"
+
+#: admin/src/views/ProView.vue
+msgid "Pro License"
+msgstr "Pro 许可证"
+
+#: admin/src/views/ProView.vue
+msgid "Pro Plugin Installed"
+msgstr "已安装 Pro 插件"
+
+#: src/Api/ProStatusController.php:48
+msgid "Pro plugin not found."
+msgstr "未找到 Pro 插件。"
+
+#: admin/src/views/QueueView.vue
+msgid "Process Now"
+msgstr "立即处理"
+
+#: src/Controllers/DispatcherController.php:146
+#. translators: %1$d: total jobs processed, %2$d: succeeded count, %3$d: failed count, %4$d: rescheduled count
+#, php-format
+msgid "Processed %1$d jobs: %2$d succeeded, %3$d failed, %4$d rescheduled."
+msgstr "已处理 %1$d 个任务：%2$d 个成功，%3$d 个失败，%4$d 个已重新安排。"
+
+#: admin/src/views/QueueView.vue
+msgid "Processing"
+msgstr "处理中"
+
+#: admin/src/views/LogsList.vue
+msgid "Processing…"
+msgstr "正在处理…"
+
+#: admin/src/components/LogsTable.vue
+msgid "Query Parameters"
+msgstr "查询参数"
+
+#: src/Api/WebhooksController.php:755
+msgid "Query parameters appended to the URL."
+msgstr "附加到 URL 的查询参数。"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/QueueView.vue
+msgid "Queue"
+msgstr "队列"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Queue Test"
+msgstr "将测试加入队列"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid ""
+"Queue appears stuck — there are pending deliveries older than 10 minutes. "
+"Check your cron setup."
+msgstr "队列似乎卡住 — 存在超过 10 分钟的待处理投递。请检查你的 cron 设置。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Queue batch size"
+msgstr "队列批量大小"
+
+#: src/Api/QueueController.php:234
+#: src/Api/QueueController.php:327
+#: src/Api/QueueController.php:369
+msgid "Queue job not found."
+msgstr "未找到队列任务。"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid ""
+"Queue processor has never run. Ensure WP-Cron is active or configure an "
+"external cron job for reliable delivery."
+msgstr "队列处理器从未运行。请确保 WP-Cron 处于活动状态，或配置外部 cron 任务以实现可靠投递。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Queuing…"
+msgstr "正在加入队列…"
+
+#: admin/src/views/VaultView.vue
+msgid "Raw value for any header — escape hatch"
+msgstr "任意标头的原始值 — 应急方案"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Re-capture"
+msgstr "重新捕获"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypt & remove database key"
+msgstr "重新加密并移除数据库密钥"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypting…"
+msgstr "正在重新加密…"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Read"
+msgstr "读取"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Read + toggle webhooks, retry/replay logs, execute queue jobs"
+msgstr "读取 + 切换 Webhook、重试/重放日志、执行队列任务"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Read + toggle webhooks, retry/replay logs, execute/retry queue jobs"
+msgstr "读取 + 切换 Webhook、重试/重放日志、执行/重试队列任务"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Ready to send some data?"
+msgstr "准备好发送一些数据了吗？"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Redirect"
+msgstr "重定向"
+
+#: admin/src/views/QueueView.vue
+msgid "Refresh"
+msgstr "刷新"
+
+#: flowsystems-webhook-actions.php
+#. Description of the plugin
+msgid ""
+"Reliable WordPress webhooks with retries, queue, Action Scheduler support, "
+"delivery logs, and replayable events for n8n, APIs, and integrations."
+msgstr ""
+"可靠的 WordPress Webhook，具备重试、队列、Action Scheduler 支持、投递日志和可重放事件，适用于 n8n、API "
+"和各类集成。"
+
+#: admin/src/views/ProView.vue
+msgid "Reliable webhooks with queue & retries"
+msgstr "可靠的 Webhook，带队列和重试"
+
+#: admin/src/views/ActivityView.vue
+msgid "Remove activity entries older than the specified number of days."
+msgstr "移除早于指定天数的活动记录。"
+
+#: admin/src/views/QueueView.vue
+msgid "Remove from queue"
+msgstr "从队列中移除"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Rename chain"
+msgstr "重命名链"
+
+#: admin/src/views/ProView.vue
+msgid "Renews / expires"
+msgstr "续订 / 到期"
+
+#: admin/src/components/LogsTable.vue
+msgid "Replay"
+msgstr "重放"
+
+#: admin/src/views/LogsList.vue
+msgid "Replay %d selected"
+msgstr "重放所选的 %d 项"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Request"
+msgstr "请求"
+
+#: admin/src/components/LogsTable.vue
+msgid "Request Headers"
+msgstr "请求标头"
+
+#: admin/src/components/LogsTable.vue
+msgid "Request Payload"
+msgstr "请求负载"
+
+#: admin/src/views/QueueView.vue
+msgid "Reset and retry"
+msgstr "重置并重试"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Response"
+msgstr "响应"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Response (ms)"
+msgstr "响应（毫秒）"
+
+#: admin/src/components/LogsTable.vue
+msgid "Response Body"
+msgstr "响应主体"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Result Preview"
+msgstr "结果预览"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Result preview is now used as the effective payload for Mapping & "
+"Conditions below."
+msgstr "结果预览现在用作下方映射与条件的有效负载。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Resume"
+msgstr "恢复"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Retries"
+msgstr "重试"
+
+#: admin/src/components/LogsTable.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Retry"
+msgstr "重试"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry %d selected"
+msgstr "重试所选的 %d 项"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry / Replay %d selected"
+msgstr "重试 / 重放所选的 %d 项"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Return value is ignored — use for side effects: %1$supdate_post_meta()%2$s, "
+"%1$swp_mail()%2$s, %1$serror_log()%2$s, follow-up API calls, etc."
+msgstr ""
+"返回值会被忽略 — "
+"用于副作用：%1$supdate_post_meta()%2$s、%1$swp_mail()%2$s、%1$serror_log()%2$s、后续 "
+"API 调用等。"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Revive token"
+msgstr "恢复令牌"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Revive token: %s"
+msgstr "恢复令牌：%s"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Reviving…"
+msgstr "正在恢复…"
+
+#: admin/src/components/RotateTokenDialog.vue admin/src/views/ApiTokensView.vue
+msgid "Rotate token"
+msgstr "轮换令牌"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Rotate token: %s"
+msgstr "轮换令牌：%s"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Rotating…"
+msgstr "正在轮换…"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Run Preview"
+msgstr "运行预览"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Run Test Now"
+msgstr "立即运行测试"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Running…"
+msgstr "正在运行…"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Samples"
+msgstr "样本"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/TriggerSchemaPanel.vue admin/src/views/ExternalCronView.vue admin/src/views/WebhooksList.vue
+msgid "Save"
+msgstr "保存"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Save & Assign"
+msgstr "保存并分配"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save & continue to chain setup"
+msgstr "保存并继续链设置"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save & use credential"
+msgstr "保存并使用凭据"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save Changes"
+msgstr "保存更改"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Save Glue"
+msgstr "保存 Glue"
+
+#: admin/src/views/VaultView.vue
+msgid "Save changes"
+msgstr "保存更改"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save credential to vault"
+msgstr "将凭据保存到保险库"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Save failed"
+msgstr "保存失败"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save to vault"
+msgstr "保存到保险库"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save webhook first"
+msgstr "请先保存 Webhook"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Saved credential"
+msgstr "已保存的凭据"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Saving…"
+msgstr "正在保存…"
+
+#: admin/src/views/ActivityView.vue
+msgid "Schemas"
+msgstr "架构"
+
+#: admin/src/components/CreateTokenDialog.vue admin/src/views/ApiTokensView.vue
+msgid "Scope"
+msgstr "作用域"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Scope reference"
+msgstr "作用域参考"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Search fields…"
+msgstr "搜索字段…"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Search snippets…"
+msgstr "搜索代码片段…"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Search triggers..."
+msgstr "搜索触发器…"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Search webhooks by name or URL…"
+msgstr "按名称或 URL 搜索 Webhook…"
+
+#: admin/src/views/VaultView.vue
+msgid "Secret value"
+msgstr "密钥值"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Secrets are encrypted at rest (AES-256-GCM) and never returned by the API — "
+"only a masked hint is shown."
+msgstr "密钥静态加密（AES-256-GCM）且 API 绝不返回 — 仅显示掩码提示。"
+
+#: admin/src/views/VaultView.vue
+msgid "Secrets are encrypted on save and never shown again."
+msgstr "密钥在保存时加密，且绝不会再次显示。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select a saved credential"
+msgstr "选择已保存的凭据"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select an existing chain or enter a new chain name"
+msgstr "选择现有链或输入新链名称"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select at least one upstream webhook to trigger this one"
+msgstr "至少选择一个上游 Webhook 以触发该 Webhook"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Select chain or create new"
+msgstr "选择链或新建"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Select field…"
+msgstr "选择字段…"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Select this field"
+msgstr "选择此字段"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Select trigger"
+msgstr "选择触发器"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Sending…"
+msgstr "正在发送…"
+
+#: admin/src/views/VaultView.vue
+msgid "Sent as Authorization: Bearer <token>"
+msgstr "以 Authorization: Bearer <token> 形式发送"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Sent today"
+msgstr "今日已发送"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Server Error"
+msgstr "服务器错误"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Set expiration date"
+msgstr "设置到期日期"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Settings"
+msgstr "设置"
+
+#: admin/src/views/VaultView.vue
+msgid "Show"
+msgstr "显示"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Show full"
+msgstr "显示完整"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Show less"
+msgstr "显示更少"
+
+#: admin/src/views/VaultView.vue
+msgid "Show password"
+msgstr "显示密码"
+
+#: admin/src/views/VaultView.vue
+msgid "Show secret"
+msgstr "显示密钥"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Showing %1$d to %2$d of %3$d"
+msgstr "显示第 %1$d 至 %2$d 项，共 %3$d 项"
+
+#: admin/src/views/ProView.vue
+msgid "Sites allowed"
+msgstr "允许的站点"
+
+#: admin/src/views/ProView.vue
+msgid "Sites used"
+msgstr "已用站点"
+
+#: admin/src/views/LogsList.vue
+msgid "Skipped"
+msgstr "已跳过"
+
+#: admin/src/components/LogsTable.vue
+msgid "Skipped:"
+msgstr "已跳过："
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Snippet Name"
+msgstr "代码片段名称"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Snippet saved and assigned."
+msgstr "代码片段已保存并分配。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Snippets"
+msgstr "代码片段"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Source"
+msgstr "源"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Source path (e.g., args.0.user_id)"
+msgstr "源路径（例如 args.0.user_id）"
+
+#: src/Api/ChainsController.php:229
+msgid "Source webhook does not exist."
+msgstr "源 Webhook 不存在。"
+
+#: admin/src/views/ProView.vue
+msgid "Starter"
+msgstr "入门版"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Stats unavailable"
+msgstr "统计数据不可用"
+
+#: admin/src/components/LogsTable.vue
+msgid "Status"
+msgstr "状态"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Store reusable authentication secrets once, then reference them from your "
+"webhooks. Secrets are encrypted at rest and are never shown again after "
+"saving — not even to you."
+msgstr "一次性存储可重用的认证密钥，然后在你的 Webhook 中引用它们。密钥静态加密，保存后绝不会再次显示 — 即使对你也是如此。"
+
+#: admin/src/components/ExternalCronChart.vue admin/src/components/HealthStatusBar.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Success"
+msgstr "成功"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Success Rate"
+msgstr "成功率"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Success rate 24h"
+msgstr "24 小时成功率"
+
+#: admin/src/App.vue
+msgid "Switch to dark mode"
+msgstr "切换到深色模式"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Switch to field selector"
+msgstr "切换到字段选择器"
+
+#: admin/src/App.vue
+msgid "Switch to light mode"
+msgstr "切换到浅色模式"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Switch to manual input"
+msgstr "切换到手动输入"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Sync"
+msgstr "同步"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Synchronous Execution"
+msgstr "同步执行"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Synchronous execution"
+msgstr "同步执行"
+
+#: admin/src/views/ActivityView.vue
+msgid "System"
+msgstr "系统"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Tags (comma-separated)"
+msgstr "标签（以逗号分隔）"
+
+#: admin/src/components/MappingEditor.vue admin/src/views/ExternalCronView.vue
+msgid "Target"
+msgstr "目标"
+
+#: admin/src/components/LogsTable.vue
+msgid "Target URL"
+msgstr "目标 URL"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Target path (e.g., user_id)"
+msgstr "目标路径（例如 user_id）"
+
+#: src/Api/ChainsController.php:232
+msgid "Target webhook does not exist."
+msgstr "目标 Webhook 不存在。"
+
+#: src/Api/TriggersController.php:229
+msgid "Taxonomy"
+msgstr "分类法"
+
+#: admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
+msgid "Test"
+msgstr "测试"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test Webhook"
+msgstr "测试 Webhook"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test failed."
+msgstr "测试失败。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test queued — it will run on the next cron cycle."
+msgstr "测试已加入队列 — 它将在下个 cron 周期运行。"
+
+#: admin/src/views/ProView.vue
+msgid "Test webhook delivery on demand"
+msgstr "按需测试 Webhook 投递"
+
+#: src/Api/ChainsController.php:236
+msgid "That link would create a cycle in the chain graph."
+msgstr "该连接会在链图中形成循环。"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid ""
+"The %1$srecommended approach is asynchronous delivery%2$s via the built-in "
+"system cron or an external cron job."
+msgstr "%1$s推荐的方式是异步投递%2$s，通过内置系统 cron 或外部 cron 任务。"
+
+#: admin/src/views/ProView.vue
+msgid "The Pro plugin is installed but not activated in WordPress."
+msgstr "Pro 插件已安装但未在 WordPress 中启用。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"The URL where webhook payloads will be sent. Supports %1$s{{ field.path "
+"}}%2$s templates — resolved against the final payload, after code glue "
+"applied."
+msgstr ""
+"Webhook 负载将发送到的 URL。支持 %1$s{{ field.path }}%2$s 模板 — 在应用 code glue "
+"之后，根据最终负载进行解析。"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"The chain and all its links will be removed. Member webhooks stay, but lose "
+"their chain-link triggers."
+msgstr "该链及其所有连接将被移除。成员 Webhook 会保留，但会失去其链接触发器。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"The encryption key lives in %1$swp-config.php%2$s (%1$sFSWA_SECRET_KEY%2$s) "
+"and is not stored in the database. A database-only dump cannot decrypt your "
+"secrets."
+msgstr ""
+"加密密钥位于 "
+"%1$swp-config.php%2$s（%1$sFSWA_SECRET_KEY%2$s）中，不存储在数据库中。仅有数据库转储无法解密你的密钥。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"The secret is resolved securely at delivery time and never exposed. Manage "
+"credentials in the"
+msgstr "密钥在投递时安全解析，绝不暴露。请在以下位置管理凭据"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"These are the primary way to send data for %1$s requests. If none are set, "
+"the mapped payload is sent as %2$s?payload=&lt;json&gt;%3$s."
+msgstr "这是 %1$s 请求发送数据的主要方式。如果未设置，则映射后的负载会以 %2$s?payload=&lt;json&gt;%3$s 形式发送。"
+
+#: admin/src/views/WebhooksList.vue
+msgid "They will move to the Unchained section with “No trigger assigned”."
+msgstr "它们将移至“未链接”部分，并显示“未分配触发器”。"
+
+#: admin/src/components/LogsTable.vue
+msgid "This action cannot be undone."
+msgstr "此操作无法撤销。"
+
+#: src/Api/CredentialsController.php:351
+#. translators: %d: number of webhooks using this credential
+#, php-format
+msgid "This credential is used by %d webhook. Detach it or delete with force."
+msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
+msgstr[0] "该凭据被 %d 个 Webhook 使用。请将其分离或强制删除。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This moves the Authorization value into the encrypted vault and references "
+"it by name. The webhook keeps working unchanged."
+msgstr "这会将 Authorization 值移入加密保险库并按名称引用。该 Webhook 将照常工作，不受影响。"
+
+#: admin/src/views/VaultView.vue
+msgid "This permanently removes the stored secret."
+msgstr "这将永久移除已存储的密钥。"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid ""
+"This token is %1$sexpired%2$s. Rotating will issue a new secret — but you "
+"must also extend the expiry, otherwise the token will remain invalid "
+"immediately after rotation."
+msgstr "该令牌%1$s已过期%2$s。轮换将颁发新密钥 — 但你还必须延长到期时间，否则令牌在轮换后将立即保持无效。"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid ""
+"This token will only be shown once. Copy it now — you won't be able to see "
+"it again."
+msgstr "该令牌只会显示一次。请立即复制 — 你将无法再次看到它。"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"This usually means the encryption key changed (e.g. %1$sFSWA_SECRET_KEY%2$s "
+"or WordPress salts). Edit each affected credential and re-enter its secret "
+"to fix it."
+msgstr ""
+"这通常意味着加密密钥已更改（例如 %1$sFSWA_SECRET_KEY%2$s 或 WordPress "
+"盐值）。请编辑每个受影响的凭据并重新输入其密钥以修复。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This webhook executes synchronously. Slow or unreachable endpoints will "
+"delay page loads and frontend interactions."
+msgstr "该 Webhook 同步执行。缓慢或无法访问的端点将延迟页面加载和前端交互。"
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook participates in a chain:"
+msgid_plural "This webhook participates in chains:"
+msgstr[0] "该 Webhook 参与了一个链："
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook will become an orphan:"
+msgid_plural "These webhooks will become orphans:"
+msgstr[0] "该 Webhook 将变为孤立："
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid ""
+"This webhook will fire inline during the WordPress request that triggers "
+"it, bypassing the queue. Slow or unreachable endpoints can %1$sdelay page "
+"loads, form submissions, and other frontend interactions.%2$s"
+msgstr ""
+"该 Webhook 将在触发它的 WordPress "
+"请求中内联触发，绕过队列。缓慢或无法访问的端点可能会%1$s延迟页面加载、表单提交及其他前端交互。%2$s"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "This webhook will run on every trigger."
+msgstr "该 Webhook 将在每次触发时运行。"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"This will permanently delete the webhook and all associated data. This "
+"action cannot be undone."
+msgstr "这将永久删除该 Webhook 及所有相关数据。此操作无法撤销。"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"This will permanently revoke the token. Any integrations using it will stop "
+"working immediately."
+msgstr "这将永久吊销该令牌。任何使用它的集成都将立即停止工作。"
+
+#: admin/src/views/ProView.vue
+msgid ""
+"This will remove the license from this site and free up a slot. You can "
+"reactivate at any time."
+msgstr "这将从本站点移除许可证并释放一个名额。你可以随时重新激活。"
+
+#: admin/src/components/ui/DateTimePicker.vue
+msgid "Time"
+msgstr "时间"
+
+#: admin/src/views/ActivityView.vue
+msgid "Timestamp"
+msgstr "时间戳"
+
+#: admin/src/views/ActivityView.vue
+msgid "To date"
+msgstr "结束日期"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "To date & time"
+msgstr "结束日期和时间"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Today"
+msgstr "今天"
+
+#: admin/src/views/ActivityView.vue
+msgid "Token"
+msgstr "令牌"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Token created"
+msgstr "令牌已创建"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Token name"
+msgstr "令牌名称"
+
+#: src/Api/ApiTokensController.php:138 admin/src/components/CreateTokenDialog.vue
+msgid "Token name is required."
+msgstr "令牌名称为必填项。"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Token will never expire."
+msgstr "令牌将永不过期。"
+
+#: admin/src/views/ActivityView.vue
+msgid "Token: %s"
+msgstr "令牌：%s"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Tokens allow external systems to access the REST API without a browser "
+"session. Token management is always admin-only regardless of scope."
+msgstr "令牌允许外部系统无需浏览器会话即可访问 REST API。无论作用域如何，令牌管理始终仅限管理员。"
+
+#: admin/src/views/QueueView.vue
+msgid "Total"
+msgstr "总计"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Total (7 days)"
+msgstr "总计（7 天）"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Total (7d)"
+msgstr "总计（7 天）"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Total delivery attempts for this webhook, including the first try. "
+"Overrides the global setting. Once reached the job is permanently failed."
+msgstr "该 Webhook 的总投递尝试次数，包括首次尝试。覆盖全局设置。一旦达到，任务即永久失败。"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Total sent"
+msgstr "已发送总计"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Transformed"
+msgstr "转换后"
+
+#: admin/src/components/LogsTable.vue
+msgid "Transformed Payload (Sent)"
+msgstr "转换后负载（已发送）"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Transformed Payload Preview"
+msgstr "转换后负载预览"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
+msgid "Trigger"
+msgstr "触发器"
+
+#: src/Api/WebhooksController.php:116
+msgid "Trigger name to use for the test."
+msgstr "用于测试的触发器名称。"
+
+#: src/Api/SchemasController.php:67
+#: src/Api/SchemasController.php:84
+#: src/Api/SchemasController.php:109
+#: src/Api/SchemasController.php:130
+msgid "Trigger name."
+msgstr "触发器名称。"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Trigger this event to capture an example payload for mapping."
+msgstr "触发该事件以捕获用于映射的示例负载。"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Trigger this webhook when the following webhooks complete"
+msgstr "当以下 Webhook 完成时触发该 Webhook"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/views/QueueView.vue
+msgid "Trigger:"
+msgstr "触发器："
+
+#: admin/src/components/WebhookForm.vue
+msgid "Triggers"
+msgstr "触发器"
+
+#: admin/src/views/VaultView.vue
+msgid "Type"
+msgstr "类型"
+
+#: admin/src/components/WebhookForm.vue
+msgid "URL Query Parameters"
+msgstr "URL 查询参数"
+
+#: admin/src/components/WebhookForm.vue
+msgid "URL must be HTTP or HTTPS"
+msgstr "URL 必须是 HTTP 或 HTTPS"
+
+#: src/Api/WebhooksController.php:719
+msgid "URL to send the webhook to."
+msgstr "发送 Webhook 的目标 URL。"
+
+#: admin/src/views/QueueView.vue
+msgid "URL:"
+msgstr "URL："
+
+#: admin/src/views/WebhooksList.vue
+msgid "Unchained"
+msgstr "未链接"
+
+#: src/Api/WebhooksController.php:69
+#: src/Api/WebhooksController.php:94
+#: src/Api/WebhooksController.php:106
+#: src/Api/WebhooksController.php:707
+msgid "Unique identifier for the webhook."
+msgstr "Webhook 的唯一标识符。"
+
+#: admin/src/views/QueueView.vue
+msgid "Unknown Webhook"
+msgstr "未知 Webhook"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Unknown error"
+msgstr "未知错误"
+
+#: admin/src/views/ProView.vue
+msgid "Unlimited conditions per trigger"
+msgstr "每个触发器不限条件数量"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Unsaved changes"
+msgstr "未保存的更改"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Untitled"
+msgstr "无标题"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Update Snippet"
+msgstr "更新代码片段"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Update this credential. Leave secret fields blank to keep the existing "
+"value."
+msgstr "更新此凭据。将密钥字段留空可保留现有值。"
+
+#: admin/src/components/ChangeExpiryDialog.vue
+msgid ""
+"Update when this token expires. Removing the expiry makes it valid "
+"indefinitely."
+msgstr "更新该令牌的到期时间。移除到期时间将使其无限期有效。"
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Upgrade"
+msgstr "升级"
+
+#: admin/src/views/ProView.vue
+msgid "Upgrade to Pro"
+msgstr "升级到 Pro"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Use %1$sX-FSWA-Token: %2$s%3$s in your requests."
+msgstr "在你的请求中使用 %1$sX-FSWA-Token: %2$s%3$s。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Use global setting"
+msgstr "使用全局设置"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Use other Webhooks as triggers"
+msgstr "使用其他 Webhook 作为触发器"
+
+#: admin/src/views/ActivityView.vue
+msgid "User #%s"
+msgstr "用户 #%s"
+
+#: admin/src/views/ActivityView.vue
+msgid "User ID"
+msgstr "用户 ID"
+
+#: admin/src/views/ActivityView.vue
+msgid "User prompt"
+msgstr "用户提示"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "User trigger"
+msgstr "用户触发器"
+
+#: admin/src/views/VaultView.vue
+msgid "Username"
+msgstr "用户名"
+
+#: src/Api/TriggersController.php:225
+msgid "Users"
+msgstr "用户"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Value for the Authorization header (e.g., \"Bearer your_token_goes_here\" "
+"or \"Basic your_encoded_base64(username:password)\"). For better security, "
+"store secrets in the"
+msgstr ""
+"Authorization 标头的值（例如“Bearer your_token_goes_here”或“Basic "
+"your_encoded_base64(username:password)”）。为获得更好的安全性，请将密钥存储在"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Values support dot-notation paths into the outgoing payload (e.g. "
+"%1$sevent.id%2$s) or static strings."
+msgstr "值支持指向传出负载的点号路径（例如 %1$sevent.id%2$s）或静态字符串。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "View full log"
+msgstr "查看完整日志"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "View in Logs"
+msgstr "在日志中查看"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "View logs"
+msgstr "查看日志"
+
+#: admin/src/views/LogsList.vue
+msgid "View webhook delivery logs"
+msgstr "查看 Webhook 投递日志"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "View webhooks, logs, queue, health, triggers, schemas"
+msgstr "查看 Webhook、日志、队列、健康状况、触发器、架构"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "WP-Cron"
+msgstr "WP-Cron"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Wait %s"
+msgstr "等待 %s"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Waiting for trigger to capture example payload..."
+msgstr "正在等待触发器以捕获示例负载…"
+
+#: admin/src/components/LogsTable.vue
+msgid "Webhook"
+msgstr "Webhook"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Webhook #%s"
+msgstr "Webhook #%s"
+
+#: src/Controllers/AdminController.php:36
+#: src/Controllers/AdminController.php:37
+#: src/Controllers/AdminController.php:44
+#: src/Controllers/AdminController.php:45
+msgid "Webhook Actions"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin Name of the plugin
+msgid "Webhook Actions by Flow Systems"
+msgstr ""
+
+#: src/Controllers/AdminController.php:214
+msgid ""
+"Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
+"new database format."
+msgstr "Webhook Actions by Flow Systems：你的 Webhook 已迁移到新的数据库格式。"
+
+#: src/Api/SchemasController.php:46
+#: src/Api/SchemasController.php:62
+#: src/Api/SchemasController.php:79
+#: src/Api/SchemasController.php:104
+#: src/Api/SchemasController.php:125
+msgid "Webhook ID."
+msgstr "Webhook ID。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Webhook auth"
+msgstr "Webhook 认证"
+
+#: src/Api/WebhooksController.php:508
+msgid "Webhook has no triggers configured."
+msgstr "该 Webhook 未配置触发器。"
+
+#: src/Api/WebhooksController.php:226
+msgid "Webhook name is required."
+msgstr "Webhook 名称为必填项。"
+
+#: src/Api/LogsController.php:386
+#: src/Api/SchemasController.php:167
+#: src/Api/SchemasController.php:195
+#: src/Api/SchemasController.php:231
+#: src/Api/SchemasController.php:326
+#: src/Api/SchemasController.php:358
+#: src/Api/WebhooksController.php:197
+#: src/Api/WebhooksController.php:301
+#: src/Api/WebhooksController.php:407
+#: src/Api/WebhooksController.php:459
+#: src/Api/WebhooksController.php:499
+msgid "Webhook not found."
+msgstr "未找到 Webhook。"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Webhooks"
+msgstr "Webhook"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"When enabled, this webhook fires inline during the WordPress request that "
+"triggers it, bypassing the queue. May slow down your site if the endpoint "
+"is slow."
+msgstr "启用后，该 Webhook 会在触发它的 WordPress 请求中内联触发，绕过队列。如果端点较慢，可能会拖慢你的站点。"
+
+#: admin/src/views/QueueView.vue
+msgid "When webhooks are triggered, jobs will appear here for processing."
+msgstr "当 Webhook 被触发时，任务将显示在此处以供处理。"
+
+#: src/Api/WebhooksController.php:110
+msgid "Where to source the test payload from."
+msgstr "测试负载的来源。"
+
+#: src/Api/WebhooksController.php:773
+msgid "Whether the webhook executes synchronously (blocking, bypasses queue)."
+msgstr "Webhook 是否同步执行（阻塞，绕过队列）。"
+
+#: src/Api/WebhooksController.php:767
+msgid "Whether the webhook is enabled."
+msgstr "Webhook 是否已启用。"
+
+#: src/Api/SchemasController.php:93
+msgid "Whether to include user data."
+msgstr "是否包含用户数据。"
+
+#: admin/src/components/LogsTable.vue
+msgid "Will Retry"
+msgstr "将重试"
+
+#: src/Api/TriggersController.php:233
+msgid "WooCommerce"
+msgstr ""
+
+#: src/Api/TriggersController.php:224
+msgid "WordPress"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "WordPress actions that will trigger this webhook"
+msgstr "将触发该 Webhook 的 WordPress 操作"
+
+#: admin/src/views/VaultView.vue
+msgid "WordPress username or API user"
+msgstr "WordPress 用户名或 API 用户"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Write your own JSON payload"
+msgstr "编写你自己的 JSON 负载"
+
+#: admin/src/views/QueueView.vue
+msgid "X-Webhook-Id:"
+msgstr "X-Webhook-Id："
+
+#: admin/src/components/LogsTable.vue
+msgid "Yes"
+msgstr "是"
+
+#: src/Api/WebhooksController.php:164
+msgid "You don't have permissions to see it."
+msgstr "你没有查看它的权限。"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid ""
+"You have unsaved changes. The test will run against the %1$ssaved%2$s "
+"version of this webhook."
+msgstr "你有未保存的更改。测试将针对该 Webhook 的%1$s已保存%2$s版本运行。"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"You might want to whitelist the External Cron IP for your WAF or server "
+"security: %1$s72.62.157.193%2$s"
+msgstr "你可能需要在 WAF 或服务器安全中将外部 Cron IP 加入白名单：%1$s72.62.157.193%2$s"
+
+#: admin/src/views/ProView.vue
+msgid "Your license is active on this site."
+msgstr "你的许可证已在本站点激活。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "array contains"
+msgstr "数组包含"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "auto"
+msgstr "自动"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "be skipped"
+msgstr "被跳过"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "bool"
+msgstr "布尔"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "contains"
+msgstr "包含"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "dispatch"
+msgstr "投递"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "does not contain"
+msgstr "不包含"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "does not equal"
+msgstr "不等于"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "e.g. CI pipeline, n8n integration"
+msgstr "例如 CI 流水线、n8n 集成"
+
+#: admin/src/components/WebhookForm.vue
+msgid "e.g. HubSpot PAT"
+msgstr "例如 HubSpot PAT"
+
+#: admin/src/views/VaultView.vue
+msgid "e.g. HubSpot PAT, Stripe key"
+msgstr "例如 HubSpot PAT、Stripe 密钥"
+
+#: admin/src/components/ChainPicker.vue
+msgid "e.g. Order to HubSpot"
+msgstr "例如 订单同步到 HubSpot"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "empty"
+msgstr "为空"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "equals"
+msgstr "等于"
+
+#: admin/src/components/MappingEditor.vue
+msgid "excluded via parent"
+msgstr "通过父级排除"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "excludes"
+msgstr "排除"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "greater than"
+msgstr "大于"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "has item"
+msgstr "含项"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "has value"
+msgstr "含值"
+
+#: flowsystems-webhook-actions.php
+#. Author URI of the plugin
+msgid "https://flowsystems.pl"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin URI of the plugin
+msgid "https://wpwebhooks.org/wordpress-webhook-plugin"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "instead."
+msgstr "。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is empty"
+msgstr "为空"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is false"
+msgstr "为假"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is not empty"
+msgstr "不为空"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is true"
+msgstr "为真"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "less than"
+msgstr "小于"
+
+#: admin/src/components/MappingEditor.vue
+msgid "mapped"
+msgstr "已映射"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "no"
+msgstr "否"
+
+#: admin/src/views/WebhooksList.vue
+msgid "no remaining triggers"
+msgstr "没有剩余触发器"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "not empty"
+msgstr "非空"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "not equals"
+msgstr "不等于"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "number"
+msgstr "数字"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "object contains"
+msgstr "对象包含"
+
+#: admin/src/components/LogsTable.vue
+msgid "perm. failed"
+msgstr "永久失败"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "property name (optional)"
+msgstr "属性名称（可选）"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "string"
+msgstr "字符串"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "stringify"
+msgstr "字符串化"
+
+#: admin/src/components/WebhookForm.vue
+msgid "then select it here."
+msgstr "然后在此处选择它。"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "unknown"
+msgstr "未知"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "value"
+msgstr "值"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "yes"
+msgstr "是"
+
+#: admin/src/views/VaultView.vue
+msgid "· database key removed"
+msgstr "· 数据库密钥已移除"
+
+#: admin/src/main.js
+msgid "…"
+msgstr "…"
+
+#: admin/src/views/ProView.vue
+msgid ""
+"💡 Local installs (%1$slocalhost%2$s, %1$s*.local%2$s, %1$s*.test%2$s) "
+"don't count toward your site limit."
+msgstr "💡 本地安装（%1$slocalhost%2$s、%1$s*.local%2$s、%1$s*.test%2$s）不计入你的站点限额。"

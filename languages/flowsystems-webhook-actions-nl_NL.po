@@ -1,0 +1,3780 @@
+# Copyright (C) 2026 Mateusz Skorupa
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Webhook Actions by Flow Systems 1.15.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-21T19:35:27+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: flowsystems-webhook-actions\n"
+"Language: nl_NL\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dh %2$dm"
+msgstr "%1$du %2$dm"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$dm %2$ds"
+msgstr "%1$dm %2$ds"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s %2$d min"
+msgstr "%1$s %2$d min"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s %2$ds"
+msgstr "%1$s %2$ds"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — runs all WordPress scheduled tasks. "
+"Min interval: 60s. %1$sDISABLE_WP_CRON%2$s is added to "
+"%1$swp-config.php%2$s automatically."
+msgstr ""
+"%1$s/wp-cron.php?doing_wp_cron%2$s — voert alle geplande WordPress-taken "
+"uit. Min. interval: 60s. %1$sDISABLE_WP_CRON%2$s wordt automatisch "
+"toegevoegd aan %1$swp-config.php%2$s."
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — processes only the webhook "
+"queue. Min interval: 20s."
+msgstr ""
+"%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — verwerkt alleen de "
+"webhook-wachtrij. Min. interval: 20s."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sAvailable variables:%2$s %3$s$payload%4$s (mapped array), %3$s$args%4$s "
+"(%5$s$payload['args']%6$s)"
+msgstr ""
+"%1$sBeschikbare variabelen:%2$s %3$s$payload%4$s (gemapte array), "
+"%3$s$args%4$s (%5$s$payload['args']%6$s)"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sAvailable variables:%2$s %3$s$payload%4$s (sent), "
+"%3$s$originalPayload%4$s (pre-mapping), %3$s$responseCode%4$s, "
+"%3$s$responseBody%4$s"
+msgstr ""
+"%1$sBeschikbare variabelen:%2$s %3$s$payload%4$s (verzonden), "
+"%3$s$originalPayload%4$s (vóór mapping), %3$s$responseCode%4$s, "
+"%3$s$responseBody%4$s"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s is active — WP-Cron auto-spawn is disabled."
+msgstr ""
+"%1$sDISABLE_WP_CRON%2$s is actief — automatisch starten van WP-Cron is "
+"uitgeschakeld."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%1$sDISABLE_WP_CRON%2$s will be written to %1$swp-config.php%2$s on save."
+msgstr ""
+"%1$sDISABLE_WP_CRON%2$s wordt bij opslaan naar %1$swp-config.php%2$s "
+"geschreven."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFSWA_SECRET_KEY%2$s is defined and your credentials still work, but a "
+"copy of the old key remains in the database — so you don't yet get the full "
+"benefit. Re-encrypt now to seal every secret with the wp-config key and "
+"delete the database key."
+msgstr ""
+"%1$sFSWA_SECRET_KEY%2$s is gedefinieerd en je referenties werken nog "
+"steeds, maar een kopie van de oude sleutel blijft in de database staan — je "
+"profiteert dus nog niet volledig. Versleutel nu opnieuw om elk geheim met "
+"de wp-config-sleutel te verzegelen en de databasesleutel te verwijderen."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sFormat:%2$s any long, random, secret string (64+ characters "
+"recommended). Generate one from the %3$sWordPress salt generator%4$s or "
+"with %5$swp_generate_password(64, true, true)%6$s."
+msgstr ""
+"%1$sFormaat:%2$s een lange, willekeurige, geheime tekenreeks (64+ tekens "
+"aanbevolen). Genereer er een met de %3$sWordPress salt-generator%4$s of met "
+"%5$swp_generate_password(64, true, true)%6$s."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sKeep it stable &amp; backed up:%2$s don't change or lose this value "
+"once credentials are sealed with it, or they become unrecoverable."
+msgstr ""
+"%1$sHoud hem stabiel en maak een back-up:%2$s wijzig of verlies deze waarde "
+"niet zodra referenties ermee zijn verzegeld, anders worden ze onherstelbaar."
+
+#: admin/src/views/ProView.vue
+msgid "%1$sPriority support%2$s — Pro subscribers get a direct response via email."
+msgstr ""
+"%1$sPrioriteitsondersteuning%2$s — Pro-abonnees krijgen een rechtstreeks "
+"antwoord via e-mail."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"%1$sSafe to add anytime:%2$s existing credentials keep working immediately. "
+"After adding it, return here and click the %3$sRe-encrypt%4$s button that "
+"appears to finish the move and remove the database key."
+msgstr ""
+"%1$sAltijd veilig toe te voegen:%2$s bestaande referenties blijven direct "
+"werken. Kom na het toevoegen hier terug en klik op de knop %3$sOpnieuw "
+"versleutelen%4$s die verschijnt om de verplaatsing te voltooien en de "
+"databasesleutel te verwijderen."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ $args.0.field }}%4$s "
+"→ %3$s$args[0]['field']%4$s, %3$s{{ $payload.key }}%4$s → "
+"%3$s$payload['key']%4$s"
+msgstr ""
+"%1$sVerkorte notatie:%2$s werkt voor elke variabele, bijv. %3$s{{ "
+"$args.0.field }}%4$s → %3$s$args[0]['field']%4$s, %3$s{{ $payload.key "
+"}}%4$s → %3$s$payload['key']%4$s"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"%1$sShorthand:%2$s works for any variable, e.g. %3$s{{ "
+"$originalPayload.args.0.id }}%4$s → "
+"%3$s$originalPayload['args'][0]['id']%4$s"
+msgstr ""
+"%1$sVerkorte notatie:%2$s werkt voor elke variabele, bijv. %3$s{{ "
+"$originalPayload.args.0.id }}%4$s → "
+"%3$s$originalPayload['args'][0]['id']%4$s"
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"%1$swp-config.php%2$s is not writable. Add this line manually before the "
+"“That’s all” comment: %3$sdefine( 'DISABLE_WP_CRON', true );%4$s"
+msgstr ""
+"%1$swp-config.php%2$s is niet beschrijfbaar. Voeg deze regel handmatig toe "
+"vóór de opmerking “That’s all”: %3$sdefine( 'DISABLE_WP_CRON', true );%4$s"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "%d available"
+msgstr "%d beschikbaar"
+
+#: admin/src/views/VaultView.vue
+msgid "%d credential cannot be decrypted with the current key."
+msgid_plural "%d credentials cannot be decrypted with the current key."
+msgstr[0] "%d referentie kan niet worden ontsleuteld met de huidige sleutel."
+msgstr[1] "%d referenties kunnen niet worden ontsleuteld met de huidige sleutel."
+
+#: admin/src/views/ActivityView.vue
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "%d dag"
+msgstr[1] "%d dagen"
+
+#: admin/src/views/ActivityView.vue
+msgid "%d entry"
+msgid_plural "%d entries"
+msgstr[0] "%d vermelding"
+msgstr[1] "%d vermeldingen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "%d uur"
+msgstr[1] "%d uur"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d link will be removed"
+msgid_plural "%d links will be removed"
+msgstr[0] "%d koppeling wordt verwijderd"
+msgstr[1] "%d koppelingen worden verwijderd"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "%d minuut"
+msgstr[1] "%d minuten"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%d second"
+msgid_plural "%d seconds"
+msgstr[0] "%d seconde"
+msgstr[1] "%d seconden"
+
+#: admin/src/views/LogsList.vue
+msgid "%d selected"
+msgstr "%d geselecteerd"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "%d trigger selected"
+msgid_plural "%d triggers selected"
+msgstr[0] "%d trigger geselecteerd"
+msgstr[1] "%d triggers geselecteerd"
+
+#: admin/src/views/WebhooksList.vue
+msgid "%d webhook"
+msgid_plural "%d webhooks"
+msgstr[0] "%d webhook"
+msgstr[1] "%d webhooks"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dh"
+msgstr "%du"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%dm"
+msgstr "%dm"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "%ds"
+msgstr "%ds"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%s Retry"
+msgstr "%s poging"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%s auth"
+msgstr "%s-authenticatie"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "%s…"
+msgstr "%s…"
+
+#: admin/src/components/LogsTable.vue
+msgid "(last attempt)"
+msgstr "(laatste poging)"
+
+#: admin/src/views/ProView.vue
+msgid "(local, not counted)"
+msgstr "(lokaal, niet meegeteld)"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "(no output)"
+msgstr "(geen uitvoer)"
+
+#: admin/src/components/MappingEditor.vue
+msgid "(param name)"
+msgstr "(parameternaam)"
+
+#: admin/src/components/MappingEditor.vue
+msgid "(value)"
+msgstr "(waarde)"
+
+#: src/Api/ChainsController.php:134
+#: src/Api/ChainsController.php:167
+msgid "A chain with that name already exists."
+msgstr "Er bestaat al een keten met die naam."
+
+#: src/Api/CredentialsController.php:237
+#: src/Api/CredentialsController.php:286
+msgid "A credential with this name already exists."
+msgstr "Er bestaat al een referentie met deze naam."
+
+#: admin/src/views/VaultView.vue
+msgid "A named header such as X-API-Key"
+msgstr "Een benoemde header zoals X-API-Key"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid ""
+"A new delivery attempt has been queued. The result will appear in this "
+"log's attempt history on the next cron run."
+msgstr ""
+"Een nieuwe bezorgpoging is in de wachtrij geplaatst. Het resultaat "
+"verschijnt bij de volgende cron-run in de pogingsgeschiedenis van dit "
+"logboek."
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid ""
+"A new token will be generated. The current token will be %1$simmediately "
+"invalidated%2$s and all existing integrations using it will stop working."
+msgstr ""
+"Er wordt een nieuw token gegenereerd. Het huidige token wordt "
+"%1$sonmiddellijk ongeldig%2$s en alle bestaande integraties die het "
+"gebruiken, stoppen met werken."
+
+#: src/Api/WebhooksController.php:529
+msgid "A payload object is required for custom source."
+msgstr "Voor een aangepaste bron is een payloadobject vereist."
+
+#: src/Api/CredentialsController.php:400
+msgid "A secret value is required."
+msgstr "Een geheime waarde is verplicht."
+
+#: src/Api/ChainsController.php:226
+msgid "A webhook cannot trigger itself."
+msgstr "Een webhook kan zichzelf niet triggeren."
+
+#: admin/src/views/ActivityView.vue
+msgid "AI reasoning"
+msgstr "AI-redenering"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "ALL (AND)"
+msgstr "ALLE (AND)"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "AND"
+msgstr "AND"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "ANY (OR)"
+msgstr "ELK (OR)"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue
+msgid "API Tokens"
+msgstr "API-tokens"
+
+#: admin/src/views/VaultView.vue
+msgid "API key (custom header)"
+msgstr "API-sleutel (aangepaste header)"
+
+#: src/Api/ApiTokensController.php:199
+#: src/Api/ApiTokensController.php:245
+#: src/Api/ApiTokensController.php:269
+msgid "API token not found."
+msgstr "API-token niet gevonden."
+
+#: admin/src/views/ActivityView.vue
+msgid "Action"
+msgstr "Actie"
+
+#: admin/src/components/LogsTable.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Actions"
+msgstr "Acties"
+
+#: admin/src/views/ProView.vue
+msgid "Activate %1$sWebhook Actions Pro%2$s to continue."
+msgstr "Activeer %1$sWebhook Actions Pro%2$s om door te gaan."
+
+#: admin/src/views/ProView.vue
+msgid "Activate License"
+msgstr "Licentie activeren"
+
+#: admin/src/views/ProView.vue
+msgid "Activate Plugin"
+msgstr "Plug-in activeren"
+
+#: admin/src/views/ProView.vue
+msgid "Activating…"
+msgstr "Activeren…"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/views/ExternalCronView.vue admin/src/views/ProView.vue
+msgid "Active"
+msgstr "Actief"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Active/Total"
+msgstr "Actief/Totaal"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Activity"
+msgstr "Activiteit"
+
+#: admin/src/views/ProView.vue
+msgid "Activity Log"
+msgstr "Activiteitenlogboek"
+
+#: admin/src/views/ActivityView.vue
+msgid "Activity entries older than %d day have been deleted."
+msgid_plural "Activity entries older than %d days have been deleted."
+msgstr[0] "Activiteitsvermeldingen ouder dan %d dag zijn verwijderd."
+msgstr[1] "Activiteitsvermeldingen ouder dan %d dagen zijn verwijderd."
+
+#: src/Api/ActivityLogController.php:54
+msgid "Activity log entry ID."
+msgstr "ID van activiteitenlogboekvermelding."
+
+#: src/Api/ActivityLogController.php:120
+msgid "Activity log entry not found."
+msgstr "Activiteitenlogboekvermelding niet gevonden."
+
+#: admin/src/views/ActivityView.vue
+msgid "Actor"
+msgstr "Actor"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/TriggerSelect.vue
+msgid "Add"
+msgstr "Toevoegen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Add Mapping"
+msgstr "Mapping toevoegen"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Add Webhook"
+msgstr "Webhook toevoegen"
+
+#: admin/src/views/VaultView.vue
+msgid "Add a credential to securely reuse it across webhooks."
+msgstr "Voeg een referentie toe om deze veilig te hergebruiken in meerdere webhooks."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add condition"
+msgstr "Voorwaarde toevoegen"
+
+#: admin/src/views/VaultView.vue
+msgid "Add first credential"
+msgstr "Eerste referentie toevoegen"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add group"
+msgstr "Groep toevoegen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Add mapping for this field"
+msgstr "Mapping voor dit veld toevoegen"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Add row"
+msgstr "Rij toevoegen"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Add rule"
+msgstr "Regel toevoegen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Additional URL Query Parameters"
+msgstr "Aanvullende URL-queryparameters"
+
+#: admin/src/views/ActivityView.vue
+msgid "Admin and API action history"
+msgstr "Geschiedenis van beheerders- en API-acties"
+
+#: admin/src/components/WebhookForm.vue
+msgid "After saving, the value is encrypted at rest and never shown again."
+msgstr "Na het opslaan wordt de waarde versleuteld opgeslagen en nooit meer getoond."
+
+#: admin/src/views/ProView.vue
+msgid "Agency"
+msgstr "Agency"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Agent (AI)"
+msgstr "Agent (AI)"
+
+#: admin/src/views/ActivityView.vue
+msgid "All actions"
+msgstr "Alle acties"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "All chains"
+msgstr "Alle ketens"
+
+#: src/Api/SettingsController.php:200
+msgid "All logs have been cleared."
+msgstr "Alle logboeken zijn gewist."
+
+#: admin/src/views/LogsList.vue
+msgid "All statuses"
+msgstr "Alle statussen"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Also update expiry"
+msgstr "Vervaldatum ook bijwerken"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid ""
+"Alternatively, %1$sAuthorization: Bearer &lt;token&gt;%2$s works on most "
+"servers (requires %1$sCGIPassAuth On%2$s on Apache)."
+msgstr ""
+"Als alternatief werkt %1$sAuthorization: Bearer &lt;token&gt;%2$s op de "
+"meeste servers (vereist %1$sCGIPassAuth On%2$s op Apache)."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"An %1$sagent%2$s API token can assign credentials to webhooks but can never "
+"read their values."
+msgstr ""
+"Een %1$sagent%2$s-API-token kan referenties aan webhooks toewijzen, maar "
+"kan hun waarden nooit lezen."
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Any unsaved changes on this form will be lost."
+msgstr "Alle niet-opgeslagen wijzigingen in dit formulier gaan verloren."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Appended to the URL alongside the JSON body. Values support dot-notation "
+"paths or static strings."
+msgstr ""
+"Toegevoegd aan de URL naast de JSON-body. Waarden ondersteunen paden in "
+"puntnotatie of statische tekenreeksen."
+
+#: src/Api/LogsController.php:110
+msgid "Array of log IDs to retry."
+msgstr "Array van log-ID's om opnieuw te proberen."
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempt #%d"
+msgstr "Poging #%d"
+
+#: admin/src/views/QueueView.vue
+msgid "Attempt %1$d/%2$d"
+msgstr "Poging %1$d/%2$d"
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempt History"
+msgstr "Pogingsgeschiedenis"
+
+#: admin/src/components/LogsTable.vue
+msgid "Attempted At"
+msgstr "Geprobeerd op"
+
+#: src/Api/AuthHelper.php:42
+msgid ""
+"Authentication required. Provide a valid API token via X-FSWA-Token header, "
+"Authorization: Bearer token, or api_token query parameter."
+msgstr ""
+"Authenticatie vereist. Geef een geldig API-token op via de "
+"X-FSWA-Token-header, Authorization: Bearer token, of de "
+"api_token-queryparameter."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Authorization (optional)"
+msgstr "Autorisatie (optioneel)"
+
+#: src/Api/WebhooksController.php:726
+msgid "Authorization header value."
+msgstr "Waarde van Authorization-header."
+
+#: admin/src/views/VaultView.vue
+msgid "Authorization: Basic <base64(user:pass)> — incl. WP Application Passwords"
+msgstr "Authorization: Basic <base64(user:pass)> — incl. WP-applicatiewachtwoorden"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Automatically enrich payload with user profile information"
+msgstr "Verrijk de payload automatisch met gebruikersprofielinformatie"
+
+#: admin/src/views/ProView.vue
+msgid "Automation Chains"
+msgstr "Automatiseringsketens"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Available Fields"
+msgstr "Beschikbare velden"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Avg attempts"
+msgstr "Gem. pogingen"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Avg ping"
+msgstr "Gem. ping"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Avg response"
+msgstr "Gem. respons"
+
+#: admin/src/views/WebhookEdit.vue admin/src/views/WebhookLogs.vue
+msgid "Back to webhooks"
+msgstr "Terug naar webhooks"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Backoff Strategy"
+msgstr "Backoff-strategie"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Base Delay (s)"
+msgstr "Basisvertraging (s)"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Base seconds used to calculate the retry delay. Acts as a multiplier for "
+"exponential, interval for linear, and constant wait for fixed."
+msgstr ""
+"Basisseconden voor het berekenen van de pogingsvertraging. Fungeert als "
+"vermenigvuldiger bij exponentieel, interval bij lineair en constante "
+"wachttijd bij vast."
+
+#: admin/src/views/VaultView.vue
+msgid "Basic auth (user + password)"
+msgstr "Basisauthenticatie (gebruiker + wachtwoord)"
+
+#: src/Api/CredentialsController.php:389
+msgid "Basic auth requires a username and password."
+msgstr "Basisauthenticatie vereist een gebruikersnaam en wachtwoord."
+
+#: admin/src/views/VaultView.vue
+msgid "Bearer token (PAT)"
+msgstr "Bearer-token (PAT)"
+
+#: src/Api/ChainsController.php:223
+msgid "Both source_webhook_id and target_webhook_id are required."
+msgstr "Zowel source_webhook_id als target_webhook_id zijn verplicht."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Browse Library"
+msgstr "Bibliotheek bladeren"
+
+#: admin/src/views/ProView.vue
+msgid "Business"
+msgstr "Business"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"By default the encryption key is generated and stored in the database. For "
+"stronger protection — so a database-only dump can't decrypt secrets — move "
+"the key into %1$swp-config.php%2$s:"
+msgstr ""
+"Standaard wordt de versleutelingssleutel gegenereerd en in de database "
+"opgeslagen. Voor sterkere bescherming — zodat een dump van alleen de "
+"database geen geheimen kan ontsleutelen — verplaats je de sleutel naar "
+"%1$swp-config.php%2$s:"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/WebhookForm.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/Api/QueueController.php:335
+msgid "Cannot delete a job that is currently being processed."
+msgstr "Kan een taak die momenteel wordt verwerkt niet verwijderen."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Cannot evaluate"
+msgstr "Kan niet evalueren"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Cap on the wait between retries. Prevents exponential backoff from growing "
+"indefinitely — any delay above this value is clamped to it."
+msgstr ""
+"Bovengrens voor de wachttijd tussen pogingen. Voorkomt dat exponentiële "
+"backoff onbeperkt groeit — elke vertraging boven deze waarde wordt erop "
+"begrensd."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Capture an example payload to enable live preview."
+msgstr "Leg een voorbeeldpayload vast om livevoorbeeld in te schakelen."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured"
+msgstr "Vastgelegd"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Mapping"
+msgstr "Vastgelegd + mapping"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Pre-dispatch Glue + Mapping"
+msgstr "Vastgelegd + Glue vóór verzending + mapping"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured + Pre-dispatch Glue + Mapping + Post-dispatch Glue"
+msgstr "Vastgelegd + Glue vóór verzending + mapping + Glue na verzending"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Captured payload with field mapping applied"
+msgstr "Vastgelegde payload met veldmapping toegepast"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Cast"
+msgstr "Casten"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Chain"
+msgstr "Keten"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Chain link #%1$s — %2$s"
+msgstr "Ketenkoppeling #%1$s — %2$s"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Chain link #%s (deleted)"
+msgstr "Ketenkoppeling #%s (verwijderd)"
+
+#: src/Api/ChainsController.php:255
+msgid "Chain link not found."
+msgstr "Ketenkoppeling niet gevonden."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Chain mode links this webhook to upstream webhooks, which requires a saved "
+"webhook record. %1$sSave the webhook first%2$s (with or without WP-hook "
+"triggers — they'll be cleared when you pick upstream webhooks), then choose "
+"your chain sources on the next screen."
+msgstr ""
+"De ketenmodus koppelt deze webhook aan upstream-webhooks, wat een "
+"opgeslagen webhookrecord vereist. %1$sSla de webhook eerst op%2$s (met of "
+"zonder WP-hook-triggers — ze worden gewist wanneer je upstream-webhooks "
+"kiest) en kies vervolgens je ketenbronnen op het volgende scherm."
+
+#: admin/src/views/WebhooksList.vue
+msgid "Chain name"
+msgstr "Ketennaam"
+
+#: src/Api/ChainsController.php:131
+#: src/Api/ChainsController.php:163
+msgid "Chain name is required."
+msgstr "Ketennaam is verplicht."
+
+#: src/Api/ChainsController.php:117
+#: src/Api/ChainsController.php:156
+#: src/Api/ChainsController.php:196
+#: src/Api/ChainsController.php:217
+msgid "Chain not found."
+msgstr "Keten niet gevonden."
+
+#: admin/src/views/ActivityView.vue
+msgid "Chains"
+msgstr "Ketens"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Change expiry"
+msgstr "Vervaldatum wijzigen"
+
+#: admin/src/components/ChangeExpiryDialog.vue
+msgid "Change expiry: %s"
+msgstr "Vervaldatum wijzigen: %s"
+
+#: admin/src/views/ActivityView.vue
+msgid "Changes"
+msgstr "Wijzigingen"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Choose which payload the conditions read from: Original is the raw payload "
+"before field mapping; Transformed is the payload after mapping is applied."
+msgstr ""
+"Kies uit welke payload de voorwaarden lezen: Origineel is de onbewerkte "
+"payload vóór veldmapping; Getransformeerd is de payload nadat mapping is "
+"toegepast."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Clear assignment"
+msgstr "Toewijzing wissen"
+
+#: admin/src/views/ActivityView.vue
+msgid "Clear filters"
+msgstr "Filters wissen"
+
+#: admin/src/views/LogsList.vue
+msgid "Clear selection"
+msgstr "Selectie wissen"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Click to select or browse • + to select an array/object"
+msgstr "Klik om te selecteren of bladeren • + om een array/object te selecteren"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Client Error"
+msgstr "Clientfout"
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/components/ui/Dialog.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Close"
+msgstr "Sluiten"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Code Glue"
+msgstr "Code Glue"
+
+#: src/Api/TriggersController.php:228
+msgid "Comments"
+msgstr "Reacties"
+
+#: admin/src/views/ProView.vue
+msgid "Community support forum"
+msgstr "Communityondersteuningsforum"
+
+#: src/Api/SchemasController.php:259
+msgid "Condition groups require a Pro license."
+msgstr "Voorwaardegroepen vereisen een Pro-licentie."
+
+#: admin/src/views/ProView.vue
+msgid "Condition groups with AND / OR logic"
+msgstr "Voorwaardegroepen met AND / OR-logica"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Conditions"
+msgstr "Voorwaarden"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid ""
+"Conditions are evaluated against the payload — use the 'Evaluate conditions "
+"against' toggle above to choose original or transformed."
+msgstr ""
+"Voorwaarden worden geëvalueerd tegen de payload — gebruik de schakelaar "
+"'Voorwaarden evalueren tegen' hierboven om origineel of getransformeerd te "
+"kiezen."
+
+#: src/Api/LogsController.php:404
+msgid "Conditions are not met with current settings — event would be skipped."
+msgstr ""
+"Aan de voorwaarden wordt met de huidige instellingen niet voldaan — de "
+"gebeurtenis zou worden overgeslagen."
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Copy Event UUID"
+msgstr "Gebeurtenis-UUID kopiëren"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy URL"
+msgstr "URL kopiëren"
+
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/QueueView.vue
+msgid "Copy X-Webhook-Id"
+msgstr "X-Webhook-Id kopiëren"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Copy code"
+msgstr "Code kopiëren"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Copy endpoint URL"
+msgstr "Eindpunt-URL kopiëren"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy headers"
+msgstr "Headers kopiëren"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy original payload"
+msgstr "Originele payload kopiëren"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy payload"
+msgstr "Payload kopiëren"
+
+#: admin/src/components/LogsTable.vue
+msgid "Copy response body"
+msgstr "Responsbody kopiëren"
+
+#: admin/src/views/QueueView.vue
+msgid "Copy scheduled time"
+msgstr "Geplande tijd kopiëren"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Copy to clipboard"
+msgstr "Naar klembord kopiëren"
+
+#: admin/src/components/WebhookCardContent.vue admin/src/views/QueueView.vue
+msgid "Copy trigger name"
+msgstr "Triggernaam kopiëren"
+
+#: src/Api/QueueController.php:270
+msgid "Could not lock job for processing."
+msgstr "Kon taak niet vergrendelen voor verwerking."
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Create API Token"
+msgstr "API-token maken"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhookEdit.vue
+msgid "Create Webhook"
+msgstr "Webhook maken"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create a token to enable programmatic API access."
+msgstr "Maak een token om programmatische API-toegang in te schakelen."
+
+#: admin/src/views/VaultView.vue
+msgid "Create credential"
+msgstr "Referentie maken"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Create first token"
+msgstr "Eerste token maken"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Create token"
+msgstr "Token maken"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Create your first webhook"
+msgstr "Maak je eerste webhook"
+
+#: admin/src/components/LogsTable.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Created"
+msgstr "Aangemaakt"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Creating…"
+msgstr "Maken…"
+
+#: src/Api/WebhooksController.php:785
+msgid "Creation date."
+msgstr "Aanmaakdatum."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Credential name"
+msgstr "Referentienaam"
+
+#: src/Api/CredentialsController.php:229
+#: src/Api/CredentialsController.php:283
+msgid "Credential name is required."
+msgstr "Referentienaam is verplicht."
+
+#: src/Api/CredentialsController.php:431
+msgid "Credential not found."
+msgstr "Referentie niet gevonden."
+
+#: admin/src/App.vue admin/src/components/WebhookForm.vue admin/src/views/VaultView.vue
+msgid "Credentials Vault"
+msgstr "Referentiekluis"
+
+#: admin/src/views/ActivityView.vue
+msgid "Cron"
+msgstr "Cron"
+
+#: src/Controllers/DispatcherController.php:117
+msgid "Cron secret not configured."
+msgstr "Cron-geheim niet geconfigureerd."
+
+#: src/Api/LogsController.php:517
+msgid "Current page of results."
+msgstr "Huidige pagina met resultaten."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Custom"
+msgstr "Aangepast"
+
+#: admin/src/views/VaultView.vue
+msgid "Custom Authorization value"
+msgstr "Aangepaste Authorization-waarde"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Custom Payload"
+msgstr "Aangepaste payload"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Custom Request Headers"
+msgstr "Aangepaste verzoekheaders"
+
+#: admin/src/views/ProView.vue
+msgid "Custom backoff strategy (exponential, linear, fixed)"
+msgstr "Aangepaste backoff-strategie (exponentieel, lineair, vast)"
+
+#: src/Api/WebhooksController.php:120
+msgid "Custom payload JSON (required when payload_source is custom)."
+msgstr "Aangepaste payload-JSON (vereist wanneer payload_source custom is)."
+
+#: admin/src/views/QueueView.vue
+msgid "Database-backed webhook job queue"
+msgstr "Database-ondersteunde webhook-takenwachtrij"
+
+#: admin/src/components/LogsTable.vue
+msgid "Date"
+msgstr "Datum"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate"
+msgstr "Deactiveren"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate License"
+msgstr "Licentie deactiveren"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivate license?"
+msgstr "Licentie deactiveren?"
+
+#: admin/src/views/ProView.vue
+msgid "Deactivating…"
+msgstr "Deactiveren…"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Delay preview"
+msgstr "Voorbeeld vertraging"
+
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete Old Activity"
+msgstr "Oude activiteit verwijderen"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain"
+msgstr "Keten verwijderen"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete chain “%s”?"
+msgstr "Keten “%s” verwijderen?"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential"
+msgstr "Referentie verwijderen"
+
+#: admin/src/views/VaultView.vue
+msgid "Delete credential: %s"
+msgstr "Referentie verwijderen: %s"
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete entries older than"
+msgstr "Verwijder vermeldingen ouder dan"
+
+#: src/Api/ActivityLogController.php:39
+msgid "Delete entries older than specified days."
+msgstr "Verwijder vermeldingen ouder dan het opgegeven aantal dagen."
+
+#: admin/src/components/LogsTable.vue
+msgid "Delete log?"
+msgstr "Logboek verwijderen?"
+
+#: src/Api/LogsController.php:64
+msgid "Delete logs older than specified days."
+msgstr "Verwijder logboeken ouder dan het opgegeven aantal dagen."
+
+#: admin/src/views/ActivityView.vue
+msgid "Delete old"
+msgstr "Oude verwijderen"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token"
+msgstr "Token verwijderen"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Delete token: %s"
+msgstr "Token verwijderen: %s"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Delete “%s”?"
+msgstr "“%s” verwijderen?"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Deleting with force will detach it from %d webhook; that webhook will send "
+"no Authorization header until reconfigured."
+msgid_plural ""
+"Deleting with force will detach it from %d webhooks; those webhooks will "
+"send no Authorization header until reconfigured."
+msgstr[0] ""
+"Geforceerd verwijderen koppelt deze los van %d webhook; die webhook "
+"verzendt geen Authorization-header totdat deze opnieuw is geconfigureerd."
+msgstr[1] ""
+"Geforceerd verwijderen koppelt deze los van %d webhooks; die webhooks "
+"verzenden geen Authorization-header totdat ze opnieuw zijn geconfigureerd."
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Deleting…"
+msgstr "Verwijderen…"
+
+#: admin/src/views/ProView.vue
+msgid "Delivery logs & replay"
+msgstr "Bezorglogboeken en opnieuw afspelen"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Disabled"
+msgstr "Uitgeschakeld"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Disabled webhooks still capture payload examples for mapping and conditions "
+"configuration."
+msgstr ""
+"Uitgeschakelde webhooks leggen nog steeds payloadvoorbeelden vast voor de "
+"configuratie van mapping en voorwaarden."
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Discard"
+msgstr "Verwerpen"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Does not match example payload"
+msgstr "Komt niet overeen met voorbeeldpayload"
+
+#: admin/src/views/ProView.vue
+msgid "Don't have a license yet?"
+msgstr "Heb je nog geen licentie?"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Don't show this again"
+msgstr "Dit niet meer tonen"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Done"
+msgstr "Klaar"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Dot-path (e.g. event.id) or static text"
+msgstr "Puntpad (bijv. event.id) of statische tekst"
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"Downstream webhooks that lose their only trigger will be marked as orphans "
+"(no trigger assigned)."
+msgstr ""
+"Downstream-webhooks die hun enige trigger verliezen, worden gemarkeerd als "
+"wees (geen trigger toegewezen)."
+
+#: admin/src/views/QueueView.vue
+msgid "Due"
+msgstr "Verschuldigd"
+
+#: admin/src/views/QueueView.vue
+msgid "Due Now"
+msgstr "Nu verschuldigd"
+
+#: admin/src/components/LogsTable.vue
+msgid "Duration"
+msgstr "Duur"
+
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+msgid "Edit"
+msgstr "Bewerken"
+
+#: admin/src/views/WebhookEdit.vue
+msgid "Edit Webhook"
+msgstr "Webhook bewerken"
+
+#: admin/src/views/VaultView.vue
+msgid "Edit credential"
+msgstr "Referentie bewerken"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Enable Anyway"
+msgstr "Toch inschakelen"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Enable External Cron"
+msgstr "Externe cron inschakelen"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid "Enable Synchronous Execution?"
+msgstr "Synchrone uitvoering inschakelen?"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Enable conditional dispatch"
+msgstr "Voorwaardelijke verzending inschakelen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Enabled Webhook"
+msgstr "Ingeschakelde webhook"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Endpoint URL"
+msgstr "Eindpunt-URL"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Endpoint URL is required"
+msgstr "Eindpunt-URL is verplicht"
+
+#: src/Api/WebhooksController.php:234
+msgid "Endpoint URL is required."
+msgstr "Eindpunt-URL is verplicht."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Enter an Authorization header value first."
+msgstr "Voer eerst een Authorization-headerwaarde in."
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Enter custom hook name..."
+msgstr "Voer een aangepaste hook-naam in…"
+
+#: admin/src/views/ProView.vue
+msgid "Enter your license key to unlock Pro features on this site."
+msgstr "Voer je licentiesleutel in om Pro-functies op deze site te ontgrendelen."
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
+msgid "Error"
+msgstr "Fout"
+
+#: admin/src/components/LogsTable.vue
+msgid "Error Message"
+msgstr "Foutmelding"
+
+#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Errors"
+msgstr "Fouten"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Evaluate conditions against"
+msgstr "Voorwaarden evalueren tegen"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Event Replayed"
+msgstr "Gebeurtenis opnieuw afgespeeld"
+
+#: admin/src/components/LogsTable.vue
+msgid "Event UUID"
+msgstr "Gebeurtenis-UUID"
+
+#: admin/src/views/QueueView.vue
+msgid "Event UUID:"
+msgstr "Gebeurtenis-UUID:"
+
+#: src/App.php:105
+msgid "Every Minute"
+msgstr "Elke minuut"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Example payload captured"
+msgstr "Voorbeeldpayload vastgelegd"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Example payload would %1$s%2$s%3$s"
+msgstr "Voorbeeldpayload zou %1$s%2$s%3$s"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Exclude entire %s"
+msgstr "Hele %s uitsluiten"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Exclude field"
+msgstr "Veld uitsluiten"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Excluded Fields"
+msgstr "Uitgesloten velden"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute"
+msgstr "Uitvoeren"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Execute Now"
+msgstr "Nu uitvoeren"
+
+#: admin/src/views/QueueView.vue
+msgid "Execute now"
+msgstr "Nu uitvoeren"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Executes synchronously (blocking)"
+msgstr "Voert synchroon uit (blokkerend)"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expired"
+msgstr "Verlopen"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Expires"
+msgstr "Verloopt"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Expires at"
+msgstr "Verloopt op"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Exponential"
+msgstr "Exponentieel"
+
+#: admin/src/App.vue admin/src/views/ExternalCronView.vue
+msgid "External Cron"
+msgstr "Externe cron"
+
+#: admin/src/views/ProView.vue
+msgid "External Cron (bypass WP-Cron)"
+msgstr "Externe cron (WP-Cron omzeilen)"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "External Cron History"
+msgstr "Geschiedenis externe cron"
+
+#: src/Api/WebhooksController.php:743
+msgid "Extra request headers as key-value pairs."
+msgstr "Extra verzoekheaders als sleutel-waardeparen."
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Fail"
+msgstr "Mislukt"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Failed"
+msgstr "Mislukt"
+
+#: src/Api/ApiTokensController.php:166
+msgid "Failed to create API token."
+msgstr "Maken van API-token mislukt."
+
+#: src/Api/ChainsController.php:241
+msgid "Failed to create chain link (it may already exist)."
+msgstr "Maken van ketenkoppeling mislukt (deze bestaat mogelijk al)."
+
+#: src/Api/ChainsController.php:139
+msgid "Failed to create chain."
+msgstr "Maken van keten mislukt."
+
+#: src/Api/CredentialsController.php:256
+msgid "Failed to create credential."
+msgstr "Maken van referentie mislukt."
+
+#: src/Api/WebhooksController.php:260
+msgid "Failed to create webhook."
+msgstr "Maken van webhook mislukt."
+
+#: src/Api/ApiTokensController.php:279
+msgid "Failed to delete API token."
+msgstr "Verwijderen van API-token mislukt."
+
+#: src/Api/CredentialsController.php:368
+msgid "Failed to delete credential."
+msgstr "Verwijderen van referentie mislukt."
+
+#: src/Api/LogsController.php:270
+msgid "Failed to delete log."
+msgstr "Verwijderen van logboek mislukt."
+
+#: src/Api/QueueController.php:345
+msgid "Failed to delete queue job."
+msgstr "Verwijderen van wachtrijtaak mislukt."
+
+#: src/Api/SchemasController.php:336
+msgid "Failed to delete schema."
+msgstr "Verwijderen van schema mislukt."
+
+#: src/Api/WebhooksController.php:429
+msgid "Failed to delete webhook."
+msgstr "Verwijderen van webhook mislukt."
+
+#: src/Services/WPHttpTransport.php:27
+msgid "Failed to encode payload as JSON"
+msgstr "Coderen van payload als JSON mislukt"
+
+#: admin/src/composables/useChains.js
+msgid "Failed to fetch chains"
+msgstr "Ophalen van ketens mislukt"
+
+#: admin/src/composables/useHealthStats.js
+msgid "Failed to fetch health stats"
+msgstr "Ophalen van statusstatistieken mislukt"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch schemas"
+msgstr "Ophalen van schema's mislukt"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch snippets"
+msgstr "Ophalen van snippets mislukt"
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to fetch trigger snippet"
+msgstr "Ophalen van triggersnippet mislukt"
+
+#: admin/src/composables/useSchemas.js
+msgid "Failed to fetch user triggers"
+msgstr "Ophalen van gebruikerstriggers mislukt"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Failed to rename chain."
+msgstr "Hernoemen van keten mislukt."
+
+#: src/Api/SchemasController.php:368
+msgid "Failed to reset capture."
+msgstr "Resetten van vastlegging mislukt."
+
+#: src/Api/LogsController.php:344
+msgid "Failed to retry job."
+msgstr "Opnieuw proberen van taak mislukt."
+
+#: src/Api/QueueController.php:387
+msgid "Failed to retry queue job."
+msgstr "Opnieuw proberen van wachtrijtaak mislukt."
+
+#: src/Api/ApiTokensController.php:213
+msgid "Failed to rotate API token."
+msgstr "Roteren van API-token mislukt."
+
+#: admin/src/composables/useSnippets.js
+msgid "Failed to save trigger snippet"
+msgstr "Opslaan van triggersnippet mislukt"
+
+#: src/Api/WebhooksController.php:471
+msgid "Failed to toggle webhook status."
+msgstr "Wijzigen van webhookstatus mislukt."
+
+#: src/Api/SchemasController.php:301
+msgid "Failed to update schema."
+msgstr "Bijwerken van schema mislukt."
+
+#: src/Api/WebhooksController.php:371
+msgid "Failed to update webhook."
+msgstr "Bijwerken van webhook mislukt."
+
+#: admin/src/components/MappingEditor.vue
+msgid "Field Mappings"
+msgstr "Veldmappings"
+
+#: src/Api/SchemasController.php:89
+msgid "Field mapping configuration."
+msgstr "Veldmappingconfiguratie."
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by X-Webhook-ID…"
+msgstr "Filteren op X-Webhook-ID…"
+
+#: src/Api/ActivityLogController.php:148
+msgid "Filter by action prefix (e.g. \"webhook\")."
+msgstr "Filteren op actievoorvoegsel (bijv. \"webhook\")."
+
+#: src/Api/LogsController.php:551
+msgid "Filter by event UUID (exact match)."
+msgstr "Filteren op gebeurtenis-UUID (exacte overeenkomst)."
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by event UUID…"
+msgstr "Filteren op gebeurtenis-UUID…"
+
+#: src/Api/ActivityLogController.php:147
+msgid "Filter by exact action string."
+msgstr "Filteren op exacte actie-tekenreeks."
+
+#: src/Api/LogsController.php:534
+msgid "Filter by status."
+msgstr "Filteren op status."
+
+#: src/Api/LogsController.php:555
+msgid "Filter by target URL (partial match)."
+msgstr "Filteren op doel-URL (gedeeltelijke overeenkomst)."
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Filter by target URL…"
+msgstr "Filteren op doel-URL…"
+
+#: src/Api/LogsController.php:539
+msgid "Filter by trigger name."
+msgstr "Filteren op triggernaam."
+
+#: src/Api/LogsController.php:134
+#: src/Api/LogsController.php:530
+msgid "Filter by webhook ID."
+msgstr "Filteren op webhook-ID."
+
+#: src/Api/LogsController.php:559
+msgid "Filter by webhook UUID (X-Webhook-Id header value)."
+msgstr "Filteren op webhook-UUID (waarde van X-Webhook-Id-header)."
+
+#: src/Api/ActivityLogController.php:152
+msgid "Filter from UTC datetime (Y-m-d H:i:s)."
+msgstr "Filteren vanaf UTC-datum/tijd (Y-m-d H:i:s)."
+
+#: src/Api/LogsController.php:543
+msgid "Filter logs from this date."
+msgstr "Logboeken filteren vanaf deze datum."
+
+#: src/Api/LogsController.php:547
+msgid "Filter logs until this date."
+msgstr "Logboeken filteren tot deze datum."
+
+#: src/Api/ActivityLogController.php:153
+msgid "Filter until UTC datetime (Y-m-d H:i:s)."
+msgstr "Filteren tot UTC-datum/tijd (Y-m-d H:i:s)."
+
+#: admin/src/views/VaultView.vue
+msgid "Finish moving the key into wp-config.php"
+msgstr "Verplaatsing van de sleutel naar wp-config.php voltooien"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Fixed"
+msgstr "Vast"
+
+#: admin/src/views/VaultView.vue
+msgid "Force delete & detach"
+msgstr "Geforceerd verwijderen en loskoppelen"
+
+#: admin/src/views/ActivityView.vue
+msgid "From date"
+msgstr "Vanaf datum"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "From date & time"
+msgstr "Vanaf datum en tijd"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Full"
+msgstr "Volledig"
+
+#: admin/src/views/ProView.vue
+msgid "Full REST API with API token authentication"
+msgstr "Volledige REST API met API-tokenauthenticatie"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Full pipeline — post-dispatch Code Glue fires after delivery"
+msgstr "Volledige pijplijn — Code Glue na verzending wordt na bezorging geactiveerd"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Full write power for AI assistants — but can never reveal auth headers or "
+"vault secrets"
+msgstr ""
+"Volledige schrijfbevoegdheid voor AI-assistenten — maar kan nooit "
+"authenticatieheaders of kluisgeheimen onthullen"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Full write power, but can never reveal auth headers or vault secrets"
+msgstr ""
+"Volledige schrijfbevoegdheid, maar kan nooit authenticatieheaders of "
+"kluisgeheimen onthullen"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "GET webhooks, logs, queue, health, triggers, schemas"
+msgstr "GET webhooks, logboeken, wachtrij, status, triggers, schema's"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Generate a new API token for programmatic access."
+msgstr "Genereer een nieuw API-token voor programmatische toegang."
+
+#: admin/src/views/ProView.vue
+msgid "Get Pro"
+msgstr "Pro aanschaffen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Give this credential a name."
+msgstr "Geef deze referentie een naam."
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Go to Pro"
+msgstr "Naar Pro"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Go to Queue"
+msgstr "Naar wachtrij"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group does not match example payload"
+msgstr "Groep komt niet overeen met voorbeeldpayload"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group matches example payload"
+msgstr "Groep komt overeen met voorbeeldpayload"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Group matches example payload: %1$s (based on %2$d rule)"
+msgid_plural "Group matches example payload: %1$s (based on %2$d rules)"
+msgstr[0] "Groep komt overeen met voorbeeldpayload: %1$s (op basis van %2$d regel)"
+msgstr[1] "Groep komt overeen met voorbeeldpayload: %1$s (op basis van %2$d regels)"
+
+#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue
+msgid "HTTP %s"
+msgstr "HTTP %s"
+
+#: admin/src/components/LogsTable.vue
+msgid "HTTP Code"
+msgstr "HTTP-code"
+
+#: admin/src/components/WebhookForm.vue
+msgid "HTTP Method"
+msgstr "HTTP-methode"
+
+#: src/Api/WebhooksController.php:736
+msgid "HTTP method used for delivery."
+msgstr "HTTP-methode gebruikt voor bezorging."
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Head to the Pro tab?"
+msgstr "Naar het Pro-tabblad gaan?"
+
+#: admin/src/views/VaultView.vue
+msgid "Header"
+msgstr "Header"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/VaultView.vue
+msgid "Header name"
+msgstr "Headernaam"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Headers"
+msgstr "Headers"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide"
+msgstr "Verbergen"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide password"
+msgstr "Wachtwoord verbergen"
+
+#: admin/src/views/VaultView.vue
+msgid "Hide secret"
+msgstr "Geheim verbergen"
+
+#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Hint"
+msgstr "Hint"
+
+#: admin/src/views/VaultView.vue
+msgid "How secrets are protected"
+msgstr "Hoe geheimen worden beschermd"
+
+#: admin/src/components/WebhookForm.vue
+msgid "How to calculate the wait between retries. Overrides the global setting."
+msgstr ""
+"Hoe de wachttijd tussen pogingen wordt berekend. Overschrijft de globale "
+"instelling."
+
+#: src/Api/WebhooksController.php:124
+msgid "How to run the test: now (synchronous) or queue (async)."
+msgstr "Hoe de test wordt uitgevoerd: now (synchroon) of queue (asynchroon)."
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "I've saved it elsewhere"
+msgstr "Ik heb het ergens anders opgeslagen"
+
+#: src/Api/WebhooksController.php:731
+msgid ""
+"ID of a vault credential to use for authorization. Takes precedence over "
+"auth_header."
+msgstr "ID van een kluisreferentie voor autorisatie. Heeft voorrang op auth_header."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "IF"
+msgstr "ALS"
+
+#: admin/src/views/ActivityView.vue
+msgid "IP"
+msgstr "IP"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Include User Data"
+msgstr "Gebruikersgegevens opnemen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Include field"
+msgstr "Veld opnemen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Include unmapped fields"
+msgstr "Niet-gemapte velden opnemen"
+
+#: src/Api/AuthHelper.php:52
+#. translators: %s: required scope name
+#, php-format
+msgid "Insufficient token scope. This endpoint requires \"%s\" scope or higher."
+msgstr "Onvoldoende tokenbereik. Dit eindpunt vereist het bereik “%s” of hoger."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Interval"
+msgstr "Interval"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Invalid JSON"
+msgstr "Ongeldige JSON"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Invalid URL format"
+msgstr "Ongeldig URL-formaat"
+
+#: src/Api/CredentialsController.php:233
+#: src/Api/CredentialsController.php:294
+msgid "Invalid credential type."
+msgstr "Ongeldig referentietype."
+
+#: src/Controllers/DispatcherController.php:125
+msgid "Invalid cron token."
+msgstr "Ongeldig cron-token."
+
+#: src/Api/WebhooksController.php:242
+#: src/Api/WebhooksController.php:318
+msgid "Invalid endpoint URL."
+msgstr "Ongeldige eindpunt-URL."
+
+#: src/Api/ApiTokensController.php:146
+msgid "Invalid scope. Must be read, operational, full, or agent."
+msgstr "Ongeldig bereik. Moet read, operational, full of agent zijn."
+
+#: src/Api/QueueController.php:354
+msgid "Job deleted successfully."
+msgstr "Taak succesvol verwijderd."
+
+#: src/Api/QueueController.php:291
+msgid "Job executed successfully."
+msgstr "Taak succesvol uitgevoerd."
+
+#: src/Api/QueueController.php:301
+msgid "Job failed and has been rescheduled for retry."
+msgstr "Taak is mislukt en opnieuw ingepland om te proberen."
+
+#: src/Api/QueueController.php:302
+msgid "Job failed and has exceeded maximum retry attempts."
+msgstr "Taak is mislukt en heeft het maximale aantal pogingen overschreden."
+
+#: src/Api/QueueController.php:312
+msgid "Job failed with a non-retryable error."
+msgstr "Taak is mislukt met een fout die niet opnieuw kan worden geprobeerd."
+
+#: src/Api/QueueController.php:250
+msgid "Job has already been completed."
+msgstr "Taak is al voltooid."
+
+#: src/Api/QueueController.php:396
+msgid "Job has been queued for retry."
+msgstr "Taak is in de wachtrij geplaatst om opnieuw te proberen."
+
+#: src/Api/QueueController.php:260
+msgid "Job has invalid payload data."
+msgstr "Taak heeft ongeldige payloadgegevens."
+
+#: src/Api/QueueController.php:242
+msgid "Job is currently being processed."
+msgstr "Taak wordt momenteel verwerkt."
+
+#: admin/src/views/QueueView.vue
+msgid ""
+"Jobs are processed every minute by WP-Cron. Failed jobs are automatically "
+"retried with exponential backoff. Use “Process Now” to manually trigger "
+"batch processing."
+msgstr ""
+"Taken worden elke minuut verwerkt door WP-Cron. Mislukte taken worden "
+"automatisch opnieuw geprobeerd met exponentiële backoff. Gebruik “Nu "
+"verwerken” om batchverwerking handmatig te starten."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Jobs processed per cron run."
+msgstr "Taken verwerkt per cron-run."
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Key"
+msgstr "Sleutel"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Key must only contain letters, numbers, hyphens, or underscores"
+msgstr "Sleutel mag alleen letters, cijfers, koppeltekens of underscores bevatten"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Last captured payload for this trigger"
+msgstr "Laatst vastgelegde payload voor deze trigger"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Last hour"
+msgstr "Laatste uur"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last ping failed:"
+msgstr "Laatste ping mislukt:"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Last stats pull: %s"
+msgstr "Laatste statistiekenophaling: %s"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Last successful response (used as preview context)"
+msgstr "Laatste geslaagde respons (gebruikt als voorbeeldcontext)"
+
+#: src/Api/WebhooksController.php:792
+msgid "Last update date."
+msgstr "Datum laatste update."
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Last used"
+msgstr "Laatst gebruikt"
+
+#: admin/src/App.vue
+msgid "Leave a review on WordPress.org"
+msgstr "Laat een beoordeling achter op WordPress.org"
+
+#: admin/src/views/VaultView.vue
+msgid "Leave blank to keep current"
+msgstr "Laat leeg om de huidige te behouden"
+
+#: admin/src/views/ProView.vue
+msgid "License Key"
+msgstr "Licentiesleutel"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Linear"
+msgstr "Lineair"
+
+#: src/Api/WebhooksController.php:779
+msgid "List of trigger actions."
+msgstr "Lijst van triggeracties."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Load"
+msgstr "Laden"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Loading last log…"
+msgstr "Laatste logboek laden…"
+
+#: admin/src/views/QueueView.vue
+msgid "Loading queue…"
+msgstr "Wachtrij laden…"
+
+#: admin/src/components/ChainPicker.vue admin/src/views/WebhooksList.vue
+msgid "Loading webhooks…"
+msgstr "Webhooks laden…"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TriggerSelect.vue
+msgid "Loading..."
+msgstr "Laden…"
+
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/views/ActivityView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
+msgid "Loading…"
+msgstr "Laden…"
+
+#: admin/src/views/QueueView.vue
+msgid "Locked by: %s"
+msgstr "Vergrendeld door: %s"
+
+#: admin/src/components/LogsTable.vue
+msgid "Log Details"
+msgstr "Logboekdetails"
+
+#: src/Api/LogsController.php:242
+#: src/Api/LogsController.php:260
+#: src/Api/LogsController.php:316
+#: src/Api/LogsController.php:368
+msgid "Log not found."
+msgstr "Logboek niet gevonden."
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/LogsList.vue
+msgid "Logs"
+msgstr "Logboeken"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Logs: %s"
+msgstr "Logboeken: %s"
+
+#: admin/src/App.vue
+msgid "Love the plugin?"
+msgstr "Vind je de plug-in goed?"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Make sure to update all systems that use this token before rotating."
+msgstr "Werk alle systemen die dit token gebruiken bij voordat je roteert."
+
+#: admin/src/views/WebhooksList.vue
+msgid "Manage your webhook endpoints"
+msgstr "Beheer je webhook-eindpunten"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Manual dot-notation for all fields"
+msgstr "Handmatige puntnotatie voor alle velden"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Manual header"
+msgstr "Handmatige header"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Mapped"
+msgstr "Gemapt"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Mapping & Conditions"
+msgstr "Mapping en voorwaarden"
+
+#: admin/src/components/LogsTable.vue
+msgid "Mapping Applied"
+msgstr "Mapping toegepast"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Match:"
+msgstr "Overeenkomst:"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "Matches example payload"
+msgstr "Komt overeen met voorbeeldpayload"
+
+#: flowsystems-webhook-actions.php
+#. Author of the plugin
+msgid "Mateusz Skorupa"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "Max Attempts"
+msgstr "Max. pogingen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Max Delay (s)"
+msgstr "Max. vertraging (s)"
+
+#: admin/src/views/VaultView.vue
+msgid "Maximum protection"
+msgstr "Maximale bescherming"
+
+#: src/Api/TriggersController.php:230
+msgid "Media"
+msgstr "Media"
+
+#: admin/src/components/LogsTable.vue
+msgid "Method"
+msgstr "Methode"
+
+#: admin/src/views/VaultView.vue
+msgid "Migrated %1$s · failed %2$s"
+msgstr "Gemigreerd %1$s · mislukt %2$s"
+
+#: admin/src/views/ProView.vue
+msgid "More sites, advanced conditions, and priority support."
+msgstr "Meer sites, geavanceerde voorwaarden en prioriteitsondersteuning."
+
+#: src/Api/SchemasController.php:268
+msgid "More than 1 condition requires a Pro license."
+msgstr "Meer dan 1 voorwaarde vereist een Pro-licentie."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Move this value into the encrypted Credentials Vault"
+msgstr "Verplaats deze waarde naar de versleutelde Referentiekluis"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Must %1$sreturn $payload;%2$s — the returned array replaces the payload "
+"before dispatch."
+msgstr ""
+"Moet %1$sreturn $payload;%2$s — de geretourneerde array vervangt de payload "
+"vóór verzending."
+
+#: admin/src/components/WebhookForm.vue
+msgid "My Webhook"
+msgstr "Mijn webhook"
+
+#: admin/src/views/WebhooksList.vue
+msgid "My chain"
+msgstr "Mijn keten"
+
+#: admin/src/components/LogsTable.vue
+msgid "N/A"
+msgstr "N.v.t."
+
+#: admin/src/components/WebhookForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+msgid "Name"
+msgstr "Naam"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Name is required"
+msgstr "Naam is verplicht"
+
+#: admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Name is required."
+msgstr "Naam is verplicht."
+
+#: src/Api/WebhooksController.php:713
+msgid "Name of the webhook."
+msgstr "Naam van de webhook."
+
+#: admin/src/views/ProView.vue
+msgid "Need help?"
+msgstr "Hulp nodig?"
+
+#: admin/src/components/ChainPicker.vue
+msgid "New chain name"
+msgstr "Nieuwe ketennaam"
+
+#: admin/src/components/ChainPicker.vue
+msgid "New chain…"
+msgstr "Nieuwe keten…"
+
+#: admin/src/views/VaultView.vue
+msgid "New credential"
+msgstr "Nieuwe referentie"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "New token"
+msgstr "Nieuw token"
+
+#: admin/src/views/ActivityView.vue
+msgid "Next"
+msgstr "Volgende"
+
+#: admin/src/components/LogsTable.vue
+msgid "Next attempt scheduled for %s"
+msgstr "Volgende poging gepland voor %s"
+
+#: admin/src/components/LogsTable.vue
+msgid "No"
+msgstr "Nee"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "No API tokens"
+msgstr "Geen API-tokens"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "No Payload Captured Yet"
+msgstr "Nog geen payload vastgelegd"
+
+#: admin/src/views/ActivityView.vue
+msgid "No activity recorded yet."
+msgstr "Nog geen activiteit vastgelegd."
+
+#: src/Api/SettingsController.php:171
+msgid "No archive files found or failed to create ZIP."
+msgstr "Geen archiefbestanden gevonden of maken van ZIP mislukt."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "No body sent"
+msgstr "Geen body verzonden"
+
+#: src/Api/WebhooksController.php:544
+#: src/Api/WebhooksController.php:562
+#: src/Api/WebhooksController.php:582
+msgid ""
+"No captured payload found for this trigger. Fire the trigger at least once "
+"first."
+msgstr ""
+"Geen vastgelegde payload gevonden voor deze trigger. Activeer de trigger "
+"eerst minstens één keer."
+
+#: admin/src/components/WebhookForm.vue
+msgid "No captured payload — trigger the webhook once to preview the resolved URL."
+msgstr ""
+"Geen vastgelegde payload — trigger de webhook één keer om de opgeloste URL "
+"te bekijken."
+
+#: src/Api/SchemasController.php:288
+msgid "No data to update."
+msgstr "Geen gegevens om bij te werken."
+
+#: admin/src/components/MappingEditor.vue
+msgid "No example payload captured yet."
+msgstr "Nog geen voorbeeldpayload vastgelegd."
+
+#: admin/src/components/MappingEditor.vue
+msgid "No field mappings configured. Fields will be sent as-is."
+msgstr "Geen veldmappings geconfigureerd. Velden worden ongewijzigd verzonden."
+
+#: admin/src/components/FieldSelector.vue
+msgid "No fields found"
+msgstr "Geen velden gevonden"
+
+#: admin/src/components/MappingEditor.vue
+msgid "No fields found in payload"
+msgstr "Geen velden gevonden in payload"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "No heartbeat data yet"
+msgstr "Nog geen heartbeat-gegevens"
+
+#: admin/src/components/LogsTable.vue
+msgid "No logs found"
+msgstr "Geen logboeken gevonden"
+
+#: admin/src/components/ChainPicker.vue
+msgid ""
+"No other webhooks exist yet — create at least one webhook to use it as a "
+"chain source."
+msgstr ""
+"Er bestaan nog geen andere webhooks — maak ten minste één webhook om deze "
+"als ketenbron te gebruiken."
+
+#: src/Api/LogsController.php:326
+msgid "No queue job found for this log entry."
+msgstr "Geen wachtrijtaak gevonden voor deze logboekvermelding."
+
+#: admin/src/views/QueueView.vue
+msgid "No queued jobs"
+msgstr "Geen taken in wachtrij"
+
+#: admin/src/views/VaultView.vue
+msgid "No saved credentials"
+msgstr "Geen opgeslagen referenties"
+
+#: admin/src/components/WebhookForm.vue
+msgid "No saved credentials yet. Add one in the"
+msgstr "Nog geen opgeslagen referenties. Voeg er een toe in de"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No snippet assigned"
+msgstr "Geen snippet toegewezen"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No snippets found"
+msgstr "Geen snippets gevonden"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No successful dispatches found for this webhook — run a test first."
+msgstr ""
+"Geen geslaagde verzendingen gevonden voor deze webhook — voer eerst een "
+"test uit."
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "No trigger assigned"
+msgstr "Geen trigger toegewezen"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "No triggers configured for this webhook."
+msgstr "Geen triggers geconfigureerd voor deze webhook."
+
+#: admin/src/components/TriggerSelect.vue
+msgid "No triggers found"
+msgstr "Geen triggers gevonden"
+
+#: admin/src/views/WebhooksList.vue
+msgid "No webhooks configured yet"
+msgstr "Nog geen webhooks geconfigureerd"
+
+#: admin/src/components/ChainPicker.vue
+msgid "No webhooks match “%s”."
+msgstr "Geen webhooks komen overeen met “%s”."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Not configured"
+msgstr "Niet geconfigureerd"
+
+#: admin/src/components/LogsTable.vue
+msgid ""
+"Not sent as request body for GET / DELETE. Without URL parameters "
+"configured, the full payload is appended as %1$s?payload=&lt;json&gt;%2$s."
+msgstr ""
+"Wordt niet als verzoekbody verzonden voor GET / DELETE. Zonder "
+"geconfigureerde URL-parameters wordt de volledige payload toegevoegd als "
+"%1$s?payload=&lt;json&gt;%2$s."
+
+#: src/Api/LogsController.php:127
+msgid "Number of days to look back."
+msgstr "Aantal dagen om terug te kijken."
+
+#: src/Api/LogsController.php:523
+msgid "Number of results per page."
+msgstr "Aantal resultaten per pagina."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "OK"
+msgstr "OK"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "OR"
+msgstr "OR"
+
+#: admin/src/views/ActivityView.vue
+msgid "Object"
+msgstr "Object"
+
+#: admin/src/components/ChainPicker.vue
+msgid ""
+"On a successful (2xx) response from any of these webhooks, this webhook "
+"fires with the upstream response, sent payload, and original pre-mapping "
+"payload available as %1$sargs[0]%2$s."
+msgstr ""
+"Bij een geslaagde (2xx) respons van een van deze webhooks wordt deze "
+"webhook geactiveerd, waarbij de upstream-respons, de verzonden payload en "
+"de oorspronkelijke payload vóór mapping beschikbaar zijn als "
+"%1$sargs[0]%2$s."
+
+#: src/Api/LogsController.php:334
+msgid "Only failed log entries can be retried."
+msgstr "Alleen mislukte logboekvermeldingen kunnen opnieuw worden geprobeerd."
+
+#: src/Api/QueueController.php:377
+msgid "Only pending or permanently failed jobs can be retried."
+msgstr ""
+"Alleen taken die in behandeling zijn of permanent zijn mislukt, kunnen "
+"opnieuw worden geprobeerd."
+
+#: src/Api/WebhooksController.php:686
+msgid "Only return enabled webhooks."
+msgstr "Alleen ingeschakelde webhooks retourneren."
+
+#: src/Api/LogsController.php:376
+msgid "Only successful or skipped log entries can be replayed."
+msgstr ""
+"Alleen geslaagde of overgeslagen logboekvermeldingen kunnen opnieuw worden "
+"afgespeeld."
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Operational"
+msgstr "Operationeel"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Operational + create/update/delete webhooks, schemas, and queue jobs"
+msgstr ""
+"Operationeel + webhooks, schema's en wachtrijtaken "
+"maken/bijwerken/verwijderen"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Operational + create/update/delete webhooks, schemas, queue jobs"
+msgstr ""
+"Operationeel + webhooks, schema's en wachtrijtaken "
+"maken/bijwerken/verwijderen"
+
+#: admin/src/views/VaultView.vue
+msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
+msgstr "Optioneel: versterken met %1$sFSWA_SECRET_KEY%2$s"
+
+#: src/Api/TriggersController.php:232
+msgid "Options"
+msgstr "Opties"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Or select from available hooks..."
+msgstr "Of kies uit beschikbare hooks…"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Original"
+msgstr "Origineel"
+
+#: admin/src/components/LogsTable.vue admin/src/components/MappingEditor.vue
+msgid "Original Payload"
+msgstr "Originele payload"
+
+#: src/Api/TriggersController.php:234
+msgid "Other"
+msgstr "Overig"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Output (stdout)"
+msgstr "Uitvoer (stdout)"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Override the global retry limit for this webhook. Leave empty to use the "
+"global setting."
+msgstr ""
+"Overschrijf de globale pogingslimiet voor deze webhook. Laat leeg om de "
+"globale instelling te gebruiken."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Override the retry delay strategy for this webhook. Leave empty to use the "
+"global setting."
+msgstr ""
+"Overschrijf de pogingsvertragingsstrategie voor deze webhook. Laat leeg om "
+"de globale instelling te gebruiken."
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "PHP Code"
+msgstr "PHP-code"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"PHP runs after successful dispatch; %1$s$responseBody%2$s and "
+"%1$s$originalPayload%2$s available"
+msgstr ""
+"PHP draait na geslaagde verzending; %1$s$responseBody%2$s en "
+"%1$s$originalPayload%2$s beschikbaar"
+
+#: src/Api/TriggersController.php:227
+msgid "Pages"
+msgstr "Pagina's"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Param name"
+msgstr "Parameternaam"
+
+#: src/Api/LogsController.php:289
+msgid "Parameter older_than_days is required."
+msgstr "Parameter older_than_days is verplicht."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Part of chain:"
+msgid_plural "Part of chains:"
+msgstr[0] "Onderdeel van keten:"
+msgstr[1] "Onderdeel van ketens:"
+
+#: admin/src/views/VaultView.vue
+msgid "Password"
+msgstr "Wachtwoord"
+
+#: admin/src/views/VaultView.vue
+msgid "Password or application password"
+msgstr "Wachtwoord of applicatiewachtwoord"
+
+#: admin/src/views/VaultView.vue
+msgid "Paste the token / key"
+msgstr "Plak het token / de sleutel"
+
+#: admin/src/components/KeyValueEditor.vue
+msgid "Path not found in captured payload"
+msgstr "Pad niet gevonden in vastgelegde payload"
+
+#: admin/src/components/FieldSelector.vue admin/src/components/MappingEditor.vue
+msgid "Path not found in payload"
+msgstr "Pad niet gevonden in payload"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Pause"
+msgstr "Pauzeren"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Paused"
+msgstr "Gepauzeerd"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Payload"
+msgstr "Payload"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Payload Example Captured"
+msgstr "Payloadvoorbeeld vastgelegd"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Payload Mapping"
+msgstr "Payload-mapping"
+
+#: admin/src/views/ProView.vue
+msgid "Payload mapping"
+msgstr "Payload-mapping"
+
+#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Pending"
+msgstr "In behandeling"
+
+#: admin/src/views/ProView.vue
+msgid "Per-webhook retry limit override"
+msgstr "Per-webhook overschrijving van pogingslimiet"
+
+#: admin/src/views/QueueView.vue
+msgid "Perm. Failed"
+msgstr "Perm. mislukt"
+
+#: admin/src/views/LogsList.vue
+msgid "Permanently Failed"
+msgstr "Permanent mislukt"
+
+#: admin/src/components/ui/DateTimePicker.vue
+msgid "Pick date & time"
+msgstr "Kies datum en tijd"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Plugin queue endpoint"
+msgstr "Plug-in-wachtrijeindpunt"
+
+#: src/Api/TriggersController.php:231
+msgid "Plugins"
+msgstr "Plug-ins"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Post Glue"
+msgstr "Glue na verzending"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Post-dispatch"
+msgstr "Na verzending"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Post-dispatch Code Glue"
+msgstr "Code Glue na verzending"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Post-dispatch Code Glue preview ran but is not saved. Save or discard "
+"before continuing."
+msgstr ""
+"Voorbeeld van Code Glue na verzending is uitgevoerd maar niet opgeslagen. "
+"Sla op of verwerp voordat je doorgaat."
+
+#: src/Api/TriggersController.php:226
+msgid "Posts"
+msgstr "Berichten"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "Pre Glue"
+msgstr "Glue vóór verzending"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Pre-dispatch"
+msgstr "Vóór verzending"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Pre-dispatch Code Glue"
+msgstr "Code Glue vóór verzending"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Pre-dispatch Code Glue applied before field mapping"
+msgstr "Code Glue vóór verzending toegepast vóór veldmapping"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Pre-dispatch Code Glue preview is active. Save or discard it before saving "
+"Mapping & Conditions."
+msgstr ""
+"Voorbeeld van Code Glue vóór verzending is actief. Sla het op of verwerp "
+"het voordat je Mapping en voorwaarden opslaat."
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Preview active"
+msgstr "Voorbeeld actief"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Preview failed"
+msgstr "Voorbeeld mislukt"
+
+#: admin/src/views/ActivityView.vue
+msgid "Previous"
+msgstr "Vorige"
+
+#: admin/src/views/ProView.vue
+msgid "Priority support"
+msgstr "Prioriteitsondersteuning"
+
+#: admin/src/App.vue admin/src/views/ProView.vue
+msgid "Pro"
+msgstr "Pro"
+
+#: admin/src/views/ProView.vue
+msgid "Pro License"
+msgstr "Pro-licentie"
+
+#: admin/src/views/ProView.vue
+msgid "Pro Plugin Installed"
+msgstr "Pro-plug-in geïnstalleerd"
+
+#: src/Api/ProStatusController.php:48
+msgid "Pro plugin not found."
+msgstr "Pro-plug-in niet gevonden."
+
+#: admin/src/views/QueueView.vue
+msgid "Process Now"
+msgstr "Nu verwerken"
+
+#: src/Controllers/DispatcherController.php:146
+#. translators: %1$d: total jobs processed, %2$d: succeeded count, %3$d: failed count, %4$d: rescheduled count
+#, php-format
+msgid "Processed %1$d jobs: %2$d succeeded, %3$d failed, %4$d rescheduled."
+msgstr "%1$d taken verwerkt: %2$d geslaagd, %3$d mislukt, %4$d opnieuw ingepland."
+
+#: admin/src/views/QueueView.vue
+msgid "Processing"
+msgstr "Verwerken"
+
+#: admin/src/views/LogsList.vue
+msgid "Processing…"
+msgstr "Verwerken…"
+
+#: admin/src/components/LogsTable.vue
+msgid "Query Parameters"
+msgstr "Queryparameters"
+
+#: src/Api/WebhooksController.php:755
+msgid "Query parameters appended to the URL."
+msgstr "Queryparameters toegevoegd aan de URL."
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/QueueView.vue
+msgid "Queue"
+msgstr "Wachtrij"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Queue Test"
+msgstr "Test in wachtrij plaatsen"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid ""
+"Queue appears stuck — there are pending deliveries older than 10 minutes. "
+"Check your cron setup."
+msgstr ""
+"De wachtrij lijkt vast te zitten — er zijn openstaande bezorgingen ouder "
+"dan 10 minuten. Controleer je cron-configuratie."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Queue batch size"
+msgstr "Wachtrij-batchgrootte"
+
+#: src/Api/QueueController.php:234
+#: src/Api/QueueController.php:327
+#: src/Api/QueueController.php:369
+msgid "Queue job not found."
+msgstr "Wachtrijtaak niet gevonden."
+
+#: admin/src/components/HealthStatusBar.vue
+msgid ""
+"Queue processor has never run. Ensure WP-Cron is active or configure an "
+"external cron job for reliable delivery."
+msgstr ""
+"De wachtrijverwerker heeft nooit gedraaid. Zorg dat WP-Cron actief is of "
+"configureer een externe cron-taak voor betrouwbare bezorging."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Queuing…"
+msgstr "In wachtrij plaatsen…"
+
+#: admin/src/views/VaultView.vue
+msgid "Raw value for any header — escape hatch"
+msgstr "Onbewerkte waarde voor elke header — noodoplossing"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Re-capture"
+msgstr "Opnieuw vastleggen"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypt & remove database key"
+msgstr "Opnieuw versleutelen en databasesleutel verwijderen"
+
+#: admin/src/views/VaultView.vue
+msgid "Re-encrypting…"
+msgstr "Opnieuw versleutelen…"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Read"
+msgstr "Lezen"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Read + toggle webhooks, retry/replay logs, execute queue jobs"
+msgstr ""
+"Lezen + webhooks aan/uit, logboeken opnieuw proberen/afspelen, "
+"wachtrijtaken uitvoeren"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Read + toggle webhooks, retry/replay logs, execute/retry queue jobs"
+msgstr ""
+"Lezen + webhooks aan/uit, logboeken opnieuw proberen/afspelen, "
+"wachtrijtaken uitvoeren/opnieuw proberen"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Ready to send some data?"
+msgstr "Klaar om gegevens te verzenden?"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Redirect"
+msgstr "Omleiding"
+
+#: admin/src/views/QueueView.vue
+msgid "Refresh"
+msgstr "Vernieuwen"
+
+#: flowsystems-webhook-actions.php
+#. Description of the plugin
+msgid ""
+"Reliable WordPress webhooks with retries, queue, Action Scheduler support, "
+"delivery logs, and replayable events for n8n, APIs, and integrations."
+msgstr ""
+"Betrouwbare WordPress-webhooks met nieuwe pogingen, wachtrij, Action "
+"Scheduler-ondersteuning, bezorglogboeken en herafspeelbare gebeurtenissen "
+"voor n8n, API's en integraties."
+
+#: admin/src/views/ProView.vue
+msgid "Reliable webhooks with queue & retries"
+msgstr "Betrouwbare webhooks met wachtrij en nieuwe pogingen"
+
+#: admin/src/views/ActivityView.vue
+msgid "Remove activity entries older than the specified number of days."
+msgstr "Verwijder activiteitsvermeldingen ouder dan het opgegeven aantal dagen."
+
+#: admin/src/views/QueueView.vue
+msgid "Remove from queue"
+msgstr "Uit wachtrij verwijderen"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Rename chain"
+msgstr "Keten hernoemen"
+
+#: admin/src/views/ProView.vue
+msgid "Renews / expires"
+msgstr "Verlengt / verloopt"
+
+#: admin/src/components/LogsTable.vue
+msgid "Replay"
+msgstr "Opnieuw afspelen"
+
+#: admin/src/views/LogsList.vue
+msgid "Replay %d selected"
+msgstr "%d geselecteerde opnieuw afspelen"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Request"
+msgstr "Verzoek"
+
+#: admin/src/components/LogsTable.vue
+msgid "Request Headers"
+msgstr "Verzoekheaders"
+
+#: admin/src/components/LogsTable.vue
+msgid "Request Payload"
+msgstr "Verzoekpayload"
+
+#: admin/src/views/QueueView.vue
+msgid "Reset and retry"
+msgstr "Resetten en opnieuw proberen"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Response"
+msgstr "Respons"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Response (ms)"
+msgstr "Respons (ms)"
+
+#: admin/src/components/LogsTable.vue
+msgid "Response Body"
+msgstr "Responsbody"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Result Preview"
+msgstr "Resultaatvoorbeeld"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Result preview is now used as the effective payload for Mapping & "
+"Conditions below."
+msgstr ""
+"Het resultaatvoorbeeld wordt nu gebruikt als de effectieve payload voor "
+"Mapping en voorwaarden hieronder."
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Resume"
+msgstr "Hervatten"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Retries"
+msgstr "Nieuwe pogingen"
+
+#: admin/src/components/LogsTable.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "Retry"
+msgstr "Opnieuw proberen"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry %d selected"
+msgstr "%d geselecteerde opnieuw proberen"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry / Replay %d selected"
+msgstr "%d geselecteerde opnieuw proberen / afspelen"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid ""
+"Return value is ignored — use for side effects: %1$supdate_post_meta()%2$s, "
+"%1$swp_mail()%2$s, %1$serror_log()%2$s, follow-up API calls, etc."
+msgstr ""
+"Retourwaarde wordt genegeerd — gebruik voor neveneffecten: "
+"%1$supdate_post_meta()%2$s, %1$swp_mail()%2$s, %1$serror_log()%2$s, "
+"vervolg-API-aanroepen, enz."
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Revive token"
+msgstr "Token herstellen"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Revive token: %s"
+msgstr "Token herstellen: %s"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Reviving…"
+msgstr "Herstellen…"
+
+#: admin/src/components/RotateTokenDialog.vue admin/src/views/ApiTokensView.vue
+msgid "Rotate token"
+msgstr "Token roteren"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Rotate token: %s"
+msgstr "Token roteren: %s"
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid "Rotating…"
+msgstr "Roteren…"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Run Preview"
+msgstr "Voorbeeld uitvoeren"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Run Test Now"
+msgstr "Test nu uitvoeren"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Running…"
+msgstr "Uitvoeren…"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Samples"
+msgstr "Monsters"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/TriggerSchemaPanel.vue admin/src/views/ExternalCronView.vue admin/src/views/WebhooksList.vue
+msgid "Save"
+msgstr "Opslaan"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Save & Assign"
+msgstr "Opslaan en toewijzen"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save & continue to chain setup"
+msgstr "Opslaan en doorgaan naar ketenconfiguratie"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save & use credential"
+msgstr "Referentie opslaan en gebruiken"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save Changes"
+msgstr "Wijzigingen opslaan"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Save Glue"
+msgstr "Glue opslaan"
+
+#: admin/src/views/VaultView.vue
+msgid "Save changes"
+msgstr "Wijzigingen opslaan"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save credential to vault"
+msgstr "Referentie opslaan in kluis"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Save failed"
+msgstr "Opslaan mislukt"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save to vault"
+msgstr "Opslaan in kluis"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Save webhook first"
+msgstr "Sla de webhook eerst op"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Saved credential"
+msgstr "Opgeslagen referentie"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+msgid "Saving…"
+msgstr "Opslaan…"
+
+#: admin/src/views/ActivityView.vue
+msgid "Schemas"
+msgstr "Schema's"
+
+#: admin/src/components/CreateTokenDialog.vue admin/src/views/ApiTokensView.vue
+msgid "Scope"
+msgstr "Bereik"
+
+#: admin/src/views/ApiTokensView.vue
+msgid "Scope reference"
+msgstr "Bereikreferentie"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Search fields…"
+msgstr "Velden zoeken…"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Search snippets…"
+msgstr "Snippets zoeken…"
+
+#: admin/src/components/TriggerSelect.vue
+msgid "Search triggers..."
+msgstr "Triggers zoeken…"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Search webhooks by name or URL…"
+msgstr "Webhooks zoeken op naam of URL…"
+
+#: admin/src/views/VaultView.vue
+msgid "Secret value"
+msgstr "Geheime waarde"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Secrets are encrypted at rest (AES-256-GCM) and never returned by the API — "
+"only a masked hint is shown."
+msgstr ""
+"Geheimen worden versleuteld opgeslagen (AES-256-GCM) en nooit door de API "
+"geretourneerd — alleen een gemaskeerde hint wordt getoond."
+
+#: admin/src/views/VaultView.vue
+msgid "Secrets are encrypted on save and never shown again."
+msgstr "Geheimen worden bij opslaan versleuteld en nooit meer getoond."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select a saved credential"
+msgstr "Selecteer een opgeslagen referentie"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select an existing chain or enter a new chain name"
+msgstr "Selecteer een bestaande keten of voer een nieuwe ketennaam in"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Select at least one upstream webhook to trigger this one"
+msgstr "Selecteer ten minste één upstream-webhook om deze te triggeren"
+
+#: admin/src/components/ChainPicker.vue
+msgid "Select chain or create new"
+msgstr "Keten selecteren of nieuwe maken"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Select field…"
+msgstr "Veld selecteren…"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Select this field"
+msgstr "Dit veld selecteren"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Select trigger"
+msgstr "Trigger selecteren"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Sending…"
+msgstr "Verzenden…"
+
+#: admin/src/views/VaultView.vue
+msgid "Sent as Authorization: Bearer <token>"
+msgstr "Verzonden als Authorization: Bearer <token>"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Sent today"
+msgstr "Vandaag verzonden"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Server Error"
+msgstr "Serverfout"
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Set expiration date"
+msgstr "Vervaldatum instellen"
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue
+msgid "Settings"
+msgstr "Instellingen"
+
+#: admin/src/views/VaultView.vue
+msgid "Show"
+msgstr "Tonen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Show full"
+msgstr "Volledig tonen"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Show less"
+msgstr "Minder tonen"
+
+#: admin/src/views/VaultView.vue
+msgid "Show password"
+msgstr "Wachtwoord tonen"
+
+#: admin/src/views/VaultView.vue
+msgid "Show secret"
+msgstr "Geheim tonen"
+
+#: admin/src/components/LogsTable.vue admin/src/views/QueueView.vue
+msgid "Showing %1$d to %2$d of %3$d"
+msgstr "%1$d tot %2$d van %3$d weergegeven"
+
+#: admin/src/views/ProView.vue
+msgid "Sites allowed"
+msgstr "Toegestane sites"
+
+#: admin/src/views/ProView.vue
+msgid "Sites used"
+msgstr "Gebruikte sites"
+
+#: admin/src/views/LogsList.vue
+msgid "Skipped"
+msgstr "Overgeslagen"
+
+#: admin/src/components/LogsTable.vue
+msgid "Skipped:"
+msgstr "Overgeslagen:"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Snippet Name"
+msgstr "Snippetnaam"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Snippet saved and assigned."
+msgstr "Snippet opgeslagen en toegewezen."
+
+#: admin/src/views/ActivityView.vue
+msgid "Snippets"
+msgstr "Snippets"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Source"
+msgstr "Bron"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Source path (e.g., args.0.user_id)"
+msgstr "Bronpad (bijv. args.0.user_id)"
+
+#: src/Api/ChainsController.php:229
+msgid "Source webhook does not exist."
+msgstr "Bron-webhook bestaat niet."
+
+#: admin/src/views/ProView.vue
+msgid "Starter"
+msgstr "Starter"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Stats unavailable"
+msgstr "Statistieken niet beschikbaar"
+
+#: admin/src/components/LogsTable.vue
+msgid "Status"
+msgstr "Status"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Store reusable authentication secrets once, then reference them from your "
+"webhooks. Secrets are encrypted at rest and are never shown again after "
+"saving — not even to you."
+msgstr ""
+"Sla herbruikbare authenticatiegeheimen één keer op en verwijs er vervolgens "
+"naar vanuit je webhooks. Geheimen worden versleuteld opgeslagen en worden "
+"na het opslaan nooit meer getoond — zelfs niet aan jou."
+
+#: admin/src/components/ExternalCronChart.vue admin/src/components/HealthStatusBar.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Success"
+msgstr "Geslaagd"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Success Rate"
+msgstr "Slagingspercentage"
+
+#: admin/src/components/ExternalCronChart.vue
+msgid "Success rate 24h"
+msgstr "Slagingspercentage 24u"
+
+#: admin/src/App.vue
+msgid "Switch to dark mode"
+msgstr "Schakel naar donkere modus"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Switch to field selector"
+msgstr "Schakel naar veldkiezer"
+
+#: admin/src/App.vue
+msgid "Switch to light mode"
+msgstr "Schakel naar lichte modus"
+
+#: admin/src/components/FieldSelector.vue
+msgid "Switch to manual input"
+msgstr "Schakel naar handmatige invoer"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Sync"
+msgstr "Synchr."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Synchronous Execution"
+msgstr "Synchrone uitvoering"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "Synchronous execution"
+msgstr "Synchrone uitvoering"
+
+#: admin/src/views/ActivityView.vue
+msgid "System"
+msgstr "Systeem"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Tags (comma-separated)"
+msgstr "Tags (door komma's gescheiden)"
+
+#: admin/src/components/MappingEditor.vue admin/src/views/ExternalCronView.vue
+msgid "Target"
+msgstr "Doel"
+
+#: admin/src/components/LogsTable.vue
+msgid "Target URL"
+msgstr "Doel-URL"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Target path (e.g., user_id)"
+msgstr "Doelpad (bijv. user_id)"
+
+#: src/Api/ChainsController.php:232
+msgid "Target webhook does not exist."
+msgstr "Doel-webhook bestaat niet."
+
+#: src/Api/TriggersController.php:229
+msgid "Taxonomy"
+msgstr "Taxonomie"
+
+#: admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
+msgid "Test"
+msgstr "Testen"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test Webhook"
+msgstr "Webhook testen"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test failed."
+msgstr "Test mislukt."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Test queued — it will run on the next cron cycle."
+msgstr "Test in wachtrij geplaatst — deze draait bij de volgende cron-cyclus."
+
+#: admin/src/views/ProView.vue
+msgid "Test webhook delivery on demand"
+msgstr "Test webhook-bezorging op aanvraag"
+
+#: src/Api/ChainsController.php:236
+msgid "That link would create a cycle in the chain graph."
+msgstr "Die koppeling zou een cyclus in de ketengrafiek creëren."
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid ""
+"The %1$srecommended approach is asynchronous delivery%2$s via the built-in "
+"system cron or an external cron job."
+msgstr ""
+"De %1$saanbevolen aanpak is asynchrone bezorging%2$s via de ingebouwde "
+"systeemcron of een externe cron-taak."
+
+#: admin/src/views/ProView.vue
+msgid "The Pro plugin is installed but not activated in WordPress."
+msgstr "De Pro-plug-in is geïnstalleerd maar niet geactiveerd in WordPress."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"The URL where webhook payloads will be sent. Supports %1$s{{ field.path "
+"}}%2$s templates — resolved against the final payload, after code glue "
+"applied."
+msgstr ""
+"De URL waarnaar webhook-payloads worden verzonden. Ondersteunt %1$s{{ "
+"field.path }}%2$s-sjablonen — opgelost tegen de uiteindelijke payload, "
+"nadat code glue is toegepast."
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"The chain and all its links will be removed. Member webhooks stay, but lose "
+"their chain-link triggers."
+msgstr ""
+"De keten en al haar koppelingen worden verwijderd. Lid-webhooks blijven "
+"behouden, maar verliezen hun ketenkoppelingstriggers."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"The encryption key lives in %1$swp-config.php%2$s (%1$sFSWA_SECRET_KEY%2$s) "
+"and is not stored in the database. A database-only dump cannot decrypt your "
+"secrets."
+msgstr ""
+"De versleutelingssleutel bevindt zich in %1$swp-config.php%2$s "
+"(%1$sFSWA_SECRET_KEY%2$s) en wordt niet in de database opgeslagen. Een dump "
+"van alleen de database kan je geheimen niet ontsleutelen."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"The secret is resolved securely at delivery time and never exposed. Manage "
+"credentials in the"
+msgstr ""
+"Het geheim wordt op het moment van bezorging veilig opgelost en nooit "
+"blootgesteld. Beheer referenties in de"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"These are the primary way to send data for %1$s requests. If none are set, "
+"the mapped payload is sent as %2$s?payload=&lt;json&gt;%3$s."
+msgstr ""
+"Dit is de primaire manier om gegevens te verzenden voor %1$s-verzoeken. Als "
+"er geen zijn ingesteld, wordt de gemapte payload verzonden als "
+"%2$s?payload=&lt;json&gt;%3$s."
+
+#: admin/src/views/WebhooksList.vue
+msgid "They will move to the Unchained section with “No trigger assigned”."
+msgstr ""
+"Ze worden verplaatst naar de sectie Niet-gekoppeld met “Geen trigger "
+"toegewezen”."
+
+#: admin/src/components/LogsTable.vue
+msgid "This action cannot be undone."
+msgstr "Deze actie kan niet ongedaan worden gemaakt."
+
+#: src/Api/CredentialsController.php:351
+#. translators: %d: number of webhooks using this credential
+#, php-format
+msgid "This credential is used by %d webhook. Detach it or delete with force."
+msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
+msgstr[0] ""
+"Deze referentie wordt gebruikt door %d webhook. Koppel deze los of "
+"verwijder geforceerd."
+msgstr[1] ""
+"Deze referentie wordt gebruikt door %d webhooks. Koppel deze los of "
+"verwijder geforceerd."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This moves the Authorization value into the encrypted vault and references "
+"it by name. The webhook keeps working unchanged."
+msgstr ""
+"Hiermee wordt de Authorization-waarde naar de versleutelde kluis verplaatst "
+"en op naam gerefereerd. De webhook blijft ongewijzigd werken."
+
+#: admin/src/views/VaultView.vue
+msgid "This permanently removes the stored secret."
+msgstr "Hiermee wordt het opgeslagen geheim permanent verwijderd."
+
+#: admin/src/components/RotateTokenDialog.vue
+msgid ""
+"This token is %1$sexpired%2$s. Rotating will issue a new secret — but you "
+"must also extend the expiry, otherwise the token will remain invalid "
+"immediately after rotation."
+msgstr ""
+"Dit token is %1$sverlopen%2$s. Bij roteren wordt een nieuw geheim "
+"uitgegeven — maar je moet ook de vervaldatum verlengen, anders blijft het "
+"token direct na rotatie ongeldig."
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid ""
+"This token will only be shown once. Copy it now — you won't be able to see "
+"it again."
+msgstr ""
+"Dit token wordt slechts één keer getoond. Kopieer het nu — je kunt het "
+"daarna niet meer zien."
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"This usually means the encryption key changed (e.g. %1$sFSWA_SECRET_KEY%2$s "
+"or WordPress salts). Edit each affected credential and re-enter its secret "
+"to fix it."
+msgstr ""
+"Dit betekent meestal dat de versleutelingssleutel is gewijzigd (bijv. "
+"%1$sFSWA_SECRET_KEY%2$s of WordPress-salts). Bewerk elke betrokken "
+"referentie en voer het geheim opnieuw in om het te herstellen."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This webhook executes synchronously. Slow or unreachable endpoints will "
+"delay page loads and frontend interactions."
+msgstr ""
+"Deze webhook voert synchroon uit. Trage of onbereikbare eindpunten "
+"vertragen het laden van pagina's en frontend-interacties."
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook participates in a chain:"
+msgid_plural "This webhook participates in chains:"
+msgstr[0] "Deze webhook maakt deel uit van een keten:"
+msgstr[1] "Deze webhook maakt deel uit van ketens:"
+
+#: admin/src/views/WebhooksList.vue
+msgid "This webhook will become an orphan:"
+msgid_plural "These webhooks will become orphans:"
+msgstr[0] "Deze webhook wordt een wees:"
+msgstr[1] "Deze webhooks worden wezen:"
+
+#: admin/src/components/WebhookForm.vue admin/src/views/WebhooksList.vue
+msgid ""
+"This webhook will fire inline during the WordPress request that triggers "
+"it, bypassing the queue. Slow or unreachable endpoints can %1$sdelay page "
+"loads, form submissions, and other frontend interactions.%2$s"
+msgstr ""
+"Deze webhook wordt inline geactiveerd tijdens het WordPress-verzoek dat hem "
+"triggert, waarbij de wachtrij wordt overgeslagen. Trage of onbereikbare "
+"eindpunten kunnen %1$shet laden van pagina's, formulierinzendingen en "
+"andere frontend-interacties vertragen.%2$s"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "This webhook will run on every trigger."
+msgstr "Deze webhook draait bij elke trigger."
+
+#: admin/src/views/WebhooksList.vue
+msgid ""
+"This will permanently delete the webhook and all associated data. This "
+"action cannot be undone."
+msgstr ""
+"Hiermee worden de webhook en alle bijbehorende gegevens permanent "
+"verwijderd. Deze actie kan niet ongedaan worden gemaakt."
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"This will permanently revoke the token. Any integrations using it will stop "
+"working immediately."
+msgstr ""
+"Hiermee wordt het token permanent ingetrokken. Alle integraties die het "
+"gebruiken, stoppen onmiddellijk met werken."
+
+#: admin/src/views/ProView.vue
+msgid ""
+"This will remove the license from this site and free up a slot. You can "
+"reactivate at any time."
+msgstr ""
+"Hiermee wordt de licentie van deze site verwijderd en komt een plek vrij. "
+"Je kunt op elk moment opnieuw activeren."
+
+#: admin/src/components/ui/DateTimePicker.vue
+msgid "Time"
+msgstr "Tijd"
+
+#: admin/src/views/ActivityView.vue
+msgid "Timestamp"
+msgstr "Tijdstempel"
+
+#: admin/src/views/ActivityView.vue
+msgid "To date"
+msgstr "Tot datum"
+
+#: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+msgid "To date & time"
+msgstr "Tot datum en tijd"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Today"
+msgstr "Vandaag"
+
+#: admin/src/views/ActivityView.vue
+msgid "Token"
+msgstr "Token"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Token created"
+msgstr "Token aangemaakt"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "Token name"
+msgstr "Tokennaam"
+
+#: src/Api/ApiTokensController.php:138 admin/src/components/CreateTokenDialog.vue
+msgid "Token name is required."
+msgstr "Tokennaam is verplicht."
+
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/RotateTokenDialog.vue
+msgid "Token will never expire."
+msgstr "Token verloopt nooit."
+
+#: admin/src/views/ActivityView.vue
+msgid "Token: %s"
+msgstr "Token: %s"
+
+#: admin/src/views/ApiTokensView.vue
+msgid ""
+"Tokens allow external systems to access the REST API without a browser "
+"session. Token management is always admin-only regardless of scope."
+msgstr ""
+"Tokens stellen externe systemen in staat de REST API te benaderen zonder "
+"browsersessie. Tokenbeheer is altijd alleen voor beheerders, ongeacht het "
+"bereik."
+
+#: admin/src/views/QueueView.vue
+msgid "Total"
+msgstr "Totaal"
+
+#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+msgid "Total (7 days)"
+msgstr "Totaal (7 dagen)"
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Total (7d)"
+msgstr "Totaal (7d)"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Total delivery attempts for this webhook, including the first try. "
+"Overrides the global setting. Once reached the job is permanently failed."
+msgstr ""
+"Totaal aantal bezorgpogingen voor deze webhook, inclusief de eerste poging. "
+"Overschrijft de globale instelling. Zodra dit is bereikt, is de taak "
+"permanent mislukt."
+
+#: admin/src/components/HealthStatusBar.vue
+msgid "Total sent"
+msgstr "Totaal verzonden"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Transformed"
+msgstr "Getransformeerd"
+
+#: admin/src/components/LogsTable.vue
+msgid "Transformed Payload (Sent)"
+msgstr "Getransformeerde payload (verzonden)"
+
+#: admin/src/components/MappingEditor.vue
+msgid "Transformed Payload Preview"
+msgstr "Voorbeeld getransformeerde payload"
+
+#: admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
+msgid "Trigger"
+msgstr "Trigger"
+
+#: src/Api/WebhooksController.php:116
+msgid "Trigger name to use for the test."
+msgstr "Triggernaam om te gebruiken voor de test."
+
+#: src/Api/SchemasController.php:67
+#: src/Api/SchemasController.php:84
+#: src/Api/SchemasController.php:109
+#: src/Api/SchemasController.php:130
+msgid "Trigger name."
+msgstr "Triggernaam."
+
+#: admin/src/components/MappingEditor.vue
+msgid "Trigger this event to capture an example payload for mapping."
+msgstr ""
+"Trigger deze gebeurtenis om een voorbeeldpayload voor mapping vast te "
+"leggen."
+
+#: admin/src/components/ChainPicker.vue
+msgid "Trigger this webhook when the following webhooks complete"
+msgstr "Trigger deze webhook wanneer de volgende webhooks zijn voltooid"
+
+#: admin/src/components/TestWebhookDrawer.vue admin/src/views/QueueView.vue
+msgid "Trigger:"
+msgstr "Trigger:"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Triggers"
+msgstr "Triggers"
+
+#: admin/src/views/VaultView.vue
+msgid "Type"
+msgstr "Type"
+
+#: admin/src/components/WebhookForm.vue
+msgid "URL Query Parameters"
+msgstr "URL-queryparameters"
+
+#: admin/src/components/WebhookForm.vue
+msgid "URL must be HTTP or HTTPS"
+msgstr "URL moet HTTP of HTTPS zijn"
+
+#: src/Api/WebhooksController.php:719
+msgid "URL to send the webhook to."
+msgstr "URL waarnaar de webhook wordt verzonden."
+
+#: admin/src/views/QueueView.vue
+msgid "URL:"
+msgstr "URL:"
+
+#: admin/src/views/WebhooksList.vue
+msgid "Unchained"
+msgstr "Niet-gekoppeld"
+
+#: src/Api/WebhooksController.php:69
+#: src/Api/WebhooksController.php:94
+#: src/Api/WebhooksController.php:106
+#: src/Api/WebhooksController.php:707
+msgid "Unique identifier for the webhook."
+msgstr "Unieke identificatie voor de webhook."
+
+#: admin/src/views/QueueView.vue
+msgid "Unknown Webhook"
+msgstr "Onbekende webhook"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "Unknown error"
+msgstr "Onbekende fout"
+
+#: admin/src/views/ProView.vue
+msgid "Unlimited conditions per trigger"
+msgstr "Onbeperkt aantal voorwaarden per trigger"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Unsaved changes"
+msgstr "Niet-opgeslagen wijzigingen"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Untitled"
+msgstr "Naamloos"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Update Snippet"
+msgstr "Snippet bijwerken"
+
+#: admin/src/views/VaultView.vue
+msgid ""
+"Update this credential. Leave secret fields blank to keep the existing "
+"value."
+msgstr ""
+"Werk deze referentie bij. Laat geheime velden leeg om de bestaande waarde "
+"te behouden."
+
+#: admin/src/components/ChangeExpiryDialog.vue
+msgid ""
+"Update when this token expires. Removing the expiry makes it valid "
+"indefinitely."
+msgstr ""
+"Werk bij wanneer dit token verloopt. Door de vervaldatum te verwijderen "
+"blijft het onbeperkt geldig."
+
+#: admin/src/components/ui/UpgradeBadge.vue
+msgid "Upgrade"
+msgstr "Upgraden"
+
+#: admin/src/views/ProView.vue
+msgid "Upgrade to Pro"
+msgstr "Upgraden naar Pro"
+
+#: admin/src/components/TokenCreatedDialog.vue
+msgid "Use %1$sX-FSWA-Token: %2$s%3$s in your requests."
+msgstr "Gebruik %1$sX-FSWA-Token: %2$s%3$s in je verzoeken."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Use global setting"
+msgstr "Globale instelling gebruiken"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Use other Webhooks as triggers"
+msgstr "Andere webhooks als triggers gebruiken"
+
+#: admin/src/views/ActivityView.vue
+msgid "User #%s"
+msgstr "Gebruiker #%s"
+
+#: admin/src/views/ActivityView.vue
+msgid "User ID"
+msgstr "Gebruikers-ID"
+
+#: admin/src/views/ActivityView.vue
+msgid "User prompt"
+msgstr "Gebruikersprompt"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "User trigger"
+msgstr "Gebruikerstrigger"
+
+#: admin/src/views/VaultView.vue
+msgid "Username"
+msgstr "Gebruikersnaam"
+
+#: src/Api/TriggersController.php:225
+msgid "Users"
+msgstr "Gebruikers"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Value for the Authorization header (e.g., \"Bearer your_token_goes_here\" "
+"or \"Basic your_encoded_base64(username:password)\"). For better security, "
+"store secrets in the"
+msgstr ""
+"Waarde voor de Authorization-header (bijv. \"Bearer your_token_goes_here\" "
+"of \"Basic your_encoded_base64(username:password)\"). Sla geheimen voor "
+"betere beveiliging op in de"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"Values support dot-notation paths into the outgoing payload (e.g. "
+"%1$sevent.id%2$s) or static strings."
+msgstr ""
+"Waarden ondersteunen paden in puntnotatie naar de uitgaande payload (bijv. "
+"%1$sevent.id%2$s) of statische tekenreeksen."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "View full log"
+msgstr "Volledig logboek bekijken"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "View in Logs"
+msgstr "Bekijken in logboeken"
+
+#: admin/src/components/WebhookCardContent.vue
+msgid "View logs"
+msgstr "Logboeken bekijken"
+
+#: admin/src/views/LogsList.vue
+msgid "View webhook delivery logs"
+msgstr "Bekijk webhook-bezorglogboeken"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "View webhooks, logs, queue, health, triggers, schemas"
+msgstr "Webhooks, logboeken, wachtrij, status, triggers, schema's bekijken"
+
+#: admin/src/views/ExternalCronView.vue
+msgid "WP-Cron"
+msgstr "WP-Cron"
+
+#: admin/src/components/WebhookForm.vue
+msgid "Wait %s"
+msgstr "Wacht %s"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Waiting for trigger to capture example payload..."
+msgstr "Wachten op trigger om voorbeeldpayload vast te leggen…"
+
+#: admin/src/components/LogsTable.vue
+msgid "Webhook"
+msgstr "Webhook"
+
+#: admin/src/views/WebhookLogs.vue
+msgid "Webhook #%s"
+msgstr "Webhook #%s"
+
+#: src/Controllers/AdminController.php:36
+#: src/Controllers/AdminController.php:37
+#: src/Controllers/AdminController.php:44
+#: src/Controllers/AdminController.php:45
+msgid "Webhook Actions"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin Name of the plugin
+msgid "Webhook Actions by Flow Systems"
+msgstr ""
+
+#: src/Controllers/AdminController.php:214
+msgid ""
+"Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
+"new database format."
+msgstr ""
+"Webhook Actions by Flow Systems: je webhooks zijn gemigreerd naar het "
+"nieuwe databaseformaat."
+
+#: src/Api/SchemasController.php:46
+#: src/Api/SchemasController.php:62
+#: src/Api/SchemasController.php:79
+#: src/Api/SchemasController.php:104
+#: src/Api/SchemasController.php:125
+msgid "Webhook ID."
+msgstr "Webhook-ID."
+
+#: admin/src/components/WebhookForm.vue
+msgid "Webhook auth"
+msgstr "Webhook-authenticatie"
+
+#: src/Api/WebhooksController.php:508
+msgid "Webhook has no triggers configured."
+msgstr "Voor de webhook zijn geen triggers geconfigureerd."
+
+#: src/Api/WebhooksController.php:226
+msgid "Webhook name is required."
+msgstr "Webhook-naam is verplicht."
+
+#: src/Api/LogsController.php:386
+#: src/Api/SchemasController.php:167
+#: src/Api/SchemasController.php:195
+#: src/Api/SchemasController.php:231
+#: src/Api/SchemasController.php:326
+#: src/Api/SchemasController.php:358
+#: src/Api/WebhooksController.php:197
+#: src/Api/WebhooksController.php:301
+#: src/Api/WebhooksController.php:407
+#: src/Api/WebhooksController.php:459
+#: src/Api/WebhooksController.php:499
+msgid "Webhook not found."
+msgstr "Webhook niet gevonden."
+
+#: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+msgid "Webhooks"
+msgstr "Webhooks"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"When enabled, this webhook fires inline during the WordPress request that "
+"triggers it, bypassing the queue. May slow down your site if the endpoint "
+"is slow."
+msgstr ""
+"Indien ingeschakeld, wordt deze webhook inline geactiveerd tijdens het "
+"WordPress-verzoek dat hem triggert, waarbij de wachtrij wordt overgeslagen. "
+"Kan je site vertragen als het eindpunt traag is."
+
+#: admin/src/views/QueueView.vue
+msgid "When webhooks are triggered, jobs will appear here for processing."
+msgstr "Wanneer webhooks worden getriggerd, verschijnen taken hier ter verwerking."
+
+#: src/Api/WebhooksController.php:110
+msgid "Where to source the test payload from."
+msgstr "Waar de testpayload vandaan moet komen."
+
+#: src/Api/WebhooksController.php:773
+msgid "Whether the webhook executes synchronously (blocking, bypasses queue)."
+msgstr "Of de webhook synchroon uitvoert (blokkerend, omzeilt wachtrij)."
+
+#: src/Api/WebhooksController.php:767
+msgid "Whether the webhook is enabled."
+msgstr "Of de webhook is ingeschakeld."
+
+#: src/Api/SchemasController.php:93
+msgid "Whether to include user data."
+msgstr "Of gebruikersgegevens moeten worden opgenomen."
+
+#: admin/src/components/LogsTable.vue
+msgid "Will Retry"
+msgstr "Probeert opnieuw"
+
+#: src/Api/TriggersController.php:233
+msgid "WooCommerce"
+msgstr ""
+
+#: src/Api/TriggersController.php:224
+msgid "WordPress"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "WordPress actions that will trigger this webhook"
+msgstr "WordPress-acties die deze webhook zullen triggeren"
+
+#: admin/src/views/VaultView.vue
+msgid "WordPress username or API user"
+msgstr "WordPress-gebruikersnaam of API-gebruiker"
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid "Write your own JSON payload"
+msgstr "Schrijf je eigen JSON-payload"
+
+#: admin/src/views/QueueView.vue
+msgid "X-Webhook-Id:"
+msgstr "X-Webhook-Id:"
+
+#: admin/src/components/LogsTable.vue
+msgid "Yes"
+msgstr "Ja"
+
+#: src/Api/WebhooksController.php:164
+msgid "You don't have permissions to see it."
+msgstr "Je hebt geen rechten om het te bekijken."
+
+#: admin/src/components/TestWebhookDrawer.vue
+msgid ""
+"You have unsaved changes. The test will run against the %1$ssaved%2$s "
+"version of this webhook."
+msgstr ""
+"Je hebt niet-opgeslagen wijzigingen. De test wordt uitgevoerd tegen de "
+"%1$sopgeslagen%2$s versie van deze webhook."
+
+#: admin/src/views/ExternalCronView.vue
+msgid ""
+"You might want to whitelist the External Cron IP for your WAF or server "
+"security: %1$s72.62.157.193%2$s"
+msgstr ""
+"Je wilt misschien het externe cron-IP op de whitelist zetten voor je WAF of "
+"serverbeveiliging: %1$s72.62.157.193%2$s"
+
+#: admin/src/views/ProView.vue
+msgid "Your license is active on this site."
+msgstr "Je licentie is actief op deze site."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "array contains"
+msgstr "array bevat"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "auto"
+msgstr "auto"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "be skipped"
+msgstr "worden overgeslagen"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "bool"
+msgstr "bool"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "contains"
+msgstr "bevat"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "dispatch"
+msgstr "verzonden"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "does not contain"
+msgstr "bevat niet"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "does not equal"
+msgstr "is niet gelijk aan"
+
+#: admin/src/components/CreateTokenDialog.vue
+msgid "e.g. CI pipeline, n8n integration"
+msgstr "bijv. CI-pijplijn, n8n-integratie"
+
+#: admin/src/components/WebhookForm.vue
+msgid "e.g. HubSpot PAT"
+msgstr "bijv. HubSpot PAT"
+
+#: admin/src/views/VaultView.vue
+msgid "e.g. HubSpot PAT, Stripe key"
+msgstr "bijv. HubSpot PAT, Stripe-sleutel"
+
+#: admin/src/components/ChainPicker.vue
+msgid "e.g. Order to HubSpot"
+msgstr "bijv. Bestelling naar HubSpot"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "empty"
+msgstr "leeg"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "equals"
+msgstr "is gelijk aan"
+
+#: admin/src/components/MappingEditor.vue
+msgid "excluded via parent"
+msgstr "uitgesloten via bovenliggend element"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "excludes"
+msgstr "sluit uit"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "greater than"
+msgstr "groter dan"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "has item"
+msgstr "heeft item"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "has value"
+msgstr "heeft waarde"
+
+#: flowsystems-webhook-actions.php
+#. Author URI of the plugin
+msgid "https://flowsystems.pl"
+msgstr ""
+
+#: flowsystems-webhook-actions.php
+#. Plugin URI of the plugin
+msgid "https://wpwebhooks.org/wordpress-webhook-plugin"
+msgstr ""
+
+#: admin/src/components/WebhookForm.vue
+msgid "instead."
+msgstr "in plaats daarvan."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is empty"
+msgstr "is leeg"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is false"
+msgstr "is onwaar"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is not empty"
+msgstr "is niet leeg"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "is true"
+msgstr "is waar"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "less than"
+msgstr "kleiner dan"
+
+#: admin/src/components/MappingEditor.vue
+msgid "mapped"
+msgstr "gemapt"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "no"
+msgstr "nee"
+
+#: admin/src/views/WebhooksList.vue
+msgid "no remaining triggers"
+msgstr "geen resterende triggers"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "not empty"
+msgstr "niet leeg"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "not equals"
+msgstr "niet gelijk aan"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "number"
+msgstr "getal"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "object contains"
+msgstr "object bevat"
+
+#: admin/src/components/LogsTable.vue
+msgid "perm. failed"
+msgstr "perm. mislukt"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "property name (optional)"
+msgstr "eigenschapsnaam (optioneel)"
+
+#: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
+msgid "string"
+msgstr "tekenreeks"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "stringify"
+msgstr "stringify"
+
+#: admin/src/components/WebhookForm.vue
+msgid "then select it here."
+msgstr "selecteer het hier."
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "unknown"
+msgstr "onbekend"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "value"
+msgstr "waarde"
+
+#: admin/src/components/ConditionsEditor.vue
+msgid "yes"
+msgstr "ja"
+
+#: admin/src/views/VaultView.vue
+msgid "· database key removed"
+msgstr "· databasesleutel verwijderd"
+
+#: admin/src/main.js
+msgid "…"
+msgstr "…"
+
+#: admin/src/views/ProView.vue
+msgid ""
+"💡 Local installs (%1$slocalhost%2$s, %1$s*.local%2$s, %1$s*.test%2$s) "
+"don't count toward your site limit."
+msgstr ""
+"💡 Lokale installaties (%1$slocalhost%2$s, %1$s*.local%2$s, %1$s*.test%2$s) "
+"tellen niet mee voor je sitelimiet."
