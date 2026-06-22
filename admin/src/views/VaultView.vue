@@ -4,16 +4,17 @@ import { ShieldCheck, KeyRound, Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide
 import { Button, Badge, Dialog, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui'
 import api from '@/lib/api'
 import { formatUtcDate } from '@/lib/dates'
+import { __, _n, sprintf } from '@/i18n'
 
 const credentials = ref([])
 const loading = ref(true)
 const error = ref(null)
 
 const typeOptions = [
-  { value: 'bearer', label: 'Bearer token (PAT)', description: 'Sent as Authorization: Bearer <token>' },
-  { value: 'basic', label: 'Basic auth (user + password)', description: 'Authorization: Basic <base64(user:pass)> — incl. WP Application Passwords' },
-  { value: 'api_key', label: 'API key (custom header)', description: 'A named header such as X-API-Key' },
-  { value: 'custom', label: 'Custom Authorization value', description: 'Raw value for any header — escape hatch' },
+  { value: 'bearer', label: __('Bearer token (PAT)'), description: __('Sent as Authorization: Bearer <token>') },
+  { value: 'basic', label: __('Basic auth (user + password)'), description: __('Authorization: Basic <base64(user:pass)> — incl. WP Application Passwords') },
+  { value: 'api_key', label: __('API key (custom header)'), description: __('A named header such as X-API-Key') },
+  { value: 'custom', label: __('Custom Authorization value'), description: __('Raw value for any header — escape hatch') },
 ]
 
 const typeLabel = (type) => typeOptions.find((t) => t.value === type)?.label ?? type
@@ -75,7 +76,7 @@ const closeForm = () => {
 
 const handleSubmit = async () => {
   if (!form.name.trim()) {
-    formError.value = 'Name is required.'
+    formError.value = __('Name is required.')
     return
   }
 
@@ -203,16 +204,15 @@ onMounted(refreshAll)
       <div>
         <h2 class="text-xl font-semibold text-foreground flex items-center gap-2">
           <ShieldCheck class="h-5 w-5" />
-          Credentials Vault
+          {{ __('Credentials Vault') }}
         </h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Store reusable authentication secrets once, then reference them from your webhooks.
-          Secrets are encrypted at rest and are never shown again after saving — not even to you.
+          {{ __('Store reusable authentication secrets once, then reference them from your webhooks. Secrets are encrypted at rest and are never shown again after saving — not even to you.') }}
         </p>
       </div>
       <Button @click="openCreate">
         <Plus class="mr-2 h-4 w-4" />
-        New credential
+        {{ __('New credential') }}
       </Button>
     </div>
 
@@ -222,7 +222,7 @@ onMounted(refreshAll)
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-sm text-muted-foreground">Loading…</div>
+    <div v-if="loading" class="text-sm text-muted-foreground">{{ __('Loading…') }}</div>
 
     <!-- Empty state -->
     <div
@@ -230,11 +230,11 @@ onMounted(refreshAll)
       class="rounded-lg border border-dashed border-border p-12 text-center"
     >
       <ShieldCheck class="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-      <h3 class="text-sm font-medium text-foreground">No saved credentials</h3>
-      <p class="mt-1 text-sm text-muted-foreground">Add a credential to securely reuse it across webhooks.</p>
+      <h3 class="text-sm font-medium text-foreground">{{ __('No saved credentials') }}</h3>
+      <p class="mt-1 text-sm text-muted-foreground">{{ __('Add a credential to securely reuse it across webhooks.') }}</p>
       <Button class="mt-4" @click="openCreate">
         <Plus class="mr-2 h-4 w-4" />
-        Add first credential
+        {{ __('Add first credential') }}
       </Button>
     </div>
 
@@ -243,12 +243,12 @@ onMounted(refreshAll)
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-border bg-muted/50">
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Name</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Type</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Header</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Hint</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Created</th>
-            <th class="px-4 py-2.5 text-right font-medium text-muted-foreground">Actions</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Name') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Type') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Header') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Hint') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Created') }}</th>
+            <th class="px-4 py-2.5 text-right font-medium text-muted-foreground">{{ __('Actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -266,14 +266,14 @@ onMounted(refreshAll)
             <td class="px-4 py-3 text-muted-foreground">{{ formatUtcDate(credential.created_at) }}</td>
             <td class="px-4 py-3">
               <div class="flex items-center justify-end gap-2">
-                <Button variant="ghost" size="sm" @click="openEdit(credential)" title="Edit credential">
+                <Button variant="ghost" size="sm" @click="openEdit(credential)" :title="__('Edit credential')">
                   <Pencil class="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   @click="openDelete(credential)"
-                  title="Delete credential"
+                  :title="__('Delete credential')"
                   class="text-destructive hover:text-destructive"
                 >
                   <Trash2 class="h-4 w-4" />
@@ -289,8 +289,8 @@ onMounted(refreshAll)
     <div v-if="keyStatus" class="space-y-3">
       <!-- Undecryptable warning (independent of key source) -->
       <div v-if="keyStatus.undecryptable > 0" class="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-        <p class="font-medium">{{ keyStatus.undecryptable }} credential(s) cannot be decrypted with the current key.</p>
-        <p class="mt-1">This usually means the encryption key changed (e.g. <code class="font-mono text-xs">FSWA_SECRET_KEY</code> or WordPress salts). Edit each affected credential and re-enter its secret to fix it.</p>
+        <p class="font-medium">{{ sprintf(_n('%d credential cannot be decrypted with the current key.', '%d credentials cannot be decrypted with the current key.', keyStatus.undecryptable), keyStatus.undecryptable) }}</p>
+        <p class="mt-1" v-html="sprintf(__('This usually means the encryption key changed (e.g. %1$sFSWA_SECRET_KEY%2$s or WordPress salts). Edit each affected credential and re-enter its secret to fix it.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></p>
       </div>
 
       <!-- Transitional: constant set but DB key still present -->
@@ -298,17 +298,15 @@ onMounted(refreshAll)
         <div class="flex items-start gap-2">
           <KeyRound class="h-5 w-5 mt-0.5 shrink-0 text-amber-600" />
           <div>
-            <p class="font-medium text-foreground">Finish moving the key into wp-config.php</p>
-            <p class="text-muted-foreground mt-1">
-              <code class="font-mono text-xs">FSWA_SECRET_KEY</code> is defined and your credentials still work, but a copy of the old key remains in the database — so you don't yet get the full benefit. Re-encrypt now to seal every secret with the wp-config key and delete the database key.
-            </p>
+            <p class="font-medium text-foreground">{{ __('Finish moving the key into wp-config.php') }}</p>
+            <p class="text-muted-foreground mt-1" v-html="sprintf(__('%1$sFSWA_SECRET_KEY%2$s is defined and your credentials still work, but a copy of the old key remains in the database — so you don\'t yet get the full benefit. Re-encrypt now to seal every secret with the wp-config key and delete the database key.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></p>
           </div>
         </div>
         <div v-if="migrateResult" class="text-xs text-muted-foreground">
-          Migrated {{ migrateResult.migrated }} · failed {{ migrateResult.failed }}<span v-if="migrateResult.db_key_removed"> · database key removed</span>
+          {{ sprintf(__('Migrated %1$s · failed %2$s'), migrateResult.migrated, migrateResult.failed) }}<span v-if="migrateResult.db_key_removed"> {{ __('· database key removed') }}</span>
         </div>
         <Button size="sm" :disabled="migrating" @click="handleReencrypt">
-          {{ migrating ? 'Re-encrypting…' : 'Re-encrypt & remove database key' }}
+          {{ migrating ? __('Re-encrypting…') : __('Re-encrypt & remove database key') }}
         </Button>
       </div>
 
@@ -316,33 +314,29 @@ onMounted(refreshAll)
       <div v-else-if="keyStatus.fully_protected" class="rounded-md border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm">
         <p class="font-medium text-foreground flex items-center gap-2">
           <ShieldCheck class="h-4 w-4 text-emerald-600" />
-          Maximum protection
+          {{ __('Maximum protection') }}
         </p>
-        <p class="text-muted-foreground mt-1">
-          The encryption key lives in <code class="font-mono text-xs">wp-config.php</code> (<code class="font-mono text-xs">FSWA_SECRET_KEY</code>) and is not stored in the database. A database-only dump cannot decrypt your secrets.
-        </p>
+        <p class="text-muted-foreground mt-1" v-html="sprintf(__('The encryption key lives in %1$swp-config.php%2$s (%1$sFSWA_SECRET_KEY%2$s) and is not stored in the database. A database-only dump cannot decrypt your secrets.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></p>
       </div>
 
       <!-- Default: DB key, suggest hardening with full guidance -->
       <div v-else class="rounded-md border border-border bg-muted/30 p-4 text-sm space-y-2">
         <p class="font-medium text-foreground flex items-center gap-2">
           <ShieldCheck class="h-4 w-4" />
-          How secrets are protected
+          {{ __('How secrets are protected') }}
         </p>
         <ul class="space-y-1 text-muted-foreground list-disc pl-5">
-          <li>Secrets are encrypted at rest (AES-256-GCM) and never returned by the API — only a masked hint is shown.</li>
-          <li>An <Badge variant="default" class="mx-1">agent</Badge> API token can assign credentials to webhooks but can never read their values.</li>
+          <li>{{ __('Secrets are encrypted at rest (AES-256-GCM) and never returned by the API — only a masked hint is shown.') }}</li>
+          <li><span v-html="sprintf(__('An %1$sagent%2$s API token can assign credentials to webhooks but can never read their values.'), '<span class=&quot;inline-flex items-center rounded-md border px-1.5 py-0.5 text-xs mx-1&quot;>', '</span>')"></span></li>
         </ul>
         <div class="rounded-md border border-border bg-background p-3 mt-2 space-y-2">
-          <p class="font-medium text-foreground">Optional: harden with <code class="font-mono text-xs">FSWA_SECRET_KEY</code></p>
-          <p class="text-muted-foreground">
-            By default the encryption key is generated and stored in the database. For stronger protection — so a database-only dump can't decrypt secrets — move the key into <code class="font-mono text-xs">wp-config.php</code>:
-          </p>
+          <p class="font-medium text-foreground" v-html="sprintf(__('Optional: harden with %1$sFSWA_SECRET_KEY%2$s'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></p>
+          <p class="text-muted-foreground" v-html="sprintf(__('By default the encryption key is generated and stored in the database. For stronger protection — so a database-only dump can\'t decrypt secrets — move the key into %1$swp-config.php%2$s:'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></p>
           <pre class="bg-muted rounded p-2 text-xs overflow-x-auto"><code>define( 'FSWA_SECRET_KEY', 'a-long-random-string-64-chars-or-more' );</code></pre>
           <ul class="text-muted-foreground list-disc pl-5 space-y-1">
-            <li><span class="font-medium text-foreground">Format:</span> any long, random, secret string (64+ characters recommended). Generate one from the <a href="https://api.wordpress.org/secret-key/1.1/salt/" target="_blank" rel="noopener" class="underline">WordPress salt generator</a> or with <code class="font-mono text-xs">wp_generate_password(64, true, true)</code>.</li>
-            <li><span class="font-medium text-foreground">Safe to add anytime:</span> existing credentials keep working immediately. After adding it, return here and click the <em>Re-encrypt</em> button that appears to finish the move and remove the database key.</li>
-            <li><span class="font-medium text-foreground">Keep it stable &amp; backed up:</span> don't change or lose this value once credentials are sealed with it, or they become unrecoverable.</li>
+            <li v-html="sprintf(__('%1$sFormat:%2$s any long, random, secret string (64+ characters recommended). Generate one from the %3$sWordPress salt generator%4$s or with %5$swp_generate_password(64, true, true)%6$s.'), '<span class=&quot;font-medium text-foreground&quot;>', '</span>', '<a href=&quot;https://api.wordpress.org/secret-key/1.1/salt/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot; class=&quot;underline&quot;>', '</a>', '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></li>
+            <li v-html="sprintf(__('%1$sSafe to add anytime:%2$s existing credentials keep working immediately. After adding it, return here and click the %3$sRe-encrypt%4$s button that appears to finish the move and remove the database key.'), '<span class=&quot;font-medium text-foreground&quot;>', '</span>', '<em>', '</em>')"></li>
+            <li v-html="sprintf(__('%1$sKeep it stable &amp; backed up:%2$s don\'t change or lose this value once credentials are sealed with it, or they become unrecoverable.'), '<span class=&quot;font-medium text-foreground&quot;>', '</span>')"></li>
           </ul>
         </div>
       </div>
@@ -351,20 +345,20 @@ onMounted(refreshAll)
     <!-- Create / edit dialog -->
     <Dialog
       :open="showFormDialog"
-      :title="isEditing ? 'Edit credential' : 'New credential'"
-      :description="isEditing ? 'Update this credential. Leave secret fields blank to keep the existing value.' : 'Secrets are encrypted on save and never shown again.'"
+      :title="isEditing ? __('Edit credential') : __('New credential')"
+      :description="isEditing ? __('Update this credential. Leave secret fields blank to keep the existing value.') : __('Secrets are encrypted on save and never shown again.')"
       @close="closeForm"
     >
       <div class="space-y-4">
         <div v-if="formError" class="text-sm text-destructive">{{ formError }}</div>
 
         <div class="space-y-1.5">
-          <Label for="cred-name">Name</Label>
-          <Input id="cred-name" v-model="form.name" placeholder="e.g. HubSpot PAT, Stripe key" />
+          <Label for="cred-name">{{ __('Name') }}</Label>
+          <Input id="cred-name" v-model="form.name" :placeholder="__('e.g. HubSpot PAT, Stripe key')" />
         </div>
 
         <div class="space-y-1.5">
-          <Label>Type</Label>
+          <Label>{{ __('Type') }}</Label>
           <Select v-model="form.type">
             <SelectTrigger>
               <SelectValue />
@@ -381,25 +375,25 @@ onMounted(refreshAll)
         </div>
 
         <div v-if="needsHeaderName" class="space-y-1.5">
-          <Label for="cred-header">Header name</Label>
+          <Label for="cred-header">{{ __('Header name') }}</Label>
           <Input id="cred-header" v-model="form.header_name" placeholder="X-API-Key" />
         </div>
 
         <!-- Basic auth -->
         <template v-if="isBasic">
           <div class="space-y-1.5">
-            <Label for="cred-username">Username</Label>
-            <Input id="cred-username" v-model="form.username" autocomplete="off" placeholder="WordPress username or API user" />
+            <Label for="cred-username">{{ __('Username') }}</Label>
+            <Input id="cred-username" v-model="form.username" autocomplete="off" :placeholder="__('WordPress username or API user')" />
           </div>
           <div class="space-y-1.5">
-            <Label for="cred-password">Password</Label>
+            <Label for="cred-password">{{ __('Password') }}</Label>
             <div class="relative">
-              <Input id="cred-password" v-model="form.password" :type="revealPassword ? 'text' : 'password'" autocomplete="new-password" class="pr-10" :placeholder="isEditing ? 'Leave blank to keep current' : 'Password or application password'" />
+              <Input id="cred-password" v-model="form.password" :type="revealPassword ? 'text' : 'password'" autocomplete="new-password" class="pr-10" :placeholder="isEditing ? __('Leave blank to keep current') : __('Password or application password')" />
               <button
                 type="button"
                 class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-                :aria-label="revealPassword ? 'Hide password' : 'Show password'"
-                :title="revealPassword ? 'Hide' : 'Show'"
+                :aria-label="revealPassword ? __('Hide password') : __('Show password')"
+                :title="revealPassword ? __('Hide') : __('Show')"
                 @click="revealPassword = !revealPassword"
               >
                 <EyeOff v-if="revealPassword" class="h-4 w-4" />
@@ -411,14 +405,14 @@ onMounted(refreshAll)
 
         <!-- Single secret -->
         <div v-else class="space-y-1.5">
-          <Label for="cred-secret">Secret value</Label>
+          <Label for="cred-secret">{{ __('Secret value') }}</Label>
           <div class="relative">
-            <Input id="cred-secret" v-model="form.secret" :type="revealSecret ? 'text' : 'password'" autocomplete="new-password" class="pr-10" :placeholder="isEditing ? 'Leave blank to keep current' : 'Paste the token / key'" />
+            <Input id="cred-secret" v-model="form.secret" :type="revealSecret ? 'text' : 'password'" autocomplete="new-password" class="pr-10" :placeholder="isEditing ? __('Leave blank to keep current') : __('Paste the token / key')" />
             <button
               type="button"
               class="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-              :aria-label="revealSecret ? 'Hide secret' : 'Show secret'"
-              :title="revealSecret ? 'Hide' : 'Show'"
+              :aria-label="revealSecret ? __('Hide secret') : __('Show secret')"
+              :title="revealSecret ? __('Hide') : __('Show')"
               @click="revealSecret = !revealSecret"
             >
               <EyeOff v-if="revealSecret" class="h-4 w-4" />
@@ -429,9 +423,9 @@ onMounted(refreshAll)
       </div>
 
       <template #footer>
-        <Button variant="outline" @click="closeForm" :disabled="submitting">Cancel</Button>
+        <Button variant="outline" @click="closeForm" :disabled="submitting">{{ __('Cancel') }}</Button>
         <Button @click="handleSubmit" :disabled="submitting">
-          {{ submitting ? 'Saving…' : (isEditing ? 'Save changes' : 'Create credential') }}
+          {{ submitting ? __('Saving…') : (isEditing ? __('Save changes') : __('Create credential')) }}
         </Button>
       </template>
     </Dialog>
@@ -439,26 +433,26 @@ onMounted(refreshAll)
     <!-- Delete dialog -->
     <Dialog
       :open="showDeleteDialog"
-      :title="`Delete credential: ${credentialToDelete?.name}`"
-      description="This permanently removes the stored secret."
+      :title="sprintf(__('Delete credential: %s'), credentialToDelete?.name)"
+      :description="__('This permanently removes the stored secret.')"
       @close="showDeleteDialog = false; credentialToDelete = null; deleteInUse = 0; deleteError = null"
     >
       <div v-if="deleteError" class="text-sm text-destructive">
         {{ deleteError }}
       </div>
       <p v-if="deleteInUse > 0" class="text-sm text-muted-foreground mt-2">
-        Deleting with force will detach it from {{ deleteInUse }} webhook(s); those webhooks will send no Authorization header until reconfigured.
+        {{ sprintf(_n('Deleting with force will detach it from %d webhook; that webhook will send no Authorization header until reconfigured.', 'Deleting with force will detach it from %d webhooks; those webhooks will send no Authorization header until reconfigured.', deleteInUse), deleteInUse) }}
       </p>
 
       <template #footer>
         <Button variant="outline" @click="showDeleteDialog = false; credentialToDelete = null; deleteInUse = 0; deleteError = null" :disabled="deleting">
-          Cancel
+          {{ __('Cancel') }}
         </Button>
         <Button v-if="deleteInUse > 0" variant="destructive" @click="handleDelete(true)" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Force delete & detach' }}
+          {{ deleting ? __('Deleting…') : __('Force delete & detach') }}
         </Button>
         <Button v-else variant="destructive" @click="handleDelete(false)" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Delete credential' }}
+          {{ deleting ? __('Deleting…') : __('Delete credential') }}
         </Button>
       </template>
     </Dialog>

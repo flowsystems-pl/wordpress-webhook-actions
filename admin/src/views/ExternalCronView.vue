@@ -5,6 +5,7 @@ import { Button, Card, Input, Label, Alert, UpgradeBadge, RadioGroup, RadioGroup
 import ExternalCronChart from '@/components/ExternalCronChart.vue'
 import { usePro } from '@/composables/usePro'
 import { useExternalCron } from '@/composables/useExternalCron'
+import { __, sprintf } from '@/i18n'
 
 const { proActive } = usePro()
 const { settings, stats, loading, saving, error, statsStale, load, fetchStats, saveSettings, pause, resume } = useExternalCron(proActive)
@@ -17,15 +18,15 @@ const localBatchSize = ref(10)
 const minInterval = computed(() => localMode.value === 'wp_cron' ? 60 : 20)
 
 const formatInterval = (s) => {
-  if (s < 60) return `${s}s`
+  if (s < 60) return sprintf(__('%ds'), s)
   if (s < 3600) {
     const m = Math.floor(s / 60)
     const r = s % 60
-    return r > 0 ? `${m}m ${r}s` : `${m}m`
+    return r > 0 ? sprintf(__('%1$dm %2$ds'), m, r) : sprintf(__('%dm'), m)
   }
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
-  return m > 0 ? `${h}h ${m}m` : `${h}h`
+  return m > 0 ? sprintf(__('%1$dh %2$dm'), h, m) : sprintf(__('%dh'), h)
 }
 
 // Fire: always visible, grey at 1h, full colour at 61s, grows below 60s
@@ -68,13 +69,13 @@ watch(localMode, (mode) => {
 
 const lastPingError = computed(() => {
   const beat = stats.value.beats?.[0]
-  if (beat && beat.status !== 1) return beat.msg || 'Unknown error'
+  if (beat && beat.status !== 1) return beat.msg || __('Unknown error')
   return null
 })
 
 const monitorStatusLabel = computed(() => {
-  if (!settings.value.monitor_id) return 'Not configured'
-  return settings.value.monitor_active ? 'Active' : 'Paused'
+  if (!settings.value.monitor_id) return __('Not configured')
+  return settings.value.monitor_active ? __('Active') : __('Paused')
 })
 
 const monitorStatusClass = computed(() =>
@@ -101,12 +102,12 @@ watch(proActive, (active) => { if (active) load() })
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Timer class="w-5 h-5 text-muted-foreground" />
-        <h2 class="text-lg font-semibold">External Cron</h2>
+        <h2 class="text-lg font-semibold">{{ __('External Cron') }}</h2>
         <UpgradeBadge v-if="!proActive" />
       </div>
       <div v-if="proActive" class="flex items-center gap-2">
         <span v-if="statsStale" class="text-xs text-amber-500 flex items-center gap-1">
-          <AlertTriangle class="w-3 h-3" /> Stats unavailable
+          <AlertTriangle class="w-3 h-3" /> {{ __('Stats unavailable') }}
         </span>
         <Button variant="ghost" size="sm" @click="fetchStats(true)" :disabled="loading">
           <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading, 'text-amber-500': statsStale }" />
@@ -117,7 +118,7 @@ watch(proActive, (active) => { if (active) load() })
     <Alert v-if="error" variant="destructive">{{ error }}</Alert>
 
     <Alert v-if="proActive && lastPingError" variant="destructive">
-      Last ping failed: <span class="font-mono text-xs">{{ lastPingError }}</span>
+      {{ __('Last ping failed:') }} <span class="font-mono text-xs">{{ lastPingError }}</span>
     </Alert>
 
     <!-- Monitor status bar (pro only, monitor must exist) -->
@@ -128,15 +129,15 @@ watch(proActive, (active) => { if (active) load() })
             {{ monitorStatusLabel }}
           </span>
           <span v-if="stats.beats?.length" class="text-sm text-muted-foreground">
-            Last stats pull: {{ new Date(stats.beats[0].time).toLocaleString() }}
+            {{ sprintf(__('Last stats pull: %s'), new Date(stats.beats[0].time).toLocaleString()) }}
           </span>
         </div>
         <div class="flex gap-2">
           <Button v-if="settings.monitor_active" variant="outline" size="sm" @click="pause">
-            <Pause class="w-4 h-4 mr-1.5" /> Pause
+            <Pause class="w-4 h-4 mr-1.5" /> {{ __('Pause') }}
           </Button>
           <Button v-else variant="outline" size="sm" @click="resume">
-            <Play class="w-4 h-4 mr-1.5" /> Resume
+            <Play class="w-4 h-4 mr-1.5" /> {{ __('Resume') }}
           </Button>
         </div>
       </div>
@@ -145,7 +146,7 @@ watch(proActive, (active) => { if (active) load() })
     <!-- Heartbeat history -->
     <Card class="p-6 space-y-3">
       <div class="flex items-center justify-between">
-        <Label class="text-base">External Cron History</Label>
+        <Label class="text-base">{{ __('External Cron History') }}</Label>
         <UpgradeBadge v-if="!proActive" />
       </div>
       <div :class="{ 'opacity-50 pointer-events-none select-none': !proActive }">
@@ -163,35 +164,27 @@ watch(proActive, (active) => { if (active) load() })
       <div :class="{ 'opacity-50 pointer-events-none select-none': !proActive }">
         <!-- Enable toggle -->
         <div class="flex items-center justify-between mb-6">
-          <Label>Enable External Cron</Label>
+          <Label>{{ __('Enable External Cron') }}</Label>
           <Switch v-model="localEnabled" :disabled="!proActive" />
         </div>
 
         <div :class="{ 'opacity-50 pointer-events-none': !localEnabled }" class="space-y-6 transition-opacity">
           <!-- Target -->
           <div class="space-y-2">
-            <Label>Target</Label>
+            <Label>{{ __('Target') }}</Label>
             <RadioGroup v-model="localMode" class="space-y-2">
               <div class="flex items-start gap-3">
                 <RadioGroupItem id="mode-plugin" value="plugin_endpoint" class="mt-0.5" />
                 <div>
-                  <Label for="mode-plugin" class="cursor-pointer font-medium">Plugin queue endpoint</Label>
-                  <p class="text-xs text-muted-foreground mt-0.5">
-                    <code class="font-mono">/wp-json/fswa/v1/cron/process?token=…</code>
-                    — processes only the webhook queue. Min interval: 20s.
-                  </p>
+                  <Label for="mode-plugin" class="cursor-pointer font-medium">{{ __('Plugin queue endpoint') }}</Label>
+                  <p class="text-xs text-muted-foreground mt-0.5" v-html="sprintf(__('%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — processes only the webhook queue. Min interval: 20s.'), '<code class=&quot;font-mono&quot;>', '</code>')"></p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
                 <RadioGroupItem id="mode-wp" value="wp_cron" class="mt-0.5" />
                 <div>
-                  <Label for="mode-wp" class="cursor-pointer font-medium">WP-Cron</Label>
-                  <p class="text-xs text-muted-foreground mt-0.5">
-                    <code class="font-mono">/wp-cron.php?doing_wp_cron</code>
-                    — runs all WordPress scheduled tasks. Min interval: 60s.
-                    <code class="font-mono">DISABLE_WP_CRON</code> is added to
-                    <code class="font-mono">wp-config.php</code> automatically.
-                  </p>
+                  <Label for="mode-wp" class="cursor-pointer font-medium">{{ __('WP-Cron') }}</Label>
+                  <p class="text-xs text-muted-foreground mt-0.5" v-html="sprintf(__('%1$s/wp-cron.php?doing_wp_cron%2$s — runs all WordPress scheduled tasks. Min interval: 60s. %1$sDISABLE_WP_CRON%2$s is added to %1$swp-config.php%2$s automatically.'), '<code class=&quot;font-mono&quot;>', '</code>')"></p>
                 </div>
               </div>
             </RadioGroup>
@@ -201,16 +194,9 @@ watch(proActive, (active) => { if (active) load() })
               class="flex items-start gap-2 text-xs p-3 rounded-md bg-muted border border-border"
             >
               <Info class="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
-              <span v-if="settings.disable_wp_cron_added">
-                <code class="font-mono">DISABLE_WP_CRON</code> is active — WP-Cron auto-spawn is disabled.
-              </span>
-              <span v-else-if="!settings.wp_config_writable">
-                <code class="font-mono">wp-config.php</code> is not writable. Add this line manually before the "That's all" comment:
-                <code class="block mt-1 font-bold font-mono">define( 'DISABLE_WP_CRON', true );</code>
-              </span>
-              <span v-else class="text-muted-foreground">
-                <code class="font-mono">DISABLE_WP_CRON</code> will be written to <code class="font-mono">wp-config.php</code> on save.
-              </span>
+              <span v-if="settings.disable_wp_cron_added" v-html="sprintf(__('%1$sDISABLE_WP_CRON%2$s is active — WP-Cron auto-spawn is disabled.'), '<code class=&quot;font-mono&quot;>', '</code>')"></span>
+              <span v-else-if="!settings.wp_config_writable" v-html="sprintf(__('%1$swp-config.php%2$s is not writable. Add this line manually before the “That’s all” comment: %3$sdefine( \'DISABLE_WP_CRON\', true );%4$s'), '<code class=&quot;font-mono&quot;>', '</code>', '<code class=&quot;block mt-1 font-bold font-mono&quot;>', '</code>')"></span>
+              <span v-else class="text-muted-foreground" v-html="sprintf(__('%1$sDISABLE_WP_CRON%2$s will be written to %1$swp-config.php%2$s on save.'), '<code class=&quot;font-mono&quot;>', '</code>')"></span>
             </div>
           </div>
 
@@ -218,7 +204,7 @@ watch(proActive, (active) => { if (active) load() })
           <div class="relative space-y-2">
             <div class="flex items-center justify-between">
               <div class="relative flex items-center">
-                <Label>Interval</Label>
+                <Label>{{ __('Interval') }}</Label>
                 <span
                   class="absolute left-full ml-1 pointer-events-none origin-left"
                   :style="fireStyle"
@@ -256,10 +242,7 @@ watch(proActive, (active) => { if (active) load() })
                 class="flex items-start gap-2 p-3 rounded-md border text-xs bg-amber-500/10 border-amber-500/25 text-amber-700 dark:text-amber-400"
               >
                 <Info class="w-4 h-4 mt-0.5 shrink-0" />
-                <span>
-                  You might want to whitelist the External Cron IP for your WAF or server security:
-                  <strong class="font-mono select-all">72.62.157.193</strong>
-                </span>
+                <span v-html="sprintf(__('You might want to whitelist the External Cron IP for your WAF or server security: %1$s72.62.157.193%2$s'), '<strong class=&quot;font-mono select-all&quot;>', '</strong>')"></span>
               </div>
             </Transition>
           </div>
@@ -268,8 +251,8 @@ watch(proActive, (active) => { if (active) load() })
           <div v-if="localMode === 'plugin_endpoint'" class="space-y-2">
             <div class="flex items-center justify-between">
               <div>
-                <Label>Queue batch size</Label>
-                <p class="text-xs text-muted-foreground mt-0.5">Jobs processed per cron run.</p>
+                <Label>{{ __('Queue batch size') }}</Label>
+                <p class="text-xs text-muted-foreground mt-0.5">{{ __('Jobs processed per cron run.') }}</p>
               </div>
             </div>
             <div class="flex items-center gap-3">
@@ -294,7 +277,7 @@ watch(proActive, (active) => { if (active) load() })
       </div>
 
       <Button @click="handleSave" :disabled="saving || !proActive">
-        {{ saving ? 'Saving…' : 'Save' }}
+        {{ saving ? __('Saving…') : __('Save') }}
       </Button>
     </Card>
   </div>

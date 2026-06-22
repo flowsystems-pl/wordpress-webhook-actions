@@ -5,6 +5,7 @@ import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 import { formatUtcDate } from '@/lib/dates'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 import { useChainTriggerLabel } from '@/composables/useChainTriggerLabel'
+import { __, sprintf } from '@/i18n'
 
 const props = defineProps({
   logs: {
@@ -221,25 +222,25 @@ const { copiedKey, copy } = useCopyToClipboard()
                 @update:model-value="toggleSelectAll"
               />
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Status</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Trigger</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Event UUID</th>
-            <th v-if="showWebhook" class="px-4 py-3 text-left text-sm font-medium">Webhook</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">HTTP Code</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Duration</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Date</th>
-            <th class="px-4 py-3 text-right text-sm font-medium">Actions</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('Status') }}</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('Trigger') }}</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('Event UUID') }}</th>
+            <th v-if="showWebhook" class="px-4 py-3 text-left text-sm font-medium">{{ __('Webhook') }}</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('HTTP Code') }}</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('Duration') }}</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">{{ __('Date') }}</th>
+            <th class="px-4 py-3 text-right text-sm font-medium">{{ __('Actions') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y">
           <tr v-if="loading && logs.length === 0">
             <td :colspan="showWebhook ? 9 : 8" class="px-4 py-8 text-center text-muted-foreground">
-              Loading...
+              {{ __('Loading...') }}
             </td>
           </tr>
           <tr v-else-if="logs.length === 0">
             <td :colspan="showWebhook ? 9 : 8" class="px-4 py-8 text-center text-muted-foreground">
-              No logs found
+              {{ __('No logs found') }}
             </td>
           </tr>
           <tr v-for="log in logs" :key="log.id" :class="['hover:bg-muted/50', isSelected(log.id) ? 'bg-muted/30' : '']">
@@ -252,11 +253,11 @@ const { copiedKey, copy } = useCopyToClipboard()
             <td class="px-4 py-3">
               <div class="flex items-center gap-1 flex-wrap">
                 <Badge :variant="statusVariant(log.status)">
-                  {{ log.status === 'permanently_failed' ? 'perm. failed' : log.status }}
+                  {{ log.status === 'permanently_failed' ? __('perm. failed') : log.status }}
                 </Badge>
                 <Badge v-if="log.mapping_applied" variant="outline" class="text-xs">
                   <ArrowRight class="h-3 w-3 mr-0.5" />
-                  Mapped
+                  {{ __('Mapped') }}
                 </Badge>
               </div>
             </td>
@@ -264,7 +265,7 @@ const { copiedKey, copy } = useCopyToClipboard()
               <template v-if="triggerLabel(log.trigger_name)">
                 <span
                   class="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs"
-                  :title="`Chain link #${triggerLabel(log.trigger_name).linkId} — ${log.trigger_name}`"
+                  :title="sprintf(__('Chain link #%1$s — %2$s'), triggerLabel(log.trigger_name).linkId, log.trigger_name)"
                 >
                   <Network class="h-3 w-3 text-accent shrink-0" />
                   <template v-if="!triggerLabel(log.trigger_name).missing">
@@ -272,7 +273,7 @@ const { copiedKey, copy } = useCopyToClipboard()
                     <span class="text-muted-foreground">← {{ triggerLabel(log.trigger_name).sourceName }}</span>
                   </template>
                   <span v-else class="text-muted-foreground italic">
-                    Chain link #{{ triggerLabel(log.trigger_name).linkId }} (deleted)
+                    {{ sprintf(__('Chain link #%s (deleted)'), triggerLabel(log.trigger_name).linkId) }}
                   </span>
                 </span>
               </template>
@@ -309,7 +310,7 @@ const { copiedKey, copy } = useCopyToClipboard()
                   v-if="isRetryable(log.status)"
                   size="icon"
                   variant="ghost"
-                  title="Retry"
+                  :title="__('Retry')"
                   @click="handleRetry(log)"
                 >
                   <RotateCcw class="h-4 w-4" />
@@ -319,7 +320,7 @@ const { copiedKey, copy } = useCopyToClipboard()
                   size="icon"
                   variant="ghost"
                   class="text-green-600 hover:text-green-700"
-                  title="Replay"
+                  :title="__('Replay')"
                   @click="emit('replay', log)"
                 >
                   <Play class="h-4 w-4" />
@@ -341,7 +342,7 @@ const { copiedKey, copy } = useCopyToClipboard()
     <!-- Pagination -->
     <div v-if="total > perPage" class="flex items-center justify-between mt-4">
       <div class="text-sm text-muted-foreground">
-        Showing {{ (page - 1) * perPage + 1 }} to {{ Math.min(page * perPage, total) }} of {{ total }}
+        {{ sprintf(__('Showing %1$d to %2$d of %3$d'), (page - 1) * perPage + 1, Math.min(page * perPage, total), total) }}
       </div>
       <div class="flex gap-2">
         <Button
@@ -366,14 +367,14 @@ const { copiedKey, copy } = useCopyToClipboard()
     <!-- Delete Confirm Dialog -->
     <Dialog
       :open="!!pendingDeleteLog"
-      title="Delete log?"
-      description="This action cannot be undone."
+      :title="__('Delete log?')"
+      :description="__('This action cannot be undone.')"
       @close="pendingDeleteLog = null"
     >
       <template #footer>
         <div class="flex gap-2">
-          <Button variant="destructive" @click="confirmDelete">Delete</Button>
-          <Button variant="outline" @click="pendingDeleteLog = null">Cancel</Button>
+          <Button variant="destructive" @click="confirmDelete">{{ __('Delete') }}</Button>
+          <Button variant="outline" @click="pendingDeleteLog = null">{{ __('Cancel') }}</Button>
         </div>
       </template>
     </Dialog>
@@ -381,26 +382,26 @@ const { copiedKey, copy } = useCopyToClipboard()
     <!-- Details Dialog -->
     <Dialog
       :open="showDetails"
-      title="Log Details"
+      :title="__('Log Details')"
       @close="closeDetails"
     >
       <div v-if="selectedLog" class="space-y-4 max-h-[60vh] overflow-y-auto">
         <!-- Status + Method -->
         <div class="flex gap-6">
           <div>
-            <div class="text-sm font-medium mb-1">Status</div>
+            <div class="text-sm font-medium mb-1">{{ __('Status') }}</div>
             <div class="flex items-center gap-2 flex-wrap">
               <Badge :variant="statusVariant(selectedLog.status)">
                 {{ selectedLog.status }}
               </Badge>
               <Badge v-if="selectedLog.mapping_applied" variant="outline" class="text-xs">
                 <ArrowRight class="h-3 w-3 mr-0.5" />
-                Mapping Applied
+                {{ __('Mapping Applied') }}
               </Badge>
             </div>
           </div>
           <div v-if="selectedLog.http_method">
-            <div class="text-sm font-medium mb-1">Method</div>
+            <div class="text-sm font-medium mb-1">{{ __('Method') }}</div>
             <Badge variant="outline" class="font-mono">{{ selectedLog.http_method }}</Badge>
           </div>
         </div>
@@ -410,21 +411,21 @@ const { copiedKey, copy } = useCopyToClipboard()
           v-if="selectedLog.status === 'skipped' && selectedLog.error_message"
           class="flex items-start gap-2 text-sm p-3 bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300 rounded-md border border-amber-200 dark:border-amber-800"
         >
-          <span class="font-medium shrink-0">Skipped:</span>
+          <span class="font-medium shrink-0">{{ __('Skipped:') }}</span>
           <span class="font-mono break-all">{{ selectedLog.error_message }}</span>
         </div>
 
         <!-- Next Attempt -->
         <div v-if="selectedLog.status === 'retry' && selectedLog.next_attempt_at" class="flex items-center gap-2 text-sm p-3 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 rounded-md">
           <Loader2 class="h-4 w-4 shrink-0 animate-spin" />
-          Next attempt scheduled for {{ formatDate(selectedLog.next_attempt_at) }}
+          {{ sprintf(__('Next attempt scheduled for %s'), formatDate(selectedLog.next_attempt_at)) }}
         </div>
 
         <!-- Error Message -->
         <div v-if="lastAttemptError">
           <div class="text-sm font-medium mb-1">
-            Error Message
-            <span v-if="selectedLog.attempt_history?.length" class="text-muted-foreground font-normal">(last attempt)</span>
+            {{ __('Error Message') }}
+            <span v-if="selectedLog.attempt_history?.length" class="text-muted-foreground font-normal">{{ __('(last attempt)') }}</span>
           </div>
           <div class="text-sm p-3 bg-destructive/10 text-destructive rounded-md font-mono break-all">
             {{ lastAttemptError }}
@@ -435,8 +436,8 @@ const { copiedKey, copy } = useCopyToClipboard()
         <div v-if="selectedLog.event_uuid || selectedLog.webhook_uuid" class="grid grid-cols-1 gap-2">
           <div v-if="selectedLog.event_uuid">
             <div class="flex items-center justify-between mb-1">
-              <div class="text-sm font-medium">Event UUID</div>
-              <button @click="copy(selectedLog.event_uuid, 'detail-uuid')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy Event UUID">
+              <div class="text-sm font-medium">{{ __('Event UUID') }}</div>
+              <button @click="copy(selectedLog.event_uuid, 'detail-uuid')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy Event UUID')">
                 <Check v-if="copiedKey === 'detail-uuid'" class="h-3.5 w-3.5 text-green-500" />
                 <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
               </button>
@@ -446,7 +447,7 @@ const { copiedKey, copy } = useCopyToClipboard()
           <div v-if="selectedLog.webhook_uuid">
             <div class="flex items-center justify-between mb-1">
               <div class="text-sm font-medium">X-Webhook-Id</div>
-              <button @click="copy(selectedLog.webhook_uuid, 'detail-wh-id')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy X-Webhook-Id">
+              <button @click="copy(selectedLog.webhook_uuid, 'detail-wh-id')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy X-Webhook-Id')">
                 <Check v-if="copiedKey === 'detail-wh-id'" class="h-3.5 w-3.5 text-green-500" />
                 <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
               </button>
@@ -458,7 +459,7 @@ const { copiedKey, copy } = useCopyToClipboard()
         <!-- Attempt History -->
         <div v-if="selectedLog.attempt_history && selectedLog.attempt_history.length > 0">
           <div class="text-sm font-medium mb-2">
-            Attempt History
+            {{ __('Attempt History') }}
             <span class="text-muted-foreground font-normal">({{ selectedLog.attempt_history.length }})</span>
           </div>
           <div class="border rounded-md divide-y overflow-hidden">
@@ -474,8 +475,8 @@ const { copiedKey, copy } = useCopyToClipboard()
               >
                 <CheckCircle2 v-if="attempt.status === 'success'" class="h-3.5 w-3.5 text-green-500 shrink-0" />
                 <XCircle v-else class="h-3.5 w-3.5 text-red-500 shrink-0" />
-                <span class="font-medium">Attempt #{{ attempt.attempt + 1 }}</span>
-                <span v-if="attempt.http_code" class="text-muted-foreground">HTTP {{ attempt.http_code }}</span>
+                <span class="font-medium">{{ sprintf(__('Attempt #%d'), attempt.attempt + 1) }}</span>
+                <span v-if="attempt.http_code" class="text-muted-foreground">{{ sprintf(__('HTTP %s'), attempt.http_code) }}</span>
                 <span v-if="attempt.duration_ms != null" class="text-muted-foreground">{{ attempt.duration_ms }}ms</span>
                 <span class="text-muted-foreground ml-auto shrink-0">{{ formatDate(attempt.attempted_at) }}</span>
                 <ChevronDown
@@ -487,34 +488,34 @@ const { copiedKey, copy } = useCopyToClipboard()
               <div v-if="openAttempts.has(index)" class="px-3 py-2 bg-muted/30 text-xs space-y-2 border-t">
                 <div class="grid grid-cols-2 gap-x-4 gap-y-1">
                   <div>
-                    <span class="text-muted-foreground">Status</span>
+                    <span class="text-muted-foreground">{{ __('Status') }}</span>
                     <div class="font-medium capitalize">{{ attempt.status }}</div>
                   </div>
                   <div>
-                    <span class="text-muted-foreground">HTTP Code</span>
+                    <span class="text-muted-foreground">{{ __('HTTP Code') }}</span>
                     <div class="font-medium">{{ attempt.http_code ?? '—' }}</div>
                   </div>
                   <div>
-                    <span class="text-muted-foreground">Duration</span>
+                    <span class="text-muted-foreground">{{ __('Duration') }}</span>
                     <div class="font-medium">{{ attempt.duration_ms != null ? `${attempt.duration_ms}ms` : '—' }}</div>
                   </div>
                   <div>
-                    <span class="text-muted-foreground">Will Retry</span>
-                    <div class="font-medium">{{ attempt.should_retry ? 'Yes' : 'No' }}</div>
+                    <span class="text-muted-foreground">{{ __('Will Retry') }}</span>
+                    <div class="font-medium">{{ attempt.should_retry ? __('Yes') : __('No') }}</div>
                   </div>
                   <div class="col-span-2">
-                    <span class="text-muted-foreground">Attempted At</span>
+                    <span class="text-muted-foreground">{{ __('Attempted At') }}</span>
                     <div class="font-medium font-mono">{{ formatDate(attempt.attempted_at) }}</div>
                   </div>
                 </div>
                 <div v-if="attempt.error_message">
-                  <span class="text-muted-foreground">Error</span>
+                  <span class="text-muted-foreground">{{ __('Error') }}</span>
                   <div class="mt-0.5 text-destructive font-mono break-all">{{ attempt.error_message }}</div>
                 </div>
                 <div v-if="attempt.response_body != null">
                   <div class="flex items-center justify-between">
-                    <span class="text-muted-foreground">Response Body</span>
-                    <button @click="copy(formatJson(attempt.response_body), `attempt-${index}-resp`)" class="shrink-0 rounded p-0.5 hover:bg-background transition-colors" title="Copy response body">
+                    <span class="text-muted-foreground">{{ __('Response Body') }}</span>
+                    <button @click="copy(formatJson(attempt.response_body), `attempt-${index}-resp`)" class="shrink-0 rounded p-0.5 hover:bg-background transition-colors" :title="__('Copy response body')">
                       <Check v-if="copiedKey === `attempt-${index}-resp`" class="h-3 w-3 text-green-500" />
                       <Copy v-else class="h-3 w-3 text-muted-foreground" />
                     </button>
@@ -529,8 +530,8 @@ const { copiedKey, copy } = useCopyToClipboard()
         <!-- Request Headers -->
         <div v-if="selectedLog.request_headers && Object.keys(selectedLog.request_headers).length">
           <div class="flex items-center justify-between mb-1">
-            <div class="text-sm font-medium">Request Headers</div>
-            <button @click="copy(formatJson(selectedLog.request_headers), 'detail-headers')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy headers">
+            <div class="text-sm font-medium">{{ __('Request Headers') }}</div>
+            <button @click="copy(formatJson(selectedLog.request_headers), 'detail-headers')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy headers')">
               <Check v-if="copiedKey === 'detail-headers'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -550,7 +551,7 @@ const { copiedKey, copy } = useCopyToClipboard()
         <!-- Query Parameters -->
         <div v-if="queryParams.length">
           <div class="flex items-center justify-between mb-1">
-            <div class="text-sm font-medium">Query Parameters</div>
+            <div class="text-sm font-medium">{{ __('Query Parameters') }}</div>
           </div>
           <div class="rounded-md border divide-y text-xs">
             <div
@@ -576,16 +577,15 @@ const { copiedKey, copy } = useCopyToClipboard()
                 class="h-3.5 w-3.5 transition-transform"
                 :class="{ 'rotate-180': !payloadCollapsed }"
               />
-              {{ selectedLog.mapping_applied ? 'Transformed Payload (Sent)' : 'Request Payload' }}
+              {{ selectedLog.mapping_applied ? __('Transformed Payload (Sent)') : __('Request Payload') }}
             </button>
-            <button @click="copy(formatJson(selectedLog.request_payload), 'detail-request')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy payload">
+            <button @click="copy(formatJson(selectedLog.request_payload), 'detail-request')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy payload')">
               <Check v-if="copiedKey === 'detail-request'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           </div>
           <template v-if="!payloadCollapsed">
-            <div v-if="isNoBodyMethod" class="text-xs text-muted-foreground p-3 bg-muted/50 rounded-md border border-dashed mb-2">
-              Not sent as request body for GET / DELETE. Without URL parameters configured, the full payload is appended as <code class="font-mono">?payload=&lt;json&gt;</code>.
+            <div v-if="isNoBodyMethod" class="text-xs text-muted-foreground p-3 bg-muted/50 rounded-md border border-dashed mb-2" v-html="sprintf(__('Not sent as request body for GET / DELETE. Without URL parameters configured, the full payload is appended as %1$s?payload=&lt;json&gt;%2$s.'), '<code class=&quot;font-mono&quot;>', '</code>')">
             </div>
             <pre class="text-xs p-3 bg-muted rounded-md overflow-x-auto">{{ formatJson(selectedLog.request_payload) }}</pre>
           </template>
@@ -603,9 +603,9 @@ const { copiedKey, copy } = useCopyToClipboard()
                 class="h-3.5 w-3.5 transition-transform"
                 :class="{ 'rotate-180': !originalPayloadCollapsed }"
               />
-              Original Payload
+              {{ __('Original Payload') }}
             </button>
-            <button @click="copy(formatJson(selectedLog.original_payload), 'detail-original')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy original payload">
+            <button @click="copy(formatJson(selectedLog.original_payload), 'detail-original')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy original payload')">
               <Check v-if="copiedKey === 'detail-original'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -617,10 +617,10 @@ const { copiedKey, copy } = useCopyToClipboard()
         <div v-if="lastAttempt?.response_body ?? selectedLog.response_body">
           <div class="flex items-center justify-between mb-1">
             <div class="text-sm font-medium">
-              Response Body
-              <span v-if="lastAttempt?.response_body" class="text-muted-foreground font-normal">(last attempt)</span>
+              {{ __('Response Body') }}
+              <span v-if="lastAttempt?.response_body" class="text-muted-foreground font-normal">{{ __('(last attempt)') }}</span>
             </div>
-            <button @click="copy(formatJson(lastAttempt?.response_body ?? selectedLog.response_body), 'detail-response')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" title="Copy response body">
+            <button @click="copy(formatJson(lastAttempt?.response_body ?? selectedLog.response_body), 'detail-response')" class="shrink-0 rounded p-1 hover:bg-background transition-colors" :title="__('Copy response body')">
               <Check v-if="copiedKey === 'detail-response'" class="h-3.5 w-3.5 text-green-500" />
               <Copy v-else class="h-3.5 w-3.5 text-muted-foreground" />
             </button>
@@ -631,21 +631,21 @@ const { copiedKey, copy } = useCopyToClipboard()
         <!-- Meta -->
         <div class="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <div class="font-medium">HTTP Code</div>
+            <div class="font-medium">{{ __('HTTP Code') }}</div>
             <div class="text-muted-foreground">
-              {{ (lastAttempt?.http_code ?? selectedLog.http_code) || 'N/A' }}
-              <span v-if="lastAttempt?.http_code" class="text-xs text-muted-foreground/60">(last attempt)</span>
+              {{ (lastAttempt?.http_code ?? selectedLog.http_code) || __('N/A') }}
+              <span v-if="lastAttempt?.http_code" class="text-xs text-muted-foreground/60">{{ __('(last attempt)') }}</span>
             </div>
           </div>
           <div>
-            <div class="font-medium">Duration</div>
+            <div class="font-medium">{{ __('Duration') }}</div>
             <div class="text-muted-foreground">
-              {{ (lastAttempt?.duration_ms ?? selectedLog.duration_ms) != null ? `${lastAttempt?.duration_ms ?? selectedLog.duration_ms}ms` : 'N/A' }}
-              <span v-if="lastAttempt?.duration_ms != null" class="text-xs text-muted-foreground/60">(last attempt)</span>
+              {{ (lastAttempt?.duration_ms ?? selectedLog.duration_ms) != null ? `${lastAttempt?.duration_ms ?? selectedLog.duration_ms}ms` : __('N/A') }}
+              <span v-if="lastAttempt?.duration_ms != null" class="text-xs text-muted-foreground/60">{{ __('(last attempt)') }}</span>
             </div>
           </div>
           <div>
-            <div class="font-medium">Trigger</div>
+            <div class="font-medium">{{ __('Trigger') }}</div>
             <div class="text-muted-foreground break-all">
               <template v-if="triggerLabel(selectedLog.trigger_name)">
                 <span class="inline-flex items-center gap-1.5">
@@ -655,7 +655,7 @@ const { copiedKey, copy } = useCopyToClipboard()
                     <span>← {{ triggerLabel(selectedLog.trigger_name).sourceName }}</span>
                   </template>
                   <span v-else class="italic">
-                    Chain link #{{ triggerLabel(selectedLog.trigger_name).linkId }} (deleted)
+                    {{ sprintf(__('Chain link #%s (deleted)'), triggerLabel(selectedLog.trigger_name).linkId) }}
                   </span>
                 </span>
                 <div class="text-xs font-mono text-muted-foreground/60 mt-0.5">{{ selectedLog.trigger_name }}</div>
@@ -664,11 +664,11 @@ const { copiedKey, copy } = useCopyToClipboard()
             </div>
           </div>
           <div>
-            <div class="font-medium">Created</div>
+            <div class="font-medium">{{ __('Created') }}</div>
             <div class="text-muted-foreground break-all">{{ formatDate(selectedLog.created_at) }}</div>
           </div>
           <div v-if="selectedLog.target_url">
-            <div class="font-medium">Target URL</div>
+            <div class="font-medium">{{ __('Target URL') }}</div>
             <div class="text-muted-foreground break-all text-xs">{{ selectedLog.target_url }}</div>
           </div>
         </div>
@@ -682,7 +682,7 @@ const { copiedKey, copy } = useCopyToClipboard()
             @click="() => { handleRetry(selectedLog); closeDetails() }"
           >
             <RotateCcw class="h-4 w-4 mr-1.5" />
-            Retry
+            {{ __('Retry') }}
           </Button>
           <Button
             v-if="isReplayable(selectedLog?.status)"
@@ -690,9 +690,9 @@ const { copiedKey, copy } = useCopyToClipboard()
             class="text-green-600 border-green-600 hover:bg-green-50"
             @click="() => { emit('replay', selectedLog); closeDetails() }"
           >
-            <Play class="h-4 w-4 mr-1.5" /> Replay
+            <Play class="h-4 w-4 mr-1.5" /> {{ __('Replay') }}
           </Button>
-          <Button variant="outline" @click="closeDetails">Close</Button>
+          <Button variant="outline" @click="closeDetails">{{ __('Close') }}</Button>
         </div>
       </template>
     </Dialog>

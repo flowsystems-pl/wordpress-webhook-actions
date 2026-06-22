@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-vue-next'
 import { Button, Card, Alert, Dialog } from '@/components/ui'
 import LogsTable from '@/components/LogsTable.vue'
 import api from '@/lib/api'
+import { __, sprintf } from '@/i18n'
 
 const router = useRouter()
 const route = useRoute()
@@ -131,10 +132,10 @@ onMounted(() => {
     <div class="mb-6">
       <Button variant="ghost" size="sm" class="mb-2" @click="router.push('/webhooks')">
         <ArrowLeft class="mr-2 h-4 w-4" />
-        Back to webhooks
+        {{ __('Back to webhooks') }}
       </Button>
       <h2 class="text-xl font-semibold">
-        Logs: {{ webhook?.name || `Webhook #${webhookId}` }}
+        {{ sprintf(__('Logs: %s'), webhook?.name || sprintf(__('Webhook #%s'), webhookId)) }}
       </h2>
       <p v-if="webhook" class="text-muted-foreground font-mono text-sm truncate">
         {{ webhook.endpoint_url }}
@@ -145,19 +146,19 @@ onMounted(() => {
     <div v-if="stats" class="grid grid-cols-4 gap-4 mb-6">
       <Card class="p-4">
         <div class="text-2xl font-bold">{{ stats.total }}</div>
-        <div class="text-sm text-muted-foreground">Total (7 days)</div>
+        <div class="text-sm text-muted-foreground">{{ __('Total (7 days)') }}</div>
       </Card>
       <Card class="p-4">
         <div class="text-2xl font-bold text-green-600">{{ stats.success }}</div>
-        <div class="text-sm text-muted-foreground">Success</div>
+        <div class="text-sm text-muted-foreground">{{ __('Success') }}</div>
       </Card>
       <Card class="p-4">
         <div class="text-2xl font-bold text-red-600">{{ stats.error + (stats.permanently_failed ?? 0) }}</div>
-        <div class="text-sm text-muted-foreground">Errors</div>
+        <div class="text-sm text-muted-foreground">{{ __('Errors') }}</div>
       </Card>
       <Card class="p-4">
         <div class="text-2xl font-bold text-yellow-600">{{ stats.retry }}</div>
-        <div class="text-sm text-muted-foreground">Retries</div>
+        <div class="text-sm text-muted-foreground">{{ __('Retries') }}</div>
       </Card>
     </div>
 
@@ -169,15 +170,15 @@ onMounted(() => {
     <!-- Replay success dialog -->
     <Dialog
       :open="showReplaySuccess"
-      title="Event Replayed"
-      description="A new delivery attempt has been queued. The result will appear in this log's attempt history on the next cron run."
+      :title="__('Event Replayed')"
+      :description="__('A new delivery attempt has been queued. The result will appear in this log\'s attempt history on the next cron run.')"
       @close="showReplaySuccess = false"
     >
       <template #footer>
         <div class="flex gap-2">
-          <Button @click="executeReplayedJob">Execute Now</Button>
-          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">Go to Queue</Button>
-          <Button variant="outline" @click="showReplaySuccess = false">Close</Button>
+          <Button @click="executeReplayedJob">{{ __('Execute Now') }}</Button>
+          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">{{ __('Go to Queue') }}</Button>
+          <Button variant="outline" @click="showReplaySuccess = false">{{ __('Close') }}</Button>
         </div>
       </template>
     </Dialog>

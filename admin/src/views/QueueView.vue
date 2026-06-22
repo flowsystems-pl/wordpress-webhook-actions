@@ -8,6 +8,7 @@ import { useHealthStats } from '@/composables/useHealthStats'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
 import { useChains } from '@/composables/useChains'
 import { useChainTriggerLabel } from '@/composables/useChainTriggerLabel'
+import { __, sprintf } from '@/i18n'
 
 const { fetchStats: refreshHealthStats } = useHealthStats()
 const { copiedKey, copy } = useCopyToClipboard()
@@ -186,17 +187,17 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <h2 class="text-xl font-semibold">Queue</h2>
-        <p class="text-muted-foreground text-sm">Database-backed webhook job queue</p>
+        <h2 class="text-xl font-semibold">{{ __('Queue') }}</h2>
+        <p class="text-muted-foreground text-sm">{{ __('Database-backed webhook job queue') }}</p>
       </div>
       <div class="flex gap-2">
         <Button variant="default" @click="processQueue" :loading="processing" class="text-xs sm:text-sm">
           <Play class="w-4 h-4 mr-1 sm:mr-2" />
-          Process Now
+          {{ __('Process Now') }}
         </Button>
         <Button variant="outline" @click="loadQueue" :loading="loading" class="text-xs sm:text-sm">
           <RefreshCw class="w-4 h-4 mr-1 sm:mr-2" />
-          Refresh
+          {{ __('Refresh') }}
         </Button>
       </div>
     </div>
@@ -209,23 +210,23 @@ onMounted(() => {
       <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4">
         <Card class="p-2 sm:p-4">
           <div class="text-lg sm:text-2xl font-bold tabular-nums">{{ stats.total }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Total</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">{{ __('Total') }}</div>
         </Card>
         <Card class="p-2 sm:p-4">
           <div class="text-lg sm:text-2xl font-bold tabular-nums text-blue-600">{{ stats.pending }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Pending</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">{{ __('Pending') }}</div>
         </Card>
         <Card class="p-2 sm:p-4">
           <div class="text-lg sm:text-2xl font-bold tabular-nums text-yellow-600">{{ stats.processing }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Processing</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">{{ __('Processing') }}</div>
         </Card>
         <Card class="p-2 sm:p-4">
           <div class="text-lg sm:text-2xl font-bold tabular-nums text-orange-600">{{ stats.due_now }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Due Now</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">{{ __('Due Now') }}</div>
         </Card>
         <Card class="p-2 sm:p-4">
           <div class="text-lg sm:text-2xl font-bold tabular-nums text-red-600">{{ stats.permanently_failed }}</div>
-          <div class="text-xs sm:text-sm text-muted-foreground">Perm. Failed</div>
+          <div class="text-xs sm:text-sm text-muted-foreground">{{ __('Perm. Failed') }}</div>
         </Card>
       </div>
     </div>
@@ -234,10 +235,10 @@ onMounted(() => {
     <div class="flex flex-wrap items-center gap-3 mb-4">
       <Select v-if="chains.length" v-model="chainFilterSelect">
         <SelectTrigger class="w-full sm:w-56">
-          <SelectValue placeholder="All chains" />
+          <SelectValue :placeholder="__('All chains')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All chains</SelectItem>
+          <SelectItem value="all">{{ __('All chains') }}</SelectItem>
           <SelectItem v-for="c in chains" :key="c.id" :value="String(c.id)">
             {{ c.name }}
           </SelectItem>
@@ -245,27 +246,27 @@ onMounted(() => {
       </Select>
       <Input
         v-model="webhookUuidFilter"
-        placeholder="Filter by X-Webhook-ID..."
+        :placeholder="__('Filter by X-Webhook-ID…')"
         class="w-full sm:w-72"
       />
       <Input
         v-model="eventUuidFilter"
-        placeholder="Filter by event UUID..."
+        :placeholder="__('Filter by event UUID…')"
         class="w-full sm:w-72"
       />
       <Input
         v-model="targetUrlFilter"
-        placeholder="Filter by target URL..."
+        :placeholder="__('Filter by target URL…')"
         class="w-full sm:w-64"
       />
       <DateTimePicker
         v-model="dateFromFilter"
-        placeholder="From date & time"
+        :placeholder="__('From date & time')"
         class="w-full sm:w-52"
       />
       <DateTimePicker
         v-model="dateToFilter"
-        placeholder="To date & time"
+        :placeholder="__('To date & time')"
         class="w-full sm:w-52"
       />
       <Loader2 v-if="loading" class="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
@@ -279,15 +280,15 @@ onMounted(() => {
     <!-- Initial loading (no data yet) -->
     <Card v-if="loading && items.length === 0" class="p-8 text-center">
       <RefreshCw class="w-8 h-8 mx-auto text-muted-foreground mb-4 animate-spin" />
-      <p class="text-muted-foreground">Loading queue...</p>
+      <p class="text-muted-foreground">{{ __('Loading queue…') }}</p>
     </Card>
 
     <!-- Empty state -->
     <Card v-else-if="!loading && items.length === 0" class="p-8 text-center">
       <Clock class="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-      <h3 class="text-lg font-medium mb-2">No queued jobs</h3>
+      <h3 class="text-lg font-medium mb-2">{{ __('No queued jobs') }}</h3>
       <p class="text-muted-foreground">
-        When webhooks are triggered, jobs will appear here for processing.
+        {{ __('When webhooks are triggered, jobs will appear here for processing.') }}
       </p>
     </Card>
 
@@ -301,22 +302,22 @@ onMounted(() => {
         <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div class="flex-1 min-w-0 max-w-full">
             <div class="flex flex-wrap items-center gap-2 mb-2">
-              <span class="font-medium truncate">{{ item.webhook_name || 'Unknown Webhook' }}</span>
+              <span class="font-medium truncate">{{ item.webhook_name || __('Unknown Webhook') }}</span>
               <Badge :variant="getStatusBadgeVariant(item.status)">{{ item.status }}</Badge>
               <Badge v-if="item.http_method" variant="outline" class="text-xs font-mono">{{ item.http_method }}</Badge>
               <Badge v-if="item.attempts > 0" variant="outline">
-                Attempt {{ item.attempts + 1 }}/{{ item.max_attempts }}
+                {{ sprintf(__('Attempt %1$d/%2$d'), item.attempts + 1, item.max_attempts) }}
               </Badge>
-              <Badge v-if="item.is_due && item.status === 'pending'" variant="warning">Due</Badge>
+              <Badge v-if="item.is_due && item.status === 'pending'" variant="warning">{{ __('Due') }}</Badge>
             </div>
 
             <div class="text-sm text-muted-foreground space-y-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-medium">Trigger:</span>
+                <span class="font-medium">{{ __('Trigger:') }}</span>
                 <template v-if="triggerLabel(item.trigger_name)">
                   <span
                     class="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-xs"
-                    :title="`Chain link #${triggerLabel(item.trigger_name).linkId} — ${item.trigger_name}`"
+                    :title="sprintf(__('Chain link #%1$s — %2$s'), triggerLabel(item.trigger_name).linkId, item.trigger_name)"
                   >
                     <Network class="h-3 w-3 text-accent shrink-0" />
                     <template v-if="!triggerLabel(item.trigger_name).missing">
@@ -324,28 +325,28 @@ onMounted(() => {
                       <span class="text-muted-foreground">← {{ triggerLabel(item.trigger_name).sourceName }}</span>
                     </template>
                     <span v-else class="text-muted-foreground italic">
-                      Chain link #{{ triggerLabel(item.trigger_name).linkId }} (deleted)
+                      {{ sprintf(__('Chain link #%s (deleted)'), triggerLabel(item.trigger_name).linkId) }}
                     </span>
                   </span>
                 </template>
                 <code v-else class="px-1.5 py-0.5 bg-muted rounded text-xs">{{ item.trigger_name }}</code>
-                <button @click="copy(item.trigger_name, `q-trigger-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy trigger name">
+                <button @click="copy(item.trigger_name, `q-trigger-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" :title="__('Copy trigger name')">
                   <Check v-if="copiedKey === `q-trigger-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
               <div v-if="item.webhook_uuid" class="flex items-center gap-2">
-                <span class="font-medium">X-Webhook-Id:</span>
+                <span class="font-medium">{{ __('X-Webhook-Id:') }}</span>
                 <Badge variant="secondary" class="font-mono rounded text-xs tracking-tight">{{ item.webhook_uuid }}</Badge>
-                <button @click="copy(item.webhook_uuid, `q-whuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy X-Webhook-Id">
+                <button @click="copy(item.webhook_uuid, `q-whuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" :title="__('Copy X-Webhook-Id')">
                   <Check v-if="copiedKey === `q-whuuid-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
               <div v-if="item.event_uuid" class="flex items-center gap-2">
-                <span class="font-medium">Event UUID:</span>
+                <span class="font-medium">{{ __('Event UUID:') }}</span>
                 <Badge variant="secondary" class="font-mono rounded text-xs tracking-tight">{{ item.event_uuid }}</Badge>
-                <button @click="copy(item.event_uuid, `q-evuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy Event UUID">
+                <button @click="copy(item.event_uuid, `q-evuuid-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" :title="__('Copy Event UUID')">
                   <Check v-if="copiedKey === `q-evuuid-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />
                 </button>
@@ -354,21 +355,21 @@ onMounted(() => {
                 <Clock class="w-4 h-4" />
                 <span>{{ item.scheduled_at_human }}</span>
                 <span class="text-muted-foreground/60">({{ item.scheduled_at }})</span>
-                <button @click="copy(item.scheduled_at, `q-time-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy scheduled time">
+                <button @click="copy(item.scheduled_at, `q-time-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" :title="__('Copy scheduled time')">
                   <Check v-if="copiedKey === `q-time-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
               <div v-if="item.webhook_url" class="flex items-center gap-2 min-w-0">
-                <span class="font-medium shrink-0">URL:</span>
+                <span class="font-medium shrink-0">{{ __('URL:') }}</span>
                 <span class="ml-1 truncate">{{ item.webhook_url }}</span>
-                <button @click="copy(item.webhook_url, `q-url-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" title="Copy URL">
+                <button @click="copy(item.webhook_url, `q-url-${item.id}`)" class="shrink-0 rounded p-0.5 hover:bg-muted transition-colors" :title="__('Copy URL')">
                   <Check v-if="copiedKey === `q-url-${item.id}`" class="h-3 w-3 text-green-500" />
                   <Copy v-else class="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
               <div v-if="item.locked_by" class="text-xs text-muted-foreground">
-                Locked by: {{ item.locked_by }}
+                {{ sprintf(__('Locked by: %s'), item.locked_by) }}
               </div>
             </div>
           </div>
@@ -382,10 +383,10 @@ onMounted(() => {
               @click="executeItem(item)"
               :loading="executingId === item.id"
               :disabled="deletingId === item.id || retryingId === item.id"
-              title="Execute now"
+              :title="__('Execute now')"
             >
               <Play class="w-4 h-4 mr-1" />
-              Execute
+              {{ __('Execute') }}
             </Button>
 
             <!-- Retry button for failed jobs -->
@@ -396,10 +397,10 @@ onMounted(() => {
               @click="retryItem(item)"
               :loading="retryingId === item.id"
               :disabled="executingId === item.id || deletingId === item.id"
-              title="Reset and retry"
+              :title="__('Reset and retry')"
             >
               <RotateCcw class="w-4 h-4 mr-1" />
-              Retry
+              {{ __('Retry') }}
             </Button>
 
             <!-- Delete button -->
@@ -410,7 +411,7 @@ onMounted(() => {
               @click="deleteItem(item)"
               :loading="deletingId === item.id"
               :disabled="executingId === item.id || retryingId === item.id"
-              title="Remove from queue"
+              :title="__('Remove from queue')"
               class="text-destructive hover:text-destructive"
             >
               <Trash2 class="w-4 h-4" />
@@ -424,7 +425,7 @@ onMounted(() => {
     <!-- Pagination -->
     <div v-if="total > perPage" class="flex items-center justify-between mt-4">
       <div class="text-sm text-muted-foreground">
-        Showing {{ (page - 1) * perPage + 1 }} to {{ Math.min(page * perPage, total) }} of {{ total }}
+        {{ sprintf(__('Showing %1$d to %2$d of %3$d'), (page - 1) * perPage + 1, Math.min(page * perPage, total), total) }}
       </div>
       <div class="flex gap-2">
         <Button
@@ -448,8 +449,7 @@ onMounted(() => {
 
     <!-- Info -->
     <Alert v-if="items.length > 0" class="mt-6">
-      Jobs are processed every minute by WP-Cron. Failed jobs are automatically retried with exponential backoff.
-      Use "Process Now" to manually trigger batch processing.
+      {{ __('Jobs are processed every minute by WP-Cron. Failed jobs are automatically retried with exponential backoff. Use “Process Now” to manually trigger batch processing.') }}
     </Alert>
   </div>
 </template>

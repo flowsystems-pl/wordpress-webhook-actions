@@ -10,6 +10,7 @@ import api from '@/lib/api';
 import { usePro } from '@/composables/usePro';
 import { useSyncWarning } from '@/composables/useSyncWarning';
 import { useChains, useWebhookChainInvolvement } from '@/composables/useChains';
+import { __, _n, sprintf } from '@/i18n';
 
 const { proActive } = usePro();
 const { dontShowAgain, isWarningDismissed, applyDismiss, resetDontShowAgain } = useSyncWarning();
@@ -24,17 +25,17 @@ const ordinal = (n) => {
 }
 
 const formatDelay = (seconds) => {
-  if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`
+  if (seconds < 60) return sprintf(_n('%d second', '%d seconds', seconds), seconds)
   if (seconds < 3600) {
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
-    const mStr = `${m} minute${m !== 1 ? 's' : ''}`
-    return s > 0 ? `${mStr} ${s}s` : mStr
+    const mStr = sprintf(_n('%d minute', '%d minutes', m), m)
+    return s > 0 ? sprintf(__('%1$s %2$ds'), mStr, s) : mStr
   }
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
-  const hStr = `${h} hour${h !== 1 ? 's' : ''}`
-  return m > 0 ? `${hStr} ${m} min` : hStr
+  const hStr = sprintf(_n('%d hour', '%d hours', h), h)
+  return m > 0 ? sprintf(__('%1$s %2$d min'), hStr, m) : hStr
 }
 
 // ── props / emits / state ─────────────────────────────────────────────────────
@@ -111,18 +112,18 @@ const vaultSaving = ref(false);
 
 const openSaveToVault = () => {
   vaultSaveError.value = null;
-  vaultSaveName.value = (form.value.name ? `${form.value.name} auth` : 'Webhook auth');
+  vaultSaveName.value = (form.value.name ? sprintf(__('%s auth'), form.value.name) : __('Webhook auth'));
   showSaveToVaultDialog.value = true;
 };
 
 const confirmSaveToVault = async () => {
   const raw = (form.value.auth_header || '').trim();
   if (!raw) {
-    vaultSaveError.value = 'Enter an Authorization header value first.';
+    vaultSaveError.value = __('Enter an Authorization header value first.');
     return;
   }
   if (!vaultSaveName.value.trim()) {
-    vaultSaveError.value = 'Give this credential a name.';
+    vaultSaveError.value = __('Give this credential a name.');
     return;
   }
 
@@ -322,9 +323,9 @@ const backoffPreview = computed(() => {
   const peak = Math.max(...delays, 1)
   return delays.map((d, i) => ({
     delay: d,
-    label: `Wait ${formatDelay(d)}`,
+    label: sprintf(__('Wait %s'), formatDelay(d)),
     height: Math.max(4, Math.round((d / peak) * 56)),
-    retryLabel: `${ordinal(i + 1)} Retry`,
+    retryLabel: sprintf(__('%s Retry'), ordinal(i + 1)),
   }))
 })
 
@@ -334,28 +335,28 @@ const validate = () => {
   errors.value = {};
 
   if (!form.value.name.trim()) {
-    errors.value.name = 'Name is required';
+    errors.value.name = __('Name is required');
   }
 
   if (!form.value.endpoint_url.trim()) {
-    errors.value.endpoint_url = 'Endpoint URL is required';
+    errors.value.endpoint_url = __('Endpoint URL is required');
   } else {
     try {
       const urlForValidation = form.value.endpoint_url.replace(/\{\{[^}]+\}\}/g, '0');
       const url = new URL(urlForValidation);
       if (!['http:', 'https:'].includes(url.protocol)) {
-        errors.value.endpoint_url = 'URL must be HTTP or HTTPS';
+        errors.value.endpoint_url = __('URL must be HTTP or HTTPS');
       }
     } catch {
-      errors.value.endpoint_url = 'Invalid URL format';
+      errors.value.endpoint_url = __('Invalid URL format');
     }
   }
 
   if (useChainTrigger.value) {
     if (chainConfig.value.chain_id == null && !chainConfig.value.new_chain_name?.trim()) {
-      errors.value.triggers = 'Select an existing chain or enter a new chain name';
+      errors.value.triggers = __('Select an existing chain or enter a new chain name');
     } else if ((chainConfig.value.source_webhook_ids || []).length === 0) {
-      errors.value.triggers = 'Select at least one upstream webhook to trigger this one';
+      errors.value.triggers = __('Select at least one upstream webhook to trigger this one');
     }
   }
   // Triggerless webhooks are allowed — they simply show as orphans in the
@@ -467,7 +468,7 @@ const handleSubmit = () => {
     >
       <div class="flex items-center gap-1.5 text-sm font-medium">
         <Network class="h-4 w-4 text-accent" />
-        <span>Part of {{ chainInvolvement.length === 1 ? 'chain' : 'chains' }}:</span>
+        <span>{{ _n('Part of chain:', 'Part of chains:', chainInvolvement.length) }}</span>
         <span v-for="(c, idx) in chainInvolvement" :key="c.id" class="inline-flex items-center gap-1">
           <Badge variant="secondary">{{ c.name }}</Badge>
           <span v-if="idx < chainInvolvement.length - 1" class="text-muted-foreground">·</span>
@@ -477,11 +478,11 @@ const handleSubmit = () => {
 
     <!-- Name -->
     <div class="space-y-2">
-      <Label for="name">Name</Label>
+      <Label for="name">{{ __('Name') }}</Label>
       <Input
         id="name"
         v-model="form.name"
-        placeholder="My Webhook"
+        :placeholder="__('My Webhook')"
         :class="{ 'border-destructive': errors.name }"
       />
       <p v-if="errors.name" class="text-sm text-destructive">{{ errors.name }}</p>
@@ -489,7 +490,7 @@ const handleSubmit = () => {
 
     <!-- Endpoint URL -->
     <div class="space-y-2">
-      <Label for="endpoint_url">Endpoint URL</Label>
+      <Label for="endpoint_url">{{ __('Endpoint URL') }}</Label>
       <Input
         id="endpoint_url"
         v-model="form.endpoint_url"
@@ -500,23 +501,21 @@ const handleSubmit = () => {
       <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
       <div class="flex items-start gap-2">
         <p class="text-sm text-muted-foreground">
-          The URL where webhook payloads will be sent. Supports
-          <code class="font-mono text-xs" v-pre>{{ field.path }}</code>
-          templates — resolved against the final payload, after code glue applied.
+          <span v-html="sprintf(__('The URL where webhook payloads will be sent. Supports %1$s{{ field.path }}%2$s templates — resolved against the final payload, after code glue applied.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></span>
         </p>
         <UpgradeBadge v-if="!proActive" class="shrink-0 mt-0.5" />
       </div>
       <template v-if="urlHasTemplates">
         <div class="rounded-md bg-muted px-3 py-2 font-mono text-xs break-all text-muted-foreground">
           <template v-if="urlTemplatePreview">{{ urlTemplatePreview }}</template>
-          <span v-else class="italic">No captured payload — trigger the webhook once to preview the resolved URL.</span>
+          <span v-else class="italic">{{ __('No captured payload — trigger the webhook once to preview the resolved URL.') }}</span>
         </div>
       </template>
     </div>
 
     <!-- HTTP Method -->
     <div class="space-y-2 border-t pt-5">
-      <Label>HTTP Method</Label>
+      <Label>{{ __('HTTP Method') }}</Label>
       <Select v-model="form.http_method">
         <SelectTrigger class="w-40">
           <SelectValue />
@@ -533,7 +532,7 @@ const handleSubmit = () => {
 
     <!-- Authorization -->
     <div class="space-y-3 border-t pt-5">
-      <Label>Authorization (optional)</Label>
+      <Label>{{ __('Authorization (optional)') }}</Label>
 
       <div class="flex gap-2">
         <Button
@@ -543,7 +542,7 @@ const handleSubmit = () => {
           @click="setAuthMode('vault')"
         >
           <ShieldCheck class="mr-1.5 h-4 w-4" />
-          Saved credential
+          {{ __('Saved credential') }}
         </Button>
         <Button
           type="button"
@@ -551,7 +550,7 @@ const handleSubmit = () => {
           :variant="authMode === 'manual' ? 'default' : 'outline'"
           @click="setAuthMode('manual')"
         >
-          Manual header
+          {{ __('Manual header') }}
         </Button>
       </div>
 
@@ -560,7 +559,7 @@ const handleSubmit = () => {
         <div v-if="credentials.length > 0" class="space-y-2">
           <Select v-model="selectedCredentialId">
             <SelectTrigger>
-              <SelectValue placeholder="Select a saved credential" />
+              <SelectValue :placeholder="__('Select a saved credential')" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem v-for="cred in credentials" :key="cred.id" :value="String(cred.id)">
@@ -572,15 +571,14 @@ const handleSubmit = () => {
             </SelectContent>
           </Select>
           <p class="text-sm text-muted-foreground">
-            The secret is resolved securely at delivery time and never exposed.
-            Manage credentials in the
-            <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>.
+            {{ __('The secret is resolved securely at delivery time and never exposed. Manage credentials in the') }}
+            <RouterLink to="/vault" class="underline">{{ __('Credentials Vault') }}</RouterLink>.
           </p>
         </div>
         <p v-else class="text-sm text-muted-foreground">
-          No saved credentials yet. Add one in the
-          <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>,
-          then select it here.
+          {{ __('No saved credentials yet. Add one in the') }}
+          <RouterLink to="/vault" class="underline">{{ __('Credentials Vault') }}</RouterLink>,
+          {{ __('then select it here.') }}
         </p>
       </template>
 
@@ -598,18 +596,16 @@ const handleSubmit = () => {
             type="button"
             variant="outline"
             @click="openSaveToVault"
-            title="Move this value into the encrypted Credentials Vault"
+            :title="__('Move this value into the encrypted Credentials Vault')"
           >
             <ShieldCheck class="mr-1.5 h-4 w-4" />
-            Save to vault
+            {{ __('Save to vault') }}
           </Button>
         </div>
         <p class="text-sm text-muted-foreground break-all md:break-normal">
-          Value for the Authorization header (e.g., "Bearer your_token_goes_here"
-          or "Basic your_encoded_base64(username:password)"). For better security,
-          store secrets in the
-          <RouterLink to="/vault" class="underline">Credentials Vault</RouterLink>
-          instead.
+          {{ __('Value for the Authorization header (e.g., "Bearer your_token_goes_here" or "Basic your_encoded_base64(username:password)"). For better security, store secrets in the') }}
+          <RouterLink to="/vault" class="underline">{{ __('Credentials Vault') }}</RouterLink>
+          {{ __('instead.') }}
         </p>
       </template>
     </div>
@@ -617,49 +613,49 @@ const handleSubmit = () => {
     <!-- Save manual header to vault dialog -->
     <Dialog
       :open="showSaveToVaultDialog"
-      title="Save credential to vault"
-      description="This moves the Authorization value into the encrypted vault and references it by name. The webhook keeps working unchanged."
+      :title="__('Save credential to vault')"
+      :description="__('This moves the Authorization value into the encrypted vault and references it by name. The webhook keeps working unchanged.')"
       @close="showSaveToVaultDialog = false"
     >
       <div class="space-y-4">
         <div v-if="vaultSaveError" class="text-sm text-destructive">{{ vaultSaveError }}</div>
         <div class="space-y-1.5">
-          <Label for="vault-save-name">Credential name</Label>
-          <Input id="vault-save-name" v-model="vaultSaveName" placeholder="e.g. HubSpot PAT" @keyup.enter="confirmSaveToVault" />
+          <Label for="vault-save-name">{{ __('Credential name') }}</Label>
+          <Input id="vault-save-name" v-model="vaultSaveName" :placeholder="__('e.g. HubSpot PAT')" @keyup.enter="confirmSaveToVault" />
         </div>
         <p class="text-xs text-muted-foreground">
-          After saving, the value is encrypted at rest and never shown again.
+          {{ __('After saving, the value is encrypted at rest and never shown again.') }}
         </p>
       </div>
       <template #footer>
-        <Button variant="outline" @click="showSaveToVaultDialog = false" :disabled="vaultSaving">Cancel</Button>
+        <Button variant="outline" @click="showSaveToVaultDialog = false" :disabled="vaultSaving">{{ __('Cancel') }}</Button>
         <Button @click="confirmSaveToVault" :disabled="vaultSaving">
-          {{ vaultSaving ? 'Saving…' : 'Save & use credential' }}
+          {{ vaultSaving ? __('Saving…') : __('Save & use credential') }}
         </Button>
       </template>
     </Dialog>
 
     <!-- Custom Request Headers -->
     <div class="space-y-2 border-t pt-5">
-      <Label>Custom Request Headers</Label>
-      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" :gluePayload="gluePayload" keyPlaceholder="Header name" />
+      <Label>{{ __('Custom Request Headers') }}</Label>
+      <KeyValueEditor v-model="form.custom_headers" :examplePayload="examplePayload" :gluePayload="gluePayload" :keyPlaceholder="__('Header name')" />
       <p class="text-sm text-muted-foreground">
-        Values support dot-notation paths into the outgoing payload (e.g. <code class="text-xs">event.id</code>) or static strings.
+        <span v-html="sprintf(__('Values support dot-notation paths into the outgoing payload (e.g. %1$sevent.id%2$s) or static strings.'), '<code class=&quot;text-xs&quot;>', '</code>')"></span>
       </p>
     </div>
 
     <!-- URL Query Parameters -->
     <div class="space-y-2 border-t pt-5">
       <Label>
-        {{ ['GET', 'DELETE'].includes(form.http_method) ? 'URL Query Parameters' : 'Additional URL Query Parameters' }}
+        {{ ['GET', 'DELETE'].includes(form.http_method) ? __('URL Query Parameters') : __('Additional URL Query Parameters') }}
       </Label>
-      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" :gluePayload="gluePayload" keyPlaceholder="Param name" />
+      <KeyValueEditor v-model="form.url_params" :examplePayload="examplePayload" :gluePayload="gluePayload" :keyPlaceholder="__('Param name')" />
       <p class="text-sm text-muted-foreground">
         <template v-if="['GET', 'DELETE'].includes(form.http_method)">
-          These are the primary way to send data for {{ form.http_method }} requests. If none are set, the mapped payload is sent as <code class="text-xs">?payload=&lt;json&gt;</code>.
+          <span v-html="sprintf(__('These are the primary way to send data for %1$s requests. If none are set, the mapped payload is sent as %2$s?payload=&lt;json&gt;%3$s.'), form.http_method, '<code class=&quot;text-xs&quot;>', '</code>')"></span>
         </template>
         <template v-else>
-          Appended to the URL alongside the JSON body. Values support dot-notation paths or static strings.
+          {{ __('Appended to the URL alongside the JSON body. Values support dot-notation paths or static strings.') }}
         </template>
       </p>
       <div v-if="urlParamsPreview" class="rounded-md bg-muted px-3 py-2 font-mono text-xs break-all text-muted-foreground">
@@ -670,7 +666,7 @@ const handleSubmit = () => {
     <!-- Triggers -->
     <div class="space-y-3 border-t pt-5">
       <div class="flex items-center justify-between gap-2">
-        <Label>Triggers</Label>
+        <Label>{{ __('Triggers') }}</Label>
         <div class="flex items-center gap-2">
           <Switch
             :model-value="useChainTrigger"
@@ -679,7 +675,7 @@ const handleSubmit = () => {
           <Label class="font-normal text-sm flex">
             <span class="inline-flex items-center gap-1">
               <Link2 class="h-3.5 w-3.5" />
-              Use other Webhooks as triggers
+              {{ __('Use other Webhooks as triggers') }}
             </span>
           </Label>
         </div>
@@ -687,7 +683,7 @@ const handleSubmit = () => {
 
       <template v-if="!useChainTrigger">
         <TriggerSelect v-model="form.triggers" />
-        <p class="text-sm text-muted-foreground">WordPress actions that will trigger this webhook</p>
+        <p class="text-sm text-muted-foreground">{{ __('WordPress actions that will trigger this webhook') }}</p>
       </template>
       <template v-else>
         <ChainPicker
@@ -702,8 +698,8 @@ const handleSubmit = () => {
     <!-- Max Attempts (Pro) -->
     <div class="space-y-2 border-t pt-5">
       <div class="flex items-center gap-2">
-        <Label for="retry_limit">Max Attempts</Label>
-        <Tooltip content="Total delivery attempts for this webhook, including the first try. Overrides the global setting. Once reached the job is permanently failed." side="right">
+        <Label for="retry_limit">{{ __('Max Attempts') }}</Label>
+        <Tooltip :content="__('Total delivery attempts for this webhook, including the first try. Overrides the global setting. Once reached the job is permanently failed.')" side="right">
           <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
         </Tooltip>
         <UpgradeBadge v-if="!proActive" />
@@ -714,20 +710,20 @@ const handleSubmit = () => {
         type="number"
         min="1"
         max="100"
-        placeholder="Use global setting"
+        :placeholder="__('Use global setting')"
         class="w-48"
         :disabled="!proActive"
       />
       <p class="text-sm text-muted-foreground">
-        Override the global retry limit for this webhook. Leave empty to use the global setting.
+        {{ __('Override the global retry limit for this webhook. Leave empty to use the global setting.') }}
       </p>
     </div>
 
     <!-- Backoff Strategy (Pro) -->
     <div class="space-y-2 border-t pt-5">
       <div class="flex items-center gap-2">
-        <Label>Backoff Strategy</Label>
-        <Tooltip content="How to calculate the wait between retries. Overrides the global setting." side="right">
+        <Label>{{ __('Backoff Strategy') }}</Label>
+        <Tooltip :content="__('How to calculate the wait between retries. Overrides the global setting.')" side="right">
           <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
         </Tooltip>
         <UpgradeBadge v-if="!proActive" />
@@ -736,18 +732,18 @@ const handleSubmit = () => {
       <div class="space-y-2">
       <Select v-model="form.backoff_strategy" :disabled="!proActive">
         <SelectTrigger class="w-56">
-          <SelectValue placeholder="Use global setting" />
+          <SelectValue :placeholder="__('Use global setting')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="default">Use global setting</SelectItem>
-          <SelectItem value="exponential">Exponential</SelectItem>
-          <SelectItem value="linear">Linear</SelectItem>
-          <SelectItem value="fixed">Fixed</SelectItem>
+          <SelectItem value="default">{{ __('Use global setting') }}</SelectItem>
+          <SelectItem value="exponential">{{ __('Exponential') }}</SelectItem>
+          <SelectItem value="linear">{{ __('Linear') }}</SelectItem>
+          <SelectItem value="fixed">{{ __('Fixed') }}</SelectItem>
         </SelectContent>
       </Select>
 
       <p class="text-sm text-muted-foreground">
-        Override the retry delay strategy for this webhook. Leave empty to use the global setting.
+        {{ __('Override the retry delay strategy for this webhook. Leave empty to use the global setting.') }}
       </p>
 
      </div>
@@ -755,8 +751,8 @@ const handleSubmit = () => {
       <div v-if="form.backoff_strategy !== 'default'" class="flex flex-wrap gap-3 mt-2">
         <div class="space-y-1">
           <div class="flex items-center gap-1">
-            <Label class="text-xs text-muted-foreground">Base Delay (s)</Label>
-            <Tooltip content="Base seconds used to calculate the retry delay. Acts as a multiplier for exponential, interval for linear, and constant wait for fixed." side="right">
+            <Label class="text-xs text-muted-foreground">{{ __('Base Delay (s)') }}</Label>
+            <Tooltip :content="__('Base seconds used to calculate the retry delay. Acts as a multiplier for exponential, interval for linear, and constant wait for fixed.')" side="right">
               <Info class="h-3 w-3 text-muted-foreground cursor-help shrink-0" />
             </Tooltip>
           </div>
@@ -772,8 +768,8 @@ const handleSubmit = () => {
         </div>
         <div v-if="form.backoff_strategy === 'exponential'" class="space-y-1">
           <div class="flex items-center gap-1">
-            <Label class="text-xs text-muted-foreground">Max Delay (s)</Label>
-            <Tooltip content="Cap on the wait between retries. Prevents exponential backoff from growing indefinitely — any delay above this value is clamped to it." side="right">
+            <Label class="text-xs text-muted-foreground">{{ __('Max Delay (s)') }}</Label>
+            <Tooltip :content="__('Cap on the wait between retries. Prevents exponential backoff from growing indefinitely — any delay above this value is clamped to it.')" side="right">
               <Info class="h-3 w-3 text-muted-foreground cursor-help shrink-0" />
             </Tooltip>
           </div>
@@ -791,7 +787,7 @@ const handleSubmit = () => {
 
       <!-- Per-webhook backoff preview -->
       <div v-if="backoffPreview.length" class="pt-2 space-y-2">
-        <p class="text-xs font-medium text-muted-foreground">Delay preview</p>
+        <p class="text-xs font-medium text-muted-foreground">{{ __('Delay preview') }}</p>
         <div class="flex items-end gap-1" style="height: 48px;">
           <div
             v-for="item in backoffPreview"
@@ -813,57 +809,48 @@ const handleSubmit = () => {
     <div class="space-y-2 border-t pt-5">
       <div class="flex items-center space-x-2">
         <Switch v-model="form.is_enabled" />
-        <Label>Enabled Webhook</Label>
+        <Label>{{ __('Enabled Webhook') }}</Label>
       </div>
       <div
         v-if="!form.is_enabled"
         class="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
       >
-        Disabled webhooks still capture payload examples for mapping and conditions configuration.
+        {{ __('Disabled webhooks still capture payload examples for mapping and conditions configuration.') }}
       </div>
     </div>
 
     <!-- Save-first-to-enable-chain dialog -->
     <Dialog
       :open="showChainSaveFirstDialog"
-      title="Save webhook first"
+      :title="__('Save webhook first')"
       @close="showChainSaveFirstDialog = false"
     >
       <div class="space-y-2 text-sm text-muted-foreground">
-        <p>
-          Chain mode links this webhook to upstream webhooks, which requires a saved webhook record.
-          <strong class="text-foreground">Save the webhook first</strong>
-          (with or without WP-hook triggers — they'll be cleared when you pick upstream webhooks), then choose your chain sources on the next screen.
-        </p>
+        <p v-html="sprintf(__('Chain mode links this webhook to upstream webhooks, which requires a saved webhook record. %1$sSave the webhook first%2$s (with or without WP-hook triggers — they\'ll be cleared when you pick upstream webhooks), then choose your chain sources on the next screen.'), '<strong class=&quot;text-foreground&quot;>', '</strong>')"></p>
       </div>
       <template #footer>
-        <Button variant="outline" type="button" @click="showChainSaveFirstDialog = false">Cancel</Button>
-        <Button type="button" @click="handleSaveFirstAndContinue">Save &amp; continue to chain setup</Button>
+        <Button variant="outline" type="button" @click="showChainSaveFirstDialog = false">{{ __('Cancel') }}</Button>
+        <Button type="button" @click="handleSaveFirstAndContinue">{{ __('Save & continue to chain setup') }}</Button>
       </template>
     </Dialog>
 
     <!-- Synchronous Execution warning dialog -->
     <Dialog
       :open="showSyncWarning"
-      title="Enable Synchronous Execution?"
+      :title="__('Enable Synchronous Execution?')"
       @close="cancelSyncToggle"
     >
       <div class="space-y-2 text-sm text-muted-foreground">
-        <p>
-          This webhook will fire inline during the WordPress request that triggers it, bypassing the queue.
-          Slow or unreachable endpoints can <strong class="text-foreground">delay page loads, form submissions, and other frontend interactions.</strong>
-        </p>
-        <p>
-          The <strong class="text-foreground">recommended approach is asynchronous delivery</strong> via the built-in system cron or an external cron job.
-        </p>
+        <p v-html="sprintf(__('This webhook will fire inline during the WordPress request that triggers it, bypassing the queue. Slow or unreachable endpoints can %1$sdelay page loads, form submissions, and other frontend interactions.%2$s'), '<strong class=&quot;text-foreground&quot;>', '</strong>')"></p>
+        <p v-html="sprintf(__('The %1$srecommended approach is asynchronous delivery%2$s via the built-in system cron or an external cron job.'), '<strong class=&quot;text-foreground&quot;>', '</strong>')"></p>
       </div>
       <label class="flex items-center gap-2 cursor-pointer select-none">
         <Checkbox v-model="dontShowAgain" />
-        <span class="text-sm text-muted-foreground">Don't show this again</span>
+        <span class="text-sm text-muted-foreground">{{ __('Don\'t show this again') }}</span>
       </label>
       <template #footer>
-        <Button variant="outline" type="button" @click="cancelSyncToggle">Cancel</Button>
-        <Button variant="destructive" type="button" @click="confirmSyncToggle">Enable Anyway</Button>
+        <Button variant="outline" type="button" @click="cancelSyncToggle">{{ __('Cancel') }}</Button>
+        <Button variant="destructive" type="button" @click="confirmSyncToggle">{{ __('Enable Anyway') }}</Button>
       </template>
     </Dialog>
 
@@ -874,8 +861,8 @@ const handleSubmit = () => {
           :model-value="form.is_synchronous"
           @update:model-value="handleSyncToggle"
         />
-        <Label>Synchronous Execution</Label>
-        <Tooltip content="When enabled, this webhook fires inline during the WordPress request that triggers it, bypassing the queue. May slow down your site if the endpoint is slow." side="right">
+        <Label>{{ __('Synchronous Execution') }}</Label>
+        <Tooltip :content="__('When enabled, this webhook fires inline during the WordPress request that triggers it, bypassing the queue. May slow down your site if the endpoint is slow.')" side="right">
           <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
         </Tooltip>
       </div>
@@ -883,17 +870,17 @@ const handleSubmit = () => {
         v-if="form.is_synchronous"
         class="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-300"
       >
-        This webhook executes synchronously. Slow or unreachable endpoints will delay page loads and frontend interactions.
+        {{ __('This webhook executes synchronously. Slow or unreachable endpoints will delay page loads and frontend interactions.') }}
       </div>
     </div>
 
     <!-- Actions -->
     <div class="flex gap-2 pt-4">
       <Button type="submit" :loading="loading">
-        {{ webhook ? 'Save Changes' : 'Create Webhook' }}
+        {{ webhook ? __('Save Changes') : __('Create Webhook') }}
       </Button>
       <Button type="button" variant="outline" @click="$emit('cancel')">
-        Cancel
+        {{ __('Cancel') }}
       </Button>
     </div>
   </form>

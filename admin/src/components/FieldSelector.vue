@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { ChevronDown, ChevronLeft, ChevronRight, Search, Hash, FolderOpen, AlertTriangle, PenLine, ListTree, Plus } from 'lucide-vue-next'
 import { Popover, Badge, Input } from '@/components/ui'
+import { __ } from '@/i18n'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -148,7 +149,7 @@ const getValuePreview = (value) => {
         </div>
         <button
           type="button"
-          title="Switch to field selector"
+          :title="__('Switch to field selector')"
           class="shrink-0 p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           @click="switchToSelector"
         >
@@ -169,7 +170,7 @@ const getValuePreview = (value) => {
               class="flex-1 flex items-center justify-between gap-2 h-10 px-3 rounded-md border border-input bg-background text-sm font-mono hover:bg-muted/50 transition-colors min-w-0"
               :class="modelValue ? 'text-foreground' : 'text-muted-foreground'"
             >
-              <span class="truncate">{{ modelValue || 'Select field…' }}</span>
+              <span class="truncate">{{ modelValue || __('Select field…') }}</span>
               <ChevronDown class="h-4 w-4 shrink-0 opacity-50" />
             </button>
           </template>
@@ -193,7 +194,7 @@ const getValuePreview = (value) => {
             <Search class="h-4 w-4 text-muted-foreground mr-2 shrink-0" />
             <input
               v-model="search"
-              placeholder="Search fields…"
+              :placeholder="__('Search fields…')"
               class="py-2.5 text-sm bg-transparent outline-none w-full placeholder:text-muted-foreground"
               @keydown.esc.stop="open = false"
             />
@@ -205,7 +206,7 @@ const getValuePreview = (value) => {
               v-if="!filteredItems.length"
               class="text-xs text-muted-foreground px-3 py-4 text-center"
             >
-              No fields found
+              {{ __('No fields found') }}
             </div>
             <div
               v-for="item in filteredItems"
@@ -242,7 +243,7 @@ const getValuePreview = (value) => {
               <button
                 v-if="!item.isLeaf"
                 type="button"
-                title="Select this field"
+                :title="__('Select this field')"
                 class="shrink-0 p-0.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
                 @click.stop="selectItem(item)"
               >
@@ -256,13 +257,13 @@ const getValuePreview = (value) => {
             v-if="!modelValue"
             class="px-3 py-2 border-t text-[10px] text-muted-foreground"
           >
-            Click to select or browse • + to select an array/object
+            {{ __('Click to select or browse • + to select an array/object') }}
           </div>
         </Popover>
 
         <button
           type="button"
-          title="Switch to manual input"
+          :title="__('Switch to manual input')"
           class="shrink-0 p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           @click="switchToText"
         >
@@ -277,7 +278,7 @@ const getValuePreview = (value) => {
       class="flex items-center gap-1 text-orange-500 text-xs"
     >
       <AlertTriangle class="h-3 w-3 shrink-0" />
-      <span>Path not found in payload</span>
+      <span>{{ __('Path not found in payload') }}</span>
     </div>
   </div>
 </template>

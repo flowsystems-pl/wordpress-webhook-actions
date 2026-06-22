@@ -15,6 +15,7 @@ import {
 } from 'lucide-vue-next';
 import { useTheme } from './composables/useTheme';
 import { usePro } from './composables/usePro';
+import { __ } from '@/i18n';
 import HealthStatusBar from './components/HealthStatusBar.vue';
 
 const route = useRoute();
@@ -22,15 +23,15 @@ const { theme, toggleTheme } = useTheme();
 const { proActive } = usePro();
 
 const navItems = [
-  { path: '/webhooks', label: 'Webhooks', icon: Webhook },
-  { path: '/logs', label: 'Logs', icon: ScrollText },
-  { path: '/queue', label: 'Queue', icon: Clock },
-  { path: '/tokens', label: 'API Tokens', icon: KeyRound },
-  { path: '/vault', label: 'Credentials Vault', icon: ShieldCheck },
-  { path: '/external-cron', label: 'External Cron', icon: Timer },
-  { path: '/activity', label: 'Activity', icon: History },
-  { path: '/settings', label: 'Settings', icon: Settings },
-  { path: '/pro', label: 'Pro', icon: Sparkles },
+  { path: '/webhooks', label: __('Webhooks'), icon: Webhook },
+  { path: '/logs', label: __('Logs'), icon: ScrollText },
+  { path: '/queue', label: __('Queue'), icon: Clock },
+  { path: '/tokens', label: __('API Tokens'), icon: KeyRound },
+  { path: '/vault', label: __('Credentials Vault'), icon: ShieldCheck },
+  { path: '/external-cron', label: __('External Cron'), icon: Timer },
+  { path: '/activity', label: __('Activity'), icon: History },
+  { path: '/settings', label: __('Settings'), icon: Settings },
+  { path: '/pro', label: __('Pro'), icon: Sparkles },
 ];
 
 const isActive = (path) => {
@@ -58,7 +59,7 @@ const isActive = (path) => {
         @click="toggleTheme"
         class="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
         :title="
-          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          theme === 'dark' ? __('Switch to light mode') : __('Switch to dark mode')
         "
       >
         <Sun v-if="theme === 'dark'" class="w-5 h-5" />
@@ -105,12 +106,12 @@ const isActive = (path) => {
         >
           WP_Webhooks<span class="cursor">█</span>
         </a>
-        <span class="text-muted-foreground">⭐ Love the plugin? <a
+        <span class="text-muted-foreground">⭐ {{ __('Love the plugin?') }} <a
           href="https://wordpress.org/support/plugin/flowsystems-webhook-actions/reviews/#new-post"
           target="_blank"
           rel="noopener noreferrer"
           class="underline underline-offset-2 hover:text-foreground transition-colors"
-        >Leave a review on WordPress.org</a></span>
+        >{{ __('Leave a review on WordPress.org') }}</a></span>
       </div>
     </footer>
   </div>

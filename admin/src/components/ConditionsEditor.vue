@@ -11,6 +11,7 @@ import {
   FolderPlus, ListChecks,
 } from 'lucide-vue-next'
 import FieldSelector from '@/components/FieldSelector.vue'
+import { __, _n, sprintf } from '@/i18n'
 
 const props = defineProps({
   modelValue: {
@@ -41,18 +42,18 @@ const atFreeLimit = computed(
 )
 
 const OPERATORS = [
-  { value: 'equals',       icon: Equal,          label: 'equals',           short: 'equals' },
-  { value: 'not_equals',   icon: EqualNot,       label: 'does not equal',   short: 'not equals' },
-  { value: 'contains',     icon: CircleCheckBig, label: 'contains',         short: 'contains' },
-  { value: 'not_contains', icon: CircleDashed,   label: 'does not contain', short: 'excludes' },
-  { value: 'greater_than', icon: ChevronRight,   label: 'greater than',     short: 'greater than' },
-  { value: 'less_than',    icon: ChevronLeft,    label: 'less than',        short: 'less than' },
-  { value: 'is_empty',     icon: Square,         label: 'is empty',         short: 'empty' },
-  { value: 'is_not_empty', icon: CheckSquare,    label: 'is not empty',     short: 'not empty' },
-  { value: 'is_true',          icon: ToggleRight,  label: 'is true',          short: 'is true' },
-  { value: 'is_false',         icon: ToggleLeft,   label: 'is false',         short: 'is false' },
-  { value: 'array_contains',  icon: ListChecks, label: 'array contains',  short: 'has item' },
-  { value: 'object_contains', icon: ListChecks, label: 'object contains', short: 'has value' },
+  { value: 'equals',       icon: Equal,          label: __('equals'),           short: __('equals') },
+  { value: 'not_equals',   icon: EqualNot,       label: __('does not equal'),   short: __('not equals') },
+  { value: 'contains',     icon: CircleCheckBig, label: __('contains'),         short: __('contains') },
+  { value: 'not_contains', icon: CircleDashed,   label: __('does not contain'), short: __('excludes') },
+  { value: 'greater_than', icon: ChevronRight,   label: __('greater than'),     short: __('greater than') },
+  { value: 'less_than',    icon: ChevronLeft,    label: __('less than'),        short: __('less than') },
+  { value: 'is_empty',     icon: Square,         label: __('is empty'),         short: __('empty') },
+  { value: 'is_not_empty', icon: CheckSquare,    label: __('is not empty'),     short: __('not empty') },
+  { value: 'is_true',          icon: ToggleRight,  label: __('is true'),          short: __('is true') },
+  { value: 'is_false',         icon: ToggleLeft,   label: __('is false'),         short: __('is false') },
+  { value: 'array_contains',  icon: ListChecks, label: __('array contains'),  short: __('has item') },
+  { value: 'object_contains', icon: ListChecks, label: __('object contains'), short: __('has value') },
 ]
 
 const getOperator = (value) => OPERATORS.find((op) => op.value === value)
@@ -67,11 +68,11 @@ const OPERATORS_BY_TYPE = {
 }
 
 const CAST_OPTIONS = [
-  { value: 'auto',      label: 'auto',      short: '—' },
-  { value: 'number',    label: 'number',    short: '#' },
-  { value: 'string',    label: 'string',    short: '"' },
-  { value: 'boolean',   label: 'bool',      short: '?' },
-  { value: 'stringify', label: 'stringify', short: '{}' },
+  { value: 'auto',      label: __('auto'),      short: '—' },
+  { value: 'number',    label: __('number'),    short: '#' },
+  { value: 'string',    label: __('string'),    short: '"' },
+  { value: 'boolean',   label: __('bool'),      short: '?' },
+  { value: 'stringify', label: __('stringify'), short: '{}' },
 ]
 
 const castToSelect = (cast) => cast || 'auto'
@@ -316,13 +317,13 @@ const handleGroupRuleFieldType = (gi, ri, type) => {
 // ── Labels ────────────────────────────────────────────────────────────────
 
 const ruleLabel = (index) => {
-  if (index === 0) return 'IF'
-  return conditions.value.type === 'or' ? 'OR' : 'AND'
+  if (index === 0) return __('IF')
+  return conditions.value.type === 'or' ? __('OR') : __('AND')
 }
 
 const groupRuleLabel = (ri, group) => {
-  if (ri === 0) return 'IF'
-  return group.match === 'or' ? 'OR' : 'AND'
+  if (ri === 0) return __('IF')
+  return group.match === 'or' ? __('OR') : __('AND')
 }
 
 // ── Condition preview ─────────────────────────────────────────────────────
@@ -448,8 +449,8 @@ const overallResult = computed(() => {
         :model-value="conditions.enabled"
         @update:model-value="toggleEnabled"
       />
-      <Label class="cursor-pointer select-none">Enable conditional dispatch</Label>
-      <Tooltip content="Conditions are evaluated against the payload — use the 'Evaluate conditions against' toggle above to choose original or transformed." side="right">
+      <Label class="cursor-pointer select-none">{{ __('Enable conditional dispatch') }}</Label>
+      <Tooltip :content="__('Conditions are evaluated against the payload — use the \'Evaluate conditions against\' toggle above to choose original or transformed.')" side="right">
         <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
       </Tooltip>
     </div>
@@ -462,7 +463,7 @@ const overallResult = computed(() => {
           @update:model-value="globalTextMode = $event"
         />
         <Label class="cursor-pointer select-none text-sm text-muted-foreground">
-          Manual dot-notation for all fields
+          {{ __('Manual dot-notation for all fields') }}
         </Label>
       </div>
 
@@ -487,11 +488,11 @@ const overallResult = computed(() => {
               >
                 <label class="flex items-center gap-1.5 cursor-pointer text-xs">
                   <RadioGroupItem value="and" />
-                  ALL (AND)
+                  {{ __('ALL (AND)') }}
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer text-xs">
                   <RadioGroupItem value="or" />
-                  ANY (OR)
+                  {{ __('ANY (OR)') }}
                 </label>
               </RadioGroup>
               <template v-if="examplePayload">
@@ -500,20 +501,20 @@ const overallResult = computed(() => {
                 <CheckCircle2
                   v-if="itemResults[index]?.result === true"
                   class="h-4 w-4 text-green-500 shrink-0"
-                  title="Group matches example payload"
+                  :title="__('Group matches example payload')"
                 />
                 <XCircle
                   v-else-if="itemResults[index]?.result === false"
                   class="h-4 w-4 text-destructive shrink-0"
-                  title="Group does not match example payload"
+                  :title="__('Group does not match example payload')"
                 />
                 <CircleDashed
                   v-else
                   class="h-4 w-4 text-muted-foreground/40 shrink-0"
-                  title="Cannot evaluate"
+                  :title="__('Cannot evaluate')"
                 />
                 <Tooltip
-                  :content="`Group matches example payload: ${itemResults[index]?.result === true ? 'yes' : itemResults[index]?.result === false ? 'no' : 'unknown'} (based on ${item.rules.length} rule${item.rules.length > 1 ? 's' : ''})`"
+                  :content="sprintf(_n('Group matches example payload: %1$s (based on %2$d rule)', 'Group matches example payload: %1$s (based on %2$d rules)', item.rules.length), itemResults[index]?.result === true ? __('yes') : itemResults[index]?.result === false ? __('no') : __('unknown'), item.rules.length)"
                   :variant="itemResults[index]?.result === false ? 'destructive' : 'default'"
                   side="top"
                 >
@@ -551,17 +552,17 @@ const overallResult = computed(() => {
                       <CheckCircle2
                         v-if="itemResults[index]?.ruleResults[ri] === true"
                         class="size-4 text-green-500"
-                        title="Matches example payload"
+                        :title="__('Matches example payload')"
                       />
                       <XCircle
                         v-else-if="itemResults[index]?.ruleResults[ri] === false"
                         class="size-4 text-destructive"
-                        title="Does not match example payload"
+                        :title="__('Does not match example payload')"
                       />
                       <CircleDashed
                         v-else
                         class="size-4 text-muted-foreground/40"
-                        title="Cannot evaluate"
+                        :title="__('Cannot evaluate')"
                       />
                     </template>
                     <Button
@@ -584,7 +585,7 @@ const overallResult = computed(() => {
                   >
                     <SelectTrigger class="w-24 shrink-0">
                       <span class="truncate text-xs" :class="!rule.cast ? 'text-muted-foreground' : ''">
-                        {{ CAST_OPTIONS.find(c => c.value === castToSelect(rule.cast))?.label ?? 'auto' }}
+                        {{ CAST_OPTIONS.find(c => c.value === castToSelect(rule.cast))?.label ?? __('auto') }}
                       </span>
                     </SelectTrigger>
                     <SelectContent to="#fswa-app">
@@ -624,7 +625,7 @@ const overallResult = computed(() => {
                 <Input
                   v-if="keyShown(rule.operator)"
                   :model-value="rule.key ?? ''"
-                  placeholder="property name (optional)"
+                  :placeholder="__('property name (optional)')"
                   class="w-full text-sm"
                   @update:model-value="updateGroupRule(index, ri, 'key', $event)"
                 />
@@ -633,7 +634,7 @@ const overallResult = computed(() => {
                 <Input
                   v-if="!valueHidden(rule.operator)"
                   :model-value="rule.value"
-                  placeholder="value"
+                  :placeholder="__('value')"
                   class="w-full text-sm"
                   @update:model-value="updateGroupRule(index, ri, 'value', $event)"
                 />
@@ -649,7 +650,7 @@ const overallResult = computed(() => {
               @click="addRuleToGroup(index)"
             >
               <Plus class="h-3.5 w-3.5 mr-1" />
-              Add rule
+              {{ __('Add rule') }}
             </Button>
           </div>
 
@@ -684,17 +685,17 @@ const overallResult = computed(() => {
                   <CheckCircle2
                     v-if="itemResults[index]?.result === true"
                     class="size-4 text-green-500"
-                    title="Matches example payload"
+                    :title="__('Matches example payload')"
                   />
                   <XCircle
                     v-else-if="itemResults[index]?.result === false"
                     class="size-4 text-destructive"
-                    title="Does not match example payload"
+                    :title="__('Does not match example payload')"
                   />
                   <CircleDashed
                     v-else
                     class="size-4 text-muted-foreground/40"
-                    title="Cannot evaluate"
+                    :title="__('Cannot evaluate')"
                   />
                 </template>
                 <Button
@@ -717,7 +718,7 @@ const overallResult = computed(() => {
               >
                 <SelectTrigger class="w-24 shrink-0">
                   <span class="truncate text-xs" :class="!item.cast ? 'text-muted-foreground' : ''">
-                    {{ CAST_OPTIONS.find(c => c.value === castToSelect(item.cast))?.label ?? 'auto' }}
+                    {{ CAST_OPTIONS.find(c => c.value === castToSelect(item.cast))?.label ?? __('auto') }}
                   </span>
                 </SelectTrigger>
                 <SelectContent to="#fswa-app">
@@ -757,7 +758,7 @@ const overallResult = computed(() => {
             <Input
               v-if="keyShown(item.operator)"
               :model-value="item.key ?? ''"
-              placeholder="property name (optional)"
+              :placeholder="__('property name (optional)')"
               class="w-full text-sm"
               @update:model-value="updateRule(index, 'key', $event)"
             />
@@ -766,7 +767,7 @@ const overallResult = computed(() => {
             <Input
               v-if="!valueHidden(item.operator)"
               :model-value="item.value"
-              placeholder="value"
+              :placeholder="__('value')"
               class="w-full text-sm"
               @update:model-value="updateRule(index, 'value', $event)"
             />
@@ -779,7 +780,7 @@ const overallResult = computed(() => {
         <CheckCircle2 v-if="overallResult" class="size-6 text-green-500 shrink-0" />
         <XCircle v-else class="size-6 text-destructive shrink-0" />
         <span :class="overallResult ? 'text-green-600 dark:text-green-400' : 'text-destructive'">
-          Example payload would <strong>{{ overallResult ? 'dispatch' : 'be skipped' }}</strong>
+          <span v-html="sprintf(__('Example payload would %1$s%2$s%3$s'), '<strong>', overallResult ? __('dispatch') : __('be skipped'), '</strong>')"></span>
         </span>
       </div>
 
@@ -793,7 +794,7 @@ const overallResult = computed(() => {
           @click="addRule"
         >
           <Plus class="h-4 w-4 mr-1" />
-          Add condition
+          {{ __('Add condition') }}
         </Button>
         <Button
           v-if="isPro"
@@ -804,14 +805,14 @@ const overallResult = computed(() => {
           @click="addGroup"
         >
           <FolderPlus class="h-4 w-4 mr-1" />
-          Add group
+          {{ __('Add group') }}
         </Button>
         <UpgradeBadge v-if="atFreeLimit && !isPro" />
       </div>
 
       <!-- Match type -->
       <div class="flex items-center gap-3 text-sm">
-        <span class="text-muted-foreground">Match:</span>
+        <span class="text-muted-foreground">{{ __('Match:') }}</span>
         <RadioGroup
           :model-value="conditions.type"
           :disabled="!isPro"
@@ -822,14 +823,14 @@ const overallResult = computed(() => {
             :class="isPro ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'"
           >
             <RadioGroupItem value="and" :disabled="!isPro" />
-            ALL (AND)
+            {{ __('ALL (AND)') }}
           </label>
           <label
             class="flex items-center gap-1.5"
             :class="isPro ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'"
           >
             <RadioGroupItem value="or" :disabled="!isPro" />
-            ANY (OR)
+            {{ __('ANY (OR)') }}
           </label>
         </RadioGroup>
         <UpgradeBadge v-if="!isPro" />
@@ -837,7 +838,7 @@ const overallResult = computed(() => {
     </template>
 
     <p v-else class="text-sm text-muted-foreground">
-      This webhook will run on every trigger.
+      {{ __('This webhook will run on every trigger.') }}
     </p>
   </div>
 </template>

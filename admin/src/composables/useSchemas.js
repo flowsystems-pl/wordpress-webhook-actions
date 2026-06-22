@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { api } from '../lib/api'
+import { __ } from '@/i18n'
 
 // Shared state per webhook (keyed by webhook ID)
 const schemasCache = ref({})
@@ -35,7 +36,7 @@ export function useSchemas(webhookId) {
         [webhookIdRef.value]: result || [],
       }
     } catch (e) {
-      setError(e.message || 'Failed to fetch schemas')
+      setError(e.message || __('Failed to fetch schemas'))
     } finally {
       setLoading(false)
     }
@@ -181,7 +182,7 @@ export function useUserTriggers() {
       userTriggersCache.value = result.triggers || []
       return userTriggersCache.value
     } catch (e) {
-      error.value = e.message || 'Failed to fetch user triggers'
+      error.value = e.message || __('Failed to fetch user triggers')
       return []
     } finally {
       loading.value = false

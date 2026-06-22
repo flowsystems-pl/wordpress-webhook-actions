@@ -1,5 +1,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { api } from '../lib/api'
+import { __ } from '@/i18n'
 
 const stats = ref(null)
 const loading = ref(false)
@@ -13,7 +14,7 @@ export function useHealthStats() {
     try {
       stats.value = await api.health.stats()
     } catch (e) {
-      error.value = e.message || 'Failed to fetch health stats'
+      error.value = e.message || __('Failed to fetch health stats')
     } finally {
       loading.value = false
     }

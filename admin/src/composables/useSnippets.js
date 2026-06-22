@@ -1,5 +1,6 @@
 import { ref, isRef } from 'vue'
 import { api } from '../lib/api'
+import { __ } from '@/i18n'
 
 const toVal = (v) => (isRef(v) ? v.value : v)
 
@@ -18,7 +19,7 @@ export function useSnippets() {
       snippets.value = await api.snippets.list(params)
     } catch (e) {
       if (e.data?.status !== 404) {
-        error.value = e.message || 'Failed to fetch snippets'
+        error.value = e.message || __('Failed to fetch snippets')
       }
       snippets.value = []
     } finally {
@@ -72,7 +73,7 @@ export function useTriggerSnippet(webhookId, trigger) {
       assignment.value = await api.snippets.getTriggerSnippet(wid, trg)
     } catch (e) {
       if (e.data?.status !== 404) {
-        error.value = e.message || 'Failed to fetch trigger snippet'
+        error.value = e.message || __('Failed to fetch trigger snippet')
       }
       assignment.value = null
     } finally {
@@ -89,7 +90,7 @@ export function useTriggerSnippet(webhookId, trigger) {
       assignment.value = await api.snippets.saveTriggerSnippet(wid, trg, data)
       return true
     } catch (e) {
-      error.value = e.message || 'Failed to save trigger snippet'
+      error.value = e.message || __('Failed to save trigger snippet')
       return false
     } finally {
       saving.value = false

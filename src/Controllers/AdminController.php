@@ -102,7 +102,7 @@ class AdminController {
         wp_enqueue_script(
           'fswa-admin',
           $distUrl . '/' . $mainEntry['file'],
-          [],
+          ['wp-i18n'],
           App::VERSION,
           true
         );
@@ -128,7 +128,7 @@ class AdminController {
       wp_enqueue_script(
         'fswa-admin',
         $devUrl . '/src/main.js',
-        ['fswa-vite-client'],
+        ['fswa-vite-client', 'wp-i18n'],
         App::VERSION,
         true
       );
@@ -147,6 +147,23 @@ class AdminController {
       'adminUrl' => admin_url(),
       'pluginUrl' => App::$url,
     ]);
+
+    // Load JS translations. wp_set_script_translations() resolves a filename
+    // built from md5() of the script's URL path, which is environment-dependent
+    // and changes per build. We ship a single stable, handle-based JSON
+    // (…-{locale}-fswa-admin.json) and redirect the loader to it below.
+    wp_set_script_translations('fswa-admin', 'flowsystems-webhook-actions', App::$path . '/languages');
+
+    add_filter('load_script_translation_file', function ($file, $handle, $domain) {
+      if ($handle === 'fswa-admin' && $domain === 'flowsystems-webhook-actions') {
+        $candidate = App::$path . '/languages/flowsystems-webhook-actions-'
+          . determine_locale() . '-fswa-admin.json';
+        if (is_readable($candidate)) {
+          return $candidate;
+        }
+      }
+      return $file;
+    }, 10, 3);
 
     wp_add_inline_style('wp-admin', '
             #fswa-app {

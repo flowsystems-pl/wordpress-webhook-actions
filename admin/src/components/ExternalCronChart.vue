@@ -14,6 +14,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js'
+import { __ } from '@/i18n'
 
 ChartJS.register(
   BarController, BarElement, CategoryScale, Filler, Legend,
@@ -73,7 +74,7 @@ const chartData = computed(() => {
         pointRadius: 0,
         pointHitRadius: 100,
         yAxisID: 'y',
-        label: 'Response (ms)',
+        label: __('Response (ms)'),
         order: 1,
       },
       {
@@ -162,7 +163,7 @@ const chartOptions = computed(() => {
           },
           label: (ctx) => {
             const beat = chronological[ctx.dataIndex]
-            const status = beat?.status === 1 ? 'Success' : 'Fail'
+            const status = beat?.status === 1 ? __('Success') : __('Fail')
             const line = ctx.parsed.y != null ? `${status} — ${ctx.parsed.y}ms` : status
             if (beat?.msg && beat.status !== 1) return [line, beat.msg]
             return line
@@ -179,19 +180,19 @@ const chartOptions = computed(() => {
     <!-- Stats row -->
     <div class="flex gap-6 text-sm">
       <div>
-        <span class="text-muted-foreground">Success rate 24h</span>
+        <span class="text-muted-foreground">{{ __('Success rate 24h') }}</span>
         <span class="ml-2 font-semibold text-foreground">
           {{ uptime24h != null ? `${uptime24h}%` : '—' }}
         </span>
       </div>
       <div>
-        <span class="text-muted-foreground">Avg ping</span>
+        <span class="text-muted-foreground">{{ __('Avg ping') }}</span>
         <span class="ml-2 font-semibold text-foreground">
           {{ avgPing != null ? `${avgPing}ms` : '—' }}
         </span>
       </div>
       <div>
-        <span class="text-muted-foreground">Samples</span>
+        <span class="text-muted-foreground">{{ __('Samples') }}</span>
         <span class="ml-2 font-semibold text-foreground">{{ beats.length }}</span>
       </div>
     </div>
@@ -200,7 +201,7 @@ const chartOptions = computed(() => {
       <Line :data="chartData" :options="chartOptions" />
     </div>
     <div v-else class="h-14 flex items-center justify-center text-sm text-muted-foreground border border-dashed border-border rounded-md">
-      No heartbeat data yet
+      {{ __('No heartbeat data yet') }}
     </div>
   </div>
 </template>

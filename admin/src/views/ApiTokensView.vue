@@ -8,6 +8,7 @@ import RotateTokenDialog from '@/components/RotateTokenDialog.vue'
 import ChangeExpiryDialog from '@/components/ChangeExpiryDialog.vue'
 import api from '@/lib/api'
 import { isUtcExpired, formatUtcDate } from '@/lib/dates'
+import { __, sprintf } from '@/i18n'
 
 const tokens = ref([])
 const loading = ref(true)
@@ -135,16 +136,15 @@ onMounted(loadTokens)
       <div>
         <h2 class="text-xl font-semibold text-foreground flex items-center gap-2">
           <KeyRound class="h-5 w-5" />
-          API Tokens
+          {{ __('API Tokens') }}
         </h2>
         <p class="text-sm text-muted-foreground mt-1">
-          Tokens allow external systems to access the REST API without a browser session.
-          Token management is always admin-only regardless of scope.
+          {{ __('Tokens allow external systems to access the REST API without a browser session. Token management is always admin-only regardless of scope.') }}
         </p>
       </div>
       <Button @click="showCreateDialog = true">
         <Plus class="mr-2 h-4 w-4" />
-        New token
+        {{ __('New token') }}
       </Button>
     </div>
 
@@ -154,7 +154,7 @@ onMounted(loadTokens)
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-sm text-muted-foreground">Loading…</div>
+    <div v-if="loading" class="text-sm text-muted-foreground">{{ __('Loading…') }}</div>
 
     <!-- Empty state -->
     <div
@@ -162,11 +162,11 @@ onMounted(loadTokens)
       class="rounded-lg border border-dashed border-border p-12 text-center"
     >
       <KeyRound class="mx-auto mb-3 h-10 w-10 text-muted-foreground/50" />
-      <h3 class="text-sm font-medium text-foreground">No API tokens</h3>
-      <p class="mt-1 text-sm text-muted-foreground">Create a token to enable programmatic API access.</p>
+      <h3 class="text-sm font-medium text-foreground">{{ __('No API tokens') }}</h3>
+      <p class="mt-1 text-sm text-muted-foreground">{{ __('Create a token to enable programmatic API access.') }}</p>
       <Button class="mt-4" @click="showCreateDialog = true">
         <Plus class="mr-2 h-4 w-4" />
-        Create first token
+        {{ __('Create first token') }}
       </Button>
     </div>
 
@@ -175,13 +175,13 @@ onMounted(loadTokens)
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-border bg-muted/50">
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Name</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Scope</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Hint</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Created</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Expires</th>
-            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">Last used</th>
-            <th class="px-4 py-2.5 text-right font-medium text-muted-foreground">Actions</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Name') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Scope') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Hint') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Created') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Expires') }}</th>
+            <th class="px-4 py-2.5 text-left font-medium text-muted-foreground">{{ __('Last used') }}</th>
+            <th class="px-4 py-2.5 text-right font-medium text-muted-foreground">{{ __('Actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -197,11 +197,11 @@ onMounted(loadTokens)
                 {{ token.scope }}
               </Badge>
             </td>
-            <td class="px-4 py-3 font-mono text-muted-foreground">{{ token.token_hint }}…</td>
+            <td class="px-4 py-3 font-mono text-muted-foreground">{{ sprintf(__('%s…'), token.token_hint) }}</td>
             <td class="px-4 py-3 text-muted-foreground">{{ formatDate(token.created_at) }}</td>
             <td class="px-4 py-3 text-muted-foreground">
               <span v-if="isExpired(token)" class="flex items-center gap-1.5">
-                <Badge variant="destructive">Expired</Badge>
+                <Badge variant="destructive">{{ __('Expired') }}</Badge>
                 <span class="text-xs">{{ formatDate(token.expires_at) }}</span>
               </span>
               <span v-else>{{ formatDate(token.expires_at) }}</span>
@@ -213,7 +213,7 @@ onMounted(loadTokens)
                   variant="ghost"
                   size="sm"
                   @click="openRotate(token)"
-                  title="Rotate token"
+                  :title="__('Rotate token')"
                 >
                   <RefreshCw class="h-4 w-4" />
                 </Button>
@@ -221,7 +221,7 @@ onMounted(loadTokens)
                   variant="ghost"
                   size="sm"
                   @click="openChangeExpiry(token)"
-                  title="Change expiry"
+                  :title="__('Change expiry')"
                 >
                   <CalendarClock class="h-4 w-4" />
                 </Button>
@@ -229,7 +229,7 @@ onMounted(loadTokens)
                   variant="ghost"
                   size="sm"
                   @click="openDelete(token)"
-                  title="Delete token"
+                  :title="__('Delete token')"
                   class="text-destructive hover:text-destructive"
                 >
                   <Trash2 class="h-4 w-4" />
@@ -243,12 +243,12 @@ onMounted(loadTokens)
 
     <!-- Scope reference -->
     <div class="rounded-md border border-border bg-muted/30 p-4 text-sm space-y-2">
-      <p class="font-medium text-foreground">Scope reference</p>
+      <p class="font-medium text-foreground">{{ __('Scope reference') }}</p>
       <ul class="space-y-1 text-muted-foreground">
-        <li><Badge variant="secondary" class="mr-2">read</Badge>GET webhooks, logs, queue, health, triggers, schemas</li>
-        <li><Badge variant="warning" class="mr-2">operational</Badge>Read + toggle webhooks, retry/replay logs, execute/retry queue jobs</li>
-        <li><Badge variant="destructive" class="mr-2">full</Badge>Operational + create/update/delete webhooks, schemas, and queue jobs</li>
-        <li><Badge variant="default" class="mr-2">agent</Badge>Full write power for AI assistants — but can never reveal auth headers or vault secrets</li>
+        <li><Badge variant="secondary" class="mr-2">read</Badge>{{ __('GET webhooks, logs, queue, health, triggers, schemas') }}</li>
+        <li><Badge variant="warning" class="mr-2">operational</Badge>{{ __('Read + toggle webhooks, retry/replay logs, execute/retry queue jobs') }}</li>
+        <li><Badge variant="destructive" class="mr-2">full</Badge>{{ __('Operational + create/update/delete webhooks, schemas, and queue jobs') }}</li>
+        <li><Badge variant="default" class="mr-2">agent</Badge>{{ __('Full write power for AI assistants — but can never reveal auth headers or vault secrets') }}</li>
       </ul>
     </div>
 
@@ -282,16 +282,16 @@ onMounted(loadTokens)
     <!-- Delete confirm dialog -->
     <Dialog
       :open="showDeleteDialog"
-      :title="`Delete token: ${tokenToDelete?.name}`"
-      description="This will permanently revoke the token. Any integrations using it will stop working immediately."
+      :title="sprintf(__('Delete token: %s'), tokenToDelete?.name)"
+      :description="__('This will permanently revoke the token. Any integrations using it will stop working immediately.')"
       @close="showDeleteDialog = false; tokenToDelete = null"
     >
       <template #footer>
         <Button variant="outline" @click="showDeleteDialog = false; tokenToDelete = null" :disabled="deleting">
-          Cancel
+          {{ __('Cancel') }}
         </Button>
         <Button variant="destructive" @click="handleDelete" :disabled="deleting">
-          {{ deleting ? 'Deleting…' : 'Delete token' }}
+          {{ deleting ? __('Deleting…') : __('Delete token') }}
         </Button>
       </template>
     </Dialog>

@@ -4,6 +4,7 @@ import { Input, Label, Select, SelectTrigger, SelectValue, SelectContent, Select
 import { Plus, X } from 'lucide-vue-next';
 import api from '@/lib/api';
 import { useChains } from '@/composables/useChains';
+import { __, sprintf } from '@/i18n';
 
 const props = defineProps({
   modelValue: {
@@ -105,10 +106,10 @@ const isCreatingNew = computed(() => props.modelValue.chain_id == null);
 <template>
   <div class="space-y-4">
     <div class="space-y-2">
-      <Label>Chain</Label>
+      <Label>{{ __('Chain') }}</Label>
       <Select v-model="chainSelectValue">
         <SelectTrigger>
-          <SelectValue placeholder="Select chain or create new" />
+          <SelectValue :placeholder="__('Select chain or create new')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem v-for="c in chains" :key="c.id" :value="String(c.id)">
@@ -117,39 +118,38 @@ const isCreatingNew = computed(() => props.modelValue.chain_id == null);
           <SelectItem :value="NEW_CHAIN_VALUE">
             <span class="inline-flex items-center gap-1">
               <Plus class="h-3.5 w-3.5" />
-              New chain…
+              {{ __('New chain…') }}
             </span>
           </SelectItem>
         </SelectContent>
       </Select>
 
       <div v-if="isCreatingNew" class="space-y-2 pt-2">
-        <Label for="new-chain-name" class="text-xs text-muted-foreground">New chain name</Label>
+        <Label for="new-chain-name" class="text-xs text-muted-foreground">{{ __('New chain name') }}</Label>
         <Input
           id="new-chain-name"
           :value="modelValue.new_chain_name"
           @input="updateNewChainName"
-          placeholder="e.g. Order to HubSpot"
+          :placeholder="__('e.g. Order to HubSpot')"
         />
       </div>
     </div>
 
     <div class="space-y-2 border-t pt-4">
-      <Label>Trigger this webhook when the following webhooks complete</Label>
-      <p class="text-sm text-muted-foreground">
-        On a successful (2xx) response from any of these webhooks, this webhook fires with the upstream response, sent payload, and original pre-mapping payload available as <code class="font-mono text-xs">args[0]</code>.
+      <Label>{{ __('Trigger this webhook when the following webhooks complete') }}</Label>
+      <p class="text-sm text-muted-foreground" v-html="sprintf(__('On a successful (2xx) response from any of these webhooks, this webhook fires with the upstream response, sent payload, and original pre-mapping payload available as %1$sargs[0]%2$s.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')">
       </p>
 
       <div v-if="loadingWebhooks" class="text-sm text-muted-foreground py-2">
-        Loading webhooks…
+        {{ __('Loading webhooks…') }}
       </div>
       <div v-else-if="selectableSources.length === 0" class="text-sm text-muted-foreground py-2">
-        No other webhooks exist yet — create at least one webhook to use it as a chain source.
+        {{ __('No other webhooks exist yet — create at least one webhook to use it as a chain source.') }}
       </div>
       <template v-else>
         <Input
           v-model="sourceSearch"
-          placeholder="Search webhooks by name or URL…"
+          :placeholder="__('Search webhooks by name or URL…')"
           class="text-sm"
         />
         <div class="space-y-1.5 max-h-64 overflow-y-auto rounded-md border p-2">
@@ -163,7 +163,7 @@ const isCreatingNew = computed(() => props.modelValue.chain_id == null);
             <span class="text-xs text-muted-foreground truncate">{{ w.endpoint_url }}</span>
           </label>
           <div v-if="filteredSources.length === 0" class="text-sm text-muted-foreground py-2 px-2">
-            No webhooks match “{{ sourceSearch }}”.
+            {{ sprintf(__('No webhooks match “%s”.'), sourceSearch) }}
           </div>
         </div>
       </template>

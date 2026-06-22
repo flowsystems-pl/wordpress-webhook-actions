@@ -10,6 +10,7 @@ import api from '@/lib/api';
 import { useHealthStats } from '@/composables/useHealthStats';
 import { useSchemas } from '@/composables/useSchemas';
 import { useChains } from '@/composables/useChains';
+import { __ } from '@/i18n';
 
 const { createChain, syncTargetSources, clearTargetLinks, refresh: refreshChains } = useChains();
 
@@ -51,7 +52,7 @@ const skipNextRouteReload = ref(false);
 
 const isEdit = computed(() => !!route.params.id);
 const pageTitle = computed(() =>
-  isEdit.value ? 'Edit Webhook' : 'Create Webhook',
+  isEdit.value ? __('Edit Webhook') : __('Create Webhook'),
 );
 
 const loadWebhook = async (silent = false) => {
@@ -184,14 +185,14 @@ watch(() => route.params.id, (newId) => {
         @click="router.push('/webhooks')"
       >
         <ArrowLeft class="mr-2 h-4 w-4" />
-        Back to webhooks
+        {{ __('Back to webhooks') }}
       </Button>
       <h2 class="text-xl font-semibold">{{ pageTitle }}</h2>
     </div>
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-8 text-muted-foreground">
-      Loading...
+      {{ __('Loading…') }}
     </div>
 
     <!-- Error -->
@@ -205,7 +206,7 @@ watch(() => route.params.id, (newId) => {
         <div v-if="isEdit" class="flex justify-end mb-4">
           <Button variant="outline" size="sm" class="gap-1.5" @click="showTest = true">
             <FlaskConical class="h-3.5 w-3.5" />
-            Test
+            {{ __('Test') }}
           </Button>
         </div>
 

@@ -2,12 +2,13 @@
 import { computed } from 'vue';
 import { Button, Input } from '@/components/ui';
 import { X, Plus, AlertTriangle } from 'lucide-vue-next';
+import { __ } from '@/i18n';
 
 const props = defineProps({
   modelValue: { type: Array, default: () => [] },
   examplePayload: { type: Object, default: null },
   gluePayload: { type: Object, default: null },
-  keyPlaceholder: { type: String, default: 'Key' },
+  keyPlaceholder: { type: String, default: () => __('Key') },
 });
 const emit = defineEmits(['update:modelValue']);
 
@@ -62,20 +63,20 @@ const isKeyInvalid = (key) => key && !/^[a-zA-Z0-9\-_]+$/.test(key);
         <AlertTriangle
           v-if="isKeyInvalid(row.key)"
           class="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-orange-500"
-          title="Key must only contain letters, numbers, hyphens, or underscores"
+          :title="__('Key must only contain letters, numbers, hyphens, or underscores')"
         />
       </div>
       <div class="relative flex-[2]">
         <Input
           :value="row.value"
-          placeholder="Dot-path (e.g. event.id) or static text"
+          :placeholder="__('Dot-path (e.g. event.id) or static text')"
           :class="isPathMissing(row.value) ? 'pr-7 !border-orange-500' : ''"
           @input="update(i, 'value', $event.target.value)"
         />
         <AlertTriangle
           v-if="isPathMissing(row.value)"
           class="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-orange-500"
-          title="Path not found in captured payload"
+          :title="__('Path not found in captured payload')"
         />
       </div>
       <Button type="button" variant="ghost" size="icon" class="shrink-0" @click="remove(i)">
@@ -84,7 +85,7 @@ const isKeyInvalid = (key) => key && !/^[a-zA-Z0-9\-_]+$/.test(key);
     </div>
     <Button type="button" variant="outline" size="sm" class="gap-1" @click="add">
       <Plus class="h-3.5 w-3.5" />
-      Add row
+      {{ __('Add row') }}
     </Button>
   </div>
 </template>

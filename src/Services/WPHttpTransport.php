@@ -24,7 +24,7 @@ class WPHttpTransport {
   public function send(string $url, array $payload, array $headers = [], string $method = 'POST') {
     $jsonPayload = json_encode($payload);
     if ($jsonPayload === false) {
-      return new WP_Error('json_encode_failed', 'Failed to encode payload as JSON');
+      return new WP_Error('json_encode_failed', __('Failed to encode payload as JSON', 'flowsystems-webhook-actions'));
     }
 
     /**
