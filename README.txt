@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.15.0
+Stable tag: 1.16.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -31,6 +31,7 @@ Operate WordPress like modern infrastructure — turn any WordPress do_action in
 - Activity History — persistent audit log of every admin and API-token action
 - Built-in CF7 and IvyForms integrations — structured payloads, no extra plugins
 - Action Scheduler auto-detection — more reliable delivery on high-traffic sites
+- Fully translatable — the entire admin interface and all server-side strings are internationalized; ships with Polish, Simplified Chinese, and Dutch, and is compatible with WPML and Polylang String Translation
 - Full REST API with scoped API token authentication (`read` / `operational` / `full` / `agent`) — the `agent` scope grants full write access for AI assistants while never exposing stored secrets
 - Developer extensibility — 16 filters and 7 action hooks ([reference](https://wpwebhooks.org/docs/))
 
@@ -79,7 +80,7 @@ No. Both integrations are built in. When CF7 or IvyForms is active, submissions 
 
 = Can I access the REST API without a WordPress login? =
 
-Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <token>` (or `Authorization: Bearer`). Three scopes available — `read`, `operational`, `full` — so you can grant exactly the access each integration needs. Full API reference at [wpwebhooks.org/webhook-wordpress-plugin-api/](https://wpwebhooks.org/webhook-wordpress-plugin-api/)
+Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <token>` (or `Authorization: Bearer`). Four scopes available — `read`, `operational`, `full`, and `agent` (full write access for AI assistants that never exposes stored secrets) — so you can grant exactly the access each integration needs. Full API reference at [wpwebhooks.org/webhook-wordpress-plugin-api/](https://wpwebhooks.org/webhook-wordpress-plugin-api/)
 
 == Screenshots ==
 
@@ -100,12 +101,9 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 1.15.0 — 2026-06-07 =
-- New: Credentials Vault — store reusable authentication secrets (Bearer token, Basic auth, API key, custom header) encrypted at rest with AES-256-GCM, and reference them from webhooks via a saved credential instead of a raw Authorization header
-- New: Write-only secrets — vault values are never returned by the REST API; only a masked hint is shown. Decrypted only at dispatch time to build the outgoing header
-- New: `agent` API token scope — full write access (create/update/delete webhooks and credentials) for AI assistants, but can never reveal auth headers or vault secrets
-- New: `FSWA_SECRET_KEY` wp-config constant (optional) — move the encryption key out of the database for stronger protection, with a one-click in-app migration that re-encrypts existing credentials and removes the database key
-- New: "Save to vault" action on the webhook form — migrate an existing manual Authorization header into the vault in one step
-- Improved: Resolved Authorization/custom auth headers are redacted in delivery logs
-- Developer: New REST endpoints under `/fswa/v1/credentials` (CRUD, `key-status`, `reencrypt`); webhooks accept an `auth_credential_id` reference
+= 1.16.0 — 2026-06-22 =
+- New: Full internationalization — the entire admin interface (every screen, dialog, and inline message) and all server-side strings are now translatable, so the plugin is fully translatable and compatible with WPML and Polylang String Translation
+- New: Polish (pl_PL), Simplified Chinese (zh_CN), and Dutch (nl_NL) translations bundled
+- Improved: Stable, hash-free admin bundle filename and handle-based script-translation loading so JavaScript translations resolve reliably across updates
+- Developer: Translation template (`.pot`) regenerated to cover all PHP and JavaScript strings; add a language by dropping in a locale `.po`/`.mo`/`.json` set
 

@@ -399,7 +399,7 @@ onMounted(loadWebhooks)
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h2 class="text-xl font-semibold">{{ __('Webhooks') }}</h2>
-        <p class="text-muted-foreground text-sm">{{ __('Manage your webhook endpoints') }}</p>
+        <p class="text-muted-foreground text-sm">{{ __('Trigger webhooks on WordPress events') }}</p>
       </div>
       <Button @click="router.push('/webhooks/new')" class="self-start sm:self-auto">
         <Plus class="mr-2 h-4 w-4" />

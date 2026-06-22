@@ -5,6 +5,7 @@ import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectC
 import api from '@/lib/api'
 import { usePro } from '@/composables/usePro'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
+import { __, _n, sprintf } from '@/i18n'
 
 const { proActive } = usePro()
 
@@ -41,17 +42,17 @@ const ordinal = (n) => {
 }
 
 const formatDelay = (seconds) => {
-  if (seconds < 60) return `${seconds} second${seconds !== 1 ? 's' : ''}`
+  if (seconds < 60) return sprintf(_n('%d second', '%d seconds', seconds), seconds)
   if (seconds < 3600) {
     const m = Math.floor(seconds / 60)
     const s = seconds % 60
-    const mStr = `${m} minute${m !== 1 ? 's' : ''}`
-    return s > 0 ? `${mStr} ${s}s` : mStr
+    const mStr = sprintf(_n('%d minute', '%d minutes', m), m)
+    return s > 0 ? sprintf(__('%1$s %2$ds'), mStr, s) : mStr
   }
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
-  const hStr = `${h} hour${h !== 1 ? 's' : ''}`
-  return m > 0 ? `${hStr} ${m} min` : hStr
+  const hStr = sprintf(_n('%d hour', '%d hours', h), h)
+  return m > 0 ? sprintf(__('%1$s %2$d min'), hStr, m) : hStr
 }
 
 watch(() => proSettings.value.backoff_strategy, (val) => {
@@ -85,18 +86,18 @@ const backoffPreview = computed(() => {
   const peak = Math.max(...delays, 1)
   return delays.map((d, i) => ({
     delay: d,
-    label: `Wait ${formatDelay(d)}`,
+    label: sprintf(__('Wait %s'), formatDelay(d)),
     height: Math.max(4, Math.round((d / peak) * 56)),
-    retryLabel: `${ordinal(i + 1)} Retry`,
+    retryLabel: sprintf(__('%s Retry'), ordinal(i + 1)),
   }))
 })
 
 const retentionOptions = [
-  { value: '7', label: '7 days' },
-  { value: '14', label: '14 days' },
-  { value: '30', label: '30 days' },
-  { value: '60', label: '60 days' },
-  { value: '90', label: '90 days' },
+  { value: '7', label: sprintf(_n('%d day', '%d days', 7), 7) },
+  { value: '14', label: sprintf(_n('%d day', '%d days', 14), 14) },
+  { value: '30', label: sprintf(_n('%d day', '%d days', 30), 30) },
+  { value: '60', label: sprintf(_n('%d day', '%d days', 60), 60) },
+  { value: '90', label: sprintf(_n('%d day', '%d days', 90), 90) },
 ]
 
 // Radix-vue Select requires string values; convert to/from number
@@ -167,7 +168,7 @@ const saveProSettings = async () => {
       backoff_base_delay:  s.backoff_base_delay !== '' ? parseInt(s.backoff_base_delay, 10) : null,
       backoff_max_delay:   s.backoff_max_delay !== '' ? parseInt(s.backoff_max_delay, 10) : null,
     })
-    success.value = 'Retry settings saved'
+    success.value = __('Retry settings saved')
     setTimeout(() => { success.value = null }, 3000)
   } catch (e) {
     error.value = e.message
@@ -190,7 +191,7 @@ const saveSettings = async () => {
       window.location.reload()
       return
     }
-    success.value = 'Settings saved successfully'
+    success.value = __('Settings saved successfully')
     setTimeout(() => {
       success.value = null
     }, 3000)
@@ -221,7 +222,7 @@ const clearLogs = async () => {
   try {
     await api.settings.clearLogs()
     showClearDialog.value = false
-    success.value = 'All logs have been cleared'
+    success.value = __('All logs have been cleared')
     await loadData()
     setTimeout(() => {
       success.value = null
@@ -243,7 +244,7 @@ const regenerateCronToken = async () => {
     cronInfo.value.token = result.token
     cronInfo.value.cron_url = result.cron_url
     cronInfo.value.cron_command = `*/1 * * * * curl -fsS '${result.cron_url}' >/dev/null 2>&1`
-    success.value = 'Cron token regenerated. Update your crontab with the new command.'
+    success.value = __('Cron token regenerated. Update your crontab with the new command.')
     setTimeout(() => {
       success.value = null
     }, 5000)
@@ -262,13 +263,13 @@ onMounted(loadData)
   <div>
     <!-- Header -->
     <div class="mb-6">
-      <h2 class="text-xl font-semibold">Settings</h2>
-      <p class="text-muted-foreground">Configure plugin behavior</p>
+      <h2 class="text-xl font-semibold">{{ __('Settings') }}</h2>
+      <p class="text-muted-foreground">{{ __('Configure plugin behavior') }}</p>
     </div>
 
     <!-- Loading -->
     <div v-if="loading" class="text-center py-8 text-muted-foreground">
-      Loading settings...
+      {{ __('Loading settings...') }}
     </div>
 
     <template v-else>
@@ -288,26 +289,24 @@ onMounted(loadData)
           <Card v-if="cronInfo" class="p-6">
             <h3 class="text-lg font-medium mb-4">
               <Clock class="inline h-5 w-5 mr-2" />
-              Queue Processor (Cron)
+              {{ __('Queue Processor (Cron)') }}
             </h3>
 
             <div class="space-y-4">
               <div>
                 <p class="text-sm text-muted-foreground mb-4">
                   <span v-if="cronInfo.action_scheduler_active">
-                    Action Scheduler detected — queue processing is managed automatically.
-                    You can still configure an external cron URL as a direct trigger.
+                    {{ __('Action Scheduler detected — queue processing is managed automatically. You can still configure an external cron URL as a direct trigger.') }}
                   </span>
                   <span v-else>
-                    For reliable webhook delivery, set up a system cron job to process the queue every minute.
-                    WP-Cron serves as a fallback when system cron isn't configured.
+                    {{ __("For reliable webhook delivery, set up a system cron job to process the queue every minute. WP-Cron serves as a fallback when system cron isn't configured.") }}
                   </span>
                 </p>
               </div>
 
               <!-- Cron Command -->
               <div class="space-y-2">
-                <Label>Crontab Command</Label>
+                <Label>{{ __('Crontab Command') }}</Label>
                 <div class="flex gap-2">
                   <code class="flex-1 p-3 bg-muted rounded text-xs font-mono break-all select-all">
                     {{ cronInfo.cron_command }}
@@ -322,14 +321,14 @@ onMounted(loadData)
                     <Copy v-else class="h-4 w-4" />
                   </Button>
                 </div>
-                <p class="text-xs text-muted-foreground">
-                  Add this line to your server's crontab: <code class="bg-muted px-1 rounded">crontab -e</code>
+                <p class="text-xs text-muted-foreground"
+                   v-html="sprintf(__('Add this line to your server\'s crontab: %1$scrontab -e%2$s'), '<code class=&quot;bg-muted px-1 rounded&quot;>', '</code>')">
                 </p>
               </div>
 
               <!-- Cron URL -->
               <div class="space-y-2">
-                <Label>Cron URL</Label>
+                <Label>{{ __('Cron URL') }}</Label>
                 <div class="flex gap-2">
                   <code class="flex-1 p-3 bg-muted rounded text-xs font-mono break-all select-all">
                     {{ cronInfo.cron_url }}
@@ -349,21 +348,21 @@ onMounted(loadData)
               <!-- Status Grid -->
               <div class="grid grid-cols-2 gap-4 text-sm mt-4 pt-4 border-t">
                 <div>
-                  <div class="font-medium">Last Cron Run</div>
+                  <div class="font-medium">{{ __('Last Cron Run') }}</div>
                   <div class="text-muted-foreground">{{ cronInfo.last_run_human }}</div>
                 </div>
                 <div>
-                  <div class="font-medium">Scheduler</div>
+                  <div class="font-medium">{{ __('Scheduler') }}</div>
                   <div>
-                    <span v-if="cronInfo.action_scheduler_active" class="text-green-600">Action Scheduler</span>
-                    <span v-else class="text-muted-foreground">WP-Cron</span>
+                    <span v-if="cronInfo.action_scheduler_active" class="text-green-600">{{ __('Action Scheduler') }}</span>
+                    <span v-else class="text-muted-foreground">{{ __('WP-Cron') }}</span>
                   </div>
                 </div>
                 <div v-if="!cronInfo.action_scheduler_active">
-                  <div class="font-medium">WP-Cron Fallback</div>
+                  <div class="font-medium">{{ __('WP-Cron Fallback') }}</div>
                   <div class="text-muted-foreground">
-                    <span v-if="cronInfo.wp_cron_disabled" class="text-yellow-600">Disabled</span>
-                    <span v-else class="text-green-600">Active</span>
+                    <span v-if="cronInfo.wp_cron_disabled" class="text-yellow-600">{{ __('Disabled') }}</span>
+                    <span v-else class="text-green-600">{{ __('Active') }}</span>
                   </div>
                 </div>
               </div>
@@ -376,11 +375,10 @@ onMounted(loadData)
                   @click="regenerateCronToken"
                 >
                   <RefreshCw class="mr-2 h-4 w-4" />
-                  Regenerate Token
+                  {{ __('Regenerate Token') }}
                 </Button>
                 <p class="mt-2 text-xs text-muted-foreground">
-                  Regenerating the token will invalidate the current cron URL.
-                  You'll need to update your crontab.
+                  {{ __("Regenerating the token will invalidate the current cron URL. You'll need to update your crontab.") }}
                 </p>
               </div>
             </div>
@@ -388,24 +386,24 @@ onMounted(loadData)
 
           <!-- Plugin Info -->
           <Card v-if="info" class="p-6">
-            <h3 class="text-lg font-medium mb-4">Plugin Info</h3>
+            <h3 class="text-lg font-medium mb-4">{{ __('Plugin Info') }}</h3>
 
             <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <div class="font-medium">Plugin Version</div>
+                <div class="font-medium">{{ __('Plugin Version') }}</div>
                 <div class="text-muted-foreground">{{ info.version }}</div>
               </div>
               <div>
-                <div class="font-medium">Database Version</div>
+                <div class="font-medium">{{ __('Database Version') }}</div>
                 <div class="text-muted-foreground">{{ info.db_version }}</div>
               </div>
               <div>
-                <div class="font-medium">Total Logs</div>
+                <div class="font-medium">{{ __('Total Logs') }}</div>
                 <div class="text-muted-foreground">{{ info.logs_count }}</div>
               </div>
               <div>
-                <div class="font-medium">Oldest Log</div>
-                <div class="text-muted-foreground">{{ info.oldest_log || 'N/A' }}</div>
+                <div class="font-medium">{{ __('Oldest Log') }}</div>
+                <div class="text-muted-foreground">{{ info.oldest_log || __('N/A') }}</div>
               </div>
             </div>
           </Card>
@@ -415,11 +413,11 @@ onMounted(loadData)
         <div class="space-y-6">
           <!-- Log Retention -->
           <Card class="p-6">
-            <h3 class="text-lg font-medium mb-4">Log Retention</h3>
+            <h3 class="text-lg font-medium mb-4">{{ __('Log Retention') }}</h3>
 
             <div class="space-y-4">
               <div class="space-y-2">
-                <Label>Keep webhook logs for</Label>
+                <Label>{{ __('Keep webhook logs for') }}</Label>
                 <Select v-model="retentionDays">
                   <SelectTrigger class="w-48">
                     <SelectValue />
@@ -431,12 +429,12 @@ onMounted(loadData)
                   </SelectContent>
                 </Select>
                 <p class="text-sm text-muted-foreground">
-                  Webhook delivery logs older than this will be automatically deleted.
+                  {{ __('Webhook delivery logs older than this will be automatically deleted.') }}
                 </p>
               </div>
 
               <div class="space-y-2">
-                <Label>Keep activity log for</Label>
+                <Label>{{ __('Keep activity log for') }}</Label>
                 <Select v-model="activityRetentionDays">
                   <SelectTrigger class="w-48">
                     <SelectValue />
@@ -448,47 +446,47 @@ onMounted(loadData)
                   </SelectContent>
                 </Select>
                 <p class="text-sm text-muted-foreground">
-                  Admin action history older than this will be automatically deleted.
+                  {{ __('Admin action history older than this will be automatically deleted.') }}
                 </p>
               </div>
 
               <div class="flex items-center space-x-2">
                 <Switch v-model="settings.archive_logs" />
-                <Label>Archive logs before deletion</Label>
+                <Label>{{ __('Archive logs before deletion') }}</Label>
               </div>
               <p class="text-sm text-muted-foreground">
-                When enabled, logs are exported to JSON files before being deleted.
+                {{ __('When enabled, logs are exported to JSON files before being deleted.') }}
               </p>
 
             </div>
 
             <div class="mt-6">
               <Button :loading="saving" @click="saveSettings">
-                Save Settings
+                {{ __('Save Settings') }}
               </Button>
             </div>
           </Card>
 
           <!-- Admin Menu -->
           <Card class="p-6">
-            <h3 class="text-lg font-medium mb-4">Admin Menu</h3>
+            <h3 class="text-lg font-medium mb-4">{{ __('Admin Menu') }}</h3>
 
             <div class="space-y-4">
               <div class="flex items-center space-x-2">
                 <Switch v-model="settings.menu_under_tools" />
-                <Label>Show menu under Tools</Label>
+                <Label>{{ __('Show menu under Tools') }}</Label>
               </div>
               <p class="text-sm text-muted-foreground">
-                Move the admin menu item under Tools instead of the top-level sidebar.
+                {{ __('Move the admin menu item under Tools instead of the top-level sidebar.') }}
                 <span v-if="isPlayground" class="block mt-1 text-yellow-600">
-                  Page reload is disabled on WordPress Playground — the menu will update on next WP menu item click.
+                  {{ __('Page reload is disabled on WordPress Playground — the menu will update on next WP menu item click.') }}
                 </span>
               </p>
             </div>
 
             <div class="mt-6">
               <Button :loading="saving" @click="saveSettings">
-                Save Settings
+                {{ __('Save Settings') }}
               </Button>
             </div>
           </Card>
@@ -498,7 +496,7 @@ onMounted(loadData)
             <div class="flex items-center gap-2 mb-4">
               <h3 class="text-lg font-medium">
                 <RotateCcw class="inline h-5 w-5 mr-2" />
-                Retry Settings
+                {{ __('Retry Settings') }}
               </h3>
               <UpgradeBadge v-if="!proActive" />
             </div>
@@ -508,8 +506,8 @@ onMounted(loadData)
                 <!-- Max Attempts -->
                 <div class="space-y-2">
                   <div class="flex items-center gap-1.5">
-                    <Label for="global_max_attempts">Max Attempts</Label>
-                    <Tooltip content="Total delivery attempts per webhook, including the first try. Once this number is reached the job is permanently failed." side="right">
+                    <Label for="global_max_attempts">{{ __('Max Attempts') }}</Label>
+                    <Tooltip :content="__('Total delivery attempts per webhook, including the first try. Once this number is reached the job is permanently failed.')" side="right">
                       <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
                     </Tooltip>
                   </div>
@@ -519,45 +517,45 @@ onMounted(loadData)
                     type="number"
                     min="1"
                     max="100"
-                    placeholder="5 (plugin default)"
+                    :placeholder="__('5 (plugin default)')"
                     class="w-48"
                   />
                   <p class="text-sm text-muted-foreground">
-                    Total delivery attempts per webhook (including the first try). Leave empty for the plugin default of 5.
+                    {{ __('Total delivery attempts per webhook (including the first try). Leave empty for the plugin default of 5.') }}
                   </p>
                 </div>
 
                 <div class="border-t pt-5 space-y-4">
                   <!-- Backoff Strategy -->
                   <div class="space-y-3">
-                    <Label>Backoff Strategy</Label>
+                    <Label>{{ __('Backoff Strategy') }}</Label>
                     <RadioGroup v-model="proSettings.backoff_strategy" class="space-y-2">
                       <div class="flex items-start gap-2">
                         <RadioGroupItem id="strategy-default" value="" class="mt-0.5" />
                         <label for="strategy-default" class="cursor-pointer">
-                          <div class="text-sm font-medium">Plugin default</div>
-                          <div class="text-xs text-muted-foreground">Exponential — base 30 s, cap 3600 s</div>
+                          <div class="text-sm font-medium">{{ __('Plugin default') }}</div>
+                          <div class="text-xs text-muted-foreground">{{ __('Exponential — base 30 s, cap 3600 s') }}</div>
                         </label>
                       </div>
                       <div class="flex items-start gap-2">
                         <RadioGroupItem id="strategy-exponential" value="exponential" class="mt-0.5" />
                         <label for="strategy-exponential" class="cursor-pointer">
-                          <div class="text-sm font-medium">Exponential</div>
-                          <div class="text-xs text-muted-foreground">Delay doubles each retry: 2ⁿ × base, capped at max</div>
+                          <div class="text-sm font-medium">{{ __('Exponential') }}</div>
+                          <div class="text-xs text-muted-foreground">{{ __('Delay doubles each retry: 2ⁿ × base, capped at max') }}</div>
                         </label>
                       </div>
                       <div class="flex items-start gap-2">
                         <RadioGroupItem id="strategy-linear" value="linear" class="mt-0.5" />
                         <label for="strategy-linear" class="cursor-pointer">
-                          <div class="text-sm font-medium">Linear</div>
-                          <div class="text-xs text-muted-foreground">Delay grows evenly: n × base seconds</div>
+                          <div class="text-sm font-medium">{{ __('Linear') }}</div>
+                          <div class="text-xs text-muted-foreground">{{ __('Delay grows evenly: n × base seconds') }}</div>
                         </label>
                       </div>
                       <div class="flex items-start gap-2">
                         <RadioGroupItem id="strategy-fixed" value="fixed" class="mt-0.5" />
                         <label for="strategy-fixed" class="cursor-pointer">
-                          <div class="text-sm font-medium">Fixed</div>
-                          <div class="text-xs text-muted-foreground">Same delay every retry: base seconds</div>
+                          <div class="text-sm font-medium">{{ __('Fixed') }}</div>
+                          <div class="text-xs text-muted-foreground">{{ __('Same delay every retry: base seconds') }}</div>
                         </label>
                       </div>
                     </RadioGroup>
@@ -567,8 +565,8 @@ onMounted(loadData)
                   <div v-if="proSettings.backoff_strategy !== ''" class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                       <div class="flex items-center gap-1.5">
-                      <Label for="backoff_base_delay">Base Delay (seconds)</Label>
-                      <Tooltip content="The base number of seconds used to calculate each retry delay. Exact role depends on the strategy: multiplier for exponential, interval for linear, constant for fixed." side="right">
+                      <Label for="backoff_base_delay">{{ __('Base Delay (seconds)') }}</Label>
+                      <Tooltip :content="__('The base number of seconds used to calculate each retry delay. Exact role depends on the strategy: multiplier for exponential, interval for linear, constant for fixed.')" side="right">
                         <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
                       </Tooltip>
                     </div>
@@ -583,8 +581,8 @@ onMounted(loadData)
                     </div>
                     <div v-if="proSettings.backoff_strategy === 'exponential'" class="space-y-2">
                       <div class="flex items-center gap-1.5">
-                      <Label for="backoff_max_delay">Max Delay (seconds)</Label>
-                      <Tooltip content="Cap on the wait between retries. Exponential backoff grows 2ⁿ × base — without a cap delays would grow indefinitely. Any calculated delay above this value is clamped to it." side="right">
+                      <Label for="backoff_max_delay">{{ __('Max Delay (seconds)') }}</Label>
+                      <Tooltip :content="__('Cap on the wait between retries. Exponential backoff grows 2ⁿ × base — without a cap delays would grow indefinitely. Any calculated delay above this value is clamped to it.')" side="right">
                         <Info class="h-3.5 w-3.5 text-muted-foreground cursor-help shrink-0" />
                       </Tooltip>
                     </div>
@@ -603,7 +601,7 @@ onMounted(loadData)
 
               <!-- Backoff preview chart -->
               <div v-if="backoffPreview.length" class="border-t pt-5 space-y-2">
-                <p class="text-sm font-medium">Delay preview</p>
+                <p class="text-sm font-medium">{{ __('Delay preview') }}</p>
                 <div class="flex items-end gap-1.5" style="height: 64px;">
                   <div
                     v-for="item in backoffPreview"
@@ -622,19 +620,19 @@ onMounted(loadData)
                     <div class="text-xs text-muted-foreground truncate">{{ item.retryLabel }}</div>
                   </div>
                 </div>
-                <p class="text-xs text-muted-foreground">Wait before each retry</p>
+                <p class="text-xs text-muted-foreground">{{ __('Wait before each retry') }}</p>
               </div>
 
               <div class="mt-6">
                 <Button :loading="savingProSettings" @click="saveProSettings">
-                  Save Retry Settings
+                  {{ __('Save Retry Settings') }}
                 </Button>
               </div>
             </template>
 
             <template v-else>
               <p class="text-sm text-muted-foreground">
-                Configure retry attempts and backoff delay strategy for failed webhooks, globally and per webhook.
+                {{ __('Configure retry attempts and backoff delay strategy for failed webhooks, globally and per webhook.') }}
               </p>
             </template>
           </Card>
@@ -643,52 +641,52 @@ onMounted(loadData)
           <Card v-if="archive" class="p-6">
             <h3 class="text-lg font-medium mb-4">
               <Archive class="inline h-5 w-5 mr-2" />
-              Log Archive
+              {{ __('Log Archive') }}
             </h3>
 
             <div v-if="archive.exists" class="space-y-4">
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div class="font-medium">Size</div>
+                  <div class="font-medium">{{ __('Size') }}</div>
                   <div class="text-muted-foreground">{{ archive.size_human }}</div>
                 </div>
                 <div>
-                  <div class="font-medium">Files</div>
+                  <div class="font-medium">{{ __('Files') }}</div>
                   <div class="text-muted-foreground">{{ archive.files_count }}</div>
                 </div>
                 <div>
-                  <div class="font-medium">Oldest</div>
-                  <div class="text-muted-foreground">{{ archive.oldest_date || 'N/A' }}</div>
+                  <div class="font-medium">{{ __('Oldest') }}</div>
+                  <div class="text-muted-foreground">{{ archive.oldest_date || __('N/A') }}</div>
                 </div>
                 <div>
-                  <div class="font-medium">Newest</div>
-                  <div class="text-muted-foreground">{{ archive.newest_date || 'N/A' }}</div>
+                  <div class="font-medium">{{ __('Newest') }}</div>
+                  <div class="text-muted-foreground">{{ archive.newest_date || __('N/A') }}</div>
                 </div>
               </div>
 
               <Button variant="outline" @click="downloadArchive">
                 <Download class="mr-2 h-4 w-4" />
-                Download Archive (ZIP)
+                {{ __('Download Archive (ZIP)') }}
               </Button>
             </div>
 
             <div v-else class="text-muted-foreground">
-              No archive files yet
+              {{ __('No archive files yet') }}
             </div>
           </Card>
 
           <!-- Danger Zone -->
           <Card class="p-6 border-destructive">
-            <h3 class="text-lg font-medium text-destructive mb-4">Danger Zone</h3>
+            <h3 class="text-lg font-medium text-destructive mb-4">{{ __('Danger Zone') }}</h3>
 
             <div class="space-y-4">
               <div>
                 <Button variant="destructive" @click="showClearDialog = true">
                   <Trash2 class="mr-2 h-4 w-4" />
-                  Clear All Logs
+                  {{ __('Clear All Logs') }}
                 </Button>
                 <p class="mt-2 text-sm text-muted-foreground">
-                  This will permanently delete all logs from the database.
+                  {{ __('This will permanently delete all logs from the database.') }}
                 </p>
               </div>
             </div>
@@ -700,20 +698,20 @@ onMounted(loadData)
     <!-- Clear Logs Dialog -->
     <Dialog
       :open="showClearDialog"
-      title="Clear All Logs"
-      description="This action cannot be undone. All logs will be permanently deleted."
+      :title="__('Clear All Logs')"
+      :description="__('This action cannot be undone. All logs will be permanently deleted.')"
       @close="showClearDialog = false"
     >
       <p class="text-muted-foreground">
-        Are you sure you want to delete all {{ info?.logs_count || 0 }} logs?
+        {{ sprintf(_n('Are you sure you want to delete all %d log?', 'Are you sure you want to delete all %d logs?', info?.logs_count || 0), info?.logs_count || 0) }}
       </p>
 
       <template #footer>
         <Button variant="outline" @click="showClearDialog = false">
-          Cancel
+          {{ __('Cancel') }}
         </Button>
         <Button variant="destructive" :loading="clearing" @click="clearLogs">
-          Delete All Logs
+          {{ __('Delete All Logs') }}
         </Button>
       </template>
     </Dialog>
