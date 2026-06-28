@@ -3,7 +3,12 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    redirect: '/webhooks',
+    redirect: '/ai-builder',
+  },
+  {
+    path: '/ai-builder',
+    name: 'AiBuilder',
+    component: () => import('@/views/AiBuilderView.vue'),
   },
   {
     path: '/webhooks',

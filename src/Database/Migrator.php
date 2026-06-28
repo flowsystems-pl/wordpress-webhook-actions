@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.15.0';
+  private const CURRENT_VERSION = '2.0.0';
 
   /**
    * Run pending migrations
@@ -49,6 +49,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_chain_links',
       $wpdb->prefix . 'fswa_activity_logs',
       $wpdb->prefix . 'fswa_credentials',
+      $wpdb->prefix . 'fswa_agent_conversations',
     ];
 
     foreach ($requiredTables as $table) {
@@ -86,6 +87,7 @@ class Migrator {
       '1.13.0' => [self::class, 'migration_1_13_0'],
       '1.14.0' => [self::class, 'migration_1_14_0'],
       '1.15.0' => [self::class, 'migration_1_15_0'],
+      '2.0.0'  => [self::class, 'migration_2_0_0'],
     ];
   }
 
@@ -674,6 +676,43 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$webhooksTable} ADD KEY idx_auth_credential (auth_credential_id)");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 2.0.0 - AI Builder: persist agent conversations (chat transcript,
+   * the current editable plan, and the last applied recipe for one-click undo).
+   *
+   * Provider API keys for the BYO-key fallback are NOT stored here — they live in
+   * the existing fswa_credentials vault under the new `ai_provider` type, encrypted
+   * at rest by CredentialCipher. This table holds no secrets.
+   */
+  public static function migration_2_0_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $table = $wpdb->prefix . 'fswa_agent_conversations';
+    $sql   = "CREATE TABLE {$table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            uuid VARCHAR(36) NOT NULL DEFAULT '',
+            title VARCHAR(255) NOT NULL DEFAULT '',
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            transport VARCHAR(20) NOT NULL DEFAULT '',
+            model VARCHAR(128) NOT NULL DEFAULT '',
+            transcript_json LONGTEXT DEFAULT NULL,
+            plan_json LONGTEXT DEFAULT NULL,
+            last_recipe_json LONGTEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_uuid (uuid),
+            KEY idx_status (status),
+            KEY idx_updated (updated_at)
+        ) {$charsetCollate};";
+
+    dbDelta($sql);
   }
 
   /**

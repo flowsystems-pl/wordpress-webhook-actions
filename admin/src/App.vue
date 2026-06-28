@@ -12,6 +12,7 @@ import {
   Sparkles,
   Timer,
   History,
+  BrainCircuit,
 } from 'lucide-vue-next';
 import { useTheme } from './composables/useTheme';
 import { usePro } from './composables/usePro';
@@ -23,6 +24,7 @@ const { theme, toggleTheme } = useTheme();
 const { proActive } = usePro();
 
 const navItems = [
+  { path: '/ai-builder', label: __('Build with AI'), icon: BrainCircuit },
   { path: '/webhooks', label: __('Webhooks'), icon: Webhook },
   { path: '/logs', label: __('Logs'), icon: ScrollText },
   { path: '/queue', label: __('Queue'), icon: Clock },

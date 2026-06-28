@@ -25,7 +25,10 @@ class CredentialsController extends WP_REST_Controller {
   protected $namespace = 'fswa/v1';
   protected $rest_base = 'credentials';
 
-  private const TYPES = ['bearer', 'basic', 'api_key', 'custom'];
+  // 'ai_provider' stores an AI provider API key (Anthropic / OpenAI / Google) for
+  // the AI Builder's bring-your-own-key fallback. It behaves like a plain secret
+  // (no outgoing header binding) and is referenced from the fswa_ai_provider option.
+  private const TYPES = ['bearer', 'basic', 'api_key', 'custom', 'ai_provider'];
 
   private CredentialRepository $repository;
   private CredentialCipher     $cipher;

@@ -13,6 +13,7 @@ use FlowSystems\WebhookActions\Services\ActivityLogService;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
 use FlowSystems\WebhookActions\Services\Scheduler;
 use FlowSystems\WebhookActions\Integrations\IntegrationLoader;
+use FlowSystems\WebhookActions\Abilities\AbilityRegistrar;
 
 class App {
   /** Plugin version — single source of truth is FSWA_VERSION in the main file. */
@@ -70,6 +71,10 @@ class App {
 
     // Third-party integrations (loaded only when the plugin is active)
     (new IntegrationLoader())->load();
+
+    // Expose the AI Builder toolset to the WordPress Abilities API (WP 6.9+/7.0)
+    // when available — additive, so the agent works on older versions too.
+    (new AbilityRegistrar())->init();
 
     // Register cleanup cron
     add_action('fswa_cleanup_logs', [$this, 'runLogCleanup']);

@@ -4,7 +4,7 @@ Tags: webhooks, automation, integration, n8n, api
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.16.0
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -18,6 +18,7 @@ Operate WordPress like modern infrastructure — turn any WordPress do_action in
 
 = Core features (free) =
 
+- AI Builder — describe an integration or automation in plain language and the in-admin AI agent proposes an editable plan, then builds and tests the webhooks, mappings, conditions, and chains for you. Uses the WordPress 7.0 AI Client when configured (no keys stored), or your own provider API key encrypted in the Credentials Vault. The plugin's capabilities are also published as WordPress Abilities, so external AI tools (Claude Code, Cursor) can drive the same toolset over MCP
 - Persistent delivery queue with smart retry and exponential backoff — powered by WP-Cron, auto-upgrades to Action Scheduler or System Cron when available, **(Pro)** External Cron for guaranteed reliability
 - Per-event UUID and ISO 8601 timestamp — enable downstream deduplication
 - Delivery logs with full attempt history, request/response inspection, replay, and bulk retry
@@ -100,6 +101,13 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 == Changelog ==
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
+
+= 2.0.0 =
+- New: AI Builder — an in-admin AI agent that builds webhook integrations and automations for you. Describe the outcome in chat; the agent inspects your site, proposes an editable plan, and on approval builds and tests the webhooks, mappings, conditions, and chains. Works plan-first with hybrid confirmation: new webhooks are created disabled, and going live / deleting / editing a live webhook requires explicit confirmation. One-click undo of the last build
+- New: LLM transport auto-detection — uses the WordPress 7.0 AI Client (`wp_ai_client_prompt()`) when a provider is configured (no API key stored), otherwise falls back to your own provider API key stored encrypted in the Credentials Vault
+- New: WordPress Abilities API integration — the plugin's operations (list/create/update webhooks, set mapping/conditions, test dispatch, probe endpoint, manage credentials, build chains) are registered as `flowsystems-webhook-actions/*` abilities, so external AI tools can discover and invoke the same toolset via REST and the MCP Adapter
+- New: Guarded endpoint probe — the agent can make a safe test call to a target API (GET/HEAD by default) to validate a credential or endpoint before wiring a webhook, with an SSRF guard, rate limiting, response-size cap, and full secret redaction
+- Developer: New `fswa_ai_transport` and `fswa_ability_permitted` filters
 
 = 1.16.0 — 2026-06-22 =
 - New: Full internationalization — the entire admin interface (every screen, dialog, and inline message) and all server-side strings are now translatable, so the plugin is fully translatable and compatible with WPML and Polylang String Translation
