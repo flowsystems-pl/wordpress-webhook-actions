@@ -41,6 +41,39 @@ class SchemaRepository {
   }
 
   /**
+   * Find the most recently captured example payload for a trigger on ANY webhook
+   * (optionally excluding one). A do_action payload shape is the same regardless
+   * of which webhook fired, so this lets a freshly created webhook reuse a payload
+   * already captured elsewhere instead of requiring a new test submission.
+   *
+   * @param string $trigger
+   * @param int    $excludeWebhookId
+   * @return array|null
+   */
+  public function findLatestExampleByTrigger(string $trigger, int $excludeWebhookId = 0): ?array {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $schema = $wpdb->get_row(
+      $wpdb->prepare(
+        "SELECT * FROM {$this->schemasTable}
+          WHERE trigger_name = %s
+            AND webhook_id <> %d
+            AND example_payload IS NOT NULL
+            AND example_payload <> ''
+          ORDER BY captured_at DESC, id DESC
+          LIMIT 1",
+        $trigger,
+        $excludeWebhookId
+      ),
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    return $schema ? $this->decodeSchema($schema) : null;
+  }
+
+  /**
    * Get all schemas for a webhook
    *
    * @param int $webhookId

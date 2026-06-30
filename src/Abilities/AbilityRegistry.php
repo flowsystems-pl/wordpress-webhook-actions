@@ -360,8 +360,25 @@ class AbilityRegistry {
     if ($webhookId <= 0 || $trigger === '') {
       return $this->invalid(__('webhook_id and trigger are required.', 'flowsystems-webhook-actions'));
     }
-    $schema = (new SchemaRepository())->findByWebhookAndTrigger($webhookId, $trigger);
-    return ['schema' => $schema];
+    $repo   = new SchemaRepository();
+    $schema = $repo->findByWebhookAndTrigger($webhookId, $trigger);
+    if (!empty($schema['example_payload'])) {
+      return ['schema' => $schema];
+    }
+
+    // Reuse a payload already captured for this trigger on another webhook — the
+    // do_action payload shape is the same — so we don't force a fresh test.
+    $borrowed = $repo->findLatestExampleByTrigger($trigger, $webhookId);
+    if (!empty($borrowed['example_payload'])) {
+      $schema = array_merge(
+        $schema ?: ['webhook_id' => $webhookId, 'trigger_name' => $trigger],
+        ['example_payload' => $borrowed['example_payload']]
+      );
+      return ['schema' => $schema, 'borrowed_from_webhook_id' => (int) ($borrowed['webhook_id'] ?? 0)];
+    }
+
+    // Nothing captured anywhere yet → null signals "submit a test first".
+    return ['schema' => null];
   }
 
   public function getLogs(array $input): array {

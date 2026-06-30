@@ -8,32 +8,45 @@ import {
   Trash2,
   ShieldAlert,
   Play,
-  Undo2,
   CheckCircle2,
   XCircle,
+  AlertCircle,
+  Circle,
   Loader2,
   Settings2,
 } from 'lucide-vue-next';
-import { Button } from '@/components/ui';
+import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
 import AiProviderSettings from '@/components/AiProviderSettings.vue';
+import AiDevPanel from '@/components/AiDevPanel.vue';
+import AiPlanStepper from '@/components/AiPlanStepper.vue';
+import { abilityTitle, fieldMeta } from '@/lib/aiLabels';
 import { api } from '@/lib/api';
 import { __ } from '@/i18n';
+
+// The dev trace panel renders only under the Vite dev server, never in the
+// shipped production build (admin/dist).
+const isDev = import.meta.env.DEV;
+const devPanel = ref(null);
 
 // ---- State ---------------------------------------------------------------
 const loading = ref(true);
 const status = ref(null);
 const conversations = ref([]);
+const abilities = ref({});
 const activeId = ref(null);
 const transcript = ref([]);
 const plan = ref([]);
 const messageInput = ref('');
 const sending = ref(false);
-const executing = ref(false);
-const execResult = ref(null);
-const pendingConfirm = ref(null);
 const error = ref('');
 const transcriptEl = ref(null);
+
+// ---- Execution state machine ---------------------------------------------
+const execution = ref(null);      // { mode, cursor, refs, steps[] }
+const running = ref(false);       // the step loop is in flight
+const inputDraft = ref({});       // user-typed values for a blocked_input step
+const ANIM_DELAY = 450;           // ms between auto-advanced steps (animation breathing room)
 
 // ---- Provider settings ---------------------------------------------------
 const showSettings = ref(false);
@@ -60,23 +73,53 @@ function onSettingsUpdate(newStatus) {
   status.value = newStatus;
 }
 
-// Steps the user has confirmed for the next execute call.
-const confirmedSteps = computed(() =>
-  plan.value.filter((s) => s._confirmed).map((s) => s.id)
+// ---- Execution-derived state ---------------------------------------------
+const execMode = computed(() => execution.value?.mode || status.value?.exec_mode || 'auto');
+const isReview = computed(() => execMode.value === 'review');
+const execSteps = computed(() => execution.value?.steps || []);
+const execCursor = computed(() => execution.value?.cursor ?? 0);
+const execFinished = computed(() => !!execution.value && execCursor.value >= execSteps.value.length);
+// The step currently being processed / awaiting the user (at the cursor).
+const currentStep = computed(() => execSteps.value[execCursor.value] || null);
+// Which step the user is viewing in the main panel. Null = follow the cursor.
+const focusedIndex = ref(null);
+const focusedStep = computed(() => execSteps.value[focusedIndex.value ?? execCursor.value] || null);
+const focusedIsCurrent = computed(
+  () => (focusedIndex.value ?? execCursor.value) === execCursor.value && !execFinished.value
 );
-const hasUnconfirmed = computed(() =>
-  plan.value.some((s) => s.requires_confirm && !s._confirmed)
+// Review mode, nothing run yet: show the plan for inspection before the first run.
+const reviewPreRun = computed(() =>
+  !!execution.value && isReview.value && execCursor.value === 0 &&
+  execSteps.value.every((s) => s.status === 'pending') && !running.value
+);
+// A paused-but-runnable run the user can resume (e.g. after leaving the panel).
+const canContinue = computed(() =>
+  !!execution.value && !execFinished.value && !running.value &&
+  currentStep.value?.status === 'pending' && !reviewPreRun.value
 );
 
 // ---- Lifecycle -----------------------------------------------------------
 onMounted(async () => {
   try {
     await refreshStatus();
-    await loadConversations();
+    await Promise.all([loadConversations(), loadAbilities()]);
+    // Restore the most recent build (newest first) so its progress resumes.
+    if (!activeId.value && conversations.value.length) {
+      await selectConversation(conversations.value[0]);
+    }
   } finally {
     loading.value = false;
   }
 });
+
+async function loadAbilities() {
+  try {
+    const res = await api.agent.abilities();
+    abilities.value = res.abilities || {};
+  } catch (e) {
+    // Non-fatal: the plan still renders, just without typed field editors.
+  }
+}
 
 async function refreshStatus() {
   try {
@@ -106,15 +149,24 @@ async function newChat() {
   }
 }
 
+function onSwitchConversation(idStr) {
+  const id = parseInt(idStr, 10);
+  const conv = conversations.value.find((c) => c.id === id);
+  if (conv) selectConversation(conv);
+}
+
 async function selectConversation(conv) {
   activeId.value = conv.id;
-  execResult.value = null;
-  pendingConfirm.value = null;
+  inputDraft.value = {};
+  focusedIndex.value = null;
   try {
     const full = await api.agent.getConversation(conv.id);
     transcript.value = full.transcript_json || [];
     plan.value = decoratePlan(full.plan_json || []);
+    // Restore any in-progress run so the user resumes where they left off.
+    execution.value = full.execution_json || null;
     await scrollDown();
+    maybeResumePrereq();
   } catch (e) {
     error.value = e.message;
   }
@@ -128,12 +180,37 @@ async function removeConversation(conv) {
     activeId.value = null;
     transcript.value = [];
     plan.value = [];
+    execution.value = null;
   }
 }
 
-// Attach a local _confirmed flag for the UI without mutating server data.
+// Attach a local _confirmed flag for the UI without mutating server data, and
+// guarantee an input object so field editors can bind to it.
 function decoratePlan(steps) {
-  return (steps || []).map((s) => ({ ...s, _confirmed: false }));
+  return (steps || []).map((s) => ({ ...s, input: s.input || {}, _confirmed: false }));
+}
+
+// ---- Plan-step input schema ----------------------------------------------
+function abilityFor(name) {
+  return abilities.value[name] || null;
+}
+
+// Fields to ask for on a blocked_input step (the missing keys + their schema meta).
+function missingFields(step) {
+  const a = abilityFor(step?.ability);
+  const props = a?.input_schema?.properties || {};
+  return (step?.missing || []).map((key) => {
+    const spec = props[key] || { type: 'string' };
+    return { key, type: spec.type || 'string', enum: spec.enum || null };
+  });
+}
+
+// Fold any clarifying questions into the assistant bubble so they're actually
+// visible (mirrors how the server stores them in the transcript).
+function foldReply(message, questions) {
+  const qs = questions || [];
+  if (!qs.length) return message || '';
+  return [message || '', ...qs.map((q) => `• ${q}`)].filter(Boolean).join('\n');
 }
 
 // ---- Chat ----------------------------------------------------------------
@@ -147,60 +224,91 @@ async function send() {
 
   sending.value = true;
   error.value = '';
-  execResult.value = null;
-  pendingConfirm.value = null;
+  execution.value = null;
+  inputDraft.value = {};
+  focusedIndex.value = null;
   transcript.value.push({ role: 'user', content: text });
   messageInput.value = '';
   await scrollDown();
 
   try {
     const res = await api.agent.message(activeId.value, text);
-    transcript.value.push({ role: 'assistant', content: res.assistant_message });
+    transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
     plan.value = decoratePlan(res.plan || []);
+    execution.value = res.execution || null;
     await scrollDown();
     await loadConversations();
+    devPanel.value?.refresh();
+    // Auto mode: start running the plan immediately. Review mode waits for "Run plan".
+    if (execution.value && execMode.value === 'auto') {
+      advance();
+    }
   } catch (e) {
     error.value = e.message;
+    devPanel.value?.refresh();
   } finally {
     sending.value = false;
   }
 }
 
-function removeStep(id) {
-  plan.value = plan.value.filter((s) => s.id !== id);
-}
+// ---- Execution loop ------------------------------------------------------
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ---- Execute -------------------------------------------------------------
-async function buildIt() {
-  if (!plan.value.length || executing.value) return;
-  executing.value = true;
+// Advance the plan one step, then auto-chain while the server says to continue.
+// `opts` (patch / confirm / skip) apply only to the FIRST call of this run.
+async function advance(opts = {}) {
+  if (running.value || !activeId.value) return;
+  running.value = true;
   error.value = '';
-  pendingConfirm.value = null;
   try {
-    const payload = {
-      plan: plan.value.map(({ _confirmed, ...rest }) => rest),
-      confirmed: confirmedSteps.value,
-    };
-    const res = await api.agent.execute(activeId.value, payload);
-    execResult.value = res;
-    if (res.status === 'needs_confirm') {
-      pendingConfirm.value = res.pending_step;
-    } else if (res.status === 'completed') {
-      // Refresh the plan (now consumed) and transcript.
-      await selectConversation({ id: activeId.value });
+    let first = true;
+    let keepGoing = true;
+    while (keepGoing) {
+      const res = await api.agent.step(activeId.value, first ? opts : {});
+      first = false;
+      execution.value = res.execution;
+      inputDraft.value = {};
+      focusedIndex.value = null; // follow the cursor as it advances
+      devPanel.value?.refresh();
+      keepGoing = res.continue;
+      if (keepGoing) await sleep(ANIM_DELAY);
     }
+    await loadConversations();
   } catch (e) {
     error.value = e.message;
   } finally {
-    executing.value = false;
+    running.value = false;
   }
 }
 
-async function undo() {
-  if (!confirm(__('Undo the last build? This deletes webhooks/chains the agent created.'))) return;
+// A "waiting for a captured payload" pause is a wait-on-external-state condition:
+// it can resolve itself once the payload exists (submitted in the meantime, or
+// already captured on another webhook). Re-check automatically when the user
+// returns to the panel, so they don't have to hit Retry. Other pauses
+// (blocked_input / needs_confirm / failed) genuinely need the user, so we leave them.
+function maybeResumePrereq() {
+  if (currentStep.value?.status === 'blocked_prereq' && !running.value) {
+    advance();
+  }
+}
+
+function continueInput() {
+  advance({ patch: { ...inputDraft.value } });
+}
+function confirmStep() {
+  advance({ confirm: true });
+}
+function retryStep() {
+  advance({});
+}
+function skipStep() {
+  advance({ skip: true });
+}
+
+async function setExecMode(mode) {
   try {
-    const res = await api.agent.undo(activeId.value);
-    execResult.value = { status: 'undone', reverted: res.reverted };
+    const res = await api.agent.setExecMode(mode);
+    if (status.value) status.value = { ...status.value, exec_mode: res.exec_mode };
   } catch (e) {
     error.value = e.message;
   }
@@ -216,6 +324,9 @@ async function scrollDown() {
 
 <template>
   <div>
+    <!-- Developer trace panel (Vite dev server only) -->
+    <AiDevPanel v-if="isDev" ref="devPanel" />
+
     <!-- Heading -->
     <div class="flex items-center gap-2 mb-2">
       <BrainCircuit class="w-6 h-6 text-primary" />
@@ -256,10 +367,16 @@ async function scrollDown() {
               <div class="text-xs text-muted-foreground truncate font-mono">{{ activeModel }}</div>
             </div>
           </div>
-          <Button variant="outline" size="sm" @click="showSettings = !showSettings">
-            <Settings2 class="w-4 h-4 mr-1.5" />
-            {{ __('Change model') }}
-          </Button>
+          <div class="flex items-center gap-3 shrink-0">
+            <label class="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">
+              <Switch :model-value="isReview" @update:model-value="(v) => setExecMode(v ? 'review' : 'auto')" />
+              {{ __('Review plan before running') }}
+            </label>
+            <Button variant="outline" size="sm" @click="showSettings = !showSettings">
+              <Settings2 class="w-4 h-4 mr-1.5" />
+              {{ __('Change model') }}
+            </Button>
+          </div>
         </div>
 
         <div v-if="showSettings" class="border-t border-border p-4">
@@ -267,28 +384,47 @@ async function scrollDown() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
-      <!-- Conversations sidebar -->
-      <aside class="space-y-2">
+      <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
+      <!-- Aside: build switcher + progress stepper -->
+      <aside class="space-y-3">
         <button @click="newChat"
           class="w-full inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
           <Plus class="w-4 h-4" /> {{ __('New build') }}
         </button>
-        <ul class="space-y-1">
-          <li v-for="c in conversations" :key="c.id">
-            <div :class="['group flex items-center justify-between rounded-md px-3 py-2 text-sm cursor-pointer',
-              activeId === c.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted']"
-              @click="selectConversation(c)">
-              <span class="truncate">{{ c.title || __('Untitled build') }}</span>
-              <button @click.stop="removeConversation(c)" class="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
-                <Trash2 class="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </li>
-        </ul>
+
+        <!-- Switch between builds (only meaningful with more than one) -->
+        <div v-if="conversations.length > 1" class="space-y-1">
+          <label class="block text-xs font-medium text-muted-foreground px-1">{{ __('Your builds') }}</label>
+          <div class="flex items-center gap-1.5">
+            <Select :model-value="String(activeId ?? '')" @update:model-value="onSwitchConversation" class="flex-1">
+              <SelectTrigger><SelectValue :placeholder="__('Your builds')" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="c in conversations" :key="c.id" :value="String(c.id)">
+                  {{ c.title || __('Untitled build') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <button v-if="activeId" @click="removeConversation({ id: activeId })" :title="__('Delete this build')"
+              class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted shrink-0">
+              <Trash2 class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Single build: just a delete affordance -->
+        <div v-else-if="activeId" class="flex justify-end">
+          <button @click="removeConversation({ id: activeId })"
+            class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive">
+            <Trash2 class="w-3.5 h-3.5" /> {{ __('Delete build') }}
+          </button>
+        </div>
+
+        <AiPlanStepper v-if="execution && execSteps.length" :steps="execSteps" :abilities="abilities"
+          :cursor="execCursor" :finished="execFinished" :running="running"
+          :selected="focusedIndex ?? execCursor" @select="(i) => (focusedIndex = i)" />
       </aside>
 
-      <!-- Chat + plan -->
+      <!-- Main: chat + the single focused step -->
       <section class="space-y-4">
         <div v-if="!activeId" class="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
           {{ __('Start a new build, then describe what you want to integrate.') }}
@@ -296,7 +432,7 @@ async function scrollDown() {
 
         <template v-else>
           <!-- Transcript -->
-          <div ref="transcriptEl" class="rounded-lg border border-border bg-card p-4 max-h-[420px] overflow-y-auto space-y-3">
+          <div ref="transcriptEl" class="rounded-lg border border-border bg-card p-4 max-h-[300px] overflow-y-auto space-y-3">
             <div v-if="!transcript.length" class="text-sm text-muted-foreground">
               {{ __('e.g. “When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook.”') }}
             </div>
@@ -314,78 +450,123 @@ async function scrollDown() {
 
           <!-- Input -->
           <form @submit.prevent="send" class="flex gap-2">
-            <input v-model="messageInput" type="text" :placeholder="__('Describe what to build…')"
-              class="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground" />
+            <Input v-model="messageInput" type="text" :placeholder="__('Describe what to build…')"
+              class="flex-1" />
             <button type="submit" :disabled="sending || !messageInput.trim()"
               class="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
               <Send class="w-4 h-4" /> {{ __('Send') }}
             </button>
           </form>
 
-          <!-- Editable plan -->
-          <div v-if="plan.length" class="rounded-lg border border-border bg-card p-4">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-foreground">{{ __('Proposed plan') }}</h3>
-              <span class="text-xs text-muted-foreground">{{ __('Review and edit before building') }}</span>
+          <!-- Focused step detail (one step at a time) -->
+          <div v-if="execution && focusedStep" class="rounded-lg border border-border bg-card p-5 space-y-4">
+            <!-- Header -->
+            <div class="flex items-start gap-3">
+              <div class="mt-0.5 shrink-0">
+                <CheckCircle2 v-if="focusedStep.status === 'done'" class="w-5 h-5 text-emerald-500" />
+                <Loader2 v-else-if="running && focusedIsCurrent && focusedStep.status === 'pending'" class="w-5 h-5 animate-spin text-primary" />
+                <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
+                <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
+                <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq'" class="w-5 h-5 text-amber-500" />
+                <Circle v-else class="w-5 h-5 text-primary" />
+              </div>
+              <div class="min-w-0">
+                <h3 class="text-base font-semibold text-foreground leading-snug">
+                  {{ focusedStep.summary || abilityTitle(abilities, focusedStep.ability) }}
+                </h3>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                  {{ __('Step') }} {{ (focusedIndex ?? execCursor) + 1 }} {{ __('of') }} {{ execSteps.length }} · {{ abilityTitle(abilities, focusedStep.ability) }}
+                </p>
+              </div>
             </div>
-            <ol class="space-y-2">
-              <li v-for="(step, idx) in plan" :key="step.id"
-                class="rounded-md border border-border p-3">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                      <span class="text-xs font-mono text-muted-foreground">{{ idx + 1 }}.</span>
-                      <code class="text-xs px-1.5 py-0.5 rounded bg-muted text-foreground">{{ step.ability }}</code>
-                      <span v-if="step.requires_confirm"
-                        class="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                        <ShieldAlert class="w-3.5 h-3.5" /> {{ __('Needs confirmation') }}
-                      </span>
-                    </div>
-                    <p class="text-sm text-foreground">{{ step.summary }}</p>
-                  </div>
-                  <button @click="removeStep(step.id)" class="text-muted-foreground hover:text-destructive shrink-0">
-                    <Trash2 class="w-4 h-4" />
-                  </button>
-                </div>
-                <label v-if="step.requires_confirm" class="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <input type="checkbox" v-model="step._confirmed" /> {{ __('I confirm this step') }}
-                </label>
-              </li>
-            </ol>
 
-            <div class="mt-4 flex items-center gap-2">
-              <button @click="buildIt" :disabled="executing || hasUnconfirmed"
-                class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-                <Loader2 v-if="executing" class="w-4 h-4 animate-spin" />
-                <Play v-else class="w-4 h-4" />
-                {{ __('Build it') }}
-              </button>
-              <span v-if="hasUnconfirmed" class="text-xs text-amber-600 dark:text-amber-400">
-                {{ __('Confirm the highlighted steps to continue.') }}
+            <!-- Active controls (only when this is the step being run) -->
+            <template v-if="focusedIsCurrent">
+              <!-- blocked_input: ask for the missing values, human-labelled -->
+              <div v-if="focusedStep.status === 'blocked_input'" class="space-y-4">
+                <div v-for="f in missingFields(focusedStep)" :key="f.key" class="space-y-1.5">
+                  <label class="block text-sm font-medium text-foreground">{{ fieldMeta(f.key).label }}</label>
+                  <p v-if="fieldMeta(f.key).help" class="text-xs text-muted-foreground">{{ fieldMeta(f.key).help }}</p>
+                  <Select v-if="f.enum" :model-value="String(inputDraft[f.key] ?? '')"
+                    @update:model-value="(v) => (inputDraft[f.key] = v)">
+                    <SelectTrigger><SelectValue :placeholder="fieldMeta(f.key).label" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem v-for="opt in f.enum" :key="opt" :value="opt">{{ opt }}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input v-else v-model="inputDraft[f.key]"
+                    :type="f.type === 'integer' ? 'number' : 'text'"
+                    :placeholder="fieldMeta(f.key).placeholder || fieldMeta(f.key).label" />
+                </div>
+                <Button :disabled="running" @click="continueInput">
+                  <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue') }}
+                </Button>
+              </div>
+
+              <!-- blocked_prereq: need a captured payload -->
+              <div v-else-if="focusedStep.status === 'blocked_prereq'"
+                class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4 text-sm">
+                <p class="text-amber-700 dark:text-amber-300 mb-3">
+                  {{ __('No example payload captured yet. Open a page with your form and submit a test entry, then retry so the agent can map the real fields.') }}
+                </p>
+                <div class="flex gap-2">
+                  <Button size="sm" :disabled="running" @click="retryStep">{{ __('I sent a test — retry') }}</Button>
+                  <Button size="sm" variant="outline" :disabled="running" @click="skipStep">{{ __('Skip') }}</Button>
+                </div>
+              </div>
+
+              <!-- needs_confirm -->
+              <div v-else-if="focusedStep.status === 'needs_confirm'"
+                class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4">
+                <p class="text-sm text-amber-700 dark:text-amber-300 mb-3 flex items-center gap-1.5">
+                  <ShieldAlert class="w-4 h-4" /> {{ __('This step goes live or changes data. Confirm to run it.') }}
+                </p>
+                <div class="flex gap-2">
+                  <Button size="sm" :disabled="running" @click="confirmStep">{{ __('Confirm & run') }}</Button>
+                  <Button size="sm" variant="outline" :disabled="running" @click="skipStep">{{ __('Skip') }}</Button>
+                </div>
+              </div>
+
+              <!-- failed -->
+              <div v-else-if="focusedStep.status === 'failed'"
+                class="rounded-md border border-destructive/40 bg-destructive/10 p-4">
+                <p class="text-sm text-destructive mb-3">{{ focusedStep.error }}</p>
+                <div class="flex gap-2">
+                  <Button size="sm" :disabled="running" @click="retryStep">{{ __('Retry') }}</Button>
+                  <Button size="sm" variant="outline" :disabled="running" @click="skipStep">{{ __('Skip') }}</Button>
+                </div>
+              </div>
+            </template>
+
+            <!-- Non-current step states -->
+            <div v-else-if="focusedStep.status === 'done'" class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 class="w-4 h-4" /> {{ __('Done') }}
+            </div>
+            <div v-else-if="focusedStep.status === 'skipped'" class="text-sm text-muted-foreground">{{ __('Skipped') }}</div>
+            <div v-else-if="!focusedIsCurrent" class="text-sm text-muted-foreground">{{ __('Waiting for earlier steps…') }}</div>
+
+            <!-- Run / continue / finished -->
+            <div v-if="reviewPreRun || canContinue || execFinished || running"
+              class="flex items-center gap-2 pt-3 border-t border-border">
+              <Button v-if="reviewPreRun" :disabled="running" @click="advance()">
+                <Play class="w-4 h-4 mr-1.5" /> {{ __('Run plan') }}
+              </Button>
+              <Button v-else-if="canContinue" :disabled="running" @click="advance()">
+                <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue build') }}
+              </Button>
+              <span v-if="execFinished" class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
+              </span>
+              <span v-else-if="running" class="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Working…') }}
               </span>
             </div>
           </div>
 
-          <!-- Execution result -->
-          <div v-if="execResult" class="rounded-lg border border-border bg-card p-4">
-            <div v-if="execResult.status === 'completed'" class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 mb-2">
-              <CheckCircle2 class="w-4 h-4" /> {{ __('Build applied.') }}
-            </div>
-            <div v-else-if="execResult.status === 'needs_confirm'" class="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 mb-2">
-              <ShieldAlert class="w-4 h-4" />
-              {{ __('Paused for confirmation:') }} {{ pendingConfirm?.summary }}
-            </div>
-            <div v-else-if="execResult.status === 'error'" class="flex items-center gap-2 text-sm text-destructive mb-2">
-              <XCircle class="w-4 h-4" /> {{ execResult.error }}
-            </div>
-            <div v-else-if="execResult.status === 'undone'" class="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-              <Undo2 class="w-4 h-4" /> {{ __('Last build undone.') }}
-            </div>
-
-            <button v-if="execResult.status === 'completed'" @click="undo"
-              class="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted">
-              <Undo2 class="w-3.5 h-3.5" /> {{ __('Undo this build') }}
-            </button>
+          <!-- Finished, nothing focused -->
+          <div v-else-if="execution && execFinished"
+            class="rounded-lg border border-border bg-card p-5 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
           </div>
         </template>
       </section>

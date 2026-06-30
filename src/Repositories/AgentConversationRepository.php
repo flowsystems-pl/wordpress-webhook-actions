@@ -18,7 +18,7 @@ class AgentConversationRepository {
   private string $table;
 
   /** JSON-encoded columns, decoded transparently on read. */
-  private const JSON_COLUMNS = ['transcript_json', 'plan_json', 'last_recipe_json'];
+  private const JSON_COLUMNS = ['transcript_json', 'plan_json', 'last_recipe_json', 'execution_json'];
 
   public function __construct() {
     global $wpdb;
@@ -110,6 +110,7 @@ class AgentConversationRepository {
       'transcript'  => 'transcript_json',
       'plan'        => 'plan_json',
       'last_recipe' => 'last_recipe_json',
+      'execution'   => 'execution_json',
     ];
     foreach ($jsonMap as $friendly => $column) {
       if (array_key_exists($friendly, $data)) {

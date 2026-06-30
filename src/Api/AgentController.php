@@ -18,6 +18,8 @@ use FlowSystems\WebhookActions\Services\Ai\AgentOrchestrator;
 use FlowSystems\WebhookActions\Services\Ai\AnthropicTransport;
 use FlowSystems\WebhookActions\Services\Ai\OpenAiTransport;
 use FlowSystems\WebhookActions\Services\Ai\GoogleTransport;
+use FlowSystems\WebhookActions\Services\Ai\AgentTraceLog;
+use FlowSystems\WebhookActions\Abilities\AbilityRegistry;
 
 /**
  * REST surface for the AI Builder (the in-admin generative integration builder).
@@ -64,6 +66,19 @@ class AgentController extends WP_REST_Controller {
       ['methods' => WP_REST_Server::DELETABLE, 'callback' => [$this, 'deleteByok'], 'permission_callback' => [$this, 'writeCheck']],
     ]);
 
+    register_rest_route($this->namespace, $base . '/traces', [
+      ['methods' => WP_REST_Server::READABLE, 'callback' => [$this, 'listTraces'], 'permission_callback' => [$this, 'readCheck']],
+      ['methods' => WP_REST_Server::DELETABLE, 'callback' => [$this, 'clearTraces'], 'permission_callback' => [$this, 'writeCheck']],
+    ]);
+
+    register_rest_route($this->namespace, $base . '/debug', [
+      ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'setDebug'], 'permission_callback' => [$this, 'writeCheck']],
+    ]);
+
+    register_rest_route($this->namespace, $base . '/abilities', [
+      ['methods' => WP_REST_Server::READABLE, 'callback' => [$this, 'listAbilities'], 'permission_callback' => [$this, 'readCheck']],
+    ]);
+
     register_rest_route($this->namespace, $base . '/conversations', [
       ['methods' => WP_REST_Server::READABLE, 'callback' => [$this, 'listConversations'], 'permission_callback' => [$this, 'readCheck']],
       ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'createConversation'], 'permission_callback' => [$this, 'writeCheck']],
@@ -85,6 +100,14 @@ class AgentController extends WP_REST_Controller {
     register_rest_route($this->namespace, $base . '/conversations/(?P<id>[\d]+)/undo', [
       ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'undo'], 'permission_callback' => [$this, 'writeCheck'], 'args' => $this->idArg()],
     ]);
+
+    register_rest_route($this->namespace, $base . '/conversations/(?P<id>[\d]+)/step', [
+      ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'step'], 'permission_callback' => [$this, 'writeCheck'], 'args' => $this->idArg()],
+    ]);
+
+    register_rest_route($this->namespace, $base . '/exec-mode', [
+      ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'setExecMode'], 'permission_callback' => [$this, 'writeCheck']],
+    ]);
   }
 
   public function readCheck(WP_REST_Request $request): bool|WP_Error {
@@ -103,7 +126,9 @@ class AgentController extends WP_REST_Controller {
    * GET /agent/status — transport configuration for the onboarding / setup card.
    */
   public function status(WP_REST_Request $request): WP_REST_Response {
-    return rest_ensure_response((new LlmTransport())->status());
+    $status              = (new LlmTransport())->status();
+    $status['exec_mode'] = $this->orchestrator->execMode();
+    return rest_ensure_response($status);
   }
 
   /**
@@ -253,6 +278,52 @@ class AgentController extends WP_REST_Controller {
   }
 
   /**
+   * GET /agent/traces — recent LLM call traces for the dev panel.
+   */
+  public function listTraces(WP_REST_Request $request): WP_REST_Response {
+    $trace = new AgentTraceLog();
+    $limit = max(1, min(200, (int) ($request->get_param('limit') ?: 50)));
+    return rest_ensure_response([
+      'enabled' => $trace->isEnabled(),
+      'entries' => $trace->recent($limit),
+    ]);
+  }
+
+  /**
+   * POST /agent/debug — turn trace logging on/off. Body: { enabled: bool }
+   */
+  public function setDebug(WP_REST_Request $request): WP_REST_Response {
+    $trace = new AgentTraceLog();
+    $trace->setEnabled(rest_sanitize_boolean($request->get_param('enabled')));
+    return rest_ensure_response(['enabled' => $trace->isEnabled()]);
+  }
+
+  /**
+   * DELETE /agent/traces — remove all stored trace files.
+   */
+  public function clearTraces(WP_REST_Request $request): WP_REST_Response {
+    $removed = (new AgentTraceLog())->clear();
+    return rest_ensure_response(['cleared' => true, 'files_removed' => $removed]);
+  }
+
+  /**
+   * GET /agent/abilities — ability catalog (label, description, input schema) so
+   * the UI can render editable plan-step fields with required markers.
+   */
+  public function listAbilities(WP_REST_Request $request): WP_REST_Response {
+    $out = [];
+    foreach ((new AbilityRegistry())->definitions() as $name => $def) {
+      $out[$name] = [
+        'label'            => $def['label'] ?? $name,
+        'description'      => $def['description'] ?? '',
+        'requires_confirm' => $def['requires_confirm'] ?? false,
+        'input_schema'     => $def['input_schema'] ?? ['type' => 'object', 'properties' => (object) []],
+      ];
+    }
+    return rest_ensure_response(['abilities' => $out]);
+  }
+
+  /**
    * GET /agent/conversations
    */
   public function listConversations(WP_REST_Request $request): WP_REST_Response {
@@ -325,6 +396,29 @@ class AgentController extends WP_REST_Controller {
   public function undo(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $result = $this->orchestrator->undoLast((int) $request->get_param('id'));
     return is_wp_error($result) ? $result : rest_ensure_response($result);
+  }
+
+  /**
+   * POST /agent/conversations/{id}/step — advance the plan by one step.
+   * Body: { patch?: {key:value}, confirm?: bool, skip?: bool }
+   */
+  public function step(WP_REST_Request $request): WP_REST_Response|WP_Error {
+    $patch = $request->get_param('patch');
+    $opts  = [
+      'patch'   => is_array($patch) ? $patch : [],
+      'confirm' => rest_sanitize_boolean($request->get_param('confirm')),
+      'skip'    => rest_sanitize_boolean($request->get_param('skip')),
+    ];
+    $result = $this->orchestrator->advanceStep((int) $request->get_param('id'), $opts);
+    return is_wp_error($result) ? $result : rest_ensure_response($result);
+  }
+
+  /**
+   * POST /agent/exec-mode — set the global execution mode. Body: { mode: 'auto'|'review' }
+   */
+  public function setExecMode(WP_REST_Request $request): WP_REST_Response {
+    $mode = $this->orchestrator->saveExecMode((string) $request->get_param('mode'));
+    return rest_ensure_response(['exec_mode' => $mode]);
   }
 
   private function notFound(): WP_Error {

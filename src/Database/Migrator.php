@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '2.0.0';
+  private const CURRENT_VERSION = '2.1.0';
 
   /**
    * Run pending migrations
@@ -88,6 +88,7 @@ class Migrator {
       '1.14.0' => [self::class, 'migration_1_14_0'],
       '1.15.0' => [self::class, 'migration_1_15_0'],
       '2.0.0'  => [self::class, 'migration_2_0_0'],
+      '2.1.0'  => [self::class, 'migration_2_1_0'],
     ];
   }
 
@@ -704,6 +705,7 @@ class Migrator {
             transcript_json LONGTEXT DEFAULT NULL,
             plan_json LONGTEXT DEFAULT NULL,
             last_recipe_json LONGTEXT DEFAULT NULL,
+            execution_json LONGTEXT DEFAULT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
@@ -713,6 +715,26 @@ class Migrator {
         ) {$charsetCollate};";
 
     dbDelta($sql);
+  }
+
+  /**
+   * Migration 2.1.0 - AI Builder: persist step-by-step plan execution state so a
+   * build can pause for input / prerequisites and resume after leaving the panel.
+   */
+  public static function migration_2_1_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_agent_conversations';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'execution_json'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN execution_json LONGTEXT DEFAULT NULL");
+    }
+    // phpcs:enable
   }
 
   /**
