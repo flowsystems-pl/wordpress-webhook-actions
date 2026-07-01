@@ -403,12 +403,22 @@ class AgentController extends WP_REST_Controller {
    * Body: { patch?: {key:value}, confirm?: bool, skip?: bool }
    */
   public function step(WP_REST_Request $request): WP_REST_Response|WP_Error {
-    $patch = $request->get_param('patch');
-    $opts  = [
+    $patch     = $request->get_param('patch');
+    $probeFix  = $request->get_param('probe_fix');
+    $opts      = [
       'patch'   => is_array($patch) ? $patch : [],
       'confirm' => rest_sanitize_boolean($request->get_param('confirm')),
       'skip'    => rest_sanitize_boolean($request->get_param('skip')),
     ];
+    if (is_array($probeFix)) {
+      $opts['probe_fix'] = [];
+      if (isset($probeFix['endpoint_url'])) {
+        $opts['probe_fix']['endpoint_url'] = esc_url_raw((string) $probeFix['endpoint_url']);
+      }
+      if (isset($probeFix['auth_credential_id'])) {
+        $opts['probe_fix']['auth_credential_id'] = (int) $probeFix['auth_credential_id'];
+      }
+    }
     $result = $this->orchestrator->advanceStep((int) $request->get_param('id'), $opts);
     return is_wp_error($result) ? $result : rest_ensure_response($result);
   }

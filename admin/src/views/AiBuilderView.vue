@@ -14,6 +14,7 @@ import {
   Circle,
   Loader2,
   Settings2,
+  ExternalLink,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -78,6 +79,17 @@ const execMode = computed(() => execution.value?.mode || status.value?.exec_mode
 const isReview = computed(() => execMode.value === 'review');
 const execSteps = computed(() => execution.value?.steps || []);
 const execCursor = computed(() => execution.value?.cursor ?? 0);
+
+// The webhook this build created, so the user can jump in and tinker once done.
+const builtWebhookId = computed(() => {
+  for (const s of execSteps.value) {
+    if (s.ability === 'create_webhook' && s.status === 'done') {
+      const id = Number(s.result?.webhook?.id);
+      if (id > 0) return id;
+    }
+  }
+  return 0;
+});
 const execFinished = computed(() => !!execution.value && execCursor.value >= execSteps.value.length);
 // The step currently being processed / awaiting the user (at the cursor).
 const currentStep = computed(() => execSteps.value[execCursor.value] || null);
@@ -102,7 +114,7 @@ const canContinue = computed(() =>
 onMounted(async () => {
   try {
     await refreshStatus();
-    await Promise.all([loadConversations(), loadAbilities()]);
+    await Promise.all([loadConversations(), loadAbilities(), loadCredentials()]);
     // Restore the most recent build (newest first) so its progress resumes.
     if (!activeId.value && conversations.value.length) {
       await selectConversation(conversations.value[0]);
@@ -118,6 +130,88 @@ async function loadAbilities() {
     abilities.value = res.abilities || {};
   } catch (e) {
     // Non-fatal: the plan still renders, just without typed field editors.
+  }
+}
+
+// Vault credentials, for the "attach a credential" fix on a 401/403 probe.
+const credentials = ref([]);
+async function loadCredentials() {
+  try {
+    const res = await api.credentials.list();
+    credentials.value = Array.isArray(res) ? res : (res.credentials || res.items || []);
+  } catch (e) {
+    // Non-fatal: the auth fix falls back to a "add one, then retry" hint.
+  }
+}
+
+// Inline probe-fix drafts (blocked_probe: correct the webhook then re-probe).
+const probeUrlDraft = ref('');
+const probeCredDraft = ref('');
+
+// Filterable credential picker for large vaults.
+const credSearch = ref('');
+const filteredCredentials = computed(() => {
+  const q = credSearch.value.trim().toLowerCase();
+  if (!q) return credentials.value;
+  return credentials.value.filter((c) => String(c.name || '').toLowerCase().includes(q));
+});
+
+function fixProbeEndpoint() {
+  const url = probeUrlDraft.value.trim();
+  if (!url) return;
+  probeUrlDraft.value = '';
+  advance({ probe_fix: { endpoint_url: url } });
+}
+function fixProbeAuth() {
+  const id = Number(probeCredDraft.value);
+  if (!id) return;
+  probeCredDraft.value = '';
+  advance({ probe_fix: { auth_credential_id: id } });
+}
+
+// Inline "create a credential, add it to the vault, and assign it" flow for a
+// 401/403 probe — so the user never has to leave the build to set up auth.
+const showCreateCred = ref(false);
+const creatingCred = ref(false);
+const newCred = ref({ name: '', type: 'bearer', secret: '', username: '', password: '', header_name: '' });
+
+function resetNewCred() {
+  newCred.value = { name: '', type: 'bearer', secret: '', username: '', password: '', header_name: '' };
+  showCreateCred.value = false;
+}
+
+const newCredValid = computed(() => {
+  const c = newCred.value;
+  if (!c.name.trim()) return false;
+  if (c.type === 'basic') return !!c.username && !!c.password;
+  if (c.type === 'api_key' || c.type === 'custom') return !!c.secret && !!c.header_name.trim();
+  return !!c.secret; // bearer
+});
+
+async function createAndAssignCred() {
+  if (!newCredValid.value || creatingCred.value) return;
+  creatingCred.value = true;
+  error.value = '';
+  try {
+    const c = newCred.value;
+    const payload = { name: c.name.trim(), type: c.type };
+    if (c.type === 'basic') {
+      payload.username = c.username;
+      payload.password = c.password;
+    } else {
+      payload.secret = c.secret;
+    }
+    if (c.type === 'api_key' || c.type === 'custom') {
+      payload.header_name = c.header_name.trim();
+    }
+    const created = await api.credentials.create(payload);
+    await loadCredentials();
+    resetNewCred();
+    advance({ probe_fix: { auth_credential_id: Number(created.id) } });
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    creatingCred.value = false;
   }
 }
 
@@ -467,7 +561,7 @@ async function scrollDown() {
                 <Loader2 v-else-if="running && focusedIsCurrent && focusedStep.status === 'pending'" class="w-5 h-5 animate-spin text-primary" />
                 <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
                 <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
-                <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq'" class="w-5 h-5 text-amber-500" />
+                <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq' || focusedStep.status === 'blocked_probe'" class="w-5 h-5 text-amber-500" />
                 <Circle v-else class="w-5 h-5 text-primary" />
               </div>
               <div class="min-w-0">
@@ -515,6 +609,70 @@ async function scrollDown() {
                 </div>
               </div>
 
+              <!-- blocked_probe: the probe reached the endpoint but got an actionable status -->
+              <div v-else-if="focusedStep.status === 'blocked_probe'"
+                class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4 text-sm space-y-3">
+                <p class="text-amber-700 dark:text-amber-300">{{ focusedStep.probe?.message }}</p>
+
+                <!-- 401/403: attach a vault credential to the webhook, then re-probe -->
+                <template v-if="focusedStep.probe?.kind === 'auth'">
+                  <!-- Pick an existing vault credential -->
+                  <div v-if="credentials.length && !showCreateCred" class="space-y-2">
+                    <Input v-if="credentials.length > 8" v-model="credSearch" type="text" :placeholder="__('Search credentials…')" />
+                    <Select :model-value="String(probeCredDraft)" @update:model-value="(v) => (probeCredDraft = v)">
+                      <SelectTrigger><SelectValue :placeholder="__('Choose a credential')" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="c in filteredCredentials" :key="c.id" :value="String(c.id)">{{ c.name }}</SelectItem>
+                        <div v-if="!filteredCredentials.length" class="px-2 py-1.5 text-xs text-muted-foreground">{{ __('No matches') }}</div>
+                      </SelectContent>
+                    </Select>
+                    <div class="flex flex-wrap gap-2">
+                      <Button size="sm" :disabled="running || !probeCredDraft" @click="fixProbeAuth">{{ __('Add credential & retry') }}</Button>
+                      <Button size="sm" variant="outline" :disabled="running" @click="showCreateCred = true">{{ __('+ New credential') }}</Button>
+                      <Button size="sm" variant="outline" :disabled="running" @click="skipStep">{{ __('Skip') }}</Button>
+                    </div>
+                  </div>
+
+                  <!-- Create a new vault credential and assign it inline -->
+                  <div v-else class="space-y-2">
+                    <p v-if="!credentials.length" class="text-xs text-muted-foreground">{{ __('No credentials in the vault yet — create one and it will be assigned to this webhook.') }}</p>
+                    <Input v-model="newCred.name" type="text" :placeholder="__('Credential name (e.g. n8n auth)')" />
+                    <Select :model-value="newCred.type" @update:model-value="(v) => (newCred.type = v)">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bearer">{{ __('Bearer token') }}</SelectItem>
+                        <SelectItem value="basic">{{ __('Basic auth') }}</SelectItem>
+                        <SelectItem value="api_key">{{ __('API key (header)') }}</SelectItem>
+                        <SelectItem value="custom">{{ __('Custom header') }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <template v-if="newCred.type === 'basic'">
+                      <Input v-model="newCred.username" type="text" :placeholder="__('Username')" />
+                      <Input v-model="newCred.password" type="password" :placeholder="__('Password')" />
+                    </template>
+                    <Input v-else v-model="newCred.secret" type="password" :placeholder="newCred.type === 'bearer' ? __('Token') : __('Secret value')" />
+                    <Input v-if="newCred.type === 'api_key' || newCred.type === 'custom'" v-model="newCred.header_name" type="text" :placeholder="__('Header name (e.g. X-API-Key)')" />
+                    <div class="flex flex-wrap gap-2">
+                      <Button size="sm" :disabled="running || creatingCred || !newCredValid" @click="createAndAssignCred">{{ __('Create & assign') }}</Button>
+                      <Button v-if="credentials.length" size="sm" variant="outline" :disabled="running || creatingCred" @click="showCreateCred = false">{{ __('Use existing') }}</Button>
+                      <Button size="sm" variant="outline" :disabled="running || creatingCred" @click="skipStep">{{ __('Skip') }}</Button>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- 404 / unreachable: provide a different endpoint URL, then re-probe -->
+                <template v-else>
+                  <div class="space-y-2">
+                    <Input v-model="probeUrlDraft" type="text" :placeholder="__('https://your-endpoint.example/webhook')" />
+                    <div class="flex gap-2">
+                      <Button size="sm" :disabled="running || !probeUrlDraft" @click="fixProbeEndpoint">{{ __('Update URL & retry') }}</Button>
+                      <Button size="sm" variant="outline" :disabled="running" @click="retryStep">{{ __('Retry') }}</Button>
+                      <Button size="sm" variant="outline" :disabled="running" @click="skipStep">{{ __('Skip') }}</Button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+
               <!-- needs_confirm -->
               <div v-else-if="focusedStep.status === 'needs_confirm'"
                 class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4">
@@ -554,9 +712,16 @@ async function scrollDown() {
               <Button v-else-if="canContinue" :disabled="running" @click="advance()">
                 <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue build') }}
               </Button>
-              <span v-if="execFinished" class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
-              </span>
+              <template v-if="execFinished">
+                <span class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
+                </span>
+                <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
+                  <Button size="sm" variant="outline">
+                    <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
+                  </Button>
+                </RouterLink>
+              </template>
               <span v-else-if="running" class="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Working…') }}
               </span>
@@ -565,8 +730,15 @@ async function scrollDown() {
 
           <!-- Finished, nothing focused -->
           <div v-else-if="execution && execFinished"
-            class="rounded-lg border border-border bg-card p-5 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
+            class="rounded-lg border border-border bg-card p-5 flex flex-wrap items-center gap-3 text-sm">
+            <span class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
+            </span>
+            <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
+              <Button size="sm" variant="outline">
+                <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
+              </Button>
+            </RouterLink>
           </div>
         </template>
       </section>

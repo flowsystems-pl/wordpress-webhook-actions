@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '2.1.0';
+  private const CURRENT_VERSION = '2.2.0';
 
   /**
    * Run pending migrations
@@ -89,6 +89,7 @@ class Migrator {
       '1.15.0' => [self::class, 'migration_1_15_0'],
       '2.0.0'  => [self::class, 'migration_2_0_0'],
       '2.1.0'  => [self::class, 'migration_2_1_0'],
+      '2.2.0'  => [self::class, 'migration_2_2_0'],
     ];
   }
 
@@ -186,6 +187,7 @@ class Migrator {
             example_payload LONGTEXT DEFAULT NULL,
             field_mapping LONGTEXT DEFAULT NULL,
             include_user_data TINYINT(1) NOT NULL DEFAULT 0,
+            use_shared_example TINYINT(1) NOT NULL DEFAULT 1,
             conditions LONGTEXT DEFAULT NULL,
             conditions_evaluate_on VARCHAR(20) NOT NULL DEFAULT 'original',
             captured_at DATETIME DEFAULT NULL,
@@ -733,6 +735,26 @@ class Migrator {
     ));
     if (!$exists) {
       $wpdb->query("ALTER TABLE {$table} ADD COLUMN execution_json LONGTEXT DEFAULT NULL");
+    }
+    // phpcs:enable
+  }
+
+  /**
+   * Migration 2.2.0 - Add use_shared_example to trigger_schemas so a webhook can
+   * reuse an example payload captured for the same trigger on another webhook.
+   */
+  public static function migration_2_2_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_trigger_schemas';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'use_shared_example'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN use_shared_example TINYINT(1) NOT NULL DEFAULT 1 AFTER include_user_data");
     }
     // phpcs:enable
   }

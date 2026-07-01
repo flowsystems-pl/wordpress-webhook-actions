@@ -74,6 +74,42 @@ class SchemaRepository {
   }
 
   /**
+   * Resolve the example payload the mapping UI / agent should use for a
+   * webhook+trigger, honoring the per-schema "reuse shared example" toggle.
+   *
+   * - This webhook's own captured example always wins when present.
+   * - Otherwise, when reuse is enabled (default), borrow the most recent example
+   *   captured for the same trigger on any other webhook (the do_action payload
+   *   shape is trigger-global).
+   * - Otherwise nothing — the caller should prompt for a fresh capture.
+   *
+   * @param array|null $schema Pre-fetched row to avoid a duplicate query.
+   * @return array{example: array|string|null, source: string|null, from_webhook_id: int}
+   */
+  public function resolveExample(int $webhookId, string $trigger, ?array $schema = null): array {
+    $schema = $schema ?? $this->findByWebhookAndTrigger($webhookId, $trigger);
+
+    if (!empty($schema['example_payload'])) {
+      return ['example' => $schema['example_payload'], 'source' => 'own', 'from_webhook_id' => $webhookId];
+    }
+
+    // Default to reuse when there is no row yet or the toggle is truthy.
+    $reuse = $schema === null ? true : (bool) ($schema['use_shared_example'] ?? 1);
+    if ($reuse) {
+      $borrowed = $this->findLatestExampleByTrigger($trigger, $webhookId);
+      if (!empty($borrowed['example_payload'])) {
+        return [
+          'example'         => $borrowed['example_payload'],
+          'source'          => 'shared',
+          'from_webhook_id' => (int) ($borrowed['webhook_id'] ?? 0),
+        ];
+      }
+    }
+
+    return ['example' => null, 'source' => null, 'from_webhook_id' => 0];
+  }
+
+  /**
    * Get all schemas for a webhook
    *
    * @param int $webhookId
@@ -133,6 +169,10 @@ class SchemaRepository {
       $insertData['include_user_data'] = (int) $data['include_user_data'];
     }
 
+    if (array_key_exists('use_shared_example', $data)) {
+      $insertData['use_shared_example'] = (int) (bool) $data['use_shared_example'];
+    }
+
     if (array_key_exists('captured_at', $data)) {
       $insertData['captured_at'] = $data['captured_at'];
     }
@@ -160,7 +200,7 @@ class SchemaRepository {
       // Build format array based on data types
       $formats = [];
       foreach ($insertData as $key => $value) {
-        if ($key === 'include_user_data') {
+        if (in_array($key, ['include_user_data', 'use_shared_example'], true)) {
           $formats[] = '%d';
         } else {
           $formats[] = '%s';
@@ -182,7 +222,7 @@ class SchemaRepository {
     // Insert new record - build format array based on data types
     $formats = [];
     foreach ($insertData as $key => $value) {
-      if (in_array($key, ['webhook_id', 'include_user_data'], true)) {
+      if (in_array($key, ['webhook_id', 'include_user_data', 'use_shared_example'], true)) {
         $formats[] = '%d';
       } else {
         $formats[] = '%s';

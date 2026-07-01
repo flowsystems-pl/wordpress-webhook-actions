@@ -14,6 +14,7 @@ import {
   Code2,
   Pencil,
   Info,
+  Share2,
 } from 'lucide-vue-next';
 import { Button, Card, Badge, Switch, Label, Alert, Tooltip, UpgradeBadge } from '@/components/ui';
 import { formatUtcDate } from '@/lib/dates';
@@ -185,7 +186,30 @@ const getCaptureStatus = (trigger) => {
   if (!schema || !schema.example_payload) {
     return { status: 'waiting', date: null };
   }
+  if (schema.example_source === 'shared') {
+    return { status: 'shared', date: null, fromWebhookId: schema.example_from_webhook_id };
+  }
   return { status: 'captured', date: schema.captured_at };
+};
+
+// Whether this webhook may reuse an example captured for the same trigger on
+// another webhook (default on when the schema has no stored preference yet).
+const isReuseEnabled = (trigger) => {
+  const schema = getSchema(trigger);
+  if (!schema || schema.use_shared_example === undefined || schema.use_shared_example === null) {
+    return true;
+  }
+  return !!Number(schema.use_shared_example);
+};
+
+const handleReuseToggle = async (trigger, value) => {
+  savingState.value = { ...savingState.value, [trigger]: true };
+  try {
+    await updateSchema(trigger, { use_shared_example: value });
+    await fetchSchemas(); // refresh so the borrowed example / source updates
+  } finally {
+    savingState.value = { ...savingState.value, [trigger]: false };
+  }
 };
 
 // Handle re-capture
@@ -442,6 +466,14 @@ watch(
               <Check class="h-3 w-3 mr-1" />
               {{ __('Payload Example Captured') }}
             </Badge>
+            <Badge
+              v-else-if="getCaptureStatus(trigger).status === 'shared'"
+              variant="secondary"
+              class="text-xs"
+            >
+              <Share2 class="h-3 w-3 mr-1" />
+              {{ __('Shared Example') }}
+            </Badge>
             <Badge v-else variant="secondary" class="text-xs">
               <Clock class="h-3 w-3 mr-1" />
               {{ __('No Payload Captured Yet') }}
@@ -510,6 +542,15 @@ watch(
                   formatDate(getCaptureStatus(trigger).date)
                 }}</span>
               </template>
+              <template v-else-if="getCaptureStatus(trigger).status === 'shared'">
+                <span class="text-foreground inline-flex items-center gap-1">
+                  <Share2 class="h-3.5 w-3.5 text-muted-foreground" />
+                  {{ __('Reusing an example captured for this trigger on another webhook') }}
+                  <template v-if="getCaptureStatus(trigger).fromWebhookId">
+                    (#{{ getCaptureStatus(trigger).fromWebhookId }})</template
+                  >
+                </span>
+              </template>
               <template v-else>
                 <span class="text-muted-foreground"
                   >{{ __('Waiting for trigger to capture example payload...') }}</span
@@ -529,6 +570,21 @@ watch(
               />
               {{ __('Re-capture') }}
             </Button>
+          </div>
+
+          <!-- Reuse a shared example from another webhook for the same trigger -->
+          <div class="flex items-start justify-between gap-3">
+            <div class="text-sm">
+              <Label class="font-medium">{{ __('Reuse example from other webhooks') }}</Label>
+              <p class="text-xs text-muted-foreground mt-0.5 max-w-md">
+                {{ __('The payload shape is the same for a trigger everywhere, so a new webhook can borrow an example already captured elsewhere. Turn off to require this webhook to capture its own.') }}
+              </p>
+            </div>
+            <Switch
+              :model-value="isReuseEnabled(trigger)"
+              :disabled="isSaving(trigger)"
+              @update:model-value="(v) => handleReuseToggle(trigger, v)"
+            />
           </div>
 
           <!-- Pre-dispatch Code Glue — inline, right after capture status -->

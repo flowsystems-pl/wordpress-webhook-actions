@@ -251,13 +251,14 @@ class AbilityRegistry {
       // ---- Test / validate ---------------------------------------------
       'probe_endpoint' => [
         'label'        => __('Probe a target endpoint', 'flowsystems-webhook-actions'),
-        'description'  => __('Make a guarded test HTTP call to a target API to validate a credential or endpoint before wiring a webhook. Defaults to GET/HEAD; other methods require confirmation. Returns status, redacted headers and a truncated body. The raw secret is never exposed.', 'flowsystems-webhook-actions'),
+        'description'  => __('Make a guarded test HTTP call to validate an endpoint before going live. To probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its URL, credential and method are reused automatically, so never ask the user for the endpoint URL again. Only pass url for an endpoint not tied to a webhook. Defaults to GET/HEAD; other methods require confirmation. Returns status, redacted headers and a truncated, redacted body. The raw secret is never exposed.', 'flowsystems-webhook-actions'),
         'category'         => 'webhook-actions',
         'scope'            => AuthHelper::SCOPE_FULL,
         'requires_confirm' => 'when_unsafe_method',
         'input_schema'     => [
           'type'       => 'object',
           'properties' => [
+            'webhook_id'         => ['type' => 'integer', 'description' => 'Probe an existing webhook by id; reuses its endpoint URL, credential and method. Prefer this over url when probing a webhook you just created.'],
             'url'                => ['type' => 'string'],
             'method'             => ['type' => 'string', 'enum' => ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'], 'default' => 'GET'],
             'auth_credential_id' => ['type' => 'integer'],
@@ -265,7 +266,7 @@ class AbilityRegistry {
             'body'               => ['type' => 'object'],
             'confirmed'          => ['type' => 'boolean', 'default' => false],
           ],
-          'required'   => ['url'],
+          'required'   => [],
         ],
         'callback'         => [$this, 'probeEndpoint'],
       ],
@@ -362,23 +363,25 @@ class AbilityRegistry {
     }
     $repo   = new SchemaRepository();
     $schema = $repo->findByWebhookAndTrigger($webhookId, $trigger);
-    if (!empty($schema['example_payload'])) {
-      return ['schema' => $schema];
+
+    // Resolve the effective example: this webhook's own capture, or — when reuse
+    // is enabled (the default) — the latest one for the same trigger on another
+    // webhook (the do_action payload shape is trigger-global), so we don't force
+    // a fresh test.
+    $resolved = $repo->resolveExample($webhookId, $trigger, $schema);
+    if ($resolved['example'] === null) {
+      // Nothing captured anywhere yet → null signals "submit a test first".
+      return ['schema' => null];
     }
 
-    // Reuse a payload already captured for this trigger on another webhook — the
-    // do_action payload shape is the same — so we don't force a fresh test.
-    $borrowed = $repo->findLatestExampleByTrigger($trigger, $webhookId);
-    if (!empty($borrowed['example_payload'])) {
-      $schema = array_merge(
-        $schema ?: ['webhook_id' => $webhookId, 'trigger_name' => $trigger],
-        ['example_payload' => $borrowed['example_payload']]
-      );
-      return ['schema' => $schema, 'borrowed_from_webhook_id' => (int) ($borrowed['webhook_id'] ?? 0)];
+    $schema = array_merge(
+      $schema ?: ['webhook_id' => $webhookId, 'trigger_name' => $trigger],
+      ['example_payload' => $resolved['example']]
+    );
+    if ($resolved['source'] === 'shared') {
+      return ['schema' => $schema, 'borrowed_from_webhook_id' => $resolved['from_webhook_id']];
     }
-
-    // Nothing captured anywhere yet → null signals "submit a test first".
-    return ['schema' => null];
+    return ['schema' => $schema];
   }
 
   public function getLogs(array $input): array {
@@ -549,10 +552,39 @@ class AbilityRegistry {
    */
   public function probeEndpoint(array $input): array|WP_Error {
     $url    = esc_url_raw((string) ($input['url'] ?? ''));
-    $method = strtoupper((string) ($input['method'] ?? 'GET'));
+    $method = strtoupper((string) ($input['method'] ?? ''));
+    $authId = (int) ($input['auth_credential_id'] ?? 0);
+
+    // Whether the caller explicitly asked for an unsafe method (vs. inheriting the
+    // webhook's own configured method, which is pre-approved for the webhook the
+    // user is building).
+    $methodExplicit = $method !== '';
+
+    // Probe a webhook we already created: reuse its endpoint URL, credential and
+    // HTTP method so it validates the endpoint the way the webhook will actually
+    // call it (e.g. a POST-only receiver correctly, instead of a false GET 404).
+    // An empty body is sent — a real delivery with the payload is test_dispatch.
+    $webhookId = (int) ($input['webhook_id'] ?? 0);
+    if ($url === '' && $webhookId > 0) {
+      $webhook = (new WebhookRepository())->find($webhookId);
+      if (!$webhook) {
+        return $this->notFound();
+      }
+      $url = esc_url_raw((string) ($webhook['endpoint_url'] ?? ''));
+      if ($authId === 0 && !empty($webhook['auth_credential_id'])) {
+        $authId = (int) $webhook['auth_credential_id'];
+      }
+      if ($method === '') {
+        $method = strtoupper((string) ($webhook['http_method'] ?? 'GET'));
+      }
+    }
+
+    if ($method === '') {
+      $method = 'GET';
+    }
 
     if ($url === '') {
-      return $this->invalid(__('A url is required.', 'flowsystems-webhook-actions'));
+      return $this->invalid(__('A url or webhook_id is required.', 'flowsystems-webhook-actions'));
     }
 
     // SSRF guard: WordPress rejects loopback / private / reserved hosts unless a
@@ -561,7 +593,9 @@ class AbilityRegistry {
       return new WP_Error('fswa_probe_blocked', __('That URL is not allowed (private, reserved or invalid host).', 'flowsystems-webhook-actions'), ['status' => 422]);
     }
 
-    $unsafe = !in_array($method, ['GET', 'HEAD'], true);
+    // Confirmation guards caller-specified unsafe methods on arbitrary URLs. A
+    // webhook's own method is pre-approved — the user is building that webhook.
+    $unsafe = $methodExplicit && !in_array($method, ['GET', 'HEAD'], true);
     if ($unsafe && empty($input['confirmed'])) {
       return new WP_Error('fswa_probe_confirm', __('Non-idempotent probe methods require confirmation.', 'flowsystems-webhook-actions'), ['status' => 412]);
     }
@@ -576,8 +610,8 @@ class AbilityRegistry {
     }
 
     // Inject the vault credential without ever exposing it to the caller.
-    if (!empty($input['auth_credential_id'])) {
-      $injected = $this->resolveCredentialHeader((int) $input['auth_credential_id']);
+    if ($authId > 0) {
+      $injected = $this->resolveCredentialHeader($authId);
       if (is_wp_error($injected)) {
         return $injected;
       }
@@ -592,9 +626,11 @@ class AbilityRegistry {
       'limit_response_size' => self::PROBE_BODY_LIMIT,
       'user-agent'          => 'WordPress/FlowSystemsWebhookActions-AIProbe',
     ];
-    if (in_array($method, ['POST', 'PUT', 'PATCH'], true) && isset($input['body'])) {
+    if (in_array($method, ['POST', 'PUT', 'PATCH'], true)) {
+      // Send a minimal empty JSON body when none is supplied, so POST-only
+      // receivers accept the request instead of rejecting an empty payload.
       $args['headers']['Content-Type'] = 'application/json';
-      $args['body']                    = wp_json_encode($input['body']);
+      $args['body']                    = wp_json_encode(isset($input['body']) ? $input['body'] : new \stdClass());
     }
 
     $response = wp_remote_request($url, $args);
@@ -602,11 +638,13 @@ class AbilityRegistry {
       return ['ok' => false, 'error' => $response->get_error_message()];
     }
 
+    $body = $this->truncate((string) wp_remote_retrieve_body($response), self::PROBE_BODY_LIMIT);
+
     return [
       'ok'      => true,
       'status'  => (int) wp_remote_retrieve_response_code($response),
       'headers' => $this->redactHeaders((array) wp_remote_retrieve_headers($response)->getAll()),
-      'body'    => $this->truncate((string) wp_remote_retrieve_body($response), self::PROBE_BODY_LIMIT),
+      'body'    => $this->redactBody($body, $args['headers']),
     ];
   }
 
@@ -631,8 +669,9 @@ class AbilityRegistry {
     if (isset($input['payload']) && is_array($input['payload'])) {
       $payload = $input['payload'];
     } else {
-      $schema  = (new SchemaRepository())->findByWebhookAndTrigger($id, $trigger);
-      $example = $schema['example_payload'] ?? null;
+      // Use this webhook's own captured example, or — when reuse is enabled — one
+      // captured for the same trigger on another webhook (trigger-global shape).
+      $example = (new SchemaRepository())->resolveExample($id, $trigger)['example'] ?? null;
       if (empty($example)) {
         return new WP_Error('fswa_no_payload', __('No payload provided and no captured example exists yet for this trigger.', 'flowsystems-webhook-actions'), ['status' => 422]);
       }
@@ -734,6 +773,22 @@ class AbilityRegistry {
       }
     }
     return $headers;
+  }
+
+  /**
+   * Redact any secret we sent (the injected auth header values) from a response
+   * body, in case a misconfigured target reflects our request headers back.
+   *
+   * @param array<string, mixed> $sentHeaders The outgoing request headers.
+   */
+  private function redactBody(string $body, array $sentHeaders): string {
+    foreach ($sentHeaders as $key => $value) {
+      $value = (string) $value;
+      if ($value !== '' && preg_match('/authorization|cookie|api[-_]?key|token|secret/i', (string) $key)) {
+        $body = str_replace($value, '***', $body);
+      }
+    }
+    return $body;
   }
 
   private function truncate(string $value, int $limit): string {
