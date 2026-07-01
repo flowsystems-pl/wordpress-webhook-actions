@@ -16,6 +16,7 @@ import {
   Settings2,
   ExternalLink,
   Undo2,
+  RotateCcw,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -71,8 +72,13 @@ const activeProviderLabel = computed(() => {
 });
 
 // The settings component returns a fresh status payload after every change.
-function onSettingsUpdate(newStatus) {
+function onSettingsUpdate(newStatus, action = '') {
   status.value = newStatus;
+  // Once a model is actually picked/activated (WP preference, a BYO model, or
+  // "Use" a provider), close the "Change model" panel so it's clear we're ready.
+  if (action === 'wp' || action.startsWith('model:') || action.startsWith('use:')) {
+    showSettings.value = false;
+  }
 }
 
 // ---- Execution-derived state ---------------------------------------------
@@ -279,6 +285,9 @@ function foldReply(message, questions) {
 }
 
 // ---- Chat ----------------------------------------------------------------
+// The message whose send failed, so the user can retry without re-typing it.
+const retryMessage = ref(null);
+
 async function send() {
   const text = messageInput.value.trim();
   if (!text || sending.value) return;
@@ -289,12 +298,26 @@ async function send() {
 
   sending.value = true;
   error.value = '';
+  retryMessage.value = null;
   execution.value = null;
   focusedIndex.value = null;
   transcript.value.push({ role: 'user', content: text });
   messageInput.value = '';
   await scrollDown();
+  await dispatchMessage(text);
+}
 
+// Re-send the last failed prompt (the user bubble is already in the transcript).
+async function retrySend() {
+  if (!retryMessage.value || sending.value) return;
+  const text = retryMessage.value;
+  sending.value = true;
+  error.value = '';
+  retryMessage.value = null;
+  await dispatchMessage(text);
+}
+
+async function dispatchMessage(text) {
   try {
     const res = await api.agent.message(activeId.value, text);
     transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
@@ -309,6 +332,7 @@ async function send() {
     }
   } catch (e) {
     error.value = e.message;
+    retryMessage.value = text;
     devPanel.value?.refresh();
   } finally {
     sending.value = false;
@@ -639,8 +663,11 @@ async function scrollDown() {
     </div>
 
     <!-- Error toast -->
-    <div v-if="error" class="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-      {{ error }}
+    <div v-if="error" class="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive flex items-center justify-between gap-3">
+      <span>{{ error }}</span>
+      <Button v-if="retryMessage" size="sm" variant="outline" :disabled="sending" @click="retrySend">
+        <RotateCcw class="w-4 h-4 mr-1.5" /> {{ __('Retry') }}
+      </Button>
     </div>
 
     <!-- Delete-build confirmation -->

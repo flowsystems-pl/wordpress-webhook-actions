@@ -33,7 +33,9 @@ async function run(marker, fn) {
   busy.value = marker;
   error.value = '';
   try {
-    emit('update', await fn());
+    // Pass the action marker so the parent can react (e.g. close the "Change
+    // model" panel once a model has actually been picked/activated).
+    emit('update', await fn(), marker);
   } catch (e) {
     error.value = e.message;
   } finally {
