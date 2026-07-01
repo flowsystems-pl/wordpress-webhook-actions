@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { CheckCircle2, XCircle, AlertCircle, Circle, Loader2, ChevronDown } from 'lucide-vue-next';
+import { CheckCircle2, XCircle, AlertCircle, Circle, Loader2, ChevronDown, Undo2 } from 'lucide-vue-next';
 import { shortLabel } from '@/lib/aiLabels';
 import { __ } from '@/i18n';
 
@@ -46,6 +46,7 @@ function toggle(i) {
             <Loader2 v-else-if="running && isActive(i) && step.status === 'pending'" class="w-4 h-4 animate-spin text-primary" />
             <XCircle v-else-if="step.status === 'failed'" class="w-4 h-4 text-destructive" />
             <AlertCircle v-else-if="step.status === 'blocked_input' || step.status === 'blocked_prereq' || step.status === 'blocked_probe' || step.status === 'needs_confirm'" class="w-4 h-4 text-amber-500" />
+            <Undo2 v-else-if="step.status === 'reverted'" class="w-4 h-4 text-muted-foreground" />
             <Circle v-else :class="['w-4 h-4', isActive(i) ? 'text-primary' : 'text-muted-foreground/40']" />
           </span>
           <span :class="['flex-1 min-w-0 text-sm truncate',

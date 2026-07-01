@@ -105,6 +105,10 @@ class AgentController extends WP_REST_Controller {
       ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'step'], 'permission_callback' => [$this, 'writeCheck'], 'args' => $this->idArg()],
     ]);
 
+    register_rest_route($this->namespace, $base . '/conversations/(?P<id>[\d]+)/revert', [
+      ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'revert'], 'permission_callback' => [$this, 'writeCheck'], 'args' => $this->idArg()],
+    ]);
+
     register_rest_route($this->namespace, $base . '/exec-mode', [
       ['methods' => WP_REST_Server::CREATABLE, 'callback' => [$this, 'setExecMode'], 'permission_callback' => [$this, 'writeCheck']],
     ]);
@@ -395,6 +399,14 @@ class AgentController extends WP_REST_Controller {
    */
   public function undo(WP_REST_Request $request): WP_REST_Response|WP_Error {
     $result = $this->orchestrator->undoLast((int) $request->get_param('id'));
+    return is_wp_error($result) ? $result : rest_ensure_response($result);
+  }
+
+  /**
+   * POST /agent/conversations/{id}/revert — undo the most recent applied change.
+   */
+  public function revert(WP_REST_Request $request): WP_REST_Response|WP_Error {
+    $result = $this->orchestrator->revertLast((int) $request->get_param('id'));
     return is_wp_error($result) ? $result : rest_ensure_response($result);
   }
 

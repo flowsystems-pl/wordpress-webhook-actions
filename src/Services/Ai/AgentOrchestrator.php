@@ -6,6 +6,7 @@ defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Abilities\AbilityRegistry;
 use FlowSystems\WebhookActions\Repositories\AgentConversationRepository;
+use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
 use WP_Error;
@@ -62,7 +63,7 @@ class AgentOrchestrator {
     $transcript   = is_array($conversation['transcript_json'] ?? null) ? $conversation['transcript_json'] : [];
     $transcript[] = ['role' => 'user', 'content' => $userMessage];
 
-    $system   = $this->systemPrompt();
+    $system   = $this->systemPrompt() . $this->buildContext($conversation);
     $options  = ['temperature' => 0.2];
     $sent     = $transcript; // Exactly what we hand to the model (before its reply).
     $started  = microtime(true);
@@ -170,10 +171,13 @@ class AgentOrchestrator {
         ];
       }
 
-      $this->activity->log('agent.' . $ability, $this->objectTypeFor($ability), $this->resultObjectId($result), $step['summary'] ?? null, [
-        'new'     => $result,
-        '_reason' => $step['summary'] ?? '',
-      ]);
+      $this->activity->log(
+        'agent.' . $ability,
+        $this->objectTypeFor($ability),
+        $this->resultObjectId($result),
+        $step['summary'] ?? null,
+        $this->abilityLogContext($ability, $result) + ['_reason' => $step['summary'] ?? '']
+      );
 
       $applied[] = ['id' => $stepId, 'ability' => $ability, 'result' => $result];
       $results[] = ['id' => $stepId, 'ability' => $ability, 'ok' => true, 'result' => $result];
@@ -308,7 +312,9 @@ class AgentOrchestrator {
       return $this->persistExecution($conversationId, $execution, $step, false, false);
     }
 
-    // 3) Run the ability.
+    // 3) Snapshot the object's state BEFORE mutating it (so we can revert), then
+    // run the ability.
+    $before = $this->captureBefore((string) $step['ability'], $input);
     $result = $this->registry->execute((string) $step['ability'], $input);
 
     // 3a) Prerequisite not met: get_trigger_schema has nothing captured yet.
@@ -350,9 +356,13 @@ class AgentOrchestrator {
     }
     unset($step['probe']);
 
-    // 3c) Success → record result, expose its id to downstream steps, advance.
+    // 3c) Success → record result (+ pre-state for undo), expose its id to
+    // downstream steps, advance.
     $step['status'] = 'done';
     $step['result'] = $result;
+    if ($before !== null) {
+      $step['prev'] = $before;
+    }
     $steps[$cursor] = $step;
 
     $objectId = $this->resultObjectId((array) $result);
@@ -360,16 +370,210 @@ class AgentOrchestrator {
       $refs[(string) $step['id']] = $objectId;
     }
 
-    $this->activity->log('agent.' . $step['ability'], $this->objectTypeFor((string) $step['ability']), $objectId, $step['summary'] ?? null, [
-      'new'     => $result,
-      '_reason' => $step['summary'] ?? '',
-    ]);
+    $this->activity->log(
+      'agent.' . $step['ability'],
+      $this->objectTypeFor((string) $step['ability']),
+      $objectId,
+      $step['summary'] ?? null,
+      $this->abilityLogContext((string) $step['ability'], $result) + ['_reason' => $step['summary'] ?? '']
+    );
 
     $execution['steps']  = $steps;
     $execution['refs']   = $refs;
     $execution['cursor'] = $cursor + 1;
     $finished            = ($cursor + 1) >= count($steps);
     return $this->persistExecution($conversationId, $execution, $step, !$finished, $finished);
+  }
+
+  /**
+   * Revert the most recent applied change in this build. Walks the executed steps
+   * backwards, finds the last still-applied revertible step, restores its
+   * pre-state (or deletes what it created), and marks it `reverted`. Repeated
+   * calls walk further back — an undo stack.
+   *
+   * @return array<string, mixed>|WP_Error
+   */
+  public function revertLast(int $conversationId): array|WP_Error {
+    $conversation = $this->conversations->find($conversationId);
+    if (!$conversation) {
+      return new WP_Error('fswa_conversation_not_found', __('Conversation not found.', 'flowsystems-webhook-actions'), ['status' => 404]);
+    }
+
+    $execution = is_array($conversation['execution_json'] ?? null) ? $conversation['execution_json'] : null;
+    if ($execution === null) {
+      return new WP_Error('fswa_nothing_to_revert', __('There is nothing to revert.', 'flowsystems-webhook-actions'), ['status' => 409]);
+    }
+
+    $steps = array_values((array) ($execution['steps'] ?? []));
+    for ($i = count($steps) - 1; $i >= 0; $i--) {
+      $step = $steps[$i];
+      if ((string) ($step['status'] ?? '') !== 'done' || !$this->isRevertible($step)) {
+        continue;
+      }
+
+      $revert = $this->applyRevert($step);
+      if (is_wp_error($revert)) {
+        return $revert;
+      }
+      if ($revert === null) {
+        continue;
+      }
+
+      $step['status'] = 'reverted';
+      $steps[$i]      = $step;
+      $execution['steps'] = $steps;
+
+      // Record the undo in the conversation so it shows in the chat and the model
+      // knows the change was rolled back on the next turn.
+      $transcript   = is_array($conversation['transcript_json'] ?? null) ? $conversation['transcript_json'] : [];
+      $note         = sprintf(
+        /* translators: %s: what was undone. */
+        __('↩︎ Reverted: %s', 'flowsystems-webhook-actions'),
+        (string) ($step['summary'] ?? $step['ability'])
+      );
+      $transcript[] = ['role' => 'assistant', 'content' => $note];
+
+      $this->conversations->update($conversationId, [
+        'execution'  => $execution,
+        'transcript' => $transcript,
+      ]);
+
+      $this->activity->log(
+        'agent.revert.' . $step['ability'],
+        $this->objectTypeFor((string) $step['ability']),
+        $this->resultObjectId((array) ($step['result'] ?? [])),
+        $step['summary'] ?? null,
+        ['meta' => ['reverted' => $step['ability']], '_reason' => 'Reverted: ' . ($step['summary'] ?? '')]
+      );
+
+      return [
+        'execution'  => $execution,
+        'transcript' => $transcript,
+        'reverted'   => $step,
+        'continue'   => false,
+        'finished'   => true,
+      ];
+    }
+
+    return new WP_Error('fswa_nothing_to_revert', __('There is nothing left to revert.', 'flowsystems-webhook-actions'), ['status' => 409]);
+  }
+
+  /**
+   * Whether a completed step's change can be undone.
+   *
+   * @param array<string, mixed> $step
+   */
+  private function isRevertible(array $step): bool {
+    return in_array((string) ($step['ability'] ?? ''), [
+      'create_webhook',
+      'update_webhook',
+      'set_mapping',
+      'set_conditions',
+      'assign_credential',
+      'enable_webhook',
+    ], true);
+  }
+
+  /**
+   * Snapshot the current state an ability is about to overwrite, so it can be
+   * restored later. Returns null for abilities whose change is not reverted this
+   * way (create_webhook is undone by deleting its result; reads never mutate).
+   *
+   * @param array<string, mixed> $input Resolved step input.
+   * @return array<string, mixed>|null
+   */
+  private function captureBefore(string $ability, array $input): ?array {
+    $webhookRepo = new WebhookRepository();
+
+    switch ($ability) {
+      case 'update_webhook':
+        $webhook = $webhookRepo->find((int) ($input['id'] ?? 0));
+        if (!$webhook) {
+          return null;
+        }
+        return array_intersect_key(
+          $webhook,
+          array_flip(['name', 'endpoint_url', 'http_method', 'triggers', 'auth_credential_id', 'custom_headers', 'url_params'])
+        );
+
+      case 'enable_webhook':
+        $webhook = $webhookRepo->find((int) ($input['id'] ?? 0));
+        return $webhook ? ['enabled' => !empty($webhook['is_enabled'])] : null;
+
+      case 'assign_credential':
+        $webhook = $webhookRepo->find((int) ($input['webhook_id'] ?? 0));
+        return $webhook ? ['credential_id' => $webhook['auth_credential_id'] ?? null] : null;
+
+      case 'set_mapping':
+        $schema = (new SchemaRepository())->findByWebhookAndTrigger((int) ($input['webhook_id'] ?? 0), (string) ($input['trigger'] ?? ''));
+        return ['field_mapping' => $schema['field_mapping'] ?? null];
+
+      case 'set_conditions':
+        $schema = (new SchemaRepository())->findByWebhookAndTrigger((int) ($input['webhook_id'] ?? 0), (string) ($input['trigger'] ?? ''));
+        return [
+          'conditions'             => $schema['conditions'] ?? null,
+          'conditions_evaluate_on' => $schema['conditions_evaluate_on'] ?? 'original',
+        ];
+
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Apply the inverse of a completed step. Returns the ability result, null when
+   * there is nothing to do, or a WP_Error on failure.
+   *
+   * @param array<string, mixed> $step
+   * @return array<string, mixed>|WP_Error|null
+   */
+  private function applyRevert(array $step) {
+    $ability = (string) ($step['ability'] ?? '');
+    $input   = (array) ($step['input'] ?? []);
+    $prev    = is_array($step['prev'] ?? null) ? $step['prev'] : [];
+    $result  = (array) ($step['result'] ?? []);
+
+    switch ($ability) {
+      case 'create_webhook':
+        $id = (int) ($result['webhook']['id'] ?? 0);
+        return $id > 0 ? $this->registry->execute('delete_webhook', ['id' => $id]) : null;
+
+      case 'update_webhook':
+        if ($prev === []) {
+          return null;
+        }
+        return $this->registry->execute('update_webhook', ['id' => (int) ($input['id'] ?? 0)] + $prev);
+
+      case 'enable_webhook':
+        return $this->registry->execute('enable_webhook', [
+          'id'      => (int) ($input['id'] ?? 0),
+          'enabled' => !empty($prev['enabled']),
+        ]);
+
+      case 'assign_credential':
+        return $this->registry->execute('assign_credential', [
+          'webhook_id'    => (int) ($input['webhook_id'] ?? 0),
+          'credential_id' => $prev['credential_id'] ?? null,
+        ]);
+
+      case 'set_mapping':
+        return $this->registry->execute('set_mapping', [
+          'webhook_id'    => (int) ($input['webhook_id'] ?? 0),
+          'trigger'       => (string) ($input['trigger'] ?? ''),
+          'field_mapping' => $prev['field_mapping'] ?? [],
+        ]);
+
+      case 'set_conditions':
+        return $this->registry->execute('set_conditions', [
+          'webhook_id'             => (int) ($input['webhook_id'] ?? 0),
+          'trigger'                => (string) ($input['trigger'] ?? ''),
+          'conditions'             => $prev['conditions'] ?? [],
+          'conditions_evaluate_on' => $prev['conditions_evaluate_on'] ?? 'original',
+        ]);
+
+      default:
+        return null;
+    }
   }
 
   /**
@@ -660,6 +864,48 @@ class AgentOrchestrator {
   }
 
   /**
+   * Build the activity-log context for an executed ability. Write abilities store
+   * the full result under `new` (the change made). Read/list abilities (e.g.
+   * list_triggers, which returns the whole hook catalog) store only a compact
+   * summary — recording that the agent ran it without bloating the log DB.
+   *
+   * @param mixed $result
+   * @return array<string, mixed>
+   */
+  private function abilityLogContext(string $ability, $result): array {
+    $definitions = $this->registry->definitions();
+    $isRead      = (($definitions[$ability]['scope'] ?? '') === 'read');
+
+    if ($isRead) {
+      return ['meta' => ['result_summary' => $this->summarizeResult($result)]];
+    }
+    return ['new' => $result];
+  }
+
+  /**
+   * Compact a (possibly large) ability result into counts/scalars for logging.
+   *
+   * @param mixed $result
+   * @return array<string, mixed>
+   */
+  private function summarizeResult($result): array {
+    if (!is_array($result)) {
+      return ['type' => gettype($result)];
+    }
+    $summary = [];
+    foreach ($result as $key => $value) {
+      if (is_array($value)) {
+        $summary[(string) $key] = ['count' => count($value)];
+      } elseif (is_scalar($value) || $value === null) {
+        $summary[(string) $key] = $value;
+      } else {
+        $summary[(string) $key] = gettype($value);
+      }
+    }
+    return $summary;
+  }
+
+  /**
    * Map an ability name to an activity-log object type.
    */
   private function objectTypeFor(string $ability): string {
@@ -685,6 +931,54 @@ class AgentOrchestrator {
       }
     }
     return null;
+  }
+
+  /**
+   * A compact catalog of the webhooks that already exist on the site, so the
+   * agent can EDIT them (by numeric id) instead of creating duplicates — whether
+   * the user references one created earlier in this build or names another. The
+   * webhook created in the current build is flagged for focus.
+   */
+  private function buildContext(array $conversation): string {
+    $webhooks = (new WebhookRepository())->getAll();
+    if (empty($webhooks)) {
+      return '';
+    }
+
+    // Highlight the webhook this build created (if any).
+    $builtId   = 0;
+    $execution = is_array($conversation['execution_json'] ?? null) ? $conversation['execution_json'] : null;
+    foreach ((array) ($execution['steps'] ?? []) as $s) {
+      if ((string) ($s['ability'] ?? '') === 'create_webhook' && (string) ($s['status'] ?? '') === 'done') {
+        $id = (int) ($s['result']['webhook']['id'] ?? 0);
+        if ($id > 0) {
+          $builtId = $id;
+        }
+      }
+    }
+
+    $max   = 40;
+    $lines = [];
+    foreach (array_slice($webhooks, 0, $max) as $w) {
+      $id       = (int) ($w['id'] ?? 0);
+      $triggers = implode(', ', (array) ($w['triggers'] ?? []));
+      $lines[]  = sprintf(
+        '- #%d "%s": %s %s; triggers [%s]; %s%s',
+        $id,
+        (string) ($w['name'] ?? ''),
+        strtoupper((string) ($w['http_method'] ?? 'POST')),
+        (string) ($w['endpoint_url'] ?? ''),
+        $triggers,
+        !empty($w['is_enabled']) ? 'ENABLED' : 'disabled',
+        $id === $builtId ? '  <-- created in THIS build' : ''
+      );
+    }
+
+    $block = "\n\nEXISTING WEBHOOKS on this site (edit these by their numeric id — do not duplicate):\n" . implode("\n", $lines);
+    if (count($webhooks) > $max) {
+      $block .= "\n(…and " . (count($webhooks) - $max) . ' more — use list_webhooks / get_webhook to find others.)';
+    }
+    return $block;
   }
 
   /**
@@ -799,6 +1093,19 @@ default.
 
 When a step needs a value produced by an earlier step (e.g. the id of a webhook you create in
 step_2), reference it as {{step_2.id}}. The plugin substitutes the real id at run time.
+
+You can also EDIT webhooks that already exist. If an EXISTING WEBHOOKS section is present below,
+those webhooks are already on the site. When the user asks to change, rename, re-map, add
+conditions to, attach a credential to, enable, disable or delete a webhook — including one they
+name or reference by id, and including the one created earlier in THIS build — find it in that
+list and propose the matching steps (update_webhook, set_mapping, set_conditions,
+assign_credential, enable_webhook, delete_webhook) using its real numeric id. NEVER create a new
+webhook to modify an existing one, and never duplicate a webhook that already fulfils the goal —
+use create_webhook only for a genuinely new integration.
+
+For a simple one-step change or edit, keep assistant_message short, natural and direct — say what
+you're doing (e.g. "Updating the endpoint to https://…" or "Remapping the email field") — do NOT
+announce it as "here's the plan". Reserve plan-style phrasing for genuine multi-step builds.
 
 You MUST reply with a single JSON object and nothing else, matching:
 {

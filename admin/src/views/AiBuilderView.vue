@@ -15,8 +15,9 @@ import {
   Loader2,
   Settings2,
   ExternalLink,
+  Undo2,
 } from 'lucide-vue-next';
-import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
+import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
 import AiProviderSettings from '@/components/AiProviderSettings.vue';
 import AiDevPanel from '@/components/AiDevPanel.vue';
@@ -80,15 +81,26 @@ const isReview = computed(() => execMode.value === 'review');
 const execSteps = computed(() => execution.value?.steps || []);
 const execCursor = computed(() => execution.value?.cursor ?? 0);
 
-// The webhook this build created, so the user can jump in and tinker once done.
+// The webhook this build created OR edited, so the user can jump in and tinker
+// once done. Prefers a created webhook; otherwise the last one the build touched.
 const builtWebhookId = computed(() => {
+  let id = 0;
   for (const s of execSteps.value) {
-    if (s.ability === 'create_webhook' && s.status === 'done') {
-      const id = Number(s.result?.webhook?.id);
-      if (id > 0) return id;
+    if (s.status !== 'done') continue;
+    if (s.ability === 'create_webhook') {
+      const n = Number(s.result?.webhook?.id);
+      if (n > 0) id = n;
+    } else if (s.ability === 'delete_webhook') {
+      id = 0; // deleted — nothing to open
+    } else if (s.ability === 'update_webhook' || s.ability === 'enable_webhook') {
+      const n = Number(s.input?.id);
+      if (n > 0) id = n;
+    } else if (['set_mapping', 'set_conditions', 'assign_credential', 'test_dispatch', 'probe_endpoint', 'get_trigger_schema'].includes(s.ability)) {
+      const n = Number(s.input?.webhook_id);
+      if (n > 0) id = n;
     }
   }
-  return 0;
+  return id;
 });
 const execFinished = computed(() => !!execution.value && execCursor.value >= execSteps.value.length);
 // The step currently being processed / awaiting the user (at the cursor).
@@ -244,8 +256,9 @@ async function newChat() {
 }
 
 function onSwitchConversation(idStr) {
-  const id = parseInt(idStr, 10);
-  const conv = conversations.value.find((c) => c.id === id);
+  // Conversation ids come back from the REST API as strings, so compare loosely
+  // (String vs String) rather than against a parsed number.
+  const conv = conversations.value.find((c) => String(c.id) === String(idStr));
   if (conv) selectConversation(conv);
 }
 
@@ -266,15 +279,40 @@ async function selectConversation(conv) {
   }
 }
 
-async function removeConversation(conv) {
-  if (!confirm(__('Delete this conversation?'))) return;
-  await api.agent.deleteConversation(conv.id);
-  conversations.value = conversations.value.filter((c) => c.id !== conv.id);
-  if (activeId.value === conv.id) {
-    activeId.value = null;
-    transcript.value = [];
-    plan.value = [];
-    execution.value = null;
+// Delete confirmation via our Dialog (not a browser alert).
+const deleteDialogOpen = ref(false);
+const pendingDeleteId = ref(null);
+const deleting = ref(false);
+
+function removeConversation(conv) {
+  pendingDeleteId.value = conv?.id ?? null;
+  deleteDialogOpen.value = true;
+}
+
+async function confirmDeleteConversation() {
+  const id = pendingDeleteId.value;
+  if (id == null) return;
+  deleting.value = true;
+  try {
+    await api.agent.deleteConversation(id);
+    conversations.value = conversations.value.filter((c) => String(c.id) !== String(id));
+    deleteDialogOpen.value = false;
+    pendingDeleteId.value = null;
+    if (String(activeId.value) === String(id)) {
+      // Load the next remaining build so the panel isn't left blank (no refresh needed).
+      if (conversations.value.length) {
+        await selectConversation(conversations.value[0]);
+      } else {
+        activeId.value = null;
+        transcript.value = [];
+        plan.value = [];
+        execution.value = null;
+      }
+    }
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    deleting.value = false;
   }
 }
 
@@ -397,6 +435,31 @@ function retryStep() {
 }
 function skipStep() {
   advance({ skip: true });
+}
+
+// Revert the most recent applied change. Repeated clicks walk further back.
+const REVERTIBLE_ABILITIES = ['create_webhook', 'update_webhook', 'set_mapping', 'set_conditions', 'assign_credential', 'enable_webhook'];
+const hasRevertible = computed(() =>
+  execSteps.value.some((s) => s.status === 'done' && REVERTIBLE_ABILITIES.includes(s.ability))
+);
+
+async function revertLast() {
+  if (running.value || !activeId.value) return;
+  running.value = true;
+  error.value = '';
+  try {
+    const res = await api.agent.revert(activeId.value);
+    execution.value = res.execution;
+    if (res.transcript) transcript.value = res.transcript;
+    focusedIndex.value = null;
+    devPanel.value?.refresh();
+    await scrollDown();
+    await loadConversations();
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    running.value = false;
+  }
 }
 
 async function setExecMode(mode) {
@@ -562,6 +625,7 @@ async function scrollDown() {
                 <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
                 <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
                 <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq' || focusedStep.status === 'blocked_probe'" class="w-5 h-5 text-amber-500" />
+                <Undo2 v-else-if="focusedStep.status === 'reverted'" class="w-5 h-5 text-muted-foreground" />
                 <Circle v-else class="w-5 h-5 text-primary" />
               </div>
               <div class="min-w-0">
@@ -701,6 +765,7 @@ async function scrollDown() {
               <CheckCircle2 class="w-4 h-4" /> {{ __('Done') }}
             </div>
             <div v-else-if="focusedStep.status === 'skipped'" class="text-sm text-muted-foreground">{{ __('Skipped') }}</div>
+            <div v-else-if="focusedStep.status === 'reverted'" class="flex items-center gap-1.5 text-sm text-muted-foreground"><Undo2 class="w-4 h-4" /> {{ __('Reverted') }}</div>
             <div v-else-if="!focusedIsCurrent" class="text-sm text-muted-foreground">{{ __('Waiting for earlier steps…') }}</div>
 
             <!-- Run / continue / finished -->
@@ -721,6 +786,9 @@ async function scrollDown() {
                     <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
                   </Button>
                 </RouterLink>
+                <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
+                  <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
+                </Button>
               </template>
               <span v-else-if="running" class="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Working…') }}
@@ -739,6 +807,9 @@ async function scrollDown() {
                 <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
               </Button>
             </RouterLink>
+            <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
+              <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
+            </Button>
           </div>
         </template>
       </section>
@@ -749,5 +820,20 @@ async function scrollDown() {
     <div v-if="error" class="mt-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {{ error }}
     </div>
+
+    <!-- Delete-build confirmation -->
+    <Dialog
+      :open="deleteDialogOpen"
+      :title="__('Delete this build?')"
+      :description="__('This removes the conversation and its build history. It does not delete any webhooks it created.')"
+      @close="deleteDialogOpen = false"
+    >
+      <template #footer>
+        <Button variant="outline" :disabled="deleting" @click="deleteDialogOpen = false">{{ __('Cancel') }}</Button>
+        <Button variant="destructive" :disabled="deleting" @click="confirmDeleteConversation">
+          <Trash2 class="w-4 h-4 mr-1.5" /> {{ __('Delete build') }}
+        </Button>
+      </template>
+    </Dialog>
   </div>
 </template>

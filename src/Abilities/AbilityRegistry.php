@@ -148,10 +148,10 @@ class AbilityRegistry {
       ],
       'update_webhook' => [
         'label'            => __('Update a webhook', 'flowsystems-webhook-actions'),
-        'description'      => __('Update an existing webhook (endpoint, method, triggers, headers, credential). Editing a live (enabled) webhook requires confirmation.', 'flowsystems-webhook-actions'),
+        'description'      => __('Update an existing webhook (endpoint, method, triggers, headers, credential).', 'flowsystems-webhook-actions'),
         'category'         => 'webhook-actions',
         'scope'            => AuthHelper::SCOPE_FULL,
-        'requires_confirm' => 'when_live',
+        'requires_confirm' => false,
         'input_schema'     => [
           'type'       => 'object',
           'properties' => [

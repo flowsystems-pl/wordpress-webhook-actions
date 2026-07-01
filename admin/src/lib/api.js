@@ -243,6 +243,7 @@ export const api = {
     step: (id, opts = {}) => post(`agent/conversations/${id}/step`, opts),
     setExecMode: (mode) => post('agent/exec-mode', { mode }),
     undo: (id) => post(`agent/conversations/${id}/undo`),
+    revert: (id) => post(`agent/conversations/${id}/revert`),
     // Dev-only trace inspection (see AiDevPanel.vue).
     traces: (limit = 50) => get('agent/traces', { limit }),
     setDebug: (enabled) => post('agent/debug', { enabled }),
