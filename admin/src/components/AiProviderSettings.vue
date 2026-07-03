@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { Loader2, Check, Trash2, KeyRound, Plus } from 'lucide-vue-next';
+import { Loader2, Check, Trash2, KeyRound, Plus, AlertTriangle } from 'lucide-vue-next';
 import { Input, Label, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 import ProviderLogo from './ProviderLogo.vue';
 import { api } from '@/lib/api';
@@ -15,6 +15,20 @@ const error = ref('');
 // ---- Source ---------------------------------------------------------------
 const aiAvailable = computed(() => props.status?.wp_ai_client?.available === true);
 const source = computed(() => props.status?.source || 'auto');
+
+// Is the WordPress 7.0 AI Client code even present? (function_exists on the server)
+const wpClientPresent = computed(() => props.status?.wp_ai_client?.present === true);
+
+// True when the site was set up to use the WordPress AI Client but it is no
+// longer usable — e.g. WordPress was downgraded below 7.0, or every connector
+// was removed. We detect this from a lingering preference or a pinned source
+// while the client reports unavailable, so a fresh pre-7.0 site (which never
+// used it) does not see the notice.
+const wpClientLost = computed(() => {
+  if (aiAvailable.value) return false;
+  const pref = props.status?.wp_ai_client?.preference || {};
+  return source.value === 'wp_ai_client' || !!(pref.provider || pref.model);
+});
 
 // Which configuration UI to show given the toggle + what's actually available.
 const displaySource = computed(() => {
@@ -181,6 +195,24 @@ initWp();
 
     <!-- BYO connectors manager -->
     <div v-else class="space-y-2">
+      <!-- WP AI Client was in use but is gone (e.g. WordPress downgraded below 7.0) -->
+      <div v-if="wpClientLost" class="rounded-md border border-amber-400/50 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2.5 flex gap-2.5">
+        <AlertTriangle class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div class="text-xs space-y-0.5">
+          <p class="font-medium text-amber-800 dark:text-amber-200">
+            {{ __('Your WordPress AI connectors are no longer available.') }}
+          </p>
+          <p class="text-amber-700/90 dark:text-amber-300/80">
+            <template v-if="!wpClientPresent">
+              {{ __('This site no longer includes the WordPress 7.0 AI Client. Connect a provider key below, or restore WordPress 7.0 or later to use your connectors again.') }}
+            </template>
+            <template v-else>
+              {{ __('No WordPress AI connector is currently configured. Add one under Settings → Connectors, or connect a provider key below.') }}
+            </template>
+          </p>
+        </div>
+      </div>
+
       <p class="text-xs text-muted-foreground">
         {{ __('Add an API key for one or more providers. The active provider is used first; if it is rate-limited or fails, the agent automatically falls back to another connected provider.') }}
       </p>
