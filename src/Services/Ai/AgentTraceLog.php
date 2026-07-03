@@ -13,11 +13,12 @@ defined('ABSPATH') || exit;
  * This is the window you need to iterate on prompts: you cannot tune what the
  * model does until you can see what it received and returned.
  *
- * Off by default. Toggled via the `fswa_ai_debug` option (set from the dev panel,
- * which only renders when the SPA runs from the Vite dev server) or by defining
- * the `FSWA_AI_DEBUG` constant. The log dir is protected from web access; even so,
- * traces can contain prompt/payload data, so this is a development aid, not a
- * production feature.
+ * Off by default. Toggled via the `fswa_ai_debug` option (set from the trace
+ * panel's "Logging" switch) or by defining the `FSWA_AI_DEBUG` constant. The
+ * panel itself is shown under the Vite dev server, or in production when the site
+ * enables "AI Dev Trace" in Settings (the `fswa_ai_trace_enabled` option). The log
+ * dir is protected from web access; even so, traces can contain prompt/payload
+ * data, so keep this off unless you are actively debugging.
  */
 class AgentTraceLog {
   private const DIR_NAME    = 'fswa-ai-logs';

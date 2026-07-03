@@ -4,10 +4,11 @@ import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces
 import { Switch } from '@/components/ui';
 import { api } from '@/lib/api';
 
-// Self-contained developer panel: inspects the raw input/output of every LLM
-// call (system prompt, sent messages, raw response). Rendered only when the SPA
-// runs from the Vite dev server (see AiBuilderView.vue). Toggling "Logging"
-// flips the server-side fswa_ai_debug option, after which new calls are recorded.
+// Self-contained diagnostic panel: inspects the raw input/output of every LLM
+// call (system prompt, sent messages, raw request, raw response). Shown under
+// the Vite dev server, and in production when the site enables "AI Dev Trace"
+// in Settings → AI Builder (see AiBuilderView.vue). Toggling "Logging" flips the
+// server-side fswa_ai_debug option, after which new calls are recorded.
 
 const enabled = ref(false);
 const entries = ref([]);

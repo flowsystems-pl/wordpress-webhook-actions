@@ -130,8 +130,11 @@ class AgentController extends WP_REST_Controller {
    * GET /agent/status — transport configuration for the onboarding / setup card.
    */
   public function status(WP_REST_Request $request): WP_REST_Response {
-    $status              = (new LlmTransport())->status();
-    $status['exec_mode'] = $this->orchestrator->execMode();
+    $status                  = (new LlmTransport())->status();
+    $status['exec_mode']     = $this->orchestrator->execMode();
+    // Whether the diagnostic trace panel should be available to this site
+    // (Settings → AI Builder). Off by default; the dev server always shows it.
+    $status['trace_enabled'] = (bool) get_option('fswa_ai_trace_enabled', false);
     return rest_ensure_response($status);
   }
 

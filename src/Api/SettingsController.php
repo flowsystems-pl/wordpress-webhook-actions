@@ -19,6 +19,7 @@ class SettingsController extends WP_REST_Controller {
   private const DEFAULT_ARCHIVE_LOGS = true;
   private const DEFAULT_MENU_UNDER_TOOLS = false;
   private const DEFAULT_ACTIVITY_RETENTION_DAYS = 90;
+  private const DEFAULT_AI_TRACE_ENABLED = false;
 
   /**
    * Register routes
@@ -51,6 +52,9 @@ class SettingsController extends WP_REST_Controller {
             'type'    => 'integer',
             'minimum' => 1,
             'maximum' => 365,
+          ],
+          'ai_trace_enabled' => [
+            'type' => 'boolean',
           ],
         ],
       ],
@@ -101,6 +105,7 @@ class SettingsController extends WP_REST_Controller {
       'archive_logs'                => (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS),
       'menu_under_tools'            => (bool) get_option('fswa_menu_under_tools', self::DEFAULT_MENU_UNDER_TOOLS),
       'activity_log_retention_days' => (int) get_option('fswa_activity_log_retention_days', self::DEFAULT_ACTIVITY_RETENTION_DAYS),
+      'ai_trace_enabled'            => (bool) get_option('fswa_ai_trace_enabled', self::DEFAULT_AI_TRACE_ENABLED),
     ];
 
     return rest_ensure_response($settings);
@@ -139,6 +144,13 @@ class SettingsController extends WP_REST_Controller {
       $oldValues['activity_log_retention_days'] = (int) get_option('fswa_activity_log_retention_days', self::DEFAULT_ACTIVITY_RETENTION_DAYS);
       update_option('fswa_activity_log_retention_days', $actDays);
       $newValues['activity_log_retention_days'] = $actDays;
+    }
+
+    if ($request->has_param('ai_trace_enabled')) {
+      $val = (bool) $request->get_param('ai_trace_enabled');
+      $oldValues['ai_trace_enabled'] = (bool) get_option('fswa_ai_trace_enabled', self::DEFAULT_AI_TRACE_ENABLED);
+      update_option('fswa_ai_trace_enabled', $val);
+      $newValues['ai_trace_enabled'] = $val;
     }
 
     if (!empty($newValues)) {

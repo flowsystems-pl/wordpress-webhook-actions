@@ -28,10 +28,11 @@ import { abilityTitle } from '@/lib/aiLabels';
 import { api } from '@/lib/api';
 import { __ } from '@/i18n';
 
-// The dev trace panel renders only under the Vite dev server, never in the
-// shipped production build (admin/dist).
+// The dev trace panel always renders under the Vite dev server, and in
+// production when the site opts in via Settings → AI Builder (trace_enabled).
 const isDev = import.meta.env.DEV;
 const devPanel = ref(null);
+const showDevPanel = computed(() => isDev || status.value?.trace_enabled === true);
 
 // ---- State ---------------------------------------------------------------
 const loading = ref(true);
@@ -434,7 +435,7 @@ async function scrollDown() {
 <template>
   <div>
     <!-- Developer trace panel (Vite dev server only) -->
-    <AiDevPanel v-if="isDev" ref="devPanel" />
+    <AiDevPanel v-if="showDevPanel" ref="devPanel" />
 
     <!-- Heading -->
     <div class="flex items-center gap-2 mb-2">

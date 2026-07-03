@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { Download, Trash2, Archive, Copy, RefreshCw, Clock, Check, RotateCcw, Info } from 'lucide-vue-next'
+import { Download, Trash2, Archive, Copy, RefreshCw, Clock, Check, RotateCcw, Info, Bug } from 'lucide-vue-next'
 import { Button, Card, Input, Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Switch, Alert, Dialog, UpgradeBadge, RadioGroup, RadioGroupItem, Tooltip } from '@/components/ui'
 import api from '@/lib/api'
 import { usePro } from '@/composables/usePro'
@@ -14,6 +14,7 @@ const settings = ref({
   archive_logs: true,
   menu_under_tools: false,
   activity_log_retention_days: 90,
+  ai_trace_enabled: false,
 })
 const info = ref(null)
 const archive = ref(null)
@@ -481,6 +482,30 @@ onMounted(loadData)
                 <span v-if="isPlayground" class="block mt-1 text-yellow-600">
                   {{ __('Page reload is disabled on WordPress Playground — the menu will update on next WP menu item click.') }}
                 </span>
+              </p>
+            </div>
+
+            <div class="mt-6">
+              <Button :loading="saving" @click="saveSettings">
+                {{ __('Save Settings') }}
+              </Button>
+            </div>
+          </Card>
+
+          <!-- AI Builder -->
+          <Card class="p-6">
+            <h3 class="text-lg font-medium mb-4">
+              <Bug class="inline h-5 w-5 mr-2" />
+              {{ __('AI Builder') }}
+            </h3>
+
+            <div class="space-y-4">
+              <div class="flex items-center space-x-2">
+                <Switch v-model="settings.ai_trace_enabled" />
+                <Label>{{ __('Enable AI Dev Trace') }}</Label>
+              </div>
+              <p class="text-sm text-muted-foreground">
+                {{ __('Adds a diagnostic panel to Build with AI that records the exact prompts and raw responses exchanged with the AI model. Useful for troubleshooting. API keys are always redacted. Leave this off unless you are debugging.') }}
               </p>
             </div>
 
