@@ -22,6 +22,9 @@ class FallbackTransport implements LlmTransportInterface {
   /** The transport that produced the last successful generation. */
   private ?LlmTransportInterface $used = null;
 
+  /** The transport tried most recently (set even when every attempt failed). */
+  private ?LlmTransportInterface $lastAttempted = null;
+
   /**
    * @param array<int, LlmTransportInterface> $transports Ordered, preferred first.
    */
@@ -40,6 +43,7 @@ class FallbackTransport implements LlmTransportInterface {
     $lastError = null;
 
     foreach ($this->transports as $transport) {
+      $this->lastAttempted = $transport;
       $result = $transport->generateText($system, $messages, $options);
 
       if (!is_wp_error($result)) {
@@ -65,5 +69,9 @@ class FallbackTransport implements LlmTransportInterface {
 
   public function model(): string {
     return ($this->used ?? $this->transports[0] ?? null)?->model() ?? '';
+  }
+
+  public function lastRequest(): ?array {
+    return ($this->used ?? $this->lastAttempted)?->lastRequest();
   }
 }

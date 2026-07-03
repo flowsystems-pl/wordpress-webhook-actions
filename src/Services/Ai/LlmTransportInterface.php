@@ -33,4 +33,14 @@ interface LlmTransportInterface {
    * The model this transport will use (for display / logging).
    */
   public function model(): string;
+
+  /**
+   * The exact wire request of the most recent generateText() call — endpoint,
+   * headers (secret values redacted), and the decoded JSON body — or null when
+   * nothing has been sent yet. Transports that don't own the HTTP call (the WP
+   * AI Client) return their best-effort equivalent: what they handed the client.
+   *
+   * @return array<string, mixed>|null
+   */
+  public function lastRequest(): ?array;
 }

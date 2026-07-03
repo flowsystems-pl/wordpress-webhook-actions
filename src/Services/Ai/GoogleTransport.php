@@ -22,6 +22,9 @@ class GoogleTransport implements LlmTransportInterface {
   private int    $credentialId;
   private string $model;
 
+  /** @var array<string, mixed>|null */
+  private ?array $lastRequest = null;
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -46,6 +49,15 @@ class GoogleTransport implements LlmTransportInterface {
     }
 
     $endpoint = sprintf(self::ENDPOINT_TEMPLATE, rawurlencode($model));
+
+    $this->lastRequest = [
+      'endpoint' => $endpoint,
+      'headers'  => [
+        'x-goog-api-key' => '[redacted]',
+        'content-type'   => 'application/json',
+      ],
+      'body'     => $body,
+    ];
 
     $response = wp_remote_post($endpoint, [
       'timeout' => 60,
@@ -83,6 +95,10 @@ class GoogleTransport implements LlmTransportInterface {
 
   public function model(): string {
     return $this->model;
+  }
+
+  public function lastRequest(): ?array {
+    return $this->lastRequest;
   }
 
   /**

@@ -24,6 +24,9 @@ class AnthropicTransport implements LlmTransportInterface {
   private int    $credentialId;
   private string $model;
 
+  /** @var array<string, mixed>|null */
+  private ?array $lastRequest = null;
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -46,6 +49,16 @@ class AnthropicTransport implements LlmTransportInterface {
     if (isset($options['temperature'])) {
       $body['temperature'] = (float) $options['temperature'];
     }
+
+    $this->lastRequest = [
+      'endpoint' => self::ENDPOINT,
+      'headers'  => [
+        'x-api-key'         => '[redacted]',
+        'anthropic-version' => self::API_VERSION,
+        'content-type'      => 'application/json',
+      ],
+      'body'     => $body,
+    ];
 
     $response = wp_remote_post(self::ENDPOINT, [
       'timeout' => 60,
@@ -86,6 +99,10 @@ class AnthropicTransport implements LlmTransportInterface {
 
   public function model(): string {
     return $this->model;
+  }
+
+  public function lastRequest(): ?array {
+    return $this->lastRequest;
   }
 
   /**

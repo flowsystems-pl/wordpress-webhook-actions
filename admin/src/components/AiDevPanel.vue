@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft } from 'lucide-vue-next';
+import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces } from 'lucide-vue-next';
 import { Switch } from '@/components/ui';
 import { api } from '@/lib/api';
 
@@ -53,6 +53,14 @@ function time(ts) {
     return new Date(ts).toLocaleTimeString();
   } catch {
     return ts;
+  }
+}
+
+function pretty(value) {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
   }
 }
 
@@ -146,6 +154,15 @@ onMounted(refresh);
                 <pre class="whitespace-pre-wrap break-words font-mono mt-1">{{ m.content }}</pre>
               </div>
             </div>
+          </div>
+
+          <!-- Raw request: the exact JSON handed to the provider (keys redacted) -->
+          <div v-if="e.request">
+            <div class="flex items-center gap-1.5 font-semibold text-muted-foreground mb-1">
+              <Braces class="w-3 h-3" /> Raw request
+              <span v-if="e.request.endpoint" class="font-mono font-normal text-muted-foreground/70 truncate">{{ e.request.endpoint }}</span>
+            </div>
+            <pre class="whitespace-pre-wrap break-words rounded bg-muted/60 p-2 font-mono max-h-60 overflow-y-auto">{{ pretty(e.request) }}</pre>
           </div>
 
           <!-- Raw response -->

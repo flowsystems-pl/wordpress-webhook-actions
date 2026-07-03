@@ -27,6 +27,9 @@ class OpenAiTransport implements LlmTransportInterface {
   private int    $credentialId;
   private string $model;
 
+  /** @var array<string, mixed>|null */
+  private ?array $lastRequest = null;
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -49,6 +52,15 @@ class OpenAiTransport implements LlmTransportInterface {
     $body = [
       'model'    => $options['model'] ?? $this->model,
       'messages' => $chat,
+    ];
+
+    $this->lastRequest = [
+      'endpoint' => self::ENDPOINT,
+      'headers'  => [
+        'Authorization' => 'Bearer [redacted]',
+        'content-type'  => 'application/json',
+      ],
+      'body'     => $body,
     ];
 
     $response = wp_remote_post(self::ENDPOINT, [
@@ -83,6 +95,10 @@ class OpenAiTransport implements LlmTransportInterface {
 
   public function model(): string {
     return $this->model;
+  }
+
+  public function lastRequest(): ?array {
+    return $this->lastRequest;
   }
 
   /**

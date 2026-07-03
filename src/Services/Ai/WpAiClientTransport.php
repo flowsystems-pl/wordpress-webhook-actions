@@ -34,6 +34,9 @@ class WpAiClientTransport implements LlmTransportInterface {
   /** The model that actually produced the last successful generation. */
   private string $usedModel = '';
 
+  /** @var array<string, mixed>|null */
+  private ?array $lastRequest = null;
+
   /**
    * @param array<int, string> $candidates Ordered model ids to try, preferred first.
    */
@@ -106,11 +109,25 @@ class WpAiClientTransport implements LlmTransportInterface {
    * @param array<string, mixed>                           $options
    */
   private function attempt(string $system, array $messages, array $options, string $modelId): string|WP_Error {
+    $prompt = $this->flattenMessages($messages);
+
+    // The AI Client owns the HTTP call, so the true wire payload is invisible
+    // here; record what we hand the builder instead (the last attempt wins).
+    $this->lastRequest = [
+      'endpoint' => 'wp_ai_client_prompt()',
+      'body'     => [
+        'prompt'             => $prompt,
+        'system_instruction' => $system,
+        'temperature'        => (float) ($options['temperature'] ?? 0.2),
+        'model_preference'   => $modelId,
+      ],
+    ];
+
     try {
       // The builder's fluent methods dispatch through __call(), so they are not
       // visible to method_exists(); call them directly. The builder records any
       // failure internally and surfaces it from generate_text() as a WP_Error.
-      $builder = wp_ai_client_prompt($this->flattenMessages($messages));
+      $builder = wp_ai_client_prompt($prompt);
 
       if ($system !== '') {
         $builder = $builder->using_system_instruction($system);
@@ -148,6 +165,10 @@ class WpAiClientTransport implements LlmTransportInterface {
    */
   public function usedModel(): string {
     return $this->usedModel;
+  }
+
+  public function lastRequest(): ?array {
+    return $this->lastRequest;
   }
 
   /**

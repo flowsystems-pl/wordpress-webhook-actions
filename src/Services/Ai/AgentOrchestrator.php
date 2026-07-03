@@ -218,6 +218,7 @@ class AgentOrchestrator {
       'temperature'     => $options['temperature'] ?? null,
       'system'          => $system,
       'messages'        => array_values($sent),
+      'request'         => $transport->lastRequest(),
     ];
   }
 
