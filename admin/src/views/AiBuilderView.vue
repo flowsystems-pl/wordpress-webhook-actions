@@ -22,6 +22,7 @@ import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectConten
 import ProviderLogo from '@/components/ProviderLogo.vue';
 import AiProviderSettings from '@/components/AiProviderSettings.vue';
 import AiDevPanel from '@/components/AiDevPanel.vue';
+import ChatMarkdown from '@/components/ChatMarkdown.vue';
 import AiPlanStepper from '@/components/AiPlanStepper.vue';
 import AiStepControls from '@/components/AiStepControls.vue';
 import { abilityTitle } from '@/lib/aiLabels';
@@ -548,9 +549,10 @@ async function scrollDown() {
             </div>
             <div v-for="(m, i) in transcript" :key="i"
               :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
-              <div :class="['max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
-                m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground']">
-                {{ m.content }}
+              <div :class="['max-w-[80%] rounded-lg px-3 py-2 text-sm',
+                m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
+                <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
+                <template v-else>{{ m.content }}</template>
               </div>
             </div>
             <div v-if="sending" class="flex items-center gap-2 text-muted-foreground text-sm">

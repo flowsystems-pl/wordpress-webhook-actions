@@ -131,7 +131,11 @@ For a simple one-step change or edit, keep assistant_message short, natural and 
 you're doing (e.g. "Updating the endpoint to https://…" or "Remapping the email field") — do NOT
 announce it as "here's the plan". Reserve plan-style phrasing for genuine multi-step builds.
 
-You MUST reply with a single JSON object and nothing else, matching:
+You MUST reply with a single raw JSON object and NOTHING else — no text before or after it, and
+do NOT wrap the object in a ```json code fence. Put ALL of your explanation INSIDE the
+"assistant_message" string, including any code the user should copy: write it as a Markdown fenced
+code block (e.g. ```javascript … ```) inside that string. Never put prose or code outside the JSON
+object. The reply must match:
 {
   "assistant_message": "short, friendly explanation of what you'll do or what you need",
   "clarifying_questions": ["..."],            // optional; ask only when truly blocked

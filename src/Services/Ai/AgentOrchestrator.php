@@ -179,27 +179,81 @@ class AgentOrchestrator {
   private function parseEnvelope(string $raw): array {
     $text = trim($raw);
 
-    // Strip ```json … ``` fences if present.
-    if (preg_match('/```(?:json)?\s*(.+?)```/s', $text, $m)) {
-      $text = trim($m[1]);
+    // 1) The response is usually already clean JSON. Decode it as-is FIRST, so a
+    //    ```code``` block embedded inside a string value (e.g. an Apps Script we
+    //    tell the user to paste) isn't mistaken for the envelope's own fence.
+    $decoded = json_decode($text, true);
+    if (self::isEnvelope($decoded)) {
+      $this->lastParseSucceeded = true;
+      return $decoded;
     }
 
-    // Fall back to the outermost { … } span.
+    // 2) Some models (notably Gemini) write a prose answer first and append the
+    //    real envelope as a ```json … ``` block — sometimes leaving the closing
+    //    fence off. Take the outermost { … } after the ```json marker; if there
+    //    is prose before it, keep the prose as the visible message so the user
+    //    doesn't lose the explanation.
+    $jsonPos = stripos($text, '```json');
+    if ($jsonPos !== false) {
+      $after = substr($text, $jsonPos + strlen('```json'));
+      $after = preg_replace('/```\s*$/', '', $after); // drop a closing fence if present
+      $s = strpos($after, '{');
+      $e = strrpos($after, '}');
+      $env = ($s !== false && $e !== false && $e > $s)
+        ? json_decode(substr($after, $s, $e - $s + 1), true)
+        : null;
+      if (self::isEnvelope($env)) {
+        $prefix = trim(substr($text, 0, $jsonPos));
+        if ($prefix !== '') {
+          $msg = isset($env['assistant_message']) ? trim((string) $env['assistant_message']) : '';
+          $env['assistant_message'] = $prefix . ($msg !== '' ? "\n\n" . $msg : '');
+        }
+        $this->lastParseSucceeded = true;
+        return $env;
+      }
+    }
+
+    // 3) The whole reply may be wrapped in a ```json … ``` fence. Unwrap greedily
+    //    to the LAST fence so an inner code fence can't truncate the capture.
+    if (preg_match('/```(?:json)?\s*(.*)```/s', $text, $m)) {
+      $inner   = trim($m[1]);
+      $decoded = json_decode($inner, true);
+      if (self::isEnvelope($decoded)) {
+        $this->lastParseSucceeded = true;
+        return $decoded;
+      }
+      $text = $inner;
+    }
+
+    // 4) Fall back to the outermost { … } span, validated by a decode.
     $start = strpos($text, '{');
     $end   = strrpos($text, '}');
     if ($start !== false && $end !== false && $end > $start) {
-      $text = substr($text, $start, $end - $start + 1);
-    }
-
-    $decoded = json_decode($text, true);
-    if (is_array($decoded)) {
-      $this->lastParseSucceeded = true;
-      return $decoded;
+      $decoded = json_decode(substr($text, $start, $end - $start + 1), true);
+      if (self::isEnvelope($decoded)) {
+        $this->lastParseSucceeded = true;
+        return $decoded;
+      }
     }
 
     // The model didn't return valid JSON — treat the whole thing as a plain reply.
     $this->lastParseSucceeded = false;
     return ['assistant_message' => trim($raw), 'plan' => []];
+  }
+
+  /**
+   * Does a decoded value look like our agent envelope? We accept any object that
+   * carries at least one of the envelope's own keys, so a stray JSON object
+   * embedded elsewhere in the prose isn't mistaken for the reply.
+   *
+   * @param mixed $value
+   */
+  private static function isEnvelope($value): bool {
+    return is_array($value) && (
+      array_key_exists('assistant_message', $value)
+      || array_key_exists('plan', $value)
+      || array_key_exists('clarifying_questions', $value)
+    );
   }
 
   /**
