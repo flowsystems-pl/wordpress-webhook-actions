@@ -569,7 +569,7 @@ async function scrollDown() {
         </button>
         <div class="flex-1"></div>
         <button @click="newChat"
-          class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shrink-0">
+          class="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted shrink-0">
           <Plus class="w-4 h-4" /> {{ __('New build') }}
         </button>
       </div>
