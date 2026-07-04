@@ -5,6 +5,7 @@ namespace FlowSystems\WebhookActions\Services\Ai;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Abilities\AbilityRegistry;
+use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 
 /**
@@ -26,7 +27,77 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->buildContext($conversation);
+    return $this->systemPrompt() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * Real captured payload examples, flattened to dot-paths, one line per
+   * trigger. Without this the model plans set_mapping/set_conditions blind and
+   * invents field names (e.g. "form_id" instead of "args.0.form_id").
+   */
+  private function payloadContext(): string {
+    $examples = (new SchemaRepository())->latestExamplesPerTrigger(8);
+    if (empty($examples)) {
+      return '';
+    }
+
+    $lines = [];
+    foreach ($examples as $trigger => $payload) {
+      $paths = array_slice($this->flattenPaths($payload), 0, 45, true);
+      $parts = [];
+      foreach ($paths as $path => $value) {
+        // Captured payloads can carry secrets (user_pass on user_register,
+        // tokens, keys). The path is what the model needs — never the value.
+        $segments = explode('.', $path);
+        $leaf     = end($segments);
+        if (preg_match('/(^|_)(pass(word)?|pwd|secret|token|credential|nonce|salt|key|apikey|auth|authorization)($|_)/i', $leaf)) {
+          $parts[] = $path . '="[redacted]"';
+          continue;
+        }
+        $parts[] = $path . '=' . $this->shortValue($value);
+      }
+      $lines[] = '- ' . $trigger . ': ' . implode(', ', $parts);
+    }
+
+    return "\n\nCAPTURED PAYLOAD FIELD PATHS (real example payloads captured on this site, flattened to dot-paths). Use these EXACT paths for set_mapping sources and set_conditions rule fields — never invent field names. Triggers not listed here have no captured payload yet (get_trigger_schema will capture one):\n" . implode("\n", $lines);
+  }
+
+  /**
+   * Flatten a nested payload into dot-path => scalar value pairs (depth-capped
+   * so huge structures like a full Gravity Forms form definition stay compact).
+   *
+   * @return array<string, mixed>
+   */
+  private function flattenPaths(array $data, string $prefix = '', int $depth = 0): array {
+    $out = [];
+    foreach ($data as $key => $value) {
+      $path = $prefix === '' ? (string) $key : $prefix . '.' . $key;
+      if (is_array($value)) {
+        if ($depth < 4) {
+          $out += $this->flattenPaths($value, $path, $depth + 1);
+        }
+        continue;
+      }
+      $out[$path] = $value;
+    }
+    return $out;
+  }
+
+  private function shortValue(mixed $value): string {
+    if (is_bool($value)) {
+      return $value ? 'true' : 'false';
+    }
+    if ($value === null) {
+      return 'null';
+    }
+    if (is_int($value) || is_float($value)) {
+      return (string) $value;
+    }
+    $s = (string) $value;
+    if (mb_strlen($s) > 24) {
+      $s = mb_substr($s, 0, 21) . '…';
+    }
+    return '"' . $s . '"';
   }
 
   /**

@@ -186,7 +186,7 @@ class AbilityRegistry {
       ],
       'set_conditions' => [
         'label'        => __('Set conditions', 'flowsystems-webhook-actions'),
-        'description'  => __('Set conditional-dispatch rules for a webhook+trigger so only matching events leave the site.', 'flowsystems-webhook-actions'),
+        'description'  => __('Set conditional-dispatch rules for a webhook+trigger so only matching events leave the site. conditions MUST be an object {"enabled":true,"type":"and"|"or","rules":[{"field":"<dot.path into the captured payload>","operator":"equals|not_equals|contains|not_contains|greater_than|less_than|is_empty|is_not_empty|is_true|is_false|array_contains|object_contains","value":"..."}]}. A rule may add an optional "cast":"number"|"string"|"boolean"|"stringify" to coerce the payload value before comparing (e.g. numeric compare on a string field). A rules item may also be a nested group {"type":"group","match":"and"|"or","rules":[...]} (Pro only; without a Pro license only ONE simple rule with type "and" is allowed). Run get_trigger_schema first and take field paths from the real captured payload (e.g. "args.0.form_id").', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_FULL,
         'input_schema' => [
@@ -194,7 +194,27 @@ class AbilityRegistry {
           'properties' => [
             'webhook_id'             => ['type' => 'integer'],
             'trigger'                => ['type' => 'string'],
-            'conditions'             => ['type' => 'array', 'items' => ['type' => 'object']],
+            'conditions'             => [
+              'type'       => 'object',
+              'properties' => [
+                'enabled' => ['type' => 'boolean', 'default' => true],
+                'type'    => ['type' => 'string', 'enum' => ['and', 'or'], 'default' => 'and'],
+                'rules'   => [
+                  'type'  => 'array',
+                  'items' => [
+                    'type'       => 'object',
+                    'properties' => [
+                      'field'    => ['type' => 'string'],
+                      'operator' => ['type' => 'string', 'enum' => self::CONDITION_OPERATORS],
+                      'value'    => ['type' => 'string'],
+                      'cast'     => ['type' => 'string', 'enum' => ['number', 'string', 'boolean', 'stringify']],
+                    ],
+                    'required'   => ['field', 'operator'],
+                  ],
+                ],
+              ],
+              'required'   => ['rules'],
+            ],
             'conditions_evaluate_on' => ['type' => 'string', 'enum' => ['original', 'transformed'], 'default' => 'original'],
           ],
           'required'   => ['webhook_id', 'trigger', 'conditions'],
@@ -473,14 +493,161 @@ class AbilityRegistry {
     return ['schema_id' => (int) $schemaId];
   }
 
+  /** Operators understood by ConditionEvaluator and the conditions editor. */
+  private const CONDITION_OPERATORS = [
+    'equals', 'not_equals', 'contains', 'not_contains', 'greater_than', 'less_than',
+    'is_empty', 'is_not_empty', 'is_true', 'is_false', 'array_contains', 'object_contains',
+  ];
+
+  /** Common foreign spellings mapped onto canonical operators. */
+  private const CONDITION_OPERATOR_ALIASES = [
+    'eq' => 'equals', '=' => 'equals', '==' => 'equals', 'equal' => 'equals', 'is' => 'equals',
+    'neq' => 'not_equals', '!=' => 'not_equals', 'not_equal' => 'not_equals', 'is_not' => 'not_equals',
+    'includes' => 'contains', 'has' => 'contains', 'like' => 'contains',
+    'not_includes' => 'not_contains', 'excludes' => 'not_contains', 'not_like' => 'not_contains',
+    'gt' => 'greater_than', '>' => 'greater_than', 'greater' => 'greater_than',
+    'lt' => 'less_than', '<' => 'less_than', 'less' => 'less_than',
+    'empty' => 'is_empty', 'not_empty' => 'is_not_empty',
+    'true' => 'is_true', 'false' => 'is_false',
+  ];
+
+  /** Operators whose rule is meaningless without a comparison value. */
+  private const CONDITION_OPERATORS_NEED_VALUE = [
+    'equals', 'not_equals', 'contains', 'not_contains', 'greater_than', 'less_than',
+    'array_contains', 'object_contains',
+  ];
+
+  /**
+   * Coerce caller-supplied conditions into the canonical envelope
+   * {enabled, type: and|or, rules: [{field, operator, value} | group]} —
+   * accepting a bare rule list and common key/operator aliases — or explain
+   * exactly what is wrong so an agent can correct itself.
+   */
+  private function normalizeConditions(mixed $raw): array|WP_Error {
+    if (is_string($raw)) {
+      $decoded = json_decode($raw, true);
+      if (is_array($decoded)) {
+        $raw = $decoded;
+      }
+    }
+    if (!is_array($raw)) {
+      return $this->invalid(__('conditions must be an object {enabled, type, rules: [...]}.', 'flowsystems-webhook-actions'));
+    }
+
+    // A bare list of rules → wrap in the canonical envelope.
+    if ($raw === [] || array_keys($raw) === range(0, count($raw) - 1)) {
+      $raw = ['enabled' => true, 'type' => 'and', 'rules' => $raw];
+    }
+
+    if (!isset($raw['rules']) || !is_array($raw['rules'])) {
+      return $this->invalid(__('conditions.rules must be an array of rule objects.', 'flowsystems-webhook-actions'));
+    }
+
+    $type  = strtolower((string) ($raw['type'] ?? $raw['logic'] ?? $raw['match'] ?? 'and'));
+    $rules = [];
+    foreach ($raw['rules'] as $item) {
+      if (is_array($item) && (($item['type'] ?? '') === 'group')) {
+        $match = strtolower((string) ($item['match'] ?? 'and'));
+        $sub   = [];
+        foreach ((array) ($item['rules'] ?? []) as $r) {
+          $n = $this->normalizeConditionRule($r);
+          if (is_wp_error($n)) {
+            return $n;
+          }
+          $sub[] = $n;
+        }
+        $rules[] = ['type' => 'group', 'match' => in_array($match, ['or', 'any'], true) ? 'or' : 'and', 'rules' => $sub];
+        continue;
+      }
+      $n = $this->normalizeConditionRule($item);
+      if (is_wp_error($n)) {
+        return $n;
+      }
+      $rules[] = $n;
+    }
+
+    return [
+      'enabled' => array_key_exists('enabled', $raw) ? (bool) $raw['enabled'] : true,
+      'type'    => in_array($type, ['or', 'any'], true) ? 'or' : 'and',
+      'rules'   => $rules,
+    ];
+  }
+
+  private function normalizeConditionRule(mixed $rule): array|WP_Error {
+    if (!is_array($rule)) {
+      return $this->invalid(__('Each condition rule must be an object {field, operator, value}.', 'flowsystems-webhook-actions'));
+    }
+
+    $field    = (string) ($rule['field'] ?? $rule['key'] ?? $rule['path'] ?? '');
+    $operator = strtolower(trim((string) ($rule['operator'] ?? $rule['compare'] ?? $rule['op'] ?? 'equals')));
+    $operator = self::CONDITION_OPERATOR_ALIASES[$operator] ?? $operator;
+
+    if ($field === '') {
+      return $this->invalid(__('A condition rule is missing "field" — a dot-path into the trigger payload (use get_trigger_schema to see the available fields).', 'flowsystems-webhook-actions'));
+    }
+    if (!in_array($operator, self::CONDITION_OPERATORS, true)) {
+      return $this->invalid(sprintf(
+        /* translators: 1: the rejected operator, 2: list of valid operators */
+        __('Unknown condition operator "%1$s". Valid operators: %2$s.', 'flowsystems-webhook-actions'),
+        $operator,
+        implode(', ', self::CONDITION_OPERATORS)
+      ));
+    }
+
+    $value = $rule['value'] ?? '';
+    if (($value === '' || $value === null) && in_array($operator, self::CONDITION_OPERATORS_NEED_VALUE, true)) {
+      return $this->invalid(sprintf(
+        /* translators: 1: rule field path, 2: operator */
+        __('The condition rule on "%1$s" (%2$s) has an empty value — ask the user for the value before setting this condition.', 'flowsystems-webhook-actions'),
+        $field,
+        $operator
+      ));
+    }
+
+    $normalized = ['field' => $field, 'operator' => $operator, 'value' => $value];
+    if (!empty($rule['cast']) && in_array($rule['cast'], ['number', 'string', 'boolean', 'stringify'], true)) {
+      $normalized['cast'] = $rule['cast'];
+    }
+    // object_contains may carry a separate key filter; keep it only when it
+    // wasn't already consumed as the field alias.
+    if ($operator === 'object_contains' && isset($rule['field'], $rule['key'])) {
+      $normalized['key'] = (string) $rule['key'];
+    }
+    return $normalized;
+  }
+
   public function setConditions(array $input): array|WP_Error {
     $webhookId = (int) ($input['webhook_id'] ?? 0);
     $trigger   = (string) ($input['trigger'] ?? '');
     if ($webhookId <= 0 || $trigger === '' || !isset($input['conditions'])) {
       return $this->invalid(__('webhook_id, trigger and conditions are required.', 'flowsystems-webhook-actions'));
     }
+    // Callers (especially LLMs) get the shape wrong in creative ways; normalize
+    // to the canonical envelope or refuse — never store a shape the evaluator
+    // and the conditions editor can't read.
+    $conditions = $this->normalizeConditions($input['conditions']);
+    if (is_wp_error($conditions)) {
+      return $conditions;
+    }
+
+    // Mirror the REST endpoint's free-tier limits (SchemasController::updateSchema):
+    // groups and more than one rule are Pro; free is locked to 'and'.
+    $proActive = class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
+      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+    if (!$proActive && !empty($conditions['rules'])) {
+      foreach ($conditions['rules'] as $rule) {
+        if (($rule['type'] ?? '') === 'group') {
+          return new WP_Error('fswa_pro_required', __('Condition groups require a Pro license — propose a single simple rule instead.', 'flowsystems-webhook-actions'), ['status' => 403]);
+        }
+      }
+      if (count($conditions['rules']) > 1) {
+        return new WP_Error('fswa_pro_required', __('More than 1 condition requires a Pro license — propose a single simple rule instead.', 'flowsystems-webhook-actions'), ['status' => 403]);
+      }
+      $conditions['type'] = 'and';
+    }
+
     $schemaId = (new SchemaRepository())->upsert($webhookId, $trigger, [
-      'conditions'             => $input['conditions'],
+      'conditions'             => $conditions,
       'conditions_evaluate_on' => $input['conditions_evaluate_on'] ?? 'original',
     ]);
     if (!$schemaId) {

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import {
   BrainCircuit,
   Send,
@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Undo2,
   RotateCcw,
+  Power,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -51,7 +52,13 @@ const transcriptEl = ref(null);
 // ---- Execution state machine ---------------------------------------------
 const execution = ref(null);      // { mode, cursor, refs, steps[] }
 const running = ref(false);       // the step loop is in flight
-const ANIM_DELAY = 450;           // ms between auto-advanced steps (animation breathing room)
+
+// Presentation pacing: most abilities execute in milliseconds, which reads as
+// "nothing happened" to a human. Each auto-run step therefore stays visibly
+// "running" for a minimum time, and the fresh green check gets a beat to
+// register before the next step starts.
+const MIN_STEP_MS = 3200;         // minimum visible "running" time per step
+const DONE_FLASH_MS = 1200;       // pause on the completed check before chaining
 
 // ---- Provider settings ---------------------------------------------------
 const showSettings = ref(false);
@@ -111,6 +118,43 @@ const builtWebhookId = computed(() => {
   return id;
 });
 const execFinished = computed(() => !!execution.value && execCursor.value >= execSteps.value.length);
+// Whether the aside progress stepper has anything to show (drives the layout).
+const hasStepper = computed(() => !!execution.value && execSteps.value.length > 0);
+
+// A build can finish with its webhook still disabled (new webhooks are created
+// disabled by design, and edit-plans don't always include an enable step). Check
+// at build end and offer to switch it live — the user should never be left with
+// a silently-dead webhook.
+const builtWebhookEnabled = ref(null); // null = unknown / not fetched
+const enablingWebhook = ref(false);
+const justEnabled = ref(false);
+
+watch([execFinished, builtWebhookId], async ([finished, id]) => {
+  builtWebhookEnabled.value = null;
+  justEnabled.value = false;
+  if (!finished || !id) return;
+  try {
+    const wh = await api.webhooks.get(id);
+    builtWebhookEnabled.value = Number(wh.is_enabled) === 1;
+  } catch (e) {
+    // Leave unknown — no offer rather than a wrong one.
+  }
+}, { immediate: true });
+
+async function enableBuiltWebhook() {
+  if (enablingWebhook.value || !builtWebhookId.value) return;
+  enablingWebhook.value = true;
+  error.value = '';
+  try {
+    await api.webhooks.toggle(builtWebhookId.value);
+    builtWebhookEnabled.value = true;
+    justEnabled.value = true;
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    enablingWebhook.value = false;
+  }
+}
 // The step currently being processed / awaiting the user (at the cursor).
 const currentStep = computed(() => execSteps.value[execCursor.value] || null);
 // Which step the user is viewing in the main panel. Null = follow the cursor.
@@ -301,7 +345,6 @@ async function send() {
   sending.value = true;
   error.value = '';
   retryMessage.value = null;
-  execution.value = null;
   focusedIndex.value = null;
   transcript.value.push({ role: 'user', content: text });
   messageInput.value = '';
@@ -323,13 +366,18 @@ async function dispatchMessage(text) {
   try {
     const res = await api.agent.message(activeId.value, text);
     transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
-    plan.value = decoratePlan(res.plan || []);
-    execution.value = res.execution || null;
+    // Only swap the plan when the reply carries a new one — a clarifying-only
+    // reply must not blank out the progress aside (mirrors server persistence,
+    // which also keeps the stored execution in that case).
+    if (res.execution) {
+      plan.value = decoratePlan(res.plan || []);
+      execution.value = res.execution;
+    }
     await scrollDown();
     await loadConversations();
     devPanel.value?.refresh();
-    // Auto mode: start running the plan immediately. Review mode waits for "Run plan".
-    if (execution.value && execMode.value === 'auto') {
+    // Auto mode: start running a NEW plan immediately. Review mode waits for "Run plan".
+    if (res.execution && execMode.value === 'auto') {
       advance();
     }
   } catch (e) {
@@ -354,13 +402,18 @@ async function advance(opts = {}) {
     let first = true;
     let keepGoing = true;
     while (keepGoing) {
+      const startedAt = Date.now();
       const res = await api.agent.step(activeId.value, first ? opts : {});
       first = false;
+      // Hold the "running" presentation so even instant steps are noticeable,
+      // THEN apply the result (the step flips to done / blocked in one beat).
+      const hold = MIN_STEP_MS - (Date.now() - startedAt);
+      if (hold > 0) await sleep(hold);
       execution.value = res.execution;
       focusedIndex.value = null; // follow the cursor as it advances
       devPanel.value?.refresh();
       keepGoing = res.continue;
-      if (keepGoing) await sleep(ANIM_DELAY);
+      if (keepGoing) await sleep(DONE_FLASH_MS);
     }
     await loadConversations();
   } catch (e) {
@@ -495,19 +548,12 @@ async function scrollDown() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-      <!-- Aside: build switcher + progress stepper -->
-      <aside class="space-y-3">
-        <button @click="newChat"
-          class="w-full inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
-          <Plus class="w-4 h-4" /> {{ __('New build') }}
-        </button>
-
-        <!-- Switch between builds (only meaningful with more than one) -->
-        <div v-if="conversations.length > 1" class="space-y-1">
-          <label class="block text-xs font-medium text-muted-foreground px-1">{{ __('Your builds') }}</label>
-          <div class="flex items-center gap-1.5">
-            <Select :model-value="String(activeId ?? '')" @update:model-value="onSwitchConversation" class="flex-1">
+      <!-- Builds bar: switcher + delete + new, above the conversation window -->
+      <div class="flex flex-wrap items-center gap-2">
+        <template v-if="conversations.length > 1">
+          <label class="text-xs font-medium text-muted-foreground">{{ __('Your builds') }}</label>
+          <div class="w-64 max-w-full">
+            <Select :model-value="String(activeId ?? '')" @update:model-value="onSwitchConversation">
               <SelectTrigger><SelectValue :placeholder="__('Your builds')" /></SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="c in conversations" :key="c.id" :value="String(c.id)">
@@ -515,22 +561,23 @@ async function scrollDown() {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <button v-if="activeId" @click="removeConversation({ id: activeId })" :title="__('Delete this build')"
-              class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted shrink-0">
-              <Trash2 class="w-4 h-4" />
-            </button>
           </div>
-        </div>
+        </template>
+        <button v-if="activeId" @click="removeConversation({ id: activeId })" :title="__('Delete this build')"
+          class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted shrink-0">
+          <Trash2 class="w-4 h-4" />
+        </button>
+        <div class="flex-1"></div>
+        <button @click="newChat"
+          class="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
+          <Plus class="w-4 h-4" /> {{ __('New build') }}
+        </button>
+      </div>
 
-        <!-- Single build: just a delete affordance -->
-        <div v-else-if="activeId" class="flex justify-end">
-          <button @click="removeConversation({ id: activeId })"
-            class="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive">
-            <Trash2 class="w-3.5 h-3.5" /> {{ __('Delete build') }}
-          </button>
-        </div>
-
-        <AiPlanStepper v-if="execution && execSteps.length" :steps="execSteps" :abilities="abilities"
+      <div :class="['grid grid-cols-1 gap-6', hasStepper && 'lg:grid-cols-[240px_1fr]']">
+      <!-- Aside: build progress stepper (only once a plan is executing) -->
+      <aside v-if="hasStepper">
+        <AiPlanStepper :steps="execSteps" :abilities="abilities"
           :cursor="execCursor" :finished="execFinished" :running="running"
           :selected="focusedIndex ?? execCursor" @select="(i) => (focusedIndex = i)" />
       </aside>
@@ -574,14 +621,20 @@ async function scrollDown() {
           <div v-if="execution && focusedStep" class="rounded-lg border border-border bg-card p-5 space-y-4">
             <!-- Header -->
             <div class="flex items-start gap-3">
-              <div class="mt-0.5 shrink-0">
-                <CheckCircle2 v-if="focusedStep.status === 'done'" class="w-5 h-5 text-emerald-500" />
-                <Loader2 v-else-if="running && focusedIsCurrent && focusedStep.status === 'pending'" class="w-5 h-5 animate-spin text-primary" />
-                <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
-                <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
-                <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq' || focusedStep.status === 'blocked_probe'" class="w-5 h-5 text-amber-500" />
-                <Undo2 v-else-if="focusedStep.status === 'reverted'" class="w-5 h-5 text-muted-foreground" />
-                <Circle v-else class="w-5 h-5 text-primary" />
+              <div class="mt-0.5 shrink-0 relative">
+                <span v-if="running && focusedIsCurrent && focusedStep.status === 'pending'"
+                  class="absolute inset-0 rounded-full bg-primary/40 animate-ping" aria-hidden="true"></span>
+                <Transition name="fswa-pop" mode="out-in">
+                  <span :key="focusedStep.status + ':' + (running && focusedIsCurrent)" class="relative block">
+                    <CheckCircle2 v-if="focusedStep.status === 'done'" class="w-5 h-5 text-emerald-500" />
+                    <Loader2 v-else-if="running && focusedIsCurrent && focusedStep.status === 'pending'" class="w-5 h-5 animate-spin text-primary" />
+                    <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
+                    <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
+                    <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq' || focusedStep.status === 'blocked_probe'" class="w-5 h-5 text-amber-500" />
+                    <Undo2 v-else-if="focusedStep.status === 'reverted'" class="w-5 h-5 text-muted-foreground" />
+                    <Circle v-else class="w-5 h-5 text-primary" />
+                  </span>
+                </Transition>
               </div>
               <div class="min-w-0">
                 <h3 class="text-base font-semibold text-foreground leading-snug">
@@ -630,6 +683,12 @@ async function scrollDown() {
                 <span class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
                 </span>
+                <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
+                  <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
+                </Button>
+                <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
+                  <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
+                </span>
                 <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
                   <Button size="sm" variant="outline">
                     <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
@@ -650,6 +709,12 @@ async function scrollDown() {
             class="rounded-lg border border-border bg-card p-5 flex flex-wrap items-center gap-3 text-sm">
             <span class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
+            </span>
+            <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
+              <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
+            </Button>
+            <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
             </span>
             <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
               <Button size="sm" variant="outline">
@@ -689,3 +754,21 @@ async function scrollDown() {
     </Dialog>
   </div>
 </template>
+
+<style scoped>
+/* Springy pop-in when a step's status icon changes (e.g. spinner → green check). */
+.fswa-pop-enter-active {
+  animation: fswa-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fswa-pop-leave-active {
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.fswa-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.6);
+}
+@keyframes fswa-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+</style>

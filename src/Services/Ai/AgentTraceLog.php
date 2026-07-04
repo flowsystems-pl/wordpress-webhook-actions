@@ -85,7 +85,9 @@ class AgentTraceLog {
 
     $entries = [];
     foreach ($files as $file) {
-      foreach ($this->readLines($file) as $line) {
+      // Reverse per file (lines are appended oldest-first) so the combined list
+      // stays globally newest-first across day boundaries.
+      foreach (array_reverse($this->readLines($file)) as $line) {
         $decoded = json_decode($line, true);
         if (is_array($decoded)) {
           $entries[] = $decoded;
@@ -96,8 +98,6 @@ class AgentTraceLog {
       }
     }
 
-    // Newest first, capped.
-    $entries = array_reverse($entries);
     return array_slice($entries, 0, $limit);
   }
 

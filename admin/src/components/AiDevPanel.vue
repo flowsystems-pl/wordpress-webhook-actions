@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces } from 'lucide-vue-next';
+import { ref, computed, onMounted } from 'vue';
+import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces, Calendar, ChevronDown } from 'lucide-vue-next';
 import { Switch } from '@/components/ui';
 import { api } from '@/lib/api';
 
@@ -57,6 +57,34 @@ function time(ts) {
   }
 }
 
+function dayLabel(ts) {
+  try {
+    const d = new Date(ts);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    const sameDay = (a, b) => a.toDateString() === b.toDateString();
+    const date = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    if (sameDay(d, today)) return `Today — ${date}`;
+    if (sameDay(d, yesterday)) return `Yesterday — ${date}`;
+    return date;
+  } catch {
+    return String(ts).slice(0, 10);
+  }
+}
+
+// Entries arrive newest-first; group them per day, preserving order, so the
+// first group is the most recent day (opened by default).
+const groups = computed(() => {
+  const map = new Map();
+  for (const e of entries.value) {
+    const label = dayLabel(e.ts);
+    if (!map.has(label)) map.set(label, []);
+    map.get(label).push(e);
+  }
+  return [...map.entries()].map(([label, items]) => ({ label, items }));
+});
+
 function pretty(value) {
   try {
     return JSON.stringify(value, null, 2);
@@ -106,10 +134,20 @@ onMounted(refresh);
         No traces yet. Send a message in the chat below.
       </p>
 
-      <!-- Trace list, newest first -->
-      <details v-for="(e, i) in entries" :key="i"
-        class="rounded border border-amber-400/40 bg-white/60 dark:bg-black/20 text-xs">
-        <summary class="flex flex-wrap items-center gap-2 px-2 py-1.5 cursor-pointer">
+      <!-- Trace list, grouped per day (newest day first and opened) -->
+      <details v-for="(g, gi) in groups" :key="g.label" :open="gi === 0"
+        class="group rounded border border-amber-400/40">
+        <summary class="flex items-center gap-2 px-2 py-1.5 cursor-pointer text-xs font-semibold text-amber-700 dark:text-amber-300 select-none hover:bg-amber-200/20 rounded">
+          <Calendar class="w-3.5 h-3.5" />
+          {{ g.label }}
+          <span class="font-normal text-amber-600/70 dark:text-amber-400/60">({{ g.items.length }})</span>
+          <ChevronDown class="w-4 h-4 ml-auto shrink-0 transition-transform group-open:rotate-180" />
+        </summary>
+
+        <div class="border-t border-amber-400/30 p-2 space-y-1.5">
+      <details v-for="(e, i) in g.items" :key="i"
+        class="group/entry rounded border border-amber-400/40 bg-white/60 dark:bg-black/20 text-xs">
+        <summary class="flex flex-wrap items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-amber-100/30 dark:hover:bg-amber-900/10 rounded">
           <span class="font-mono text-muted-foreground">{{ time(e.ts) }}</span>
           <span class="font-mono text-foreground">{{ e.provider }}</span>
           <span class="font-mono text-muted-foreground">{{ e.model }}</span>
@@ -131,6 +169,7 @@ onMounted(refresh);
               {{ e.clarifying_count }} question{{ e.clarifying_count === 1 ? '' : 's' }}
             </span>
           </template>
+          <ChevronDown class="w-3.5 h-3.5 ml-auto shrink-0 text-muted-foreground transition-transform group-open/entry:rotate-180" />
         </summary>
 
         <div class="border-t border-amber-400/30 p-2 space-y-3">
@@ -173,6 +212,8 @@ onMounted(refresh);
             </div>
             <pre class="whitespace-pre-wrap break-words rounded bg-muted/60 p-2 font-mono max-h-60 overflow-y-auto">{{ e.response_raw }}</pre>
           </div>
+        </div>
+      </details>
         </div>
       </details>
     </div>

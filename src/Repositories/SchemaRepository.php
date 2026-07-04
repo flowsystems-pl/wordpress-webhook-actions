@@ -74,6 +74,43 @@ class SchemaRepository {
   }
 
   /**
+   * The most recent captured example payload per trigger, across all webhooks.
+   * Used to ground the AI agent in the real payload shapes available on this
+   * site (payload shape is trigger-global).
+   *
+   * @return array<string, array> trigger_name => decoded example payload
+   */
+  public function latestExamplesPerTrigger(int $maxTriggers = 8): array {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+      "SELECT trigger_name, example_payload FROM {$this->schemasTable}
+        WHERE example_payload IS NOT NULL
+          AND example_payload <> ''
+        ORDER BY captured_at DESC, id DESC",
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    $examples = [];
+    foreach ((array) $rows as $row) {
+      $trigger = (string) $row['trigger_name'];
+      if ($trigger === '' || isset($examples[$trigger])) {
+        continue;
+      }
+      $decoded = json_decode((string) $row['example_payload'], true);
+      if (is_array($decoded)) {
+        $examples[$trigger] = $decoded;
+        if (count($examples) >= $maxTriggers) {
+          break;
+        }
+      }
+    }
+    return $examples;
+  }
+
+  /**
    * Resolve the example payload the mapping UI / agent should use for a
    * webhook+trigger, honoring the per-schema "reuse shared example" toggle.
    *
