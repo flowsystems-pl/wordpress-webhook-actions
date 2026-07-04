@@ -46,7 +46,7 @@ const copyKey = (k) => 'code-' + k;
 </script>
 
 <template>
-  <div class="space-y-2">
+  <div class="space-y-2 min-w-0 max-w-full">
     <template v-for="b in blocks" :key="b.key">
       <!-- Prose -->
       <div v-if="b.type === 'text' && b.content.trim()" class="leading-relaxed" v-html="inlineHtml(b.content)" />

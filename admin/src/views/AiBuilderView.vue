@@ -582,8 +582,10 @@ async function scrollDown() {
           :selected="focusedIndex ?? execCursor" @select="(i) => (focusedIndex = i)" />
       </aside>
 
-      <!-- Main: chat + the single focused step -->
-      <section class="space-y-4">
+      <!-- Main: chat + the single focused step. min-w-0 lets the column shrink
+           below its content's intrinsic width (wide code blocks scroll inside
+           their bubble instead of blowing the grid out sideways). -->
+      <section class="space-y-4 min-w-0">
         <div v-if="!activeId" class="rounded-lg border border-dashed border-border p-8 text-center text-muted-foreground">
           {{ __('Start a new build, then describe what you want to integrate.') }}
         </div>
@@ -596,7 +598,7 @@ async function scrollDown() {
             </div>
             <div v-for="(m, i) in transcript" :key="i"
               :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
-              <div :class="['max-w-[80%] rounded-lg px-3 py-2 text-sm',
+              <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
                 m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
                 <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
                 <template v-else>{{ m.content }}</template>
