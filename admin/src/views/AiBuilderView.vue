@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import {
   BrainCircuit,
-  Send,
+  WandSparkles,
   Sparkles,
   Plus,
   Trash2,
@@ -552,7 +552,7 @@ async function scrollDown() {
       <div class="flex flex-wrap items-center gap-2">
         <template v-if="conversations.length > 1">
           <label class="text-xs font-medium text-muted-foreground">{{ __('Your builds') }}</label>
-          <div class="w-64 max-w-full">
+          <div class="flex-1 min-w-56 max-w-2xl">
             <Select :model-value="String(activeId ?? '')" @update:model-value="onSwitchConversation">
               <SelectTrigger><SelectValue :placeholder="__('Your builds')" /></SelectTrigger>
               <SelectContent>
@@ -569,7 +569,7 @@ async function scrollDown() {
         </button>
         <div class="flex-1"></div>
         <button @click="newChat"
-          class="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted">
+          class="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shrink-0">
           <Plus class="w-4 h-4" /> {{ __('New build') }}
         </button>
       </div>
@@ -613,7 +613,7 @@ async function scrollDown() {
               class="flex-1" />
             <button type="submit" :disabled="sending || !messageInput.trim()"
               class="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
-              <Send class="w-4 h-4" /> {{ __('Send') }}
+              <WandSparkles class="w-4 h-4" /> {{ __('Build') }}
             </button>
           </form>
 
