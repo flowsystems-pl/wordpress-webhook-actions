@@ -3,7 +3,6 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import {
   BrainCircuit,
   WandSparkles,
-  Sparkles,
   Plus,
   Trash2,
   ShieldAlert,
@@ -495,9 +494,6 @@ async function scrollDown() {
     <div class="flex items-center gap-2 mb-2">
       <BrainCircuit class="w-6 h-6 text-primary" />
       <h2 class="text-xl font-semibold text-foreground">{{ __('Build with AI') }}</h2>
-      <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30">
-        <Sparkles class="w-3 h-3" /> {{ __('Beta') }}
-      </span>
     </div>
     <p class="text-sm text-muted-foreground mb-6">
       {{ __('Describe the integration or automation you want. The agent proposes a plan you can edit, then builds and tests it for you.') }}
