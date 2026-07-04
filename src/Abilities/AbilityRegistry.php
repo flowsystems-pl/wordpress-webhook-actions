@@ -54,10 +54,15 @@ class AbilityRegistry {
    * input_schema (JSON Schema), and a `callback` (callable(array $input):
    * array|WP_Error).
    *
+   * Extensions (the Pro plugin) can add or adjust abilities via the
+   * `fswa_ability_definitions` filter; everything downstream — the agent's
+   * system-prompt catalog, plan execution, and WP Abilities/MCP registration —
+   * flows through this method, so filtered abilities work everywhere.
+   *
    * @return array<string, array<string, mixed>>
    */
   public function definitions(): array {
-    return [
+    $definitions = [
       // ---- Discovery / read --------------------------------------------
       'list_triggers' => [
         'label'        => __('List available triggers', 'flowsystems-webhook-actions'),
@@ -338,6 +343,13 @@ class AbilityRegistry {
         'callback'         => [$this, 'deleteWebhook'],
       ],
     ];
+
+    /**
+     * Filter the agent/MCP ability definitions.
+     *
+     * @param array<string, array<string, mixed>> $definitions Ability defs keyed by short name.
+     */
+    return apply_filters('fswa_ability_definitions', $definitions);
   }
 
   /**

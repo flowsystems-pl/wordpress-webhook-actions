@@ -27,7 +27,23 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->buildContext($conversation) . $this->payloadContext();
+    return $this->systemPrompt() . $this->licenseContext() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * Tell the model which tier the site runs so it plans set_conditions (and Pro
+   * abilities) correctly — the static ability description alone can't tell it
+   * whether the Pro limits apply HERE.
+   */
+  private function licenseContext(): string {
+    $proActive = class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
+      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+
+    if ($proActive) {
+      return "\n\nLICENSE: Webhook Actions Pro is ACTIVE on this site. set_conditions accepts multiple rules, nested groups and \"or\" matching — use them freely when the user's logic needs more than one rule. Any Pro abilities listed in the catalog above are available.";
+    }
+
+    return "\n\nLICENSE: this site runs the FREE tier. set_conditions accepts only ONE simple rule with type \"and\" — never propose multiple rules or condition groups. If the user's logic needs more, pick the single most important rule and mention the rest requires Webhook Actions Pro.";
   }
 
   /**
