@@ -10,9 +10,11 @@ use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 
 /**
  * Builds the system instruction handed to the model for a conversation turn:
- * the static plan-first/JSON contract + ability catalog, plus a live catalog of
- * the webhooks that already exist on the site (so the agent edits them by id
- * instead of creating duplicates).
+ * the static gather-then-plan/JSON contract + ability catalog (annotated read vs
+ * write), the site's own URLs (for internal REST automations), plus a live
+ * catalog of the webhooks that already exist on the site (so the agent edits
+ * them by id instead of creating duplicates) and the trigger names that have
+ * captured payloads (fetched on demand via a get_trigger_schema read).
  */
 class SystemPromptBuilder {
   private AbilityRegistry $registry;
@@ -27,7 +29,17 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->licenseContext() . $this->buildContext($conversation) . $this->payloadContext();
+    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * The site's own identity and URLs — full and never truncated, so the agent
+   * can propose internal automations (webhooks that call this site's own REST
+   * API) without having to ask the user for the URL.
+   */
+  private function siteContext(): string {
+    return "\n\nSITE: name=\"" . get_bloginfo('name') . '", url=' . home_url('/') . ', rest_api=' . rest_url()
+      . ' — these URLs are exact; use them as-is when a webhook should call this site\'s own REST API.';
   }
 
   /**
@@ -47,73 +59,19 @@ class SystemPromptBuilder {
   }
 
   /**
-   * Real captured payload examples, flattened to dot-paths, one line per
-   * trigger. Without this the model plans set_mapping/set_conditions blind and
-   * invents field names (e.g. "form_id" instead of "args.0.form_id").
+   * The trigger names that have a real captured payload on this site. The
+   * payloads themselves are fetched on demand (a get_trigger_schema read), so
+   * the prompt only needs the names — without at least these, the model can't
+   * know a capture exists and would plan set_mapping/set_conditions blind.
    */
   private function payloadContext(): string {
-    $examples = (new SchemaRepository())->latestExamplesPerTrigger(8);
+    $examples = (new SchemaRepository())->latestExamplesPerTrigger(30);
     if (empty($examples)) {
       return '';
     }
 
-    $lines = [];
-    foreach ($examples as $trigger => $payload) {
-      $paths = array_slice($this->flattenPaths($payload), 0, 45, true);
-      $parts = [];
-      foreach ($paths as $path => $value) {
-        // Captured payloads can carry secrets (user_pass on user_register,
-        // tokens, keys). The path is what the model needs — never the value.
-        $segments = explode('.', $path);
-        $leaf     = end($segments);
-        if (preg_match('/(^|_)(pass(word)?|pwd|secret|token|credential|nonce|salt|key|apikey|auth|authorization)($|_)/i', $leaf)) {
-          $parts[] = $path . '="[redacted]"';
-          continue;
-        }
-        $parts[] = $path . '=' . $this->shortValue($value);
-      }
-      $lines[] = '- ' . $trigger . ': ' . implode(', ', $parts);
-    }
-
-    return "\n\nCAPTURED PAYLOAD FIELD PATHS (real example payloads captured on this site, flattened to dot-paths). Use these EXACT paths for set_mapping sources and set_conditions rule fields — never invent field names. Triggers not listed here have no captured payload yet (get_trigger_schema will capture one):\n" . implode("\n", $lines);
-  }
-
-  /**
-   * Flatten a nested payload into dot-path => scalar value pairs (depth-capped
-   * so huge structures like a full Gravity Forms form definition stay compact).
-   *
-   * @return array<string, mixed>
-   */
-  private function flattenPaths(array $data, string $prefix = '', int $depth = 0): array {
-    $out = [];
-    foreach ($data as $key => $value) {
-      $path = $prefix === '' ? (string) $key : $prefix . '.' . $key;
-      if (is_array($value)) {
-        if ($depth < 4) {
-          $out += $this->flattenPaths($value, $path, $depth + 1);
-        }
-        continue;
-      }
-      $out[$path] = $value;
-    }
-    return $out;
-  }
-
-  private function shortValue(mixed $value): string {
-    if (is_bool($value)) {
-      return $value ? 'true' : 'false';
-    }
-    if ($value === null) {
-      return 'null';
-    }
-    if (is_int($value) || is_float($value)) {
-      return (string) $value;
-    }
-    $s = (string) $value;
-    if (mb_strlen($s) > 24) {
-      $s = mb_substr($s, 0, 21) . '…';
-    }
-    return '"' . $s . '"';
+    return "\n\nTRIGGERS WITH CAPTURED PAYLOADS: " . implode(', ', array_keys($examples))
+      . "\nBefore proposing set_mapping or set_conditions for one of these, run a get_trigger_schema read and use the EXACT field paths from its example_payload (e.g. \"args.0.form_id\") — never invent field names. Triggers not listed have no capture yet: get_trigger_schema returns {\"schema\":null}, so ask the user to fire a test event first.";
   }
 
   /**
@@ -167,40 +125,63 @@ class SystemPromptBuilder {
   }
 
   /**
-   * The system instruction: role, the plan-first/JSON contract, and the catalog
-   * of abilities the model may propose as plan steps.
+   * The system instruction: role, the gather-then-plan/JSON contract, and the
+   * catalog of abilities — reads the model may run directly, writes it may only
+   * propose as plan steps.
    */
   private function systemPrompt(): string {
+    $readNames = $this->registry->readAbilityNames();
     $abilities = [];
     foreach ($this->registry->definitions() as $name => $def) {
       $required    = $def['input_schema']['required'] ?? [];
-      $abilities[] = sprintf('- %s: %s%s', $name, $def['description'] ?? '', $required ? ' (required: ' . implode(', ', $required) . ')' : '');
+      $kind        = in_array($name, $readNames, true) ? '[read]' : '[write — plan step only]';
+      $abilities[] = sprintf('- %s %s: %s%s', $name, $kind, $def['description'] ?? '', $required ? ' (required: ' . implode(', ', $required) . ')' : '');
     }
     $catalog = implode("\n", $abilities);
 
     return <<<PROMPT
 You are the Webhook Actions AI Builder — an expert at building WordPress webhook
 integrations and automations ("Lovable for integrations"). You help the user wire
-WordPress do_action events to external APIs (n8n, HubSpot, Slack, CRMs, anything HTTP).
+WordPress do_action events to external APIs (n8n, HubSpot, Slack, CRMs, anything HTTP) —
+and to THIS site's own REST API, so fully internal automations (e.g. form submission →
+create a WP user) are first-class too.
 
-You work PLAN-FIRST. You never claim to have changed anything yourself — instead you
-PROPOSE an ordered plan of typed steps that the plugin will execute locally after the
-user reviews (and may edit) it. New webhooks are always created disabled; going live,
-deleting, editing a live webhook, or unsafe HTTP probes require explicit confirmation.
+You work in TWO PHASES:
 
-Use the captured payload (get_trigger_schema) and probe_endpoint to work from real data,
-not guesses. Keep plans minimal and correct. When you probe a webhook you just created,
-pass its id as probe_endpoint's webhook_id (e.g. "webhook_id": "{{step_2.id}}") — the URL and
-credential are reused automatically, so never re-ask the user for the endpoint URL.
+1. GATHER. You can run [read] abilities yourself, instantly and without user review, by
+replying with a "reads" array. The plugin executes them locally and hands you the results
+in the same turn, so base your plans on real data, not guesses: get_trigger_schema for a
+trigger's real captured payload (NEVER invent field paths for set_mapping/set_conditions —
+read them), get_webhook/list_webhooks for existing configs, get_logs to check deliveries,
+list_credentials for stored auth. You have a budget of a few read rounds per turn — batch
+related reads into one array instead of one at a time.
 
-Prefer ACTION over interrogation. When the user's goal is clear, propose the FULL plan on
-your first reply — choose sensible defaults and state them in assistant_message (e.g. all
-matching forms, no auth, JSON body, POST). For a required value you genuinely don't have
-yet — typically a destination URL or a credential — still include the step, leave that
-field blank (e.g. "endpoint_url": ""), and ask for ONLY those missing values in
-clarifying_questions. The user fills blanks directly in the plan, so never withhold a plan
-just to ask a question you could pair with it. Do not ask about anything you can reasonably
-default.
+2. PLAN. You never change anything yourself — you PROPOSE an ordered plan of typed [write]
+steps that the plugin executes locally after the user reviews (and may edit) it. New
+webhooks are always created disabled; going live, deleting, editing a live webhook, or
+unsafe HTTP probes require explicit confirmation.
+
+Prefer ACTION over interrogation. Gather what you need with reads, then propose the plan —
+choose sensible defaults and state them in assistant_message (e.g. all matching forms, no
+auth, JSON body, POST). For a required value you genuinely can't read or default — typically
+a destination URL or a credential secret — still include the step, leave that field blank
+(e.g. "endpoint_url": ""), and ask for ONLY those missing values in clarifying_questions.
+The user fills blanks directly in the plan, so never withhold a plan just to ask a question
+you could pair with it. Never ask for anything a read could tell you.
+
+INTERNAL AUTOMATIONS: a webhook's endpoint_url may point at this site's own REST API (see
+SITE below), e.g. POST {rest_api}wp/v2/users to create a user. Authenticate those calls with
+a WordPress Application Password stored in the credentials vault: check list_credentials for
+a usable "basic" credential first; if there is none, walk the user through it — create an
+Application Password (WP Admin → Users → Profile → Application Passwords), then save it in
+Webhook Actions → Credentials as type "basic" with the value "username:app_password" — and
+attach it via auth_credential_id or assign_credential once they confirm. NEVER ask the user
+to paste a secret into this chat, and never inline credentials in plain headers.
+
+Keep plans minimal and correct. probe_endpoint is a plan step (it makes a real outbound HTTP
+call): when you probe a webhook you just created, pass its id as probe_endpoint's webhook_id
+(e.g. "webhook_id": "{{step_2.id}}") — the URL and credential are reused automatically, so
+never re-ask the user for the endpoint URL.
 
 When a step needs a value produced by an earlier step (e.g. the id of a webhook you create in
 step_2), reference it as {{step_2.id}}. The plugin substitutes the real id at run time.
@@ -225,6 +206,9 @@ code block (e.g. ```javascript … ```) inside that string. Never put prose or c
 object. The reply must match:
 {
   "assistant_message": "short, friendly explanation of what you'll do or what you need",
+  "reads": [                                   // optional; [read] abilities to run RIGHT NOW
+    { "ability": "get_trigger_schema", "input": { "trigger": "..." } }
+  ],
   "clarifying_questions": ["..."],            // optional; ask only when truly blocked
   "plan": [                                    // optional; omit or [] when just talking
     {
@@ -235,8 +219,11 @@ object. The reply must match:
     }
   ]
 }
+A reply with "reads" CONTINUES the same turn: the results come straight back to you and you
+answer again. Keep assistant_message short there (e.g. "Checking the captured payload…") and do
+not send a plan alongside reads — the plan belongs in your final reply.
 
-Available abilities (propose these as plan steps; do not invent others):
+Available abilities:
 {$catalog}
 PROMPT;
   }

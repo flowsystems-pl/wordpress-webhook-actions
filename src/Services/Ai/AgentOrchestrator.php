@@ -25,6 +25,12 @@ use WP_Error;
  * plugin executes them locally, keeping the site in control.
  */
 class AgentOrchestrator {
+  /** Max model round-trips spent on "reads" before the reply must be final. */
+  private const READ_ITERATIONS_MAX = 3;
+
+  /** Byte budget for one read result handed back to the model. */
+  private const READ_RESULT_BYTES = 8192;
+
   private AbilityRegistry             $registry;
   private AgentConversationRepository $conversations;
   private AgentTraceLog               $trace;
@@ -65,36 +71,61 @@ class AgentOrchestrator {
 
     $system   = $this->prompts->build($conversation);
     $options  = ['temperature' => 0.2];
-    $sent     = $transcript; // Exactly what we hand to the model (before its reply).
-    $started  = microtime(true);
-    $raw      = $transport->generateText($system, $transcript, $options);
-    $latency  = (int) round((microtime(true) - $started) * 1000);
+    $activity = [];
 
-    if (is_wp_error($raw)) {
-      $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
-        'error'      => $raw->get_error_message(),
-        'error_code' => $raw->get_error_code(),
-      ]);
-      return $raw;
+    // A turn can be several model round-trips: while the envelope asks for
+    // "reads" (read-only abilities), execute them locally, feed the results
+    // back, and ask again. Bounded, so the whole turn stays one HTTP request.
+    if (function_exists('set_time_limit')) {
+      @set_time_limit(180);
     }
 
-    $envelope = $this->parseEnvelope($raw);
+    for ($iteration = 0; ; $iteration++) {
+      $sent    = $this->modelMessages($transcript);
+      $started = microtime(true);
+      $raw     = $transport->generateText($system, $sent, $options);
+      $latency = (int) round((microtime(true) - $started) * 1000);
+
+      if (is_wp_error($raw)) {
+        $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
+          'iteration'  => $iteration,
+          'error'      => $raw->get_error_message(),
+          'error_code' => $raw->get_error_code(),
+        ]);
+        return $raw;
+      }
+
+      $envelope = $this->parseEnvelope($raw);
+      $reads    = $this->lastParseSucceeded ? $this->normalizeReads($envelope['reads'] ?? []) : [];
+      $plan     = $this->executor->normalizePlan($envelope['plan'] ?? []);
+
+      $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
+        'response_raw'     => $raw,
+        'parsed_ok'        => $this->lastParseSucceeded,
+        'iteration'        => $iteration,
+        'reads'            => array_column($reads, 'ability'),
+        'plan_steps'       => count($plan),
+        'clarifying_count' => count((array) ($envelope['clarifying_questions'] ?? [])),
+      ]);
+
+      // Final reply: no reads requested, or the read budget is spent (then any
+      // leftover reads are dropped and the envelope is treated as final).
+      if ($reads === [] || $iteration >= self::READ_ITERATIONS_MAX) {
+        break;
+      }
+
+      // Replay material: the envelope that asked for the reads, then the results.
+      $transcript[] = $this->assistantEntry($envelope, (string) ($envelope['assistant_message'] ?? ''));
+      $transcript[] = $this->executeReads($reads, $activity, $iteration >= self::READ_ITERATIONS_MAX - 1);
+    }
 
     // Keep the human-readable reply — WITH any clarifying questions folded in — in
-    // the transcript. This is what the UI shows and what we replay to the model on
-    // the next turn, so the agent remembers what it already asked (no re-asking loop).
+    // the transcript for the UI, and the raw envelope alongside it: the model gets
+    // the envelope replayed next turn (a prose history teaches it to answer in
+    // prose and breaks the JSON contract — see the 2026-07-06 trace).
     $assistantText = (string) ($envelope['assistant_message'] ?? '');
     $clarifying    = array_values((array) ($envelope['clarifying_questions'] ?? []));
-    $transcript[]  = ['role' => 'assistant', 'content' => $this->foldReply($assistantText, $clarifying)];
-
-    $plan = $this->executor->normalizePlan($envelope['plan'] ?? []);
-
-    $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
-      'response_raw'     => $raw,
-      'parsed_ok'        => $this->lastParseSucceeded,
-      'plan_steps'       => count($plan),
-      'clarifying_count' => count($clarifying),
-    ]);
+    $transcript[]  = $this->assistantEntry($envelope, $this->foldReply($assistantText, $clarifying));
 
     // A fresh plan seeds a runnable execution state machine (cursor + per-step
     // status). A clarifying-only reply (no plan) leaves any prior run untouched.
@@ -118,6 +149,7 @@ class AgentOrchestrator {
       'clarifying_questions' => $clarifying,
       'plan'                 => $plan,
       'execution'            => $execution,
+      'activity'             => $activity,
       'transport'            => $transport->id(),
       'model'                => $transport->model(),
     ];
@@ -169,6 +201,125 @@ class AgentOrchestrator {
   // ===================================================================
   // Conversation-turn internals.
   // ===================================================================
+
+  /**
+   * The message list actually handed to the model.
+   *
+   * The stored transcript is the UI's view (folded prose). The model instead
+   * gets, for each assistant turn, the raw JSON envelope it produced — keeping
+   * its own few-shot history in the required format — and each `tool` entry
+   * (read results) rendered as a user-role block.
+   *
+   * @param array<int, array<string, mixed>> $transcript
+   * @return array<int, array{role:string,content:string}>
+   */
+  private function modelMessages(array $transcript): array {
+    $out = [];
+    foreach ($transcript as $entry) {
+      $role    = (string) ($entry['role'] ?? 'user');
+      $content = (string) ($entry['content'] ?? '');
+
+      if ($role === 'assistant') {
+        $out[] = ['role' => 'assistant', 'content' => (string) ($entry['envelope'] ?? '') ?: $content];
+        continue;
+      }
+      if ($role === 'tool') {
+        $out[] = ['role' => 'user', 'content' => $content];
+        continue;
+      }
+      $out[] = ['role' => 'user', 'content' => $content];
+    }
+    return $out;
+  }
+
+  /**
+   * Build an assistant transcript entry: folded prose for the UI plus (when the
+   * reply parsed) the raw envelope for model replay.
+   *
+   * @param array<string, mixed> $envelope
+   * @return array<string, mixed>
+   */
+  private function assistantEntry(array $envelope, string $content): array {
+    $entry = ['role' => 'assistant', 'content' => $content];
+    if ($this->lastParseSucceeded) {
+      $json = wp_json_encode($envelope, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+      if ($json !== false) {
+        $entry['envelope'] = $json;
+      }
+    }
+    return $entry;
+  }
+
+  /**
+   * Validate the envelope's `reads` list down to [{ability, input}] items.
+   *
+   * @param mixed $reads
+   * @return array<int, array{ability:string,input:array<string,mixed>}>
+   */
+  private function normalizeReads($reads): array {
+    if (!is_array($reads)) {
+      return [];
+    }
+    $out = [];
+    foreach ($reads as $read) {
+      $ability = is_array($read) ? trim((string) ($read['ability'] ?? '')) : '';
+      if ($ability === '') {
+        continue;
+      }
+      $input = is_array($read['input'] ?? null) ? $read['input'] : [];
+      $out[] = ['ability' => $ability, 'input' => $input];
+    }
+    return $out;
+  }
+
+  /**
+   * Execute a batch of requested reads and package the results as the `tool`
+   * transcript entry fed back to the model. Only read-scoped abilities run —
+   * anything else comes back as an inline error steering the model to propose
+   * a plan step instead. Results are secret-redacted and size-capped.
+   *
+   * @param array<int, array{ability:string,input:array<string,mixed>}> $reads
+   * @param array<int, array<string, mixed>>                            $activity Accumulates what ran (for the UI).
+   * @param bool                                                        $budgetSpent True when this was the last allowed read round.
+   * @return array<string, mixed> Transcript entry.
+   */
+  private function executeReads(array $reads, array &$activity, bool $budgetSpent): array {
+    $allowed = $this->registry->readAbilityNames();
+    $results = [];
+
+    foreach ($reads as $read) {
+      $ability = $read['ability'];
+      $input   = $read['input'];
+
+      if (!in_array($ability, $allowed, true)) {
+        $results[] = [
+          'ability' => $ability,
+          'input'   => $input,
+          'error'   => sprintf('"%s" is not a read ability — propose it as a plan step instead.', $ability),
+        ];
+        continue;
+      }
+
+      $result = $this->registry->execute($ability, $input);
+      if (is_wp_error($result)) {
+        $results[] = ['ability' => $ability, 'input' => $input, 'error' => $result->get_error_message()];
+      } else {
+        $results[] = ['ability' => $ability, 'input' => $input, 'result' => PayloadRedactor::redact($result)];
+      }
+      $activity[] = ['ability' => $ability, 'input' => $input];
+    }
+
+    $content = "READ RESULTS (read-only abilities executed locally, no user review needed):\n"
+      . PayloadRedactor::encodeCapped($results, self::READ_RESULT_BYTES * max(1, count($results)))
+      . "\n\nReply with your next JSON envelope."
+      . ($budgetSpent ? ' Your read budget for this turn is spent — no further "reads"; give your final assistant_message/plan now.' : '');
+
+    return [
+      'role'    => 'tool',
+      'content' => $content,
+      'reads'   => array_map(static fn($r) => ['ability' => $r['ability'], 'input' => $r['input']], $reads),
+    ];
+  }
 
   /**
    * Extract a JSON envelope from the model's raw text, tolerating code fences
@@ -253,6 +404,7 @@ class AgentOrchestrator {
       array_key_exists('assistant_message', $value)
       || array_key_exists('plan', $value)
       || array_key_exists('clarifying_questions', $value)
+      || array_key_exists('reads', $value)
     );
   }
 

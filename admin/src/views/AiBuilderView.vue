@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Circle,
   Loader2,
+  Search,
   Settings2,
   ExternalLink,
   Undo2,
@@ -321,6 +322,13 @@ function decoratePlan(steps) {
   return (steps || []).map((s) => ({ ...s, input: s.input || {}, _confirmed: false }));
 }
 
+// One chip per read the agent executed, e.g. "get_trigger_schema · wpcf7_mail_sent".
+function readLabel(read) {
+  const input = read.input || {};
+  const hint = input.trigger || input.webhook_id || input.id || '';
+  return hint ? `${read.ability} · ${hint}` : read.ability;
+}
+
 // Fold any clarifying questions into the assistant bubble so they're actually
 // visible (mirrors how the server stores them in the transcript).
 function foldReply(message, questions) {
@@ -364,6 +372,10 @@ async function retrySend() {
 async function dispatchMessage(text) {
   try {
     const res = await api.agent.message(activeId.value, text);
+    // Reads the agent ran mid-turn, shown as one activity line before the reply.
+    if (res.activity?.length) {
+      transcript.value.push({ role: 'tool', reads: res.activity });
+    }
     transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
     // Only swap the plan when the reply carries a new one — a clarifying-only
     // reply must not blank out the progress aside (mirrors server persistence,
@@ -592,14 +604,22 @@ async function scrollDown() {
             <div v-if="!transcript.length" class="text-sm text-muted-foreground">
               {{ __('e.g. “When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook.”') }}
             </div>
-            <div v-for="(m, i) in transcript" :key="i"
-              :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
-              <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
-                m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
-                <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
-                <template v-else>{{ m.content }}</template>
+            <template v-for="(m, i) in transcript" :key="i">
+              <!-- Read activity: abilities the agent ran itself to gather data -->
+              <div v-if="m.role === 'tool'" class="flex items-center flex-wrap gap-1.5 px-1 text-xs text-muted-foreground">
+                <Search class="w-3.5 h-3.5 shrink-0" />
+                <span v-for="(r, j) in (m.reads || [])" :key="j"
+                  class="rounded bg-muted px-1.5 py-0.5 font-mono">{{ readLabel(r) }}</span>
               </div>
-            </div>
+              <div v-else-if="m.content"
+                :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
+                <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
+                  m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
+                  <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
+                  <template v-else>{{ m.content }}</template>
+                </div>
+              </div>
+            </template>
             <div v-if="sending" class="flex items-center gap-2 text-muted-foreground text-sm">
               <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Thinking…') }}
             </div>

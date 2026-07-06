@@ -94,16 +94,16 @@ class AbilityRegistry {
       ],
       'get_trigger_schema' => [
         'label'        => __('Get captured payload + mapping for a trigger', 'flowsystems-webhook-actions'),
-        'description'  => __('Return the last captured example payload, field mapping and conditions for a webhook+trigger so the agent can map against the real payload shape.', 'flowsystems-webhook-actions'),
+        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
         'input_schema' => [
           'type'       => 'object',
           'properties' => [
-            'webhook_id' => ['type' => 'integer'],
+            'webhook_id' => ['type' => 'integer', 'description' => 'Optional — omit for a trigger-wide lookup.'],
             'trigger'    => ['type' => 'string'],
           ],
-          'required'   => ['webhook_id', 'trigger'],
+          'required'   => ['trigger'],
         ],
         'callback'     => [$this, 'getTriggerSchema'],
       ],
@@ -353,6 +353,24 @@ class AbilityRegistry {
   }
 
   /**
+   * Ability names the agent may execute directly as mid-conversation "reads",
+   * without user review: everything read-scoped, plus list_credentials (full
+   * scope for API tokens, but it only ever returns names/types/masked hints).
+   *
+   * @return array<int, string>
+   */
+  public function readAbilityNames(): array {
+    $names = [];
+    foreach ($this->definitions() as $name => $def) {
+      if (($def['scope'] ?? '') === AuthHelper::SCOPE_READ) {
+        $names[] = $name;
+      }
+    }
+    $names[] = 'list_credentials';
+    return $names;
+  }
+
+  /**
    * Execute an ability by short name. Used by the orchestrator.
    *
    * @return array<string, mixed>|WP_Error
@@ -390,11 +408,13 @@ class AbilityRegistry {
   public function getTriggerSchema(array $input): array|WP_Error {
     $webhookId = (int) ($input['webhook_id'] ?? 0);
     $trigger   = (string) ($input['trigger'] ?? '');
-    if ($webhookId <= 0 || $trigger === '') {
-      return $this->invalid(__('webhook_id and trigger are required.', 'flowsystems-webhook-actions'));
+    if ($trigger === '') {
+      return $this->invalid(__('trigger is required.', 'flowsystems-webhook-actions'));
     }
+    // webhook_id 0 = trigger-wide lookup: no own row, resolveExample() borrows
+    // the latest capture for this trigger from any webhook.
     $repo   = new SchemaRepository();
-    $schema = $repo->findByWebhookAndTrigger($webhookId, $trigger);
+    $schema = $webhookId > 0 ? $repo->findByWebhookAndTrigger($webhookId, $trigger) : null;
 
     // Resolve the effective example: this webhook's own capture, or — when reuse
     // is enabled (the default) — the latest one for the same trigger on another
