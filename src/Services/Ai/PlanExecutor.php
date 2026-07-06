@@ -513,6 +513,17 @@ class PlanExecutor {
    * @return mixed
    */
   private function resolveRefValue(string $value, array $refs) {
+    // Models embed site placeholders inside longer strings (e.g.
+    // "{{site.url}}/wp-json/wp/v2/users") — expand them in place. rest_url()
+    // keeps its trailing slash (models append the route bare); a duplicate
+    // slash from "{{site.rest_url}}/wp/v2/users" is collapsed afterwards.
+    $expanded = preg_replace_callback('/\{\{\s*site\.(url|home_url|rest_url)\s*\}\}/', static function (array $m): string {
+      return $m[1] === 'rest_url' ? rest_url() : untrailingslashit(home_url());
+    }, $value, -1, $count);
+    if ($count > 0) {
+      $value = preg_replace('#(?<!:)//+#', '/', $expanded);
+    }
+
     if (preg_match('/^\{\{\s*(step_[A-Za-z0-9]+)(?:\.[A-Za-z0-9_]+)?\s*\}\}$/', $value, $m)) {
       return array_key_exists($m[1], $refs) ? $refs[$m[1]] : $value;
     }
@@ -831,7 +842,7 @@ class PlanExecutor {
    * Best-effort extraction of the affected object id from an ability result.
    */
   private function resultObjectId(array $result): ?int {
-    foreach (['webhook', 'chain', 'link'] as $key) {
+    foreach (['webhook', 'chain', 'link', 'snippet'] as $key) {
       if (isset($result[$key]['id'])) {
         return (int) $result[$key]['id'];
       }

@@ -162,6 +162,12 @@ onMounted(refresh);
                           : 'bg-destructive/15 text-destructive']">
               {{ e.parsed_ok ? 'JSON ✓' : 'parse fail' }}
             </span>
+            <span v-if="e.iteration" class="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300 font-medium">
+              hop {{ e.iteration }}
+            </span>
+            <span v-if="e.reads?.length" class="px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300 font-mono">
+              reads: {{ e.reads.join(', ') }}
+            </span>
             <span v-if="e.plan_steps" class="px-1.5 py-0.5 rounded bg-primary/15 text-primary font-medium">
               {{ e.plan_steps }} step{{ e.plan_steps === 1 ? '' : 's' }}
             </span>

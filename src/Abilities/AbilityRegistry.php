@@ -94,16 +94,16 @@ class AbilityRegistry {
       ],
       'get_trigger_schema' => [
         'label'        => __('Get captured payload + mapping for a trigger', 'flowsystems-webhook-actions'),
-        'description'  => __('Return the last captured example payload, field mapping and conditions for a webhook+trigger so the agent can map against the real payload shape.', 'flowsystems-webhook-actions'),
+        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
         'input_schema' => [
           'type'       => 'object',
           'properties' => [
-            'webhook_id' => ['type' => 'integer'],
+            'webhook_id' => ['type' => 'integer', 'description' => 'Optional — omit for a trigger-wide lookup.'],
             'trigger'    => ['type' => 'string'],
           ],
-          'required'   => ['webhook_id', 'trigger'],
+          'required'   => ['trigger'],
         ],
         'callback'     => [$this, 'getTriggerSchema'],
       ],
@@ -175,7 +175,7 @@ class AbilityRegistry {
       ],
       'set_mapping' => [
         'label'        => __('Set field mapping', 'flowsystems-webhook-actions'),
-        'description'  => __('Set the payload field mapping for a webhook+trigger (rename / restructure / exclude / type-cast fields with dot-notation paths).', 'flowsystems-webhook-actions'),
+        'description'  => __('Set the payload field mapping for a webhook+trigger. field_mapping MUST be an object {"mappings":[{"source":"<dot.path in the captured payload>","target":"<dot.path in the outgoing body>","cast":"number|string|boolean|stringify" (optional)}],"excluded":["<dot.path to drop>"],"includeUnmapped":true|false}. It can only move/rename/exclude EXISTING payload fields — static or constant values are NOT supported (inject those with a pre-dispatch Code Glue snippet instead). The mapping runs BEFORE any pre-dispatch snippet, so snippet output cannot be mapped. Run get_trigger_schema first and take source paths from the real captured payload.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_FULL,
         'input_schema' => [
@@ -305,7 +305,7 @@ class AbilityRegistry {
           'properties' => [
             'webhook_id' => ['type' => 'integer'],
             'trigger'    => ['type' => 'string'],
-            'payload'    => ['type' => 'object', 'description' => 'Optional custom payload; falls back to the captured example.'],
+            'payload'    => ['type' => 'object', 'description' => 'Optional custom payload, sent as-is. When omitted, the captured example is used with the stored field mapping applied — matching real deliveries.'],
           ],
           'required'   => ['webhook_id'],
         ],
@@ -353,6 +353,24 @@ class AbilityRegistry {
   }
 
   /**
+   * Ability names the agent may execute directly as mid-conversation "reads",
+   * without user review: everything read-scoped, plus list_credentials (full
+   * scope for API tokens, but it only ever returns names/types/masked hints).
+   *
+   * @return array<int, string>
+   */
+  public function readAbilityNames(): array {
+    $names = [];
+    foreach ($this->definitions() as $name => $def) {
+      if (($def['scope'] ?? '') === AuthHelper::SCOPE_READ) {
+        $names[] = $name;
+      }
+    }
+    $names[] = 'list_credentials';
+    return $names;
+  }
+
+  /**
    * Execute an ability by short name. Used by the orchestrator.
    *
    * @return array<string, mixed>|WP_Error
@@ -390,11 +408,13 @@ class AbilityRegistry {
   public function getTriggerSchema(array $input): array|WP_Error {
     $webhookId = (int) ($input['webhook_id'] ?? 0);
     $trigger   = (string) ($input['trigger'] ?? '');
-    if ($webhookId <= 0 || $trigger === '') {
-      return $this->invalid(__('webhook_id and trigger are required.', 'flowsystems-webhook-actions'));
+    if ($trigger === '') {
+      return $this->invalid(__('trigger is required.', 'flowsystems-webhook-actions'));
     }
+    // webhook_id 0 = trigger-wide lookup: no own row, resolveExample() borrows
+    // the latest capture for this trigger from any webhook.
     $repo   = new SchemaRepository();
-    $schema = $repo->findByWebhookAndTrigger($webhookId, $trigger);
+    $schema = $webhookId > 0 ? $repo->findByWebhookAndTrigger($webhookId, $trigger) : null;
 
     // Resolve the effective example: this webhook's own capture, or — when reuse
     // is enabled (the default) — the latest one for the same trigger on another
@@ -845,6 +865,8 @@ class AbilityRegistry {
       return $this->invalid(__('The webhook has no triggers; provide one.', 'flowsystems-webhook-actions'));
     }
 
+    $mappingApplied  = false;
+    $originalPayload = null;
     if (isset($input['payload']) && is_array($input['payload'])) {
       $payload = $input['payload'];
     } else {
@@ -854,11 +876,16 @@ class AbilityRegistry {
       if (empty($example)) {
         return new WP_Error('fswa_no_payload', __('No payload provided and no captured example exists yet for this trigger.', 'flowsystems-webhook-actions'), ['status' => 422]);
       }
-      $payload = is_string($example) ? (json_decode($example, true) ?: []) : (array) $example;
+      $decoded = is_string($example) ? (json_decode($example, true) ?: []) : (array) $example;
+      // Apply the stored field mapping so the test matches real deliveries.
+      $mapped          = (new PayloadTransformer())->applyStoredMapping($id, $trigger, $decoded);
+      $payload         = $mapped['payload'];
+      $mappingApplied  = $mapped['mapping_applied'];
+      $originalPayload = $mappingApplied ? $decoded : null;
     }
 
     $logService = new LogService();
-    $logId      = $logService->logPending($id, $trigger, $payload, null, false);
+    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied);
 
     $dispatcher = new Dispatcher(new WPHttpTransport(), new QueueService());
     $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, 0, true, null);
@@ -866,10 +893,11 @@ class AbilityRegistry {
     $log = $logService->getRepository()->find($logId);
 
     return [
-      'log_id'   => $logId,
-      'status'   => $log['status'] ?? null,
-      'http_code' => $log['http_code'] ?? null,
-      'response' => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
+      'log_id'          => $logId,
+      'status'          => $log['status'] ?? null,
+      'http_code'       => $log['http_code'] ?? null,
+      'mapping_applied' => $mappingApplied,
+      'response'        => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
     ];
   }
 
