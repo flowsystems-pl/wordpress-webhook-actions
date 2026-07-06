@@ -93,6 +93,10 @@ class SchemasController extends WP_REST_Controller {
             'description' => __('Whether to include user data.', 'flowsystems-webhook-actions'),
             'type' => 'boolean',
           ],
+          'use_shared_example' => [
+            'description' => __('Reuse an example payload captured for the same trigger on another webhook when this one has none.', 'flowsystems-webhook-actions'),
+            'type' => 'boolean',
+          ],
         ],
       ],
       [
@@ -169,12 +173,44 @@ class SchemasController extends WP_REST_Controller {
       );
     }
 
-    $schemas = $this->schemaRepository->getByWebhook($webhookId);
+    $existing  = $this->schemaRepository->getByWebhook($webhookId);
+    $byTrigger = [];
+    foreach ($existing as $row) {
+      $byTrigger[$row['trigger_name']] = $row;
+    }
 
-    // Enhance with user trigger support info
+    // Include an entry for every configured trigger (not just ones with a stored
+    // row) so a brand-new webhook can still show an example borrowed from another
+    // webhook for the same trigger. Keep any orphaned rows for triggers that were
+    // since removed from the webhook.
+    $triggerNames = array_values(array_unique(array_merge(
+      (array) ($webhook['triggers'] ?? []),
+      array_keys($byTrigger)
+    )));
+
     $userTriggers = $this->payloadTransformer->getUserEnrichmentTriggers();
-    foreach ($schemas as &$schema) {
-      $schema['supports_user_enrichment'] = in_array($schema['trigger_name'], $userTriggers, true);
+    $schemas      = [];
+    foreach ($triggerNames as $triggerName) {
+      $row    = $byTrigger[$triggerName] ?? null;
+      $schema = $row ?? [
+        'webhook_id'         => $webhookId,
+        'trigger_name'       => $triggerName,
+        'example_payload'    => null,
+        'field_mapping'      => null,
+        'include_user_data'  => false,
+        'use_shared_example' => 1,
+        'captured_at'        => null,
+      ];
+
+      // Fall back to a shared example for the same trigger when enabled.
+      $resolved = $this->schemaRepository->resolveExample($webhookId, $triggerName, $row);
+      $schema['example_payload']         = $resolved['example'];
+      $schema['example_source']          = $resolved['source']; // own | shared | null
+      $schema['example_from_webhook_id'] = $resolved['from_webhook_id'];
+      $schema['use_shared_example']      = (int) ($schema['use_shared_example'] ?? 1);
+      $schema['supports_user_enrichment'] = in_array($triggerName, $userTriggers, true);
+
+      $schemas[] = $schema;
     }
 
     return rest_ensure_response($schemas);
@@ -207,9 +243,18 @@ class SchemasController extends WP_REST_Controller {
         'example_payload' => null,
         'field_mapping' => null,
         'include_user_data' => false,
+        'use_shared_example' => 1,
         'captured_at' => null,
       ];
     }
+
+    // Fall back to an example captured for the same trigger on another webhook
+    // when this webhook has none of its own and reuse is enabled (the default).
+    $resolved = $this->schemaRepository->resolveExample($webhookId, $trigger, $schema);
+    $schema['example_payload']         = $resolved['example'];
+    $schema['example_source']          = $resolved['source']; // own | shared | null
+    $schema['example_from_webhook_id'] = $resolved['from_webhook_id'];
+    $schema['use_shared_example']      = (int) ($schema['use_shared_example'] ?? 1);
 
     $schema['supports_user_enrichment'] = $this->payloadTransformer->supportsUserEnrichment($trigger);
 
@@ -241,6 +286,10 @@ class SchemasController extends WP_REST_Controller {
 
     if ($request->has_param('include_user_data')) {
       $data['include_user_data'] = (bool) $request->get_param('include_user_data');
+    }
+
+    if ($request->has_param('use_shared_example')) {
+      $data['use_shared_example'] = (bool) $request->get_param('use_shared_example');
     }
 
     if ($request->has_param('conditions')) {

@@ -6,6 +6,10 @@ import Dialog from './Dialog.vue'
 import Button from './Button.vue'
 import { __ } from '@/i18n'
 
+// Multi-root template (button + Dialog): attrs like `class` can't auto-inherit,
+// so forward them to the button explicitly.
+defineOptions({ inheritAttrs: false })
+
 const router = useRouter()
 const open = ref(false)
 
@@ -17,6 +21,7 @@ const navigate = () => {
 
 <template>
   <button
+    v-bind="$attrs"
     type="button"
     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25 transition-colors cursor-pointer"
     @click="open = true"

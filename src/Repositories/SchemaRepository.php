@@ -41,6 +41,112 @@ class SchemaRepository {
   }
 
   /**
+   * Find the most recently captured example payload for a trigger on ANY webhook
+   * (optionally excluding one). A do_action payload shape is the same regardless
+   * of which webhook fired, so this lets a freshly created webhook reuse a payload
+   * already captured elsewhere instead of requiring a new test submission.
+   *
+   * @param string $trigger
+   * @param int    $excludeWebhookId
+   * @return array|null
+   */
+  public function findLatestExampleByTrigger(string $trigger, int $excludeWebhookId = 0): ?array {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $schema = $wpdb->get_row(
+      $wpdb->prepare(
+        "SELECT * FROM {$this->schemasTable}
+          WHERE trigger_name = %s
+            AND webhook_id <> %d
+            AND example_payload IS NOT NULL
+            AND example_payload <> ''
+          ORDER BY captured_at DESC, id DESC
+          LIMIT 1",
+        $trigger,
+        $excludeWebhookId
+      ),
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    return $schema ? $this->decodeSchema($schema) : null;
+  }
+
+  /**
+   * The most recent captured example payload per trigger, across all webhooks.
+   * Used to ground the AI agent in the real payload shapes available on this
+   * site (payload shape is trigger-global).
+   *
+   * @return array<string, array> trigger_name => decoded example payload
+   */
+  public function latestExamplesPerTrigger(int $maxTriggers = 8): array {
+    global $wpdb;
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $rows = $wpdb->get_results(
+      "SELECT trigger_name, example_payload FROM {$this->schemasTable}
+        WHERE example_payload IS NOT NULL
+          AND example_payload <> ''
+        ORDER BY captured_at DESC, id DESC",
+      ARRAY_A
+    );
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+    $examples = [];
+    foreach ((array) $rows as $row) {
+      $trigger = (string) $row['trigger_name'];
+      if ($trigger === '' || isset($examples[$trigger])) {
+        continue;
+      }
+      $decoded = json_decode((string) $row['example_payload'], true);
+      if (is_array($decoded)) {
+        $examples[$trigger] = $decoded;
+        if (count($examples) >= $maxTriggers) {
+          break;
+        }
+      }
+    }
+    return $examples;
+  }
+
+  /**
+   * Resolve the example payload the mapping UI / agent should use for a
+   * webhook+trigger, honoring the per-schema "reuse shared example" toggle.
+   *
+   * - This webhook's own captured example always wins when present.
+   * - Otherwise, when reuse is enabled (default), borrow the most recent example
+   *   captured for the same trigger on any other webhook (the do_action payload
+   *   shape is trigger-global).
+   * - Otherwise nothing — the caller should prompt for a fresh capture.
+   *
+   * @param array|null $schema Pre-fetched row to avoid a duplicate query.
+   * @return array{example: array|string|null, source: string|null, from_webhook_id: int}
+   */
+  public function resolveExample(int $webhookId, string $trigger, ?array $schema = null): array {
+    $schema = $schema ?? $this->findByWebhookAndTrigger($webhookId, $trigger);
+
+    if (!empty($schema['example_payload'])) {
+      return ['example' => $schema['example_payload'], 'source' => 'own', 'from_webhook_id' => $webhookId];
+    }
+
+    // Default to reuse when there is no row yet or the toggle is truthy.
+    $reuse = $schema === null ? true : (bool) ($schema['use_shared_example'] ?? 1);
+    if ($reuse) {
+      $borrowed = $this->findLatestExampleByTrigger($trigger, $webhookId);
+      if (!empty($borrowed['example_payload'])) {
+        return [
+          'example'         => $borrowed['example_payload'],
+          'source'          => 'shared',
+          'from_webhook_id' => (int) ($borrowed['webhook_id'] ?? 0),
+        ];
+      }
+    }
+
+    return ['example' => null, 'source' => null, 'from_webhook_id' => 0];
+  }
+
+  /**
    * Get all schemas for a webhook
    *
    * @param int $webhookId
@@ -100,6 +206,10 @@ class SchemaRepository {
       $insertData['include_user_data'] = (int) $data['include_user_data'];
     }
 
+    if (array_key_exists('use_shared_example', $data)) {
+      $insertData['use_shared_example'] = (int) (bool) $data['use_shared_example'];
+    }
+
     if (array_key_exists('captured_at', $data)) {
       $insertData['captured_at'] = $data['captured_at'];
     }
@@ -127,7 +237,7 @@ class SchemaRepository {
       // Build format array based on data types
       $formats = [];
       foreach ($insertData as $key => $value) {
-        if ($key === 'include_user_data') {
+        if (in_array($key, ['include_user_data', 'use_shared_example'], true)) {
           $formats[] = '%d';
         } else {
           $formats[] = '%s';
@@ -149,7 +259,7 @@ class SchemaRepository {
     // Insert new record - build format array based on data types
     $formats = [];
     foreach ($insertData as $key => $value) {
-      if (in_array($key, ['webhook_id', 'include_user_data'], true)) {
+      if (in_array($key, ['webhook_id', 'include_user_data', 'use_shared_example'], true)) {
         $formats[] = '%d';
       } else {
         $formats[] = '%s';

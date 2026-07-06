@@ -32,8 +32,40 @@ const emit = defineEmits(['update:modelValue'])
 
 const FREE_RULE_LIMIT = 1
 
+// Conditions can arrive in foreign shapes (older exports, or rules written by
+// an AI/MCP caller before backend normalization existed) — a bare rule array,
+// key/compare aliases, or a missing rules key. Normalize defensively so the
+// editor never crashes on stored data.
+const normalizeRuleShape = (r) => {
+  if (!r || typeof r !== 'object') return { field: '', operator: 'equals', value: '' }
+  if (r.type === 'group') {
+    return { ...r, match: r.match === 'or' ? 'or' : 'and', rules: Array.isArray(r.rules) ? r.rules.map(normalizeRuleShape) : [] }
+  }
+  const out = {
+    ...r,
+    field: r.field ?? r.key ?? r.path ?? '',
+    operator: r.operator ?? r.compare ?? r.op ?? 'equals',
+    value: r.value ?? '',
+  }
+  delete out.compare
+  delete out.op
+  if (out.key !== undefined && out.operator !== 'object_contains') delete out.key
+  delete out.path
+  return out
+}
+
+const normalizeModel = (raw) => {
+  if (Array.isArray(raw)) return { enabled: true, type: 'and', rules: raw.map(normalizeRuleShape) }
+  if (!raw || typeof raw !== 'object') return { enabled: false, type: 'and', rules: [] }
+  return {
+    ...raw,
+    type: raw.type === 'or' ? 'or' : 'and',
+    rules: Array.isArray(raw.rules) ? raw.rules.map(normalizeRuleShape) : [],
+  }
+}
+
 const conditions = computed({
-  get: () => props.modelValue ?? { enabled: false, type: 'and', rules: [] },
+  get: () => normalizeModel(props.modelValue),
   set: (val) => emit('update:modelValue', val),
 })
 

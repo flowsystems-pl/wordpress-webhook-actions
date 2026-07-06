@@ -536,8 +536,7 @@ class WebhooksController extends WP_REST_Controller {
         break;
 
       case 'mapped':
-        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
-        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        $example = $this->schemaRepository->resolveExample($id, $trigger)['example'] ?? null;
         if (empty($example)) {
           return new WP_Error(
             'rest_no_captured_payload',
@@ -554,8 +553,7 @@ class WebhooksController extends WP_REST_Controller {
 
       case 'pre_glue':
       case 'full_glue':
-        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
-        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        $example = $this->schemaRepository->resolveExample($id, $trigger)['example'] ?? null;
         if (empty($example)) {
           return new WP_Error(
             'rest_no_captured_payload',
@@ -574,8 +572,7 @@ class WebhooksController extends WP_REST_Controller {
 
       case 'captured':
       default:
-        $schema = $this->schemaRepository->findByWebhookAndTrigger($id, $trigger);
-        $example = $schema ? ($schema['example_payload'] ?? null) : null;
+        $example = $this->schemaRepository->resolveExample($id, $trigger)['example'] ?? null;
         if (empty($example)) {
           return new WP_Error(
             'rest_no_captured_payload',

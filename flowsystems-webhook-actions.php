@@ -1,9 +1,9 @@
 <?php
 /*
- * Plugin Name: Webhook Actions by Flow Systems
+ * Plugin Name: Webhook Actions - build automations and integrations with AI help
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
- * Description: Reliable WordPress webhooks with retries, queue, Action Scheduler support, delivery logs, and replayable events for n8n, APIs, and integrations.
- * Version: 1.16.0
+ * Description: Describe what you want in chat — the built-in AI agent plans, builds, and tests your WordPress webhooks, integrations, and automations.
+ * Version: 2.0.0
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
  * License: GPLv2 or later
@@ -17,7 +17,7 @@ use FlowSystems\WebhookActions\Activation;
 
 defined('ABSPATH') || exit;
 
-define('FSWA_VERSION', '1.16.0');
+define('FSWA_VERSION', '2.0.0');
 define('FSWA_FILE', __FILE__);
 
 require_once __DIR__ . '/vendor/autoload.php';

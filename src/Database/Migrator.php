@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '1.15.0';
+  private const CURRENT_VERSION = '2.2.0';
 
   /**
    * Run pending migrations
@@ -49,6 +49,7 @@ class Migrator {
       $wpdb->prefix . 'fswa_chain_links',
       $wpdb->prefix . 'fswa_activity_logs',
       $wpdb->prefix . 'fswa_credentials',
+      $wpdb->prefix . 'fswa_agent_conversations',
     ];
 
     foreach ($requiredTables as $table) {
@@ -86,6 +87,9 @@ class Migrator {
       '1.13.0' => [self::class, 'migration_1_13_0'],
       '1.14.0' => [self::class, 'migration_1_14_0'],
       '1.15.0' => [self::class, 'migration_1_15_0'],
+      '2.0.0'  => [self::class, 'migration_2_0_0'],
+      '2.1.0'  => [self::class, 'migration_2_1_0'],
+      '2.2.0'  => [self::class, 'migration_2_2_0'],
     ];
   }
 
@@ -183,6 +187,7 @@ class Migrator {
             example_payload LONGTEXT DEFAULT NULL,
             field_mapping LONGTEXT DEFAULT NULL,
             include_user_data TINYINT(1) NOT NULL DEFAULT 0,
+            use_shared_example TINYINT(1) NOT NULL DEFAULT 1,
             conditions LONGTEXT DEFAULT NULL,
             conditions_evaluate_on VARCHAR(20) NOT NULL DEFAULT 'original',
             captured_at DATETIME DEFAULT NULL,
@@ -674,6 +679,84 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$webhooksTable} ADD KEY idx_auth_credential (auth_credential_id)");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+  }
+
+  /**
+   * Migration 2.0.0 - AI Builder: persist agent conversations (chat transcript,
+   * the current editable plan, and the last applied recipe for one-click undo).
+   *
+   * Provider API keys for the BYO-key fallback are NOT stored here — they live in
+   * the existing fswa_credentials vault under the new `ai_provider` type, encrypted
+   * at rest by CredentialCipher. This table holds no secrets.
+   */
+  public static function migration_2_0_0(): void {
+    global $wpdb;
+
+    $charsetCollate = $wpdb->get_charset_collate();
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $table = $wpdb->prefix . 'fswa_agent_conversations';
+    $sql   = "CREATE TABLE {$table} (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            uuid VARCHAR(36) NOT NULL DEFAULT '',
+            title VARCHAR(255) NOT NULL DEFAULT '',
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            transport VARCHAR(20) NOT NULL DEFAULT '',
+            model VARCHAR(128) NOT NULL DEFAULT '',
+            transcript_json LONGTEXT DEFAULT NULL,
+            plan_json LONGTEXT DEFAULT NULL,
+            last_recipe_json LONGTEXT DEFAULT NULL,
+            execution_json LONGTEXT DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY idx_uuid (uuid),
+            KEY idx_status (status),
+            KEY idx_updated (updated_at)
+        ) {$charsetCollate};";
+
+    dbDelta($sql);
+  }
+
+  /**
+   * Migration 2.1.0 - AI Builder: persist step-by-step plan execution state so a
+   * build can pause for input / prerequisites and resume after leaving the panel.
+   */
+  public static function migration_2_1_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_agent_conversations';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'execution_json'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN execution_json LONGTEXT DEFAULT NULL");
+    }
+    // phpcs:enable
+  }
+
+  /**
+   * Migration 2.2.0 - Add use_shared_example to trigger_schemas so a webhook can
+   * reuse an example payload captured for the same trigger on another webhook.
+   */
+  public static function migration_2_2_0(): void {
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'fswa_trigger_schemas';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+    $exists = $wpdb->get_var($wpdb->prepare(
+      "SHOW COLUMNS FROM {$table} LIKE %s",
+      'use_shared_example'
+    ));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$table} ADD COLUMN use_shared_example TINYINT(1) NOT NULL DEFAULT 1 AFTER include_user_data");
+    }
+    // phpcs:enable
   }
 
   /**
