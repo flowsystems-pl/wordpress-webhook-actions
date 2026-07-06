@@ -305,7 +305,7 @@ class AbilityRegistry {
           'properties' => [
             'webhook_id' => ['type' => 'integer'],
             'trigger'    => ['type' => 'string'],
-            'payload'    => ['type' => 'object', 'description' => 'Optional custom payload; falls back to the captured example.'],
+            'payload'    => ['type' => 'object', 'description' => 'Optional custom payload, sent as-is. When omitted, the captured example is used with the stored field mapping applied — matching real deliveries.'],
           ],
           'required'   => ['webhook_id'],
         ],
@@ -865,6 +865,8 @@ class AbilityRegistry {
       return $this->invalid(__('The webhook has no triggers; provide one.', 'flowsystems-webhook-actions'));
     }
 
+    $mappingApplied  = false;
+    $originalPayload = null;
     if (isset($input['payload']) && is_array($input['payload'])) {
       $payload = $input['payload'];
     } else {
@@ -874,11 +876,16 @@ class AbilityRegistry {
       if (empty($example)) {
         return new WP_Error('fswa_no_payload', __('No payload provided and no captured example exists yet for this trigger.', 'flowsystems-webhook-actions'), ['status' => 422]);
       }
-      $payload = is_string($example) ? (json_decode($example, true) ?: []) : (array) $example;
+      $decoded = is_string($example) ? (json_decode($example, true) ?: []) : (array) $example;
+      // Apply the stored field mapping so the test matches real deliveries.
+      $mapped          = (new PayloadTransformer())->applyStoredMapping($id, $trigger, $decoded);
+      $payload         = $mapped['payload'];
+      $mappingApplied  = $mapped['mapping_applied'];
+      $originalPayload = $mappingApplied ? $decoded : null;
     }
 
     $logService = new LogService();
-    $logId      = $logService->logPending($id, $trigger, $payload, null, false);
+    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied);
 
     $dispatcher = new Dispatcher(new WPHttpTransport(), new QueueService());
     $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, 0, true, null);
@@ -886,10 +893,11 @@ class AbilityRegistry {
     $log = $logService->getRepository()->find($logId);
 
     return [
-      'log_id'   => $logId,
-      'status'   => $log['status'] ?? null,
-      'http_code' => $log['http_code'] ?? null,
-      'response' => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
+      'log_id'          => $logId,
+      'status'          => $log['status'] ?? null,
+      'http_code'       => $log['http_code'] ?? null,
+      'mapping_applied' => $mappingApplied,
+      'response'        => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
     ];
   }
 
