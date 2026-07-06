@@ -129,5 +129,5 @@ For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.
 - New: LLM transport auto-detection — uses the WordPress 7.0 AI Client (`wp_ai_client_prompt()`) when a provider is configured (no API key stored), otherwise falls back to your own provider API key stored encrypted in the Credentials Vault
 - New: WordPress Abilities API integration — the plugin's operations (list/create/update webhooks, set mapping/conditions, test dispatch, probe endpoint, manage credentials, build chains) are registered as `flowsystems-webhook-actions/*` abilities, so external AI tools can discover and invoke the same toolset via REST and the MCP Adapter
 - New: Guarded endpoint probe — the agent can make a safe test call to a target API (GET/HEAD by default) to validate a credential or endpoint before wiring a webhook, with an SSRF guard, rate limiting, response-size cap, and full secret redaction
-- Developer: New `fswa_ai_transport` and `fswa_ability_permitted` filters
+- Developer: New `fswa_ability_definitions`, `fswa_ability_permitted`, and `fswa_ai_transport` filters
 
