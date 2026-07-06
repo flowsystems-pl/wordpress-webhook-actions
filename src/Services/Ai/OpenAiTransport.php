@@ -53,6 +53,9 @@ class OpenAiTransport implements LlmTransportInterface {
       'model'    => $options['model'] ?? $this->model,
       'messages' => $chat,
     ];
+    if (!empty($options['json'])) {
+      $body['response_format'] = ['type' => 'json_object'];
+    }
 
     $this->lastRequest = [
       'endpoint' => self::ENDPOINT,

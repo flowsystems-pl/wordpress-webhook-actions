@@ -70,7 +70,7 @@ class AgentOrchestrator {
     $transcript[] = ['role' => 'user', 'content' => $userMessage];
 
     $system   = $this->prompts->build($conversation);
-    $options  = ['temperature' => 0.2];
+    $options  = ['temperature' => 0.2, 'json' => true];
     $activity = [];
 
     // A turn can be several model round-trips: while the envelope asks for

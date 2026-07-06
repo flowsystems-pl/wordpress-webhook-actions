@@ -133,9 +133,21 @@ class SystemPromptBuilder {
     $readNames = $this->registry->readAbilityNames();
     $abilities = [];
     foreach ($this->registry->definitions() as $name => $def) {
-      $required    = $def['input_schema']['required'] ?? [];
-      $kind        = in_array($name, $readNames, true) ? '[read]' : '[write — plan step only]';
-      $abilities[] = sprintf('- %s %s: %s%s', $name, $kind, $def['description'] ?? '', $required ? ' (required: ' . implode(', ', $required) . ')' : '');
+      $required = $def['input_schema']['required'] ?? [];
+      $kind     = in_array($name, $readNames, true) ? '[read]' : '[write — plan step only]';
+      // Surface enum'd inputs as literal values (e.g. "stage: pre|post") — models
+      // otherwise infer them from prose and invent variants like "pre_dispatch".
+      $enums = [];
+      foreach (($def['input_schema']['properties'] ?? []) as $prop => $spec) {
+        if (!empty($spec['enum']) && is_array($spec['enum'])) {
+          $enums[] = $prop . ': ' . implode('|', $spec['enum']);
+        }
+      }
+      $notes = array_filter([
+        $required ? 'required: ' . implode(', ', $required) : '',
+        $enums ? 'exact values — ' . implode('; ', $enums) : '',
+      ]);
+      $abilities[] = sprintf('- %s %s: %s%s', $name, $kind, $def['description'] ?? '', $notes ? ' (' . implode('; ', $notes) . ')' : '');
     }
     $catalog = implode("\n", $abilities);
 

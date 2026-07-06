@@ -44,8 +44,17 @@ class GoogleTransport implements LlmTransportInterface {
     if ($system !== '') {
       $body['systemInstruction'] = ['parts' => [['text' => $system]]];
     }
+    $generation = [];
     if (isset($options['temperature'])) {
-      $body['generationConfig'] = ['temperature' => (float) $options['temperature']];
+      $generation['temperature'] = (float) $options['temperature'];
+    }
+    if (!empty($options['json'])) {
+      // Force raw JSON output — without this Gemini tends to wrap the envelope
+      // in prose and a ```json fence, which breaks strict parsing downstream.
+      $generation['responseMimeType'] = 'application/json';
+    }
+    if ($generation !== []) {
+      $body['generationConfig'] = $generation;
     }
 
     $endpoint = sprintf(self::ENDPOINT_TEMPLATE, rawurlencode($model));
