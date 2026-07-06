@@ -175,7 +175,7 @@ class AbilityRegistry {
       ],
       'set_mapping' => [
         'label'        => __('Set field mapping', 'flowsystems-webhook-actions'),
-        'description'  => __('Set the payload field mapping for a webhook+trigger (rename / restructure / exclude / type-cast fields with dot-notation paths).', 'flowsystems-webhook-actions'),
+        'description'  => __('Set the payload field mapping for a webhook+trigger. field_mapping MUST be an object {"mappings":[{"source":"<dot.path in the captured payload>","target":"<dot.path in the outgoing body>","cast":"number|string|boolean|stringify" (optional)}],"excluded":["<dot.path to drop>"],"includeUnmapped":true|false}. It can only move/rename/exclude EXISTING payload fields — static or constant values are NOT supported (inject those with a pre-dispatch Code Glue snippet instead). The mapping runs BEFORE any pre-dispatch snippet, so snippet output cannot be mapped. Run get_trigger_schema first and take source paths from the real captured payload.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_FULL,
         'input_schema' => [
