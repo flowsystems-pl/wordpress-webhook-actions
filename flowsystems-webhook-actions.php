@@ -1,8 +1,8 @@
 <?php
 /*
- * Plugin Name: Webhook Actions by Flow Systems
+ * Plugin Name: Webhook Actions - build automations and integrations with AI help
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
- * Description: Reliable WordPress webhooks with retries, queue, Action Scheduler support, delivery logs, and replayable events for n8n, APIs, and integrations.
+ * Description: Describe what you want in chat — the built-in AI agent plans, builds, and tests your WordPress webhooks, integrations, and automations.
  * Version: 2.0.0
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
