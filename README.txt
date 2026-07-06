@@ -131,9 +131,3 @@ For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.
 - New: Guarded endpoint probe — the agent can make a safe test call to a target API (GET/HEAD by default) to validate a credential or endpoint before wiring a webhook, with an SSRF guard, rate limiting, response-size cap, and full secret redaction
 - Developer: New `fswa_ai_transport` and `fswa_ability_permitted` filters
 
-= 1.16.0 — 2026-06-22 =
-- New: Full internationalization — the entire admin interface (every screen, dialog, and inline message) and all server-side strings are now translatable, so the plugin is fully translatable and compatible with WPML and Polylang String Translation
-- New: Polish (pl_PL), Simplified Chinese (zh_CN), and Dutch (nl_NL) translations bundled
-- Improved: Stable, hash-free admin bundle filename and handle-based script-translation loading so JavaScript translations resolve reliably across updates
-- Developer: Translation template (`.pot`) regenerated to cover all PHP and JavaScript strings; add a language by dropping in a locale `.po`/`.mo`/`.json` set
-
