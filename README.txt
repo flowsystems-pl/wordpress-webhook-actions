@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -124,10 +124,11 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.0.0 =
-- New: AI Builder — an in-admin AI agent that builds webhook integrations and automations for you. Describe the outcome in chat; the agent inspects your site, proposes an editable plan, and on approval builds and tests the webhooks, mappings, conditions, and chains. Works plan-first with hybrid confirmation: new webhooks are created disabled, and going live / deleting / editing a live webhook requires explicit confirmation. One-click undo of the last build
-- New: LLM transport auto-detection — uses the WordPress 7.0 AI Client (`wp_ai_client_prompt()`) when a provider is configured (no API key stored), otherwise falls back to your own provider API key stored encrypted in the Credentials Vault
-- New: WordPress Abilities API integration — the plugin's operations (list/create/update webhooks, set mapping/conditions, test dispatch, probe endpoint, manage credentials, build chains) are registered as `flowsystems-webhook-actions/*` abilities, so external AI tools can discover and invoke the same toolset via REST and the MCP Adapter
-- New: Guarded endpoint probe — the agent can make a safe test call to a target API (GET/HEAD by default) to validate a credential or endpoint before wiring a webhook, with an SSRF guard, rate limiting, response-size cap, and full secret redaction
-- Developer: New `fswa_ability_definitions`, `fswa_ability_permitted`, and `fswa_ai_transport` filters
+= 2.1.0 =
+- Improved: AI Builder — the agent can now read live site data mid-conversation (webhooks, logs, captured payloads, credential names) before proposing a plan, instead of guessing
+- Improved: AI responses are requested as raw JSON (Gemini, OpenAI) and conversations replay the model's exact envelopes — fixes plans failing to parse when the model wrapped them in prose or code fences
+- Fixed: multi-step snippet plans (with Pro) — snippet ids created in one step now resolve in the next, and stage values like `pre_dispatch` are accepted
+- Fixed: AI test deliveries now apply the stored field mapping, matching real dispatches
+- Improved: the AI ability catalog documents exact enum values and the full field-mapping format, and plans may use `{{site.url}}` / `{{site.rest_url}}` placeholders for this site's own REST API
+- Improved: the system prompt includes the site's home and REST URLs, so internal automations (webhooks targeting this site's own WP REST API) work without asking for the URL
 
