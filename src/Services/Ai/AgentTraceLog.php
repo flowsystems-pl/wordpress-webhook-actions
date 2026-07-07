@@ -65,6 +65,14 @@ class AgentTraceLog {
     }
 
     $file = $dir . '/' . gmdate('Y-m-d') . '.jsonl';
+    // A day file created by another OS user (e.g. a root wp-cli session) can
+    // leave the web user unable to append — fall back to a per-user sibling
+    // instead of dropping traces silently for the rest of the day. recent()
+    // globs *.jsonl, so fallback files show up in the panel alongside.
+    if (file_exists($file) && !is_writable($file)) {
+      $uid  = function_exists('posix_geteuid') ? (string) posix_geteuid() : 'alt';
+      $file = $dir . '/' . gmdate('Y-m-d') . '-u' . $uid . '.jsonl';
+    }
     file_put_contents($file, $line . "\n", FILE_APPEND | LOCK_EX);
   }
 

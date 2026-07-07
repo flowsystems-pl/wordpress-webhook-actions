@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces, Calendar, ChevronDown } from 'lucide-vue-next';
+import { Bug, RefreshCw, Trash2, FileText, MessageSquare, CornerDownLeft, Braces, Calendar, ChevronDown, Copy, Check } from 'lucide-vue-next';
 import { Switch } from '@/components/ui';
 import { api } from '@/lib/api';
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
 
 // Self-contained diagnostic panel: inspects the raw input/output of every LLM
 // call (system prompt, sent messages, raw request, raw response). Shown under
@@ -93,6 +94,8 @@ function pretty(value) {
   }
 }
 
+const { copiedKey, copy } = useCopyToClipboard();
+
 // Expose so the parent can refresh right after a message round-trips.
 defineExpose({ refresh });
 
@@ -175,7 +178,12 @@ onMounted(refresh);
               {{ e.clarifying_count }} question{{ e.clarifying_count === 1 ? '' : 's' }}
             </span>
           </template>
-          <ChevronDown class="w-3.5 h-3.5 ml-auto shrink-0 text-muted-foreground transition-transform group-open/entry:rotate-180" />
+          <button @click.prevent.stop="copy(pretty(e), `${gi}-${i}-entry`)" title="Copy full trace entry as JSON"
+            class="ml-auto shrink-0 p-1 rounded text-muted-foreground hover:bg-amber-200/40 hover:text-foreground">
+            <Check v-if="copiedKey === `${gi}-${i}-entry`" class="w-3.5 h-3.5 text-green-500" />
+            <Copy v-else class="w-3.5 h-3.5" />
+          </button>
+          <ChevronDown class="w-3.5 h-3.5 shrink-0 text-muted-foreground transition-transform group-open/entry:rotate-180" />
         </summary>
 
         <div class="border-t border-amber-400/30 p-2 space-y-3">
@@ -185,6 +193,11 @@ onMounted(refresh);
           <div>
             <div class="flex items-center gap-1.5 font-semibold text-muted-foreground mb-1">
               <FileText class="w-3 h-3" /> System prompt
+              <button @click="copy(e.system, `${gi}-${i}-system`)" title="Copy system prompt"
+                class="ml-auto p-1 rounded hover:bg-amber-200/40 hover:text-foreground">
+                <Check v-if="copiedKey === `${gi}-${i}-system`" class="w-3 h-3 text-green-500" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
             </div>
             <pre class="whitespace-pre-wrap break-words rounded bg-muted/60 p-2 font-mono max-h-48 overflow-y-auto">{{ e.system }}</pre>
           </div>
@@ -193,6 +206,11 @@ onMounted(refresh);
           <div v-if="e.messages && e.messages.length">
             <div class="flex items-center gap-1.5 font-semibold text-muted-foreground mb-1">
               <MessageSquare class="w-3 h-3" /> Messages sent ({{ e.messages.length }})
+              <button @click="copy(pretty(e.messages), `${gi}-${i}-messages`)" title="Copy messages as JSON"
+                class="ml-auto p-1 rounded hover:bg-amber-200/40 hover:text-foreground">
+                <Check v-if="copiedKey === `${gi}-${i}-messages`" class="w-3 h-3 text-green-500" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
             </div>
             <div class="space-y-1">
               <div v-for="(m, mi) in e.messages" :key="mi" class="rounded bg-muted/60 p-2">
@@ -207,6 +225,11 @@ onMounted(refresh);
             <div class="flex items-center gap-1.5 font-semibold text-muted-foreground mb-1">
               <Braces class="w-3 h-3" /> Raw request
               <span v-if="e.request.endpoint" class="font-mono font-normal text-muted-foreground/70 truncate">{{ e.request.endpoint }}</span>
+              <button @click="copy(pretty(e.request), `${gi}-${i}-request`)" title="Copy raw request as JSON"
+                class="ml-auto p-1 rounded hover:bg-amber-200/40 hover:text-foreground">
+                <Check v-if="copiedKey === `${gi}-${i}-request`" class="w-3 h-3 text-green-500" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
             </div>
             <pre class="whitespace-pre-wrap break-words rounded bg-muted/60 p-2 font-mono max-h-60 overflow-y-auto">{{ pretty(e.request) }}</pre>
           </div>
@@ -215,6 +238,11 @@ onMounted(refresh);
           <div v-if="e.response_raw != null">
             <div class="flex items-center gap-1.5 font-semibold text-muted-foreground mb-1">
               <CornerDownLeft class="w-3 h-3" /> Raw response
+              <button @click="copy(String(e.response_raw), `${gi}-${i}-response`)" title="Copy raw response"
+                class="ml-auto p-1 rounded hover:bg-amber-200/40 hover:text-foreground">
+                <Check v-if="copiedKey === `${gi}-${i}-response`" class="w-3 h-3 text-green-500" />
+                <Copy v-else class="w-3 h-3" />
+              </button>
             </div>
             <pre class="whitespace-pre-wrap break-words rounded bg-muted/60 p-2 font-mono max-h-60 overflow-y-auto">{{ e.response_raw }}</pre>
           </div>

@@ -71,7 +71,8 @@ class SystemPromptBuilder {
     }
 
     return "\n\nTRIGGERS WITH CAPTURED PAYLOADS: " . implode(', ', array_keys($examples))
-      . "\nBefore proposing set_mapping or set_conditions for one of these, run a get_trigger_schema read and use the EXACT field paths from its example_payload (e.g. \"args.0.form_id\") — never invent field names. Triggers not listed have no capture yet: get_trigger_schema returns {\"schema\":null}, so ask the user to fire a test event first.";
+      . "\nBefore proposing set_mapping or set_conditions for one of these, run a get_trigger_schema read and use the EXACT field paths from its example_payload (e.g. \"args.0.form_id\") — never invent field names. Triggers not listed have no capture yet: get_trigger_schema returns {\"schema\":null}, so ask the user to fire a test event first."
+      . "\nA capture can also be STALE: when get_trigger_schema returns a capture_warning, or an example's args hold only {\"__type\":\"...\"} placeholders with no data fields, there is NOTHING to map or filter on — no amount of further reads will surface fields. Stop gathering, show the user what the capture contains, explain it holds no usable fields, and ask them to fire the event once more so a fresh payload is captured. Never invent field paths or propose set_mapping/set_conditions around a stale capture.";
   }
 
   /**

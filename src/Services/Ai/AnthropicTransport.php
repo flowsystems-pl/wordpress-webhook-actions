@@ -61,7 +61,9 @@ class AnthropicTransport implements LlmTransportInterface {
     ];
 
     $response = wp_remote_post(self::ENDPOINT, [
-      'timeout' => 60,
+      // Big agent prompts (system + replayed read results) can push slow providers
+      // past 60s (field trace: cURL 28 on the final round of a read loop).
+      'timeout' => (int) apply_filters('fswa_ai_http_timeout', 120),
       'headers' => [
         'x-api-key'         => $key,
         'anthropic-version' => self::API_VERSION,

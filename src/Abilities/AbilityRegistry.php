@@ -44,6 +44,9 @@ class AbilityRegistry {
   /** Max bytes of a probe response body returned to the agent. */
   private const PROBE_BODY_LIMIT = 4096;
 
+  /** Max triggers a single list_triggers read returns (use search to narrow). */
+  private const TRIGGERS_LIST_MAX = 200;
+
   /** Probe calls allowed per rolling minute (abuse guard). */
   private const PROBE_RATE_PER_MIN = 10;
 
@@ -66,10 +69,13 @@ class AbilityRegistry {
       // ---- Discovery / read --------------------------------------------
       'list_triggers' => [
         'label'        => __('List available triggers', 'flowsystems-webhook-actions'),
-        'description'  => __('List every WordPress do_action hook discovered on this site (runtime + static scan) that can be used as a webhook trigger.', 'flowsystems-webhook-actions'),
+        'description'  => __('List WordPress do_action hooks discovered on this site (runtime + static scan) that can be used as webhook triggers. The full catalog is LARGE (hundreds of hooks): when hunting for a specific plugin\'s hooks, always pass search (matches hook name or plugin slug, e.g. {"search":"cf7"}) instead of listing everything. Results cap at 200 with a total count.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
-        'input_schema' => ['type' => 'object', 'properties' => (object) []],
+        'input_schema' => [
+          'type'       => 'object',
+          'properties' => ['search' => ['type' => 'string', 'description' => 'Case-insensitive substring filter on hook name or source plugin slug.']],
+        ],
         'callback'     => [$this, 'listTriggers'],
       ],
       'list_webhooks' => [
@@ -94,7 +100,7 @@ class AbilityRegistry {
       ],
       'get_trigger_schema' => [
         'label'        => __('Get captured payload + mapping for a trigger', 'flowsystems-webhook-actions'),
-        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook.', 'flowsystems-webhook-actions'),
+        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook. If the result carries a capture_warning, the capture is stale/opaque (no mappable fields): follow the warning — show the user what the capture contains and ask them to re-fire the event — instead of proposing mappings.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
         'input_schema' => [
@@ -389,7 +395,31 @@ class AbilityRegistry {
   // ===================================================================
 
   public function listTriggers(array $input): array {
-    return ['triggers' => (new HookDiscoveryService())->discover()];
+    $triggers = (new HookDiscoveryService())->discover();
+
+    $search = strtolower(trim((string) ($input['search'] ?? '')));
+    if ($search !== '') {
+      $triggers = array_filter(
+        $triggers,
+        static fn($source, $hook) => str_contains(strtolower((string) $hook), $search)
+          || str_contains(strtolower((string) $source), $search),
+        ARRAY_FILTER_USE_BOTH
+      );
+    }
+
+    // Cap the result: the full catalog is hundreds of hooks and every read
+    // result is replayed to the model on later rounds — unfiltered dumps blow
+    // up the prompt (and were behind a 60s provider timeout in the field).
+    $total = count($triggers);
+    $out   = ['triggers' => array_slice($triggers, 0, self::TRIGGERS_LIST_MAX, true), 'total' => $total];
+    if ($total > self::TRIGGERS_LIST_MAX) {
+      $out['note'] = sprintf(
+        'Showing %d of %d triggers — pass {"search":"..."} (hook name or plugin slug substring) to narrow.',
+        self::TRIGGERS_LIST_MAX,
+        $total
+      );
+    }
+    return $out;
   }
 
   public function listWebhooks(array $input): array {
@@ -430,10 +460,43 @@ class AbilityRegistry {
       $schema ?: ['webhook_id' => $webhookId, 'trigger_name' => $trigger],
       ['example_payload' => $resolved['example']]
     );
-    if ($resolved['source'] === 'shared') {
-      return ['schema' => $schema, 'borrowed_from_webhook_id' => $resolved['from_webhook_id']];
+    $result = ['schema' => $schema];
+    if ($this->captureIsOpaque($resolved['example'])) {
+      $result['capture_warning'] = 'This capture is UNUSABLE for mapping or conditions: its args contain only opaque '
+        . 'object placeholders (a lone "__type" key with no data fields) — typically captured by an older plugin '
+        . 'version. Do NOT propose set_mapping or set_conditions from it and never invent field paths. Instead, show '
+        . 'the user exactly what the capture contains, explain that it holds no usable fields, and ask them to fire '
+        . 'the event once more (e.g. re-submit the form) so a fresh payload is captured — then re-read get_trigger_schema.';
     }
-    return ['schema' => $schema];
+    if ($resolved['source'] === 'shared') {
+      $result['borrowed_from_webhook_id'] = $resolved['from_webhook_id'];
+    }
+    return $result;
+  }
+
+  /**
+   * True when a captured example's args carry no mappable data — every arg is
+   * an opaque object placeholder like {"__type":"WPCF7_ContactForm"} (how
+   * older plugin versions serialized objects they could not unpack). Such a
+   * capture cannot back set_mapping or set_conditions.
+   *
+   * @param array<string, mixed> $example
+   */
+  private function captureIsOpaque(array $example): bool {
+    $args = $example['args'] ?? null;
+    if (!is_array($args) || $args === []) {
+      return false;
+    }
+    foreach ($args as $arg) {
+      if (!is_array($arg)) {
+        return false; // Scalar arg — mappable as-is.
+      }
+      unset($arg['__type']);
+      if ($arg !== []) {
+        return false; // Carries real data fields.
+      }
+    }
+    return true;
   }
 
   public function getLogs(array $input): array {
@@ -884,20 +947,36 @@ class AbilityRegistry {
       $originalPayload = $mappingApplied ? $decoded : null;
     }
 
+    // Apply pre-dispatch Code Glue exactly like real deliveries (the sync
+    // branch of dispatch() and processJob()) — sendToWebhook() expects an
+    // already-glued payload, so without this a test silently skips the
+    // webhook's snippet and can't reproduce production behaviour.
+    $preGlue = $payload;
+    $glued   = apply_filters('fswa_webhook_payload', $payload, $id, $trigger, $originalPayload ?: null);
+    $payload = is_array($glued) ? $glued : $payload;
+    $glueApplied = $payload !== $preGlue;
+    if ($glueApplied && $originalPayload === null) {
+      $originalPayload = $preGlue;
+    }
+
     $logService = new LogService();
-    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied);
+    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied || $glueApplied);
 
     $dispatcher = new Dispatcher(new WPHttpTransport(), new QueueService());
     $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, 0, true, null);
 
     $log = $logService->getRepository()->find($logId);
 
+    // response_body may come back json-decoded (array) from the repository.
+    $body = $log['response_body'] ?? '';
+
     return [
       'log_id'          => $logId,
       'status'          => $log['status'] ?? null,
       'http_code'       => $log['http_code'] ?? null,
       'mapping_applied' => $mappingApplied,
-      'response'        => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
+      'glue_applied'    => $glueApplied,
+      'response'        => $this->truncate(is_string($body) ? $body : (string) wp_json_encode($body), self::PROBE_BODY_LIMIT),
     ];
   }
 

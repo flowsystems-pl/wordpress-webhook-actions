@@ -369,14 +369,54 @@ async function retrySend() {
   await dispatchMessage(text);
 }
 
-async function dispatchMessage(text) {
-  try {
-    const res = await api.agent.message(activeId.value, text);
-    // Reads the agent ran mid-turn, shown as one activity line before the reply.
-    if (res.activity?.length) {
-      transcript.value.push({ role: 'tool', reads: res.activity });
+// While a turn runs server-side the orchestrator persists each completed read
+// round, so polling the conversation surfaces live progress ("Checking the
+// captured payload…" + read chips) instead of a silent spinner.
+function pollTurnProgress(convId) {
+  let fetching = false;
+  return setInterval(async () => {
+    if (fetching) return;
+    fetching = true;
+    try {
+      const full = await api.agent.getConversation(convId);
+      const t = full.transcript_json || [];
+      // Only grow, and only for the conversation still on screen — an in-flight
+      // poll must never clobber the final reply or a switched conversation.
+      if (String(activeId.value) === String(convId) && t.length > transcript.value.length) {
+        transcript.value = t;
+        await scrollDown();
+      }
+    } catch { /* transient — keep polling */ } finally {
+      fetching = false;
     }
-    transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
+  }, 1500);
+}
+
+// The stored transcript is canonical (interim read rounds, error notices, the
+// final reply) — reload it rather than appending locally on top of what the
+// progress poller may already have shown.
+async function reloadTranscript(convId) {
+  const full = await api.agent.getConversation(convId);
+  if (String(activeId.value) === String(convId)) {
+    transcript.value = full.transcript_json || [];
+  }
+}
+
+async function dispatchMessage(text) {
+  const convId = activeId.value;
+  const poll = pollTurnProgress(convId);
+  try {
+    const res = await api.agent.message(convId, text);
+    clearInterval(poll);
+    try {
+      await reloadTranscript(convId);
+    } catch {
+      // Fallback: append locally like before (reads as one activity line).
+      if (res.activity?.length) {
+        transcript.value.push({ role: 'tool', reads: res.activity });
+      }
+      transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
+    }
     // Only swap the plan when the reply carries a new one — a clarifying-only
     // reply must not blank out the progress aside (mirrors server persistence,
     // which also keeps the stored execution in that case).
@@ -392,10 +432,14 @@ async function dispatchMessage(text) {
       advance();
     }
   } catch (e) {
+    // The failed turn is persisted server-side (completed read rounds + an
+    // error notice bubble) — show it; retrying the same message resumes there.
+    try { await reloadTranscript(convId); } catch { /* keep local view */ }
     error.value = e.message;
     retryMessage.value = text;
     devPanel.value?.refresh();
   } finally {
+    clearInterval(poll);
     sending.value = false;
   }
 }
