@@ -947,20 +947,36 @@ class AbilityRegistry {
       $originalPayload = $mappingApplied ? $decoded : null;
     }
 
+    // Apply pre-dispatch Code Glue exactly like real deliveries (the sync
+    // branch of dispatch() and processJob()) — sendToWebhook() expects an
+    // already-glued payload, so without this a test silently skips the
+    // webhook's snippet and can't reproduce production behaviour.
+    $preGlue = $payload;
+    $glued   = apply_filters('fswa_webhook_payload', $payload, $id, $trigger, $originalPayload ?: null);
+    $payload = is_array($glued) ? $glued : $payload;
+    $glueApplied = $payload !== $preGlue;
+    if ($glueApplied && $originalPayload === null) {
+      $originalPayload = $preGlue;
+    }
+
     $logService = new LogService();
-    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied);
+    $logId      = $logService->logPending($id, $trigger, $payload, $originalPayload, $mappingApplied || $glueApplied);
 
     $dispatcher = new Dispatcher(new WPHttpTransport(), new QueueService());
     $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, 0, true, null);
 
     $log = $logService->getRepository()->find($logId);
 
+    // response_body may come back json-decoded (array) from the repository.
+    $body = $log['response_body'] ?? '';
+
     return [
       'log_id'          => $logId,
       'status'          => $log['status'] ?? null,
       'http_code'       => $log['http_code'] ?? null,
       'mapping_applied' => $mappingApplied,
-      'response'        => $this->truncate((string) ($log['response_body'] ?? ''), self::PROBE_BODY_LIMIT),
+      'glue_applied'    => $glueApplied,
+      'response'        => $this->truncate(is_string($body) ? $body : (string) wp_json_encode($body), self::PROBE_BODY_LIMIT),
     ];
   }
 
