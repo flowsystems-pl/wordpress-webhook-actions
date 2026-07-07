@@ -44,6 +44,9 @@ class AbilityRegistry {
   /** Max bytes of a probe response body returned to the agent. */
   private const PROBE_BODY_LIMIT = 4096;
 
+  /** Max triggers a single list_triggers read returns (use search to narrow). */
+  private const TRIGGERS_LIST_MAX = 200;
+
   /** Probe calls allowed per rolling minute (abuse guard). */
   private const PROBE_RATE_PER_MIN = 10;
 
@@ -66,10 +69,13 @@ class AbilityRegistry {
       // ---- Discovery / read --------------------------------------------
       'list_triggers' => [
         'label'        => __('List available triggers', 'flowsystems-webhook-actions'),
-        'description'  => __('List every WordPress do_action hook discovered on this site (runtime + static scan) that can be used as a webhook trigger.', 'flowsystems-webhook-actions'),
+        'description'  => __('List WordPress do_action hooks discovered on this site (runtime + static scan) that can be used as webhook triggers. The full catalog is LARGE (hundreds of hooks): when hunting for a specific plugin\'s hooks, always pass search (matches hook name or plugin slug, e.g. {"search":"cf7"}) instead of listing everything. Results cap at 200 with a total count.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
-        'input_schema' => ['type' => 'object', 'properties' => (object) []],
+        'input_schema' => [
+          'type'       => 'object',
+          'properties' => ['search' => ['type' => 'string', 'description' => 'Case-insensitive substring filter on hook name or source plugin slug.']],
+        ],
         'callback'     => [$this, 'listTriggers'],
       ],
       'list_webhooks' => [
@@ -389,7 +395,31 @@ class AbilityRegistry {
   // ===================================================================
 
   public function listTriggers(array $input): array {
-    return ['triggers' => (new HookDiscoveryService())->discover()];
+    $triggers = (new HookDiscoveryService())->discover();
+
+    $search = strtolower(trim((string) ($input['search'] ?? '')));
+    if ($search !== '') {
+      $triggers = array_filter(
+        $triggers,
+        static fn($source, $hook) => str_contains(strtolower((string) $hook), $search)
+          || str_contains(strtolower((string) $source), $search),
+        ARRAY_FILTER_USE_BOTH
+      );
+    }
+
+    // Cap the result: the full catalog is hundreds of hooks and every read
+    // result is replayed to the model on later rounds — unfiltered dumps blow
+    // up the prompt (and were behind a 60s provider timeout in the field).
+    $total = count($triggers);
+    $out   = ['triggers' => array_slice($triggers, 0, self::TRIGGERS_LIST_MAX, true), 'total' => $total];
+    if ($total > self::TRIGGERS_LIST_MAX) {
+      $out['note'] = sprintf(
+        'Showing %d of %d triggers — pass {"search":"..."} (hook name or plugin slug substring) to narrow.',
+        self::TRIGGERS_LIST_MAX,
+        $total
+      );
+    }
+    return $out;
   }
 
   public function listWebhooks(array $input): array {

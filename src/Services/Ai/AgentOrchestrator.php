@@ -31,6 +31,18 @@ class AgentOrchestrator {
   /** Byte budget for one read result handed back to the model. */
   private const READ_RESULT_BYTES = 8192;
 
+  /**
+   * How many trailing `tool` (read-result) entries replay in full. One turn
+   * produces at most READ_ITERATIONS_MAX of them, so this keeps the CURRENT
+   * turn's results intact while read dumps from earlier turns get capped —
+   * they are stale, and replaying them whole grows every later prompt (a 16KB
+   * list_triggers dump re-sent on each round pushed a provider past timeout).
+   */
+  private const REPLAY_TOOL_FULL_COUNT = self::READ_ITERATIONS_MAX + 1;
+
+  /** Byte cap for a stale (earlier-turn) read-result entry in model replay. */
+  private const REPLAY_TOOL_STALE_BYTES = 1024;
+
   private AbilityRegistry             $registry;
   private AgentConversationRepository $conversations;
   private AgentTraceLog               $trace;
@@ -82,11 +94,13 @@ class AgentOrchestrator {
     // A turn can be several model round-trips: while the envelope asks for
     // "reads" (read-only abilities), execute them locally, feed the results
     // back, and ask again. Bounded, so the whole turn stays one HTTP request.
-    if (function_exists('set_time_limit')) {
-      @set_time_limit(180);
-    }
-
     for ($iteration = 0; ; $iteration++) {
+      // Reset per round-trip: each provider call may take up to the transport
+      // timeout, so one shared budget would starve the later rounds.
+      if (function_exists('set_time_limit')) {
+        @set_time_limit(180);
+      }
+
       $sent    = $this->modelMessages($transcript);
       $started = microtime(true);
       $raw     = $transport->generateText($system, $sent, $options);
@@ -127,6 +141,11 @@ class AgentOrchestrator {
       // Replay material: the envelope that asked for the reads, then the results.
       $transcript[] = $this->assistantEntry($envelope, (string) ($envelope['assistant_message'] ?? ''));
       $transcript[] = $this->executeReads($reads, $activity, $iteration >= self::READ_ITERATIONS_MAX - 1);
+
+      // Interim persistence: the chat UI polls the conversation while the turn
+      // runs, so each completed read round becomes visible progress — and a
+      // hard crash mid-turn keeps the rounds already paid for.
+      $this->conversations->update($conversationId, ['transcript' => $transcript]);
     }
 
     // Keep the human-readable reply — WITH any clarifying questions folded in — in
@@ -224,8 +243,18 @@ class AgentOrchestrator {
    * @return array<int, array{role:string,content:string}>
    */
   private function modelMessages(array $transcript): array {
+    // Only the last few read-result entries replay in full (see the constant):
+    // older ones belong to finished turns and would bloat every prompt.
+    $toolIndexes = array_keys(array_filter(
+      $transcript,
+      static fn($entry) => (($entry['role'] ?? '') === 'tool') && empty($entry['error'])
+    ));
+    $fullToolsFrom = count($toolIndexes) > self::REPLAY_TOOL_FULL_COUNT
+      ? $toolIndexes[count($toolIndexes) - self::REPLAY_TOOL_FULL_COUNT]
+      : 0;
+
     $out = [];
-    foreach ($transcript as $entry) {
+    foreach ($transcript as $index => $entry) {
       // Transport-failure notices are UI-only history — the model never said
       // them, so replaying them would only pollute its few-shot format.
       if (!empty($entry['error'])) {
@@ -240,6 +269,10 @@ class AgentOrchestrator {
         continue;
       }
       if ($role === 'tool') {
+        if ($index < $fullToolsFrom && strlen($content) > self::REPLAY_TOOL_STALE_BYTES) {
+          $content = substr($content, 0, self::REPLAY_TOOL_STALE_BYTES)
+            . "\n…[older read results truncated — re-run the read if you need them]";
+        }
         $out[] = ['role' => 'user', 'content' => $content];
         continue;
       }
