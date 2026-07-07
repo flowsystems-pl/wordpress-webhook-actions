@@ -66,8 +66,14 @@ class AgentOrchestrator {
       return new WP_Error('fswa_conversation_not_found', __('Conversation not found.', 'flowsystems-webhook-actions'), ['status' => 404]);
     }
 
-    $transcript   = is_array($conversation['transcript_json'] ?? null) ? $conversation['transcript_json'] : [];
-    $transcript[] = ['role' => 'user', 'content' => $userMessage];
+    $transcript = is_array($conversation['transcript_json'] ?? null) ? $conversation['transcript_json'] : [];
+
+    // A retry after a transport failure re-sends the same message: keep the
+    // persisted turn (its completed read rounds replay for free) instead of
+    // appending a duplicate user entry.
+    if (!$this->isRetryAfterFailure($transcript, $userMessage)) {
+      $transcript[] = ['role' => 'user', 'content' => $userMessage];
+    }
 
     $system   = $this->prompts->build($conversation);
     $options  = ['temperature' => 0.2, 'json' => true];
@@ -92,6 +98,10 @@ class AgentOrchestrator {
           'error'      => $raw->get_error_message(),
           'error_code' => $raw->get_error_code(),
         ]);
+        // Persist what the turn accumulated (user message + completed read
+        // rounds) so a retry continues from here instead of re-paying the
+        // reads — before this, a mid-turn failure silently discarded it all.
+        $this->persistFailedTurn($conversationId, $conversation, $transport, $transcript, $userMessage, $raw);
         return $raw;
       }
 
@@ -216,6 +226,12 @@ class AgentOrchestrator {
   private function modelMessages(array $transcript): array {
     $out = [];
     foreach ($transcript as $entry) {
+      // Transport-failure notices are UI-only history — the model never said
+      // them, so replaying them would only pollute its few-shot format.
+      if (!empty($entry['error'])) {
+        continue;
+      }
+
       $role    = (string) ($entry['role'] ?? 'user');
       $content = (string) ($entry['content'] ?? '');
 
@@ -229,7 +245,66 @@ class AgentOrchestrator {
       }
       $out[] = ['role' => 'user', 'content' => $content];
     }
-    return $out;
+
+    // Skipping error entries (and tool→user rendering) can leave same-role
+    // neighbours; merge them so transports that expect alternation stay happy.
+    $merged = [];
+    foreach ($out as $message) {
+      $last = count($merged) - 1;
+      if ($last >= 0 && $merged[$last]['role'] === $message['role']) {
+        $merged[$last]['content'] .= "\n\n" . $message['content'];
+        continue;
+      }
+      $merged[] = $message;
+    }
+    return $merged;
+  }
+
+  /**
+   * True when the incoming message is a re-send of the message that opened the
+   * last (transport-failed) turn: the transcript ends with an error notice and
+   * its most recent user entry is the same text. The UI's retry button re-sends
+   * verbatim, so this keeps the persisted turn instead of duplicating it.
+   *
+   * @param array<int, array<string, mixed>> $transcript
+   */
+  private function isRetryAfterFailure(array $transcript, string $userMessage): bool {
+    $last = end($transcript);
+    if (!is_array($last) || empty($last['error'])) {
+      return false;
+    }
+    for ($i = count($transcript) - 1; $i >= 0; $i--) {
+      if ((string) ($transcript[$i]['role'] ?? '') === 'user') {
+        return (string) ($transcript[$i]['content'] ?? '') === $userMessage;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Save the transcript of a turn that died on a transport error, closed with
+   * a UI-visible notice flagged `error` (excluded from model replay). Whatever
+   * read rounds completed are kept, so retrying is cheap.
+   *
+   * @param array<string, mixed>             $conversation
+   * @param array<int, array<string, mixed>> $transcript
+   */
+  private function persistFailedTurn(int $conversationId, array $conversation, LlmTransportInterface $transport, array $transcript, string $userMessage, WP_Error $error): void {
+    $transcript[] = [
+      'role'    => 'assistant',
+      'content' => sprintf(
+        /* translators: %s: the AI provider's error message. */
+        __('The AI provider request failed mid-turn (%s). Progress so far is saved — send the message again to retry from here.', 'flowsystems-webhook-actions'),
+        $error->get_error_message()
+      ),
+      'error'   => true,
+    ];
+    $this->conversations->update($conversationId, [
+      'transport'  => $transport->id(),
+      'model'      => $transport->model(),
+      'transcript' => $transcript,
+      'title'      => $conversation['title'] !== '' ? $conversation['title'] : $this->deriveTitle($userMessage),
+    ]);
   }
 
   /**

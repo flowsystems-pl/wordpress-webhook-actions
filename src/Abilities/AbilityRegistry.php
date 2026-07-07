@@ -94,7 +94,7 @@ class AbilityRegistry {
       ],
       'get_trigger_schema' => [
         'label'        => __('Get captured payload + mapping for a trigger', 'flowsystems-webhook-actions'),
-        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook.', 'flowsystems-webhook-actions'),
+        'description'  => __('Return the last captured example payload, field mapping and conditions for a trigger so the agent can map against the real payload shape. Pass webhook_id to read that webhook\'s own capture; omit it to get the latest example for the trigger from any webhook. If the result carries a capture_warning, the capture is stale/opaque (no mappable fields): follow the warning — show the user what the capture contains and ask them to re-fire the event — instead of proposing mappings.', 'flowsystems-webhook-actions'),
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
         'input_schema' => [
@@ -430,10 +430,43 @@ class AbilityRegistry {
       $schema ?: ['webhook_id' => $webhookId, 'trigger_name' => $trigger],
       ['example_payload' => $resolved['example']]
     );
-    if ($resolved['source'] === 'shared') {
-      return ['schema' => $schema, 'borrowed_from_webhook_id' => $resolved['from_webhook_id']];
+    $result = ['schema' => $schema];
+    if ($this->captureIsOpaque($resolved['example'])) {
+      $result['capture_warning'] = 'This capture is UNUSABLE for mapping or conditions: its args contain only opaque '
+        . 'object placeholders (a lone "__type" key with no data fields) — typically captured by an older plugin '
+        . 'version. Do NOT propose set_mapping or set_conditions from it and never invent field paths. Instead, show '
+        . 'the user exactly what the capture contains, explain that it holds no usable fields, and ask them to fire '
+        . 'the event once more (e.g. re-submit the form) so a fresh payload is captured — then re-read get_trigger_schema.';
     }
-    return ['schema' => $schema];
+    if ($resolved['source'] === 'shared') {
+      $result['borrowed_from_webhook_id'] = $resolved['from_webhook_id'];
+    }
+    return $result;
+  }
+
+  /**
+   * True when a captured example's args carry no mappable data — every arg is
+   * an opaque object placeholder like {"__type":"WPCF7_ContactForm"} (how
+   * older plugin versions serialized objects they could not unpack). Such a
+   * capture cannot back set_mapping or set_conditions.
+   *
+   * @param array<string, mixed> $example
+   */
+  private function captureIsOpaque(array $example): bool {
+    $args = $example['args'] ?? null;
+    if (!is_array($args) || $args === []) {
+      return false;
+    }
+    foreach ($args as $arg) {
+      if (!is_array($arg)) {
+        return false; // Scalar arg — mappable as-is.
+      }
+      unset($arg['__type']);
+      if ($arg !== []) {
+        return false; // Carries real data fields.
+      }
+    }
+    return true;
   }
 
   public function getLogs(array $input): array {
