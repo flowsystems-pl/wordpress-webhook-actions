@@ -186,6 +186,7 @@ export const api = {
     delete: (id, force = false) => del(`credentials/${id}`, force ? { force: true } : {}),
     keyStatus: () => get('credentials/key-status'),
     reencrypt: () => post('credentials/reencrypt'),
+    provisionAppPassword: (name) => post('credentials/provision-app-password', name ? { name } : {}),
   },
   pro: {
     status: () => get('pro/status'),
