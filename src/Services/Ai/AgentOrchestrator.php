@@ -154,7 +154,17 @@ class AgentOrchestrator {
     // prose and breaks the JSON contract — see the 2026-07-06 trace).
     $assistantText = (string) ($envelope['assistant_message'] ?? '');
     $clarifying    = array_values((array) ($envelope['clarifying_questions'] ?? []));
-    $transcript[]  = $this->assistantEntry($envelope, $this->foldReply($assistantText, $clarifying));
+
+    // If the user's selected provider failed and we answered on a fallback, the
+    // user otherwise only learns this from the Dev Trace. Surface it as a notice
+    // on the turn so the chat shows which provider actually answered and why.
+    $notice = $this->fallbackNotice($transport);
+
+    $finalEntry = $this->assistantEntry($envelope, $this->foldReply($assistantText, $clarifying));
+    if ($notice !== null) {
+      $finalEntry['notice'] = $notice;
+    }
+    $transcript[] = $finalEntry;
 
     // A fresh plan seeds a runnable execution state machine (cursor + per-step
     // status). A clarifying-only reply (no plan) leaves any prior run untouched.
@@ -181,7 +191,35 @@ class AgentOrchestrator {
       'activity'             => $activity,
       'transport'            => $transport->id(),
       'model'                => $transport->model(),
+      'notice'               => $notice,
     ];
+  }
+
+  /**
+   * When a bring-your-own-key turn answered on a fallback provider (the user's
+   * selected one failed), build a short user-facing notice naming both providers
+   * and the reason — otherwise the fallback is invisible outside the Dev Trace.
+   * Returns null when no fallback happened.
+   */
+  private function fallbackNotice(LlmTransportInterface $transport): ?string {
+    if (!($transport instanceof FallbackTransport) || !$transport->didFallBack()) {
+      return null;
+    }
+    $reason = $transport->fallbackReason();
+    return sprintf(
+      /* translators: 1: selected provider/model, 2: fallback provider/model, 3: error reason */
+      __('Your selected model %1$s couldn\'t respond, so this reply came from %2$s instead. (%3$s) Pick a different model with Change model.', 'flowsystems-webhook-actions'),
+      $this->providerLabel($transport->requestedId(), $transport->requestedModel()),
+      $this->providerLabel($transport->id(), $transport->model()),
+      $reason !== '' ? $reason : __('provider unavailable', 'flowsystems-webhook-actions')
+    );
+  }
+
+  /** "Google (gemini-3.5-flash)" style label for a provider id + model. */
+  private function providerLabel(string $id, string $model): string {
+    $names = ['openai' => 'OpenAI', 'google' => 'Google', 'anthropic' => 'Anthropic'];
+    $name  = $names[$id] ?? ucfirst($id);
+    return $model !== '' ? sprintf('%s (%s)', $name, $model) : $name;
   }
 
   // ===================================================================

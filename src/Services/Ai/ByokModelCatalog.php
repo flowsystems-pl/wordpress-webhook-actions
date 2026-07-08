@@ -66,6 +66,22 @@ class ByokModelCatalog {
   }
 
   /**
+   * Return the curated model list ONLY if it is already cached — never triggers a
+   * network fetch. For hot paths (e.g. building the per-turn fallback transport)
+   * that must not add provider latency: returns [] on a cold cache.
+   *
+   * @return array<int, array<string, mixed>>
+   */
+  public function cachedModels(string $provider, int $credentialId): array {
+    $key = $this->resolveKey($credentialId);
+    if ($key === '') {
+      return [];
+    }
+    $cached = get_transient(self::CACHE_PREFIX . $provider . '_' . substr(md5($key), 0, 12));
+    return is_array($cached) ? $cached : [];
+  }
+
+  /**
    * Anthropic: GET /v1/models → { data: [ { id, display_name } ] }.
    *
    * @return array<int, array{id:string,name:string}>

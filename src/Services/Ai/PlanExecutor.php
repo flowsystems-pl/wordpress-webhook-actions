@@ -281,6 +281,25 @@ class PlanExecutor {
       $refs[(string) $step['id']] = $objectId;
     }
 
+    // 3c-1) Safety net: a freshly provisioned WP Application Password credential
+    // is useless until it's attached to the webhook. Weaker models sometimes emit
+    // the provision step but drop the follow-up assign_credential, leaving the
+    // credential created-but-unassigned (nothing authenticates). If a webhook was
+    // created earlier in THIS run and still has no credential, wire the new one to
+    // it automatically. A later explicit assign_credential (if the model did add
+    // one) simply re-assigns the same id — harmless.
+    if ((string) $step['ability'] === 'provision_wp_app_password' && $objectId) {
+      $wid = $this->createdWebhookId($steps, $cursor);
+      if ($wid > 0) {
+        $webhook = (new WebhookRepository())->find($wid);
+        if ($webhook && empty($webhook['auth_credential_id'])) {
+          $this->registry->execute('assign_credential', ['webhook_id' => $wid, 'credential_id' => $objectId]);
+          $step['result']['auto_assigned_webhook_id'] = $wid;
+          $steps[$cursor] = $step;
+        }
+      }
+    }
+
     $this->activity->log(
       'agent.' . $step['ability'],
       $this->objectTypeFor((string) $step['ability']),

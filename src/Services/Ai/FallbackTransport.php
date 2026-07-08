@@ -25,6 +25,9 @@ class FallbackTransport implements LlmTransportInterface {
   /** The transport tried most recently (set even when every attempt failed). */
   private ?LlmTransportInterface $lastAttempted = null;
 
+  /** The error from the PREFERRED transport when the last call had to fall back. */
+  private ?WP_Error $fallbackError = null;
+
   /**
    * @param array<int, LlmTransportInterface> $transports Ordered, preferred first.
    */
@@ -40,9 +43,12 @@ class FallbackTransport implements LlmTransportInterface {
   }
 
   public function generateText(string $system, array $messages, array $options = []): string|WP_Error {
-    $lastError = null;
+    // Reset per call so didFallBack()/fallbackReason() describe THIS generation.
+    $this->used          = null;
+    $this->fallbackError = null;
+    $lastError           = null;
 
-    foreach ($this->transports as $transport) {
+    foreach ($this->transports as $index => $transport) {
       $this->lastAttempted = $transport;
       $result = $transport->generateText($system, $messages, $options);
 
@@ -51,6 +57,11 @@ class FallbackTransport implements LlmTransportInterface {
         return $result;
       }
 
+      // Remember why the user's PREFERRED provider failed, so if a later one
+      // succeeds we can tell the user what happened and why.
+      if ($index === 0) {
+        $this->fallbackError = $result;
+      }
       $lastError = $result;
       if (!$this->isRetryable($result)) {
         break;
@@ -61,6 +72,28 @@ class FallbackTransport implements LlmTransportInterface {
       'fswa_no_provider',
       __('No configured AI provider could complete the request.', 'flowsystems-webhook-actions')
     );
+  }
+
+  /** True when the last successful generation came from a non-preferred provider. */
+  public function didFallBack(): bool {
+    return $this->used !== null
+      && isset($this->transports[0])
+      && $this->used !== $this->transports[0];
+  }
+
+  /** The provider id the user actually selected (preferred, first in the list). */
+  public function requestedId(): string {
+    return ($this->transports[0] ?? null)?->id() ?? 'byok';
+  }
+
+  /** The model the user actually selected. */
+  public function requestedModel(): string {
+    return ($this->transports[0] ?? null)?->model() ?? '';
+  }
+
+  /** Human-readable reason the preferred provider failed on the last fallback. */
+  public function fallbackReason(): string {
+    return $this->fallbackError?->get_error_message() ?? '';
   }
 
   public function id(): string {
