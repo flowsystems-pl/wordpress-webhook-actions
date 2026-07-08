@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -124,12 +124,8 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.1.1 =
-- Improved: AI Builder chat shows live progress while the agent gathers site data — each read round appears as it runs instead of a silent spinner
-- Fixed: a failed AI provider call mid-conversation no longer loses the turn — everything gathered so far is saved, and retrying resumes from there without re-running the reads
-- Fixed: the agent now detects captured example payloads with no usable fields (captured by older plugin versions), shows what the capture contains, and asks for a fresh test event instead of inventing field paths
-- Fixed: AI test deliveries now run pre-dispatch Code Glue snippets (with Pro), matching real dispatches, and report whether a snippet ran
-- Improved: the trigger-catalog read supports search with capped results, and older read results are trimmed from the model's context — faster responses and fewer provider timeouts
-- Improved: AI provider requests allow up to 120 seconds (new `fswa_ai_http_timeout` filter) instead of timing out at 60 on large conversations
-- Added: copy-to-clipboard buttons in the AI Dev Trace panel — full trace entry as JSON, system prompt, messages, raw request and response
-- Fixed: AI trace logging no longer stops silently when the day's log file was created by a CLI session
+= 2.1.2 =
+- Fixed: the AI Builder no longer loses a turn when the AI provider returns slightly malformed JSON — a stray trailing brace, a trailing comma, or an unescaped line break is now repaired and parsed instead of failing silently
+- Improved: for automations that call this site's own WordPress REST API, the AI Builder proposes the full plan and lets you pick or create the auth credential right in the plan, instead of asking for it in chat
+- Added: one-click "Create a WP Application Password for me" on the credential step (and a matching AI plan step) — it mints an Application Password for the current administrator and stores it in the vault as a ready-to-use Basic credential named "WP REST API (internal)"
+- Improved: the AI Builder now knows webhooks carry no code field, and points you to Code Glue (with Pro) for computed values or to the WordPress REST API for code-free internal automations
