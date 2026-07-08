@@ -27,6 +27,7 @@ const FIELD_META = {
   webhook_id: { label: 'Webhook' },
   field_mapping: { label: 'Field mapping' },
   auth_credential_id: { label: 'Credential' },
+  credential_id: { label: 'Credential' },
   id: { label: 'ID' },
 };
 
@@ -52,6 +53,7 @@ const SHORT_LABELS = {
   set_mapping: 'Map fields',
   set_conditions: 'Set conditions',
   assign_credential: 'Assign credential',
+  provision_wp_app_password: 'Create WP app password',
   create_chain: 'Create chain',
   create_chain_link: 'Link chain',
   probe_endpoint: 'Probe endpoint',

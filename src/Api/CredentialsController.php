@@ -12,6 +12,7 @@ use WP_Error;
 use FlowSystems\WebhookActions\Repositories\CredentialRepository;
 use FlowSystems\WebhookActions\Services\CredentialCipher;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
+use FlowSystems\WebhookActions\Services\WpAppPasswordService;
 
 /**
  * Credentials Vault REST controller.
@@ -60,6 +61,17 @@ class CredentialsController extends WP_REST_Controller {
         'methods'             => WP_REST_Server::READABLE,
         'callback'            => [$this, 'keyStatus'],
         'permission_callback' => [$this, 'permissionsCheck'],
+      ],
+    ]);
+
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/provision-app-password', [
+      [
+        'methods'             => WP_REST_Server::CREATABLE,
+        'callback'            => [$this, 'provisionAppPassword'],
+        'permission_callback' => [$this, 'permissionsCheck'],
+        'args'                => [
+          'name' => ['required' => false, 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field'],
+        ],
       ],
     ]);
 
@@ -219,6 +231,19 @@ class CredentialsController extends WP_REST_Controller {
       'failed_ids'     => $failedIds,
       'db_key_removed' => $dbKeyRemoved,
     ]);
+  }
+
+  /**
+   * POST /credentials/provision-app-password
+   * Mint a WordPress Application Password for the current user and store it as a
+   * basic vault credential, so internal WP REST automations get one-click auth.
+   */
+  public function provisionAppPassword(WP_REST_Request $request): WP_REST_Response|WP_Error {
+    $created = (new WpAppPasswordService())->provisionForCurrentUser((string) $request->get_param('name'));
+    if (is_wp_error($created)) {
+      return $created;
+    }
+    return rest_ensure_response($created);
   }
 
   /**

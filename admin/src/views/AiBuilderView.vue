@@ -211,16 +211,44 @@ async function loadCredentials() {
 // Busy flag while a credential is being created inline (from a 401/403 probe fix).
 const creatingCred = ref(false);
 
-// Create a credential in the vault (payload from AiStepControls), assign it to the
-// webhook and re-probe — so the user never leaves the build to set up auth.
-async function onCreateCredential(payload) {
-  if (creatingCred.value) return;
+// Create a credential in the vault (from AiStepControls) and continue the step with
+// it — so the user never leaves the build to set up auth. Two entry points:
+//   • probe auth-fail (no inputKey): assign to the probed webhook and re-probe.
+//   • blocked_input credential field (inputKey): patch the new id into that field.
+async function onCreateCredential({ payload, inputKey } = {}) {
+  if (creatingCred.value || !payload) return;
   creatingCred.value = true;
   error.value = '';
   try {
     const created = await api.credentials.create(payload);
     await loadCredentials();
-    advance({ probe_fix: { auth_credential_id: Number(created.id) } });
+    if (inputKey) {
+      advance({ patch: { [inputKey]: Number(created.id) } });
+    } else {
+      advance({ probe_fix: { auth_credential_id: Number(created.id) } });
+    }
+  } catch (e) {
+    error.value = e.message;
+  } finally {
+    creatingCred.value = false;
+  }
+}
+
+// Mint a WP Application Password for the current admin server-side, store it as a
+// basic vault credential, and continue the step with it — the secret never comes
+// back to the browser. Same two entry points as onCreateCredential.
+async function onProvisionAppPassword({ inputKey } = {}) {
+  if (creatingCred.value) return;
+  creatingCred.value = true;
+  error.value = '';
+  try {
+    const created = await api.credentials.provisionAppPassword();
+    await loadCredentials();
+    if (inputKey) {
+      advance({ patch: { [inputKey]: Number(created.id) } });
+    } else {
+      advance({ probe_fix: { auth_credential_id: Number(created.id) } });
+    }
   } catch (e) {
     error.value = e.message;
   } finally {
@@ -722,6 +750,7 @@ async function scrollDown() {
               @skip="skipStep"
               @probe-fix="(fix) => advance({ probe_fix: fix })"
               @create-credential="onCreateCredential"
+              @provision-app-password="onProvisionAppPassword"
             />
 
             <!-- Non-current step states -->

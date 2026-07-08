@@ -17,7 +17,7 @@ const props = defineProps({
   busy: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['continue', 'retry', 'skip', 'confirm', 'probe-fix', 'create-credential']);
+const emit = defineEmits(['continue', 'retry', 'skip', 'confirm', 'probe-fix', 'create-credential', 'provision-app-password']);
 
 // ---- blocked_input -------------------------------------------------------
 const inputDraft = reactive({});
@@ -38,6 +38,22 @@ function missingFields(step) {
 
 function continueInput() {
   emit('continue', { ...inputDraft });
+}
+
+// A blocked_input step may be missing a vault-credential reference (e.g.
+// assign_credential.credential_id, or an auth_credential_id). For those we render
+// the same pick-or-create-inline control the probe auth path uses, instead of a
+// raw number field, so the user never has to leave the build to wire up auth.
+const CRED_KEYS = ['credential_id', 'auth_credential_id'];
+const credInputKey = computed(() =>
+  (props.step?.missing || []).find((k) => CRED_KEYS.includes(k)) || null
+);
+const inputCredDraft = ref('');
+
+function continueWithCred() {
+  const id = Number(inputCredDraft.value);
+  if (!id || !credInputKey.value) return;
+  emit('continue', { ...inputDraft, [credInputKey.value]: id });
 }
 
 // ---- blocked_probe: endpoint / credential fixes --------------------------
@@ -73,8 +89,7 @@ const newCredValid = computed(() => {
   return !!newCred.secret; // bearer
 });
 
-function createAndAssignCred() {
-  if (!newCredValid.value) return;
+function buildNewCredPayload() {
   const payload = { name: newCred.name.trim(), type: newCred.type };
   if (newCred.type === 'basic') {
     payload.username = newCred.username;
@@ -85,28 +100,96 @@ function createAndAssignCred() {
   if (newCred.type === 'api_key' || newCred.type === 'custom') {
     payload.header_name = newCred.header_name.trim();
   }
-  emit('create-credential', payload);
+  return payload;
+}
+
+// From a 401/403 probe: create the credential and assign it to the probed webhook.
+function createAndAssignCred() {
+  if (!newCredValid.value) return;
+  emit('create-credential', { payload: buildNewCredPayload() });
+}
+
+// From a blocked_input credential field: create the credential, then continue the
+// step with its new id patched into that field.
+function createCredForInput() {
+  if (!newCredValid.value || !credInputKey.value) return;
+  emit('create-credential', { payload: buildNewCredPayload(), inputKey: credInputKey.value });
 }
 </script>
 
 <template>
   <!-- blocked_input: ask for the missing values, human-labelled -->
   <div v-if="step.status === 'blocked_input'" class="space-y-4">
-    <div v-for="f in missingFields(step)" :key="f.key" class="space-y-1.5">
-      <label class="block text-sm font-medium text-foreground">{{ fieldMeta(f.key).label }}</label>
-      <p v-if="fieldMeta(f.key).help" class="text-xs text-muted-foreground">{{ fieldMeta(f.key).help }}</p>
-      <Select v-if="f.enum" :model-value="String(inputDraft[f.key] ?? '')"
-        @update:model-value="(v) => (inputDraft[f.key] = v)">
-        <SelectTrigger><SelectValue :placeholder="fieldMeta(f.key).label" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="opt in f.enum" :key="opt" :value="opt">{{ opt }}</SelectItem>
-        </SelectContent>
-      </Select>
-      <Input v-else v-model="inputDraft[f.key]"
-        :type="f.type === 'integer' ? 'number' : 'text'"
-        :placeholder="fieldMeta(f.key).placeholder || fieldMeta(f.key).label" />
-    </div>
-    <Button :disabled="busy" @click="continueInput">
+    <template v-for="f in missingFields(step)" :key="f.key">
+      <!-- A credential reference: pick an existing vault credential or create one inline -->
+      <div v-if="CRED_KEYS.includes(f.key)" class="space-y-2">
+        <label class="block text-sm font-medium text-foreground">{{ fieldMeta(f.key).label }}</label>
+        <p class="text-xs text-muted-foreground">{{ __('This step needs a stored auth credential. Pick one from the vault or create a new one — the secret stays in the vault and is injected only at dispatch.') }}</p>
+
+        <!-- One-click: mint a WP Application Password for this site's own REST API -->
+        <Button size="sm" variant="secondary" :disabled="busy" @click="emit('provision-app-password', { inputKey: credInputKey })">
+          {{ __('Create a WP Application Password for me') }}
+        </Button>
+
+        <!-- Pick an existing vault credential -->
+        <div v-if="credentials.length && !showCreateCred" class="space-y-2">
+          <Input v-if="credentials.length > 8" v-model="credSearch" type="text" :placeholder="__('Search credentials…')" />
+          <Select :model-value="String(inputCredDraft)" @update:model-value="(v) => (inputCredDraft = v)">
+            <SelectTrigger><SelectValue :placeholder="__('Choose a credential')" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem v-for="c in filteredCredentials" :key="c.id" :value="String(c.id)">{{ c.name }}</SelectItem>
+              <div v-if="!filteredCredentials.length" class="px-2 py-1.5 text-xs text-muted-foreground">{{ __('No matches') }}</div>
+            </SelectContent>
+          </Select>
+          <div class="flex flex-wrap gap-2">
+            <Button size="sm" :disabled="busy || !inputCredDraft" @click="continueWithCred">{{ __('Use credential & continue') }}</Button>
+            <Button size="sm" variant="outline" :disabled="busy" @click="showCreateCred = true">{{ __('+ New credential') }}</Button>
+          </div>
+        </div>
+
+        <!-- Create a new vault credential and continue with it -->
+        <div v-else class="space-y-2">
+          <p v-if="!credentials.length" class="text-xs text-muted-foreground">{{ __('No credentials in the vault yet — create one and it will be used for this step.') }}</p>
+          <Input v-model="newCred.name" type="text" :placeholder="__('Credential name (e.g. WP REST admin)')" />
+          <Select :model-value="newCred.type" @update:model-value="(v) => (newCred.type = v)">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bearer">{{ __('Bearer token') }}</SelectItem>
+              <SelectItem value="basic">{{ __('Basic auth') }}</SelectItem>
+              <SelectItem value="api_key">{{ __('API key (header)') }}</SelectItem>
+              <SelectItem value="custom">{{ __('Custom header') }}</SelectItem>
+            </SelectContent>
+          </Select>
+          <template v-if="newCred.type === 'basic'">
+            <Input v-model="newCred.username" type="text" :placeholder="__('Username')" />
+            <Input v-model="newCred.password" type="password" :placeholder="__('Password (or Application Password)')" />
+          </template>
+          <Input v-else v-model="newCred.secret" type="password" :placeholder="newCred.type === 'bearer' ? __('Token') : __('Secret value')" />
+          <Input v-if="newCred.type === 'api_key' || newCred.type === 'custom'" v-model="newCred.header_name" type="text" :placeholder="__('Header name (e.g. X-API-Key)')" />
+          <div class="flex flex-wrap gap-2">
+            <Button size="sm" :disabled="busy || !newCredValid" @click="createCredForInput">{{ __('Create & continue') }}</Button>
+            <Button v-if="credentials.length" size="sm" variant="outline" :disabled="busy" @click="showCreateCred = false">{{ __('Use existing') }}</Button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Any other missing field: ask for it directly -->
+      <div v-else class="space-y-1.5">
+        <label class="block text-sm font-medium text-foreground">{{ fieldMeta(f.key).label }}</label>
+        <p v-if="fieldMeta(f.key).help" class="text-xs text-muted-foreground">{{ fieldMeta(f.key).help }}</p>
+        <Select v-if="f.enum" :model-value="String(inputDraft[f.key] ?? '')"
+          @update:model-value="(v) => (inputDraft[f.key] = v)">
+          <SelectTrigger><SelectValue :placeholder="fieldMeta(f.key).label" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="opt in f.enum" :key="opt" :value="opt">{{ opt }}</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input v-else v-model="inputDraft[f.key]"
+          :type="f.type === 'integer' ? 'number' : 'text'"
+          :placeholder="fieldMeta(f.key).placeholder || fieldMeta(f.key).label" />
+      </div>
+    </template>
+    <Button v-if="!credInputKey" :disabled="busy" @click="continueInput">
       <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue') }}
     </Button>
   </div>
@@ -130,6 +213,11 @@ function createAndAssignCred() {
 
     <!-- 401/403: attach a vault credential to the webhook, then re-probe -->
     <template v-if="step.probe?.kind === 'auth'">
+      <!-- One-click: mint a WP Application Password for this site's own REST API -->
+      <Button size="sm" variant="secondary" :disabled="busy" @click="emit('provision-app-password', {})">
+        {{ __('Create a WP Application Password for me') }}
+      </Button>
+
       <!-- Pick an existing vault credential -->
       <div v-if="credentials.length && !showCreateCred" class="space-y-2">
         <Input v-if="credentials.length > 8" v-model="credSearch" type="text" :placeholder="__('Search credentials…')" />

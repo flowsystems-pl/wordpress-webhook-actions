@@ -17,6 +17,7 @@ use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\CredentialCipher;
+use FlowSystems\WebhookActions\Services\WpAppPasswordService;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 use WP_Error;
 
@@ -243,9 +244,23 @@ class AbilityRegistry {
             'webhook_id'    => ['type' => 'integer'],
             'credential_id' => ['type' => ['integer', 'null']],
           ],
-          'required'   => ['webhook_id'],
+          'required'   => ['webhook_id', 'credential_id'],
         ],
         'callback'     => [$this, 'assignCredential'],
+      ],
+      'provision_wp_app_password' => [
+        'label'            => __('Create a WordPress Application Password credential', 'flowsystems-webhook-actions'),
+        'description'      => __('Mint a WordPress Application Password for the CURRENT signed-in admin and store it as a "basic" vault credential named "WP REST API (internal) — <user>", for authenticating this site\'s own REST API. Use it for INTERNAL automations (endpoint_url on this site\'s wp-json), then reference the new credential id from assign_credential as {{step_N.id}}. Requires confirmation; the secret is written straight to the vault and never exposed. The optional name only labels the Application Password in the user\'s profile.', 'flowsystems-webhook-actions'),
+        'category'         => 'webhook-actions',
+        'scope'            => AuthHelper::SCOPE_FULL,
+        'requires_confirm' => 'always',
+        'input_schema'     => [
+          'type'       => 'object',
+          'properties' => [
+            'name' => ['type' => 'string'],
+          ],
+        ],
+        'callback'     => [$this, 'provisionWpAppPassword'],
       ],
       'create_chain' => [
         'label'        => __('Create a webhook chain', 'flowsystems-webhook-actions'),
@@ -767,6 +782,15 @@ class AbilityRegistry {
 
     $repo->update($webhookId, ['auth_credential_id' => $credentialId]);
     return ['webhook_id' => $webhookId, 'auth_credential_id' => $credentialId];
+  }
+
+  public function provisionWpAppPassword(array $input): array|WP_Error {
+    $created = (new WpAppPasswordService())->provisionForCurrentUser((string) ($input['name'] ?? ''));
+    if (is_wp_error($created)) {
+      return $created;
+    }
+    // Shape the result so {{step_N.id}} resolves to the new credential id.
+    return ['credential' => $created, 'id' => (int) ($created['id'] ?? 0)];
   }
 
   public function createChain(array $input): array|WP_Error {

@@ -842,7 +842,7 @@ class PlanExecutor {
    * Best-effort extraction of the affected object id from an ability result.
    */
   private function resultObjectId(array $result): ?int {
-    foreach (['webhook', 'chain', 'link', 'snippet'] as $key) {
+    foreach (['webhook', 'chain', 'link', 'snippet', 'credential'] as $key) {
       if (isset($result[$key]['id'])) {
         return (int) $result[$key]['id'];
       }

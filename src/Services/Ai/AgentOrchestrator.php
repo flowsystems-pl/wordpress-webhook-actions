@@ -484,11 +484,14 @@ class AgentOrchestrator {
       $text = $inner;
     }
 
-    // 4) Fall back to the outermost { … } span, validated by a decode.
-    $start = strpos($text, '{');
-    $end   = strrpos($text, '}');
-    if ($start !== false && $end !== false && $end > $start) {
-      $decoded = json_decode(substr($text, $start, $end - $start + 1), true);
+    // 4) Last resort: run a conservative JSON repair over the text and decode
+    //    that. This folds together the quirks models actually emit — stray
+    //    trailing output after the object (e.g. Gemini's extra "}"), a dangling
+    //    comma before a "}"/"]", and raw newlines/tabs inside string values —
+    //    into one lint pass instead of a per-quirk fallback ladder.
+    $repaired = self::repairJsonObject($text);
+    if ($repaired !== null) {
+      $decoded = json_decode($repaired, true);
       if (self::isEnvelope($decoded)) {
         $this->lastParseSucceeded = true;
         return $decoded;
@@ -498,6 +501,80 @@ class AgentOrchestrator {
     // The model didn't return valid JSON — treat the whole thing as a plain reply.
     $this->lastParseSucceeded = false;
     return ['assistant_message' => trim($raw), 'plan' => []];
+  }
+
+  /**
+   * Conservative, lossless JSON repair for a single object embedded in model
+   * output. Scans from the first "{" to its matching close brace — tracking
+   * string literals and escapes so braces inside strings don't affect depth —
+   * and while copying it:
+   *   • escapes raw control chars (newline, CR, tab) that appear INSIDE strings,
+   *     which models emit unescaped and which json_decode rejects;
+   *   • drops a trailing comma immediately before a "}" or "]".
+   * Anything after the balanced object (stray braces, prose) is ignored. Returns
+   * the repaired JSON string, or null when there is no balanced object (e.g. a
+   * truncated reply) — those fail safe rather than being force-closed.
+   */
+  private static function repairJsonObject(string $text): ?string {
+    $start = strpos($text, '{');
+    if ($start === false) {
+      return null;
+    }
+
+    $out      = '';
+    $depth    = 0;
+    $inString = false;
+    $escaped  = false;
+    $len      = strlen($text);
+
+    for ($i = $start; $i < $len; $i++) {
+      $ch = $text[$i];
+
+      if ($inString) {
+        if ($escaped) {
+          $escaped = false;
+          $out    .= $ch;
+        } elseif ($ch === '\\') {
+          $escaped = true;
+          $out    .= $ch;
+        } elseif ($ch === '"') {
+          $inString = false;
+          $out     .= $ch;
+        } elseif ($ch === "\n") {
+          $out .= '\\n';
+        } elseif ($ch === "\r") {
+          $out .= '\\r';
+        } elseif ($ch === "\t") {
+          $out .= '\\t';
+        } else {
+          $out .= $ch;
+        }
+        continue;
+      }
+
+      if ($ch === '"') {
+        $inString = true;
+        $out     .= $ch;
+      } elseif ($ch === '{' || $ch === '[') {
+        $depth++;
+        $out .= $ch;
+      } elseif ($ch === '}' || $ch === ']') {
+        // Strip a dangling comma (and any whitespace) before the closer.
+        $trimmed = rtrim($out);
+        if (substr($trimmed, -1) === ',') {
+          $out = substr($trimmed, 0, -1);
+        }
+        $out .= $ch;
+        $depth--;
+        if ($depth === 0) {
+          return $out;
+        }
+      } else {
+        $out .= $ch;
+      }
+    }
+
+    return null;
   }
 
   /**
