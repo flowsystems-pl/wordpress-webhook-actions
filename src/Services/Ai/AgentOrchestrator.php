@@ -168,7 +168,10 @@ class AgentOrchestrator {
 
     // A fresh plan seeds a runnable execution state machine (cursor + per-step
     // status). A clarifying-only reply (no plan) leaves any prior run untouched.
-    $execution = $plan !== [] ? $this->executor->seedExecution($plan) : null;
+    // The prior run is passed in so its applied-object ledger carries forward and
+    // a re-proposed create/provision step is reused, not duplicated.
+    $priorExecution = is_array($conversation['execution_json'] ?? null) ? $conversation['execution_json'] : [];
+    $execution      = $plan !== [] ? $this->executor->seedExecution($plan, null, $priorExecution) : null;
 
     $update = [
       'transport'  => $transport->id(),

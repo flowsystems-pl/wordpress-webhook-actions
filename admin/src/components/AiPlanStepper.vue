@@ -86,6 +86,9 @@ watch(
             isActive(i) ? 'font-medium text-foreground' : step.status === 'done' ? 'text-muted-foreground' : 'text-foreground']">
             {{ shortLabel(step.ability) }}
           </span>
+          <span v-if="step.reused" class="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+            {{ __('reused') }}
+          </span>
           <ChevronDown class="w-3.5 h-3.5 shrink-0 text-muted-foreground transition-transform"
             :class="openIndex === i && 'rotate-180'" />
         </button>

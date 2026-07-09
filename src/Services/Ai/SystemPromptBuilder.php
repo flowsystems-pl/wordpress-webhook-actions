@@ -88,20 +88,13 @@ class SystemPromptBuilder {
   private function buildContext(array $conversation): string {
     $webhooks = (new WebhookRepository())->getAll();
     if (empty($webhooks)) {
-      return '';
+      return $this->appliedContext($conversation);
     }
 
-    // Highlight the webhook this build created (if any).
-    $builtId   = 0;
-    $execution = is_array($conversation['execution_json'] ?? null) ? $conversation['execution_json'] : null;
-    foreach ((array) ($execution['steps'] ?? []) as $s) {
-      if ((string) ($s['ability'] ?? '') === 'create_webhook' && (string) ($s['status'] ?? '') === 'done') {
-        $id = (int) ($s['result']['webhook']['id'] ?? 0);
-        if ($id > 0) {
-          $builtId = $id;
-        }
-      }
-    }
+    // Every webhook created earlier in THIS build (from the applied-object
+    // ledger) is flagged, so the model never mistakes one it just made for an
+    // unrelated pre-existing webhook — the trap that produced duplicate builds.
+    $builtIds = $this->builtWebhookIds($conversation);
 
     $max   = 40;
     $lines = [];
@@ -116,7 +109,7 @@ class SystemPromptBuilder {
         (string) ($w['endpoint_url'] ?? ''),
         $triggers,
         !empty($w['is_enabled']) ? 'ENABLED' : 'disabled',
-        $id === $builtId ? '  <-- created in THIS build' : ''
+        in_array($id, $builtIds, true) ? '  <-- created in THIS build' : ''
       );
     }
 
@@ -124,7 +117,69 @@ class SystemPromptBuilder {
     if (count($webhooks) > $max) {
       $block .= "\n(…and " . (count($webhooks) - $max) . ' more — use list_webhooks / get_webhook to find others.)';
     }
-    return $block;
+    return $block . $this->appliedContext($conversation);
+  }
+
+  /**
+   * The webhook ids created earlier in this conversation, read from the build's
+   * applied-object ledger (durable across re-plans).
+   *
+   * @param array<string, mixed> $conversation
+   * @return array<int, int>
+   */
+  private function builtWebhookIds(array $conversation): array {
+    $ids = [];
+    foreach ($this->ledger($conversation) as $entry) {
+      if ((string) ($entry['ability'] ?? '') === 'create_webhook') {
+        $id = (int) ($entry['object_id'] ?? 0);
+        if ($id > 0) {
+          $ids[] = $id;
+        }
+      }
+    }
+    return array_values(array_unique($ids));
+  }
+
+  /**
+   * The applied-object ledger for this conversation (what create/provision steps
+   * already produced in this build).
+   *
+   * @param array<string, mixed> $conversation
+   * @return array<int, array<string, mixed>>
+   */
+  private function ledger(array $conversation): array {
+    $execution = is_array($conversation['execution_json'] ?? null) ? $conversation['execution_json'] : [];
+    return is_array($execution['ledger'] ?? null) ? $execution['ledger'] : [];
+  }
+
+  /**
+   * A spelled-out record of what THIS build has already applied — so the model
+   * references those objects (by id) and does NOT re-propose the create/provision
+   * steps that made them. Weaker models otherwise re-emit the whole plan each
+   * turn; without this they created the same webhook and credential repeatedly.
+   *
+   * @param array<string, mixed> $conversation
+   */
+  private function appliedContext(array $conversation): string {
+    $ledger = $this->ledger($conversation);
+    if ($ledger === []) {
+      return '';
+    }
+
+    $lines = [];
+    foreach ($ledger as $entry) {
+      $label = trim((string) ($entry['label'] ?? ''));
+      if ($label !== '') {
+        $lines[] = '- ' . $label;
+      }
+    }
+    if ($lines === []) {
+      return '';
+    }
+
+    return "\n\nALREADY APPLIED IN THIS BUILD (created by earlier steps — do NOT create these again; reference them by id and only ADD the remaining steps):\n"
+      . implode("\n", $lines)
+      . "\nIf your goal needs one of these, it already exists — use its id (e.g. as a webhook_id / credential_id or via assign_credential/set_mapping/enable_webhook). Never include a create_webhook or provision_wp_app_password step for something listed here.";
   }
 
   /**
