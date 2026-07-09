@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -124,8 +124,7 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.1.2 =
-- Fixed: the AI Builder no longer loses a turn when the AI provider returns slightly malformed JSON — a stray trailing brace, a trailing comma, or an unescaped line break is now repaired and parsed instead of failing silently
-- Improved: for automations that call this site's own WordPress REST API, the AI Builder proposes the full plan and lets you pick or create the auth credential right in the plan, instead of asking for it in chat
-- Added: one-click "Create a WP Application Password for me" on the credential step (and a matching AI plan step) — it mints an Application Password for the current administrator and stores it in the vault as a ready-to-use Basic credential named "WP REST API (internal)"
-- Improved: the AI Builder now knows webhooks carry no code field, and points you to Code Glue (with Pro) for computed values or to the WordPress REST API for code-free internal automations
+= 2.1.3 =
+- Fixed: the AI Builder no longer creates duplicate webhooks or Application Password credentials when a model re-sends a plan it already applied — steps that were already built are recognised and reused instead of run again
+- Improved: when your chosen AI model can't respond and the build falls back to another model or provider, the AI Builder now shows a notice (with the reason) so you can switch models, instead of quietly answering from a different one
+- Fixed: a WP Application Password provisioned during a build is now automatically attached to the webhook that needs it, instead of being created but left unassigned
