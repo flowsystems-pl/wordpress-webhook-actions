@@ -6,7 +6,6 @@ defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Abilities\AbilityRegistry;
 use FlowSystems\WebhookActions\Repositories\AgentConversationRepository;
-use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
 use WP_Error;
@@ -14,15 +13,19 @@ use WP_Error;
 /**
  * Runs an agent plan against the AbilityRegistry: the step-by-step execution
  * state machine (advanceStep), plan seeding/normalization, the revert/undo
- * stack, and the small helpers that gate, resolve and log each step.
+ * stack, and the small helpers that gate and resolve each step.
  *
  * The AgentOrchestrator owns the conversation turn and delegates all plan
- * execution and reverting here.
+ * execution and reverting here. Cohesive sub-concerns live in collaborators:
+ * {@see BuildLedger} (idempotent reuse of already-built objects),
+ * {@see StepReverter} (per-step undo mechanics) and {@see ProbeInterpreter}.
  */
 class PlanExecutor {
   private AgentConversationRepository $conversations;
   private AbilityRegistry             $registry;
   private ActivityLogService          $activity;
+  private BuildLedger                 $ledger;
+  private StepReverter                $reverter;
 
   public function __construct(
     AgentConversationRepository $conversations,
@@ -32,6 +35,8 @@ class PlanExecutor {
     $this->conversations = $conversations;
     $this->registry      = $registry;
     $this->activity      = $activity;
+    $this->ledger        = new BuildLedger();
+    $this->reverter      = new StepReverter($registry);
   }
 
   /**
@@ -84,8 +89,8 @@ class PlanExecutor {
 
       $this->activity->log(
         'agent.' . $ability,
-        $this->objectTypeFor($ability),
-        $this->resultObjectId($result),
+        StepResult::objectType($ability),
+        StepResult::objectId($result),
         $step['summary'] ?? null,
         $this->abilityLogContext($ability, $result) + ['_reason' => $step['summary'] ?? '']
       );
@@ -146,6 +151,21 @@ class PlanExecutor {
     }
 
     $step = $steps[$cursor];
+
+    // Already built earlier in this conversation (pre-marked done/reused when the
+    // plan was re-seeded) — don't run it again. Carry its object id to downstream
+    // steps and advance, so a re-proposed create_webhook / provision can't make a
+    // duplicate even when auto mode fires the whole plan.
+    if (in_array((string) ($step['status'] ?? ''), ['done', 'skipped', 'reverted'], true)) {
+      $objectId = StepResult::objectId((array) ($step['result'] ?? []));
+      if ($objectId !== null) {
+        $refs[(string) ($step['id'] ?? '')] = $objectId;
+        $execution['refs'] = $refs;
+      }
+      $execution['cursor'] = $cursor + 1;
+      $finished            = ($cursor + 1) >= count($steps);
+      return $this->persistExecution($conversationId, $execution, $step, !$finished, $finished);
+    }
 
     // Skip on request — mark and advance.
     if (!empty($opts['skip'])) {
@@ -225,7 +245,7 @@ class PlanExecutor {
 
     // 3) Snapshot the object's state BEFORE mutating it (so we can revert), then
     // run the ability.
-    $before = $this->captureBefore((string) $step['ability'], $input);
+    $before = $this->reverter->captureBefore((string) $step['ability'], $input);
     $result = $this->registry->execute((string) $step['ability'], $input);
 
     // 3a) Prerequisite not met: get_trigger_schema has nothing captured yet.
@@ -256,7 +276,7 @@ class PlanExecutor {
     // (auth needed / wrong endpoint / unreachable) — pause with guidance so the
     // user can fix the webhook and retry, rather than silently marking it done.
     if ((string) $step['ability'] === 'probe_endpoint' && is_array($result)) {
-      $probe = $this->interpretProbe($result);
+      $probe = ProbeInterpreter::interpret($result);
       if ($probe !== null) {
         $step['status']     = 'blocked_probe';
         $step['probe']      = $probe;
@@ -276,18 +296,47 @@ class PlanExecutor {
     }
     $steps[$cursor] = $step;
 
-    $objectId = $this->resultObjectId((array) $result);
+    $objectId = StepResult::objectId((array) $result);
     if ($objectId !== null) {
       $refs[(string) $step['id']] = $objectId;
     }
 
+    // 3c-1) Safety net: a freshly provisioned WP Application Password credential
+    // is useless until it's attached to the webhook. Weaker models sometimes emit
+    // the provision step but drop the follow-up assign_credential, leaving the
+    // credential created-but-unassigned (nothing authenticates). If a webhook was
+    // created earlier in THIS run and still has no credential, wire the new one to
+    // it automatically. A later explicit assign_credential (if the model did add
+    // one) simply re-assigns the same id — harmless.
+    if ((string) $step['ability'] === 'provision_wp_app_password' && $objectId) {
+      $wid = $this->createdWebhookId($steps, $cursor);
+      if ($wid > 0) {
+        $webhook = (new WebhookRepository())->find($wid);
+        if ($webhook && empty($webhook['auth_credential_id'])) {
+          $this->registry->execute('assign_credential', ['webhook_id' => $wid, 'credential_id' => $objectId]);
+          $step['result']['auto_assigned_webhook_id'] = $wid;
+          $steps[$cursor] = $step;
+        }
+      }
+    }
+
     $this->activity->log(
       'agent.' . $step['ability'],
-      $this->objectTypeFor((string) $step['ability']),
+      StepResult::objectType((string) $step['ability']),
       $objectId,
       $step['summary'] ?? null,
       $this->abilityLogContext((string) $step['ability'], $result) + ['_reason' => $step['summary'] ?? '']
     );
+
+    // Record a freshly created object in the build ledger so later steps in this
+    // run — and the system prompt next turn — treat it as built (never re-create).
+    if (BuildLedger::handles((string) $step['ability']) && $objectId) {
+      $execution['ledger'] = $this->ledger->record(
+        is_array($execution['ledger'] ?? null) ? $execution['ledger'] : [],
+        $step,
+        (int) $objectId
+      );
+    }
 
     $execution['steps']  = $steps;
     $execution['refs']   = $refs;
@@ -318,11 +367,11 @@ class PlanExecutor {
     $steps = array_values((array) ($execution['steps'] ?? []));
     for ($i = count($steps) - 1; $i >= 0; $i--) {
       $step = $steps[$i];
-      if ((string) ($step['status'] ?? '') !== 'done' || !$this->isRevertible($step)) {
+      if ((string) ($step['status'] ?? '') !== 'done' || !$this->reverter->isRevertible($step)) {
         continue;
       }
 
-      $revert = $this->applyRevert($step);
+      $revert = $this->reverter->applyRevert($step);
       if (is_wp_error($revert)) {
         return $revert;
       }
@@ -351,8 +400,8 @@ class PlanExecutor {
 
       $this->activity->log(
         'agent.revert.' . $step['ability'],
-        $this->objectTypeFor((string) $step['ability']),
-        $this->resultObjectId((array) ($step['result'] ?? [])),
+        StepResult::objectType((string) $step['ability']),
+        StepResult::objectId((array) ($step['result'] ?? [])),
         $step['summary'] ?? null,
         ['meta' => ['reverted' => $step['ability']], '_reason' => 'Reverted: ' . ($step['summary'] ?? '')]
       );
@@ -410,26 +459,54 @@ class PlanExecutor {
   /**
    * Build a fresh execution state machine from a normalized plan.
    *
+   * A re-plan mid-build re-seeds this — so the prior run's applied-object ledger
+   * is carried forward and any step that would re-create something already built
+   * in this conversation is pre-marked `done` (reusing the recorded result). That
+   * is what stops a re-proposed create_webhook / provision step from making a
+   * duplicate when the run (in auto mode) fires again; downstream {{step.id}}
+   * references still resolve because the reused object id is seeded into refs.
+   *
    * @param array<int, array<string, mixed>> $plan
+   * @param array<string, mixed>             $prior The prior execution_json, if any.
    * @return array<string, mixed>
    */
-  public function seedExecution(array $plan, ?string $mode = null): array {
+  public function seedExecution(array $plan, ?string $mode = null, array $prior = []): array {
+    $ledger = $this->ledger->carryForward($prior);
+
     $steps = [];
+    $refs  = [];
     foreach ($plan as $step) {
-      $steps[] = [
-        'id'               => (string) ($step['id'] ?? ''),
+      $id    = (string) ($step['id'] ?? '');
+      $entry = [
+        'id'               => $id,
         'ability'          => (string) ($step['ability'] ?? ''),
         'summary'          => (string) ($step['summary'] ?? ''),
         'input'            => (array) ($step['input'] ?? []),
         'requires_confirm' => (bool) ($step['requires_confirm'] ?? false),
         'status'           => 'pending',
       ];
+
+      // Already built earlier in this conversation? Reuse it: pre-mark the step
+      // done with the recorded result and expose its id to downstream steps.
+      $match = $this->ledger->match($ledger, $entry);
+      if ($match !== null) {
+        $entry['status'] = 'done';
+        $entry['result'] = is_array($match['result'] ?? null) ? $match['result'] : [];
+        $entry['reused'] = true;
+        if ((int) ($match['object_id'] ?? 0) > 0 && $id !== '') {
+          $refs[$id] = (int) $match['object_id'];
+        }
+      }
+
+      $steps[] = $entry;
     }
+
     return [
       'mode'   => $mode ?: $this->execMode(),
       'cursor' => 0,
-      'refs'   => (object) [],
+      'refs'   => $refs === [] ? (object) [] : $refs,
       'steps'  => $steps,
+      'ledger' => $ledger,
     ];
   }
 
@@ -604,180 +681,6 @@ class PlanExecutor {
     return $latestBefore > 0 ? $latestBefore : $fallback;
   }
 
-  /**
-   * Turn a probe_endpoint result into an actionable pause, or null when the probe
-   * reached the endpoint fine (2xx/3xx, or any other reachable response) and the
-   * run should continue. We only stop for the two cases the user can act on:
-   * authentication needed (401/403) and a wrong/absent endpoint (404/405/410),
-   * plus a hard transport failure (unreachable).
-   *
-   * @param array<string, mixed> $result
-   * @return array{kind:string, status:int, message:string}|null
-   */
-  private function interpretProbe(array $result): ?array {
-    // Transport failure — DNS, TLS, timeout, SSRF block surfaced as ok=false.
-    if (($result['ok'] ?? null) === false) {
-      $detail = trim((string) ($result['error'] ?? ''));
-      return [
-        'kind'    => 'unreachable',
-        'status'  => 0,
-        'message' => $detail !== ''
-          ? sprintf(
-            /* translators: %s: underlying HTTP error message. */
-            __('The endpoint could not be reached (%s). Check the URL is correct and publicly reachable, then retry.', 'flowsystems-webhook-actions'),
-            $detail
-          )
-          : __('The endpoint could not be reached. Check the URL is correct and publicly reachable, then retry.', 'flowsystems-webhook-actions'),
-      ];
-    }
-
-    $status = (int) ($result['status'] ?? 0);
-
-    if (in_array($status, [401, 403], true)) {
-      return [
-        'kind'    => 'auth',
-        'status'  => $status,
-        'message' => sprintf(
-          /* translators: %d: HTTP status code (401 or 403). */
-          __('The endpoint responded %d — it needs authentication. Add a credential to the webhook, then retry.', 'flowsystems-webhook-actions'),
-          $status
-        ),
-      ];
-    }
-
-    if (in_array($status, [404, 405, 410], true)) {
-      return [
-        'kind'    => 'endpoint',
-        'status'  => $status,
-        'message' => sprintf(
-          /* translators: %d: HTTP status code (404, 405 or 410). */
-          __('The endpoint responded %d — the URL may be wrong or not accept this request. Double-check the endpoint URL on the webhook, then retry.', 'flowsystems-webhook-actions'),
-          $status
-        ),
-      ];
-    }
-
-    return null;
-  }
-
-  /**
-   * Whether a completed step's change can be undone.
-   *
-   * @param array<string, mixed> $step
-   */
-  private function isRevertible(array $step): bool {
-    return in_array((string) ($step['ability'] ?? ''), [
-      'create_webhook',
-      'update_webhook',
-      'set_mapping',
-      'set_conditions',
-      'assign_credential',
-      'enable_webhook',
-    ], true);
-  }
-
-  /**
-   * Snapshot the current state an ability is about to overwrite, so it can be
-   * restored later. Returns null for abilities whose change is not reverted this
-   * way (create_webhook is undone by deleting its result; reads never mutate).
-   *
-   * @param array<string, mixed> $input Resolved step input.
-   * @return array<string, mixed>|null
-   */
-  private function captureBefore(string $ability, array $input): ?array {
-    $webhookRepo = new WebhookRepository();
-
-    switch ($ability) {
-      case 'update_webhook':
-        $webhook = $webhookRepo->find((int) ($input['id'] ?? 0));
-        if (!$webhook) {
-          return null;
-        }
-        return array_intersect_key(
-          $webhook,
-          array_flip(['name', 'endpoint_url', 'http_method', 'triggers', 'auth_credential_id', 'custom_headers', 'url_params'])
-        );
-
-      case 'enable_webhook':
-        $webhook = $webhookRepo->find((int) ($input['id'] ?? 0));
-        return $webhook ? ['enabled' => !empty($webhook['is_enabled'])] : null;
-
-      case 'assign_credential':
-        $webhook = $webhookRepo->find((int) ($input['webhook_id'] ?? 0));
-        return $webhook ? ['credential_id' => $webhook['auth_credential_id'] ?? null] : null;
-
-      case 'set_mapping':
-        $schema = (new SchemaRepository())->findByWebhookAndTrigger((int) ($input['webhook_id'] ?? 0), (string) ($input['trigger'] ?? ''));
-        return ['field_mapping' => $schema['field_mapping'] ?? null];
-
-      case 'set_conditions':
-        $schema = (new SchemaRepository())->findByWebhookAndTrigger((int) ($input['webhook_id'] ?? 0), (string) ($input['trigger'] ?? ''));
-        return [
-          'conditions'             => $schema['conditions'] ?? null,
-          'conditions_evaluate_on' => $schema['conditions_evaluate_on'] ?? 'original',
-        ];
-
-      default:
-        return null;
-    }
-  }
-
-  /**
-   * Apply the inverse of a completed step. Returns the ability result, null when
-   * there is nothing to do, or a WP_Error on failure.
-   *
-   * @param array<string, mixed> $step
-   * @return array<string, mixed>|WP_Error|null
-   */
-  private function applyRevert(array $step) {
-    $ability = (string) ($step['ability'] ?? '');
-    $input   = (array) ($step['input'] ?? []);
-    $prev    = is_array($step['prev'] ?? null) ? $step['prev'] : [];
-    $result  = (array) ($step['result'] ?? []);
-
-    switch ($ability) {
-      case 'create_webhook':
-        $id = (int) ($result['webhook']['id'] ?? 0);
-        return $id > 0 ? $this->registry->execute('delete_webhook', ['id' => $id]) : null;
-
-      case 'update_webhook':
-        if ($prev === []) {
-          return null;
-        }
-        return $this->registry->execute('update_webhook', ['id' => (int) ($input['id'] ?? 0)] + $prev);
-
-      case 'enable_webhook':
-        return $this->registry->execute('enable_webhook', [
-          'id'      => (int) ($input['id'] ?? 0),
-          'enabled' => !empty($prev['enabled']),
-        ]);
-
-      case 'assign_credential':
-        return $this->registry->execute('assign_credential', [
-          'webhook_id'    => (int) ($input['webhook_id'] ?? 0),
-          'credential_id' => $prev['credential_id'] ?? null,
-        ]);
-
-      case 'set_mapping':
-        return $this->registry->execute('set_mapping', [
-          'webhook_id'    => (int) ($input['webhook_id'] ?? 0),
-          'trigger'       => (string) ($input['trigger'] ?? ''),
-          'field_mapping' => $prev['field_mapping'] ?? [],
-        ]);
-
-      case 'set_conditions':
-        return $this->registry->execute('set_conditions', [
-          'webhook_id'             => (int) ($input['webhook_id'] ?? 0),
-          'trigger'                => (string) ($input['trigger'] ?? ''),
-          'conditions'             => $prev['conditions'] ?? [],
-          'conditions_evaluate_on' => $prev['conditions_evaluate_on'] ?? 'original',
-        ]);
-
-      default:
-        return null;
-    }
-  }
-
   private function persistRecipe(int $conversationId, array $applied, array $remainingPlan): void {
     $this->conversations->update($conversationId, [
       'last_recipe' => $applied,
@@ -827,31 +730,4 @@ class PlanExecutor {
     return $summary;
   }
 
-  /**
-   * Map an ability name to an activity-log object type.
-   */
-  private function objectTypeFor(string $ability): string {
-    return match (true) {
-      str_contains($ability, 'chain')      => 'chain',
-      str_contains($ability, 'credential') => 'credential',
-      default                              => 'webhook',
-    };
-  }
-
-  /**
-   * Best-effort extraction of the affected object id from an ability result.
-   */
-  private function resultObjectId(array $result): ?int {
-    foreach (['webhook', 'chain', 'link', 'snippet', 'credential'] as $key) {
-      if (isset($result[$key]['id'])) {
-        return (int) $result[$key]['id'];
-      }
-    }
-    foreach (['id', 'webhook_id', 'log_id', 'schema_id'] as $key) {
-      if (isset($result[$key])) {
-        return (int) $result[$key];
-      }
-    }
-    return null;
-  }
 }

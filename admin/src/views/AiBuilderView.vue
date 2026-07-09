@@ -443,7 +443,7 @@ async function dispatchMessage(text) {
       if (res.activity?.length) {
         transcript.value.push({ role: 'tool', reads: res.activity });
       }
-      transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions) });
+      transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions), notice: res.notice || undefined });
     }
     // Only swap the plan when the reply carries a new one — a clarifying-only
     // reply must not blank out the progress aside (mirrors server persistence,
@@ -689,6 +689,13 @@ async function scrollDown() {
                   m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
                   <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
                   <template v-else>{{ m.content }}</template>
+                </div>
+              </div>
+              <!-- Provider fallback notice: the selected model failed, another answered -->
+              <div v-if="m.notice" class="flex justify-start">
+                <div class="max-w-[80%] flex items-start gap-1.5 rounded-md border border-amber-400/40 bg-amber-50/50 dark:bg-amber-950/20 px-2.5 py-1.5 text-xs text-amber-700 dark:text-amber-300">
+                  <AlertCircle class="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>{{ m.notice }}</span>
                 </div>
               </div>
             </template>

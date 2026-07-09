@@ -221,6 +221,7 @@ class LlmTransport {
     if (($active = $config['active']) && isset($providers[$active])) {
       $order = array_merge([$active], array_values(array_diff($order, [$active])));
     }
+    $leadProvider = $order[0] ?? null;
 
     $repo       = new CredentialRepository();
     $transports = [];
@@ -230,7 +231,19 @@ class LlmTransport {
       if ($credentialId <= 0 || !$repo->find($credentialId)) {
         continue;
       }
-      $transports[] = $this->providerTransport($provider, $credentialId, (string) ($entry['model'] ?? ''));
+      $model        = (string) ($entry['model'] ?? '');
+      $transports[] = $this->providerTransport($provider, $credentialId, $model);
+
+      // Same-provider retry FIRST: a specific model often fails (deprecated,
+      // rate-limited, overloaded) while another model on the SAME provider is
+      // fine, so try that before switching providers. Only expands the active
+      // provider — one extra model — to keep the chain (and latency) short.
+      if ($provider === $leadProvider) {
+        $alt = $this->alternativeModel($provider, $credentialId, $model);
+        if ($alt !== null) {
+          $transports[] = $this->providerTransport($provider, $credentialId, $alt);
+        }
+      }
     }
 
     if ($transports === []) {
@@ -248,6 +261,23 @@ class LlmTransport {
       'anthropic' => new AnthropicTransport($credentialId, $model),
       default     => new AnthropicTransport($credentialId, $model),
     };
+  }
+
+  /**
+   * The best same-provider fallback model: the provider's top-recommended curated
+   * model whose id differs from the one already selected. Uses ONLY the cached
+   * model list (no network fetch on this hot path — the model list is warmed by
+   * the Change-model dropdown), so it returns null on a cold cache rather than
+   * adding provider latency to the turn.
+   */
+  private function alternativeModel(string $provider, int $credentialId, string $selectedModel): ?string {
+    foreach ((new ByokModelCatalog())->cachedModels($provider, $credentialId) as $m) {
+      $id = (string) ($m['id'] ?? '');
+      if ($id !== '' && $id !== $selectedModel) {
+        return $id;
+      }
+    }
+    return null;
   }
 
   // ---- Helpers -------------------------------------------------------------
