@@ -9,18 +9,23 @@ use FlowSystems\WebhookActions\Api\AuthHelper;
 /**
  * Declarative catalog of AI Builder / MCP abilities: label, description, scope,
  * confirm policy and JSON-Schema for every operation, plus the callback that runs
- * it (a method on {@see AbilityRegistry}, which owns the imperative handlers and
- * the fswa_ability_definitions filter). Kept separate from the registry so the
+ * it (a method on one of {@see AbilityRegistry}'s handler collaborators —
+ * ReadAbilities / WriteAbilities / TestAbilities; the registry owns the
+ * fswa_ability_definitions filter). Kept separate from the registry so the
  * large, purely-declarative definitions don't crowd the executable logic.
  */
 class AbilityCatalog {
   /**
    * All ability definitions keyed by short name. Callbacks are bound to the
-   * passed registry, which holds the handler implementations.
+   * passed registry's handler collaborators.
    *
    * @return array<string, array<string, mixed>>
    */
   public static function build(AbilityRegistry $r): array {
+    $reads  = $r->reads();
+    $writes = $r->writes();
+    $tests  = $r->tests();
+
     $definitions = [
       // ---- Discovery / read --------------------------------------------
       'list_triggers' => [
@@ -32,7 +37,7 @@ class AbilityCatalog {
           'type'       => 'object',
           'properties' => ['search' => ['type' => 'string', 'description' => 'Case-insensitive substring filter on hook name or source plugin slug.']],
         ],
-        'callback'     => [$r, 'listTriggers'],
+        'callback'     => [$reads, 'listTriggers'],
       ],
       'list_webhooks' => [
         'label'        => __('List webhooks', 'flowsystems-webhook-actions'),
@@ -40,7 +45,7 @@ class AbilityCatalog {
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_READ,
         'input_schema' => ['type' => 'object', 'properties' => (object) []],
-        'callback'     => [$r, 'listWebhooks'],
+        'callback'     => [$reads, 'listWebhooks'],
       ],
       'get_webhook' => [
         'label'        => __('Get a webhook', 'flowsystems-webhook-actions'),
@@ -52,7 +57,7 @@ class AbilityCatalog {
           'properties' => ['id' => ['type' => 'integer', 'description' => 'Webhook id']],
           'required'   => ['id'],
         ],
-        'callback'     => [$r, 'getWebhook'],
+        'callback'     => [$reads, 'getWebhook'],
       ],
       'get_trigger_schema' => [
         'label'        => __('Get captured payload + mapping for a trigger', 'flowsystems-webhook-actions'),
@@ -67,7 +72,7 @@ class AbilityCatalog {
           ],
           'required'   => ['trigger'],
         ],
-        'callback'     => [$r, 'getTriggerSchema'],
+        'callback'     => [$reads, 'getTriggerSchema'],
       ],
       'get_rest_route_schema' => [
         'label'        => __('Get a REST route\'s argument schema (this site)', 'flowsystems-webhook-actions'),
@@ -82,7 +87,7 @@ class AbilityCatalog {
           ],
           'required'   => ['route'],
         ],
-        'callback'     => [$r, 'getRestRouteSchema'],
+        'callback'     => [$reads, 'getRestRouteSchema'],
       ],
       'get_logs' => [
         'label'        => __('Get delivery logs', 'flowsystems-webhook-actions'),
@@ -96,7 +101,7 @@ class AbilityCatalog {
             'limit'      => ['type' => 'integer', 'default' => 10],
           ],
         ],
-        'callback'     => [$r, 'getLogs'],
+        'callback'     => [$reads, 'getLogs'],
       ],
       'list_credentials' => [
         'label'        => __('List credentials', 'flowsystems-webhook-actions'),
@@ -104,7 +109,7 @@ class AbilityCatalog {
         'category'     => 'webhook-actions',
         'scope'        => AuthHelper::SCOPE_FULL,
         'input_schema' => ['type' => 'object', 'properties' => (object) []],
-        'callback'     => [$r, 'listCredentials'],
+        'callback'     => [$reads, 'listCredentials'],
       ],
 
       // ---- Build / write -----------------------------------------------
@@ -127,7 +132,7 @@ class AbilityCatalog {
           ],
           'required'   => ['name', 'endpoint_url'],
         ],
-        'callback'     => [$r, 'createWebhook'],
+        'callback'     => [$writes, 'createWebhook'],
       ],
       'update_webhook' => [
         'label'            => __('Update a webhook', 'flowsystems-webhook-actions'),
@@ -150,7 +155,7 @@ class AbilityCatalog {
           ],
           'required'   => ['id'],
         ],
-        'callback'         => [$r, 'updateWebhook'],
+        'callback'         => [$writes, 'updateWebhook'],
       ],
       'set_mapping' => [
         'label'        => __('Set field mapping', 'flowsystems-webhook-actions'),
@@ -166,7 +171,7 @@ class AbilityCatalog {
           ],
           'required'   => ['webhook_id', 'trigger', 'field_mapping'],
         ],
-        'callback'     => [$r, 'setMapping'],
+        'callback'     => [$writes, 'setMapping'],
       ],
       'set_conditions' => [
         'label'        => __('Set conditions', 'flowsystems-webhook-actions'),
@@ -189,7 +194,7 @@ class AbilityCatalog {
                     'type'       => 'object',
                     'properties' => [
                       'field'    => ['type' => 'string'],
-                      'operator' => ['type' => 'string', 'enum' => AbilityRegistry::CONDITION_OPERATORS],
+                      'operator' => ['type' => 'string', 'enum' => WriteAbilities::CONDITION_OPERATORS],
                       'value'    => ['type' => 'string'],
                       'cast'     => ['type' => 'string', 'enum' => ['number', 'string', 'boolean', 'stringify']],
                     ],
@@ -203,7 +208,7 @@ class AbilityCatalog {
           ],
           'required'   => ['webhook_id', 'trigger', 'conditions'],
         ],
-        'callback'     => [$r, 'setConditions'],
+        'callback'     => [$writes, 'setConditions'],
       ],
       'assign_credential' => [
         'label'        => __('Assign a vault credential to a webhook', 'flowsystems-webhook-actions'),
@@ -218,7 +223,7 @@ class AbilityCatalog {
           ],
           'required'   => ['webhook_id', 'credential_id'],
         ],
-        'callback'     => [$r, 'assignCredential'],
+        'callback'     => [$writes, 'assignCredential'],
       ],
       'provision_wp_app_password' => [
         'label'            => __('Create a WordPress Application Password credential', 'flowsystems-webhook-actions'),
@@ -232,7 +237,7 @@ class AbilityCatalog {
             'name' => ['type' => 'string'],
           ],
         ],
-        'callback'     => [$r, 'provisionWpAppPassword'],
+        'callback'     => [$writes, 'provisionWpAppPassword'],
       ],
       'create_chain' => [
         'label'        => __('Create a webhook chain', 'flowsystems-webhook-actions'),
@@ -247,7 +252,7 @@ class AbilityCatalog {
           ],
           'required'   => ['name'],
         ],
-        'callback'     => [$r, 'createChain'],
+        'callback'     => [$writes, 'createChain'],
       ],
       'create_chain_link' => [
         'label'        => __('Add a chain link', 'flowsystems-webhook-actions'),
@@ -263,7 +268,7 @@ class AbilityCatalog {
           ],
           'required'   => ['chain_id', 'source_webhook_id', 'target_webhook_id'],
         ],
-        'callback'     => [$r, 'createChainLink'],
+        'callback'     => [$writes, 'createChainLink'],
       ],
 
       // ---- Test / validate ---------------------------------------------
@@ -286,7 +291,7 @@ class AbilityCatalog {
           ],
           'required'   => [],
         ],
-        'callback'         => [$r, 'probeEndpoint'],
+        'callback'         => [$tests, 'probeEndpoint'],
       ],
       'test_dispatch' => [
         'label'            => __('Test-dispatch a webhook', 'flowsystems-webhook-actions'),
@@ -304,7 +309,7 @@ class AbilityCatalog {
           ],
           'required'   => ['webhook_id'],
         ],
-        'callback'     => [$r, 'testDispatch'],
+        'callback'     => [$tests, 'testDispatch'],
       ],
 
       // ---- Go-live / destructive (confirm) ------------------------------
@@ -322,7 +327,7 @@ class AbilityCatalog {
           ],
           'required'   => ['id'],
         ],
-        'callback'         => [$r, 'enableWebhook'],
+        'callback'         => [$writes, 'enableWebhook'],
       ],
       'delete_webhook' => [
         'label'            => __('Delete a webhook', 'flowsystems-webhook-actions'),
@@ -335,7 +340,7 @@ class AbilityCatalog {
           'properties' => ['id' => ['type' => 'integer']],
           'required'   => ['id'],
         ],
-        'callback'         => [$r, 'deleteWebhook'],
+        'callback'         => [$writes, 'deleteWebhook'],
       ],
     ];
 
