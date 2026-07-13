@@ -64,7 +64,7 @@ class PlanExecutor {
       $ability = (string) $step['ability'];
       $input   = (array) ($step['input'] ?? []);
 
-      if ($this->stepNeedsConfirm($step) && !in_array($stepId, $confirmed, true)) {
+      if ($this->stepNeedsConfirm($step, $input) && !in_array($stepId, $confirmed, true)) {
         $this->persistRecipe($conversationId, $applied, $plan);
         return [
           'status'         => 'needs_confirm',
@@ -237,7 +237,7 @@ class PlanExecutor {
 
     // 2) Confirmation gate (go-live / delete / edit-live / unsafe probe /
     //    real test delivery). Surface the ability's side-effect notice if any.
-    if ($this->stepNeedsConfirm($step) && empty($opts['confirm'])) {
+    if ($this->stepNeedsConfirm($step, $input) && empty($opts['confirm'])) {
       $definitions = $this->registry->definitions();
       $notice      = (string) ($definitions[(string) $step['ability']]['confirm_notice'] ?? '');
       $step['status'] = 'needs_confirm';
@@ -255,7 +255,7 @@ class PlanExecutor {
     // so bridge the confirmation into the input; otherwise a confirmed
     // POST/PUT/PATCH/DELETE probe rejects itself with "requires confirmation".
     // Harmless for other abilities, which don't read `confirmed`.
-    if ($this->stepNeedsConfirm($step)) {
+    if ($this->stepNeedsConfirm($step, $input)) {
       $input['confirmed'] = true;
     }
 
@@ -649,16 +649,23 @@ class PlanExecutor {
   /**
    * Resolve whether a plan step must pause for user confirmation, based on the
    * ability's `requires_confirm` policy and live state.
+   *
+   * Pass the ref-RESOLVED input when available: the raw step input may still
+   * hold a {{step_N.id}} placeholder, which a live-state check would misread
+   * as webhook 0. Falls back to the step's own input (pre-run UI metadata).
    */
-  private function stepNeedsConfirm(array $step): bool {
+  private function stepNeedsConfirm(array $step, ?array $input = null): bool {
     $ability     = (string) ($step['ability'] ?? '');
     $definitions = $this->registry->definitions();
     $policy      = $definitions[$ability]['requires_confirm'] ?? false;
+    $input     ??= (array) ($step['input'] ?? []);
 
     return match ($policy) {
       'always'             => true,
-      'when_live'          => $this->webhookIsLive((int) (($step['input']['id'] ?? 0))),
-      'when_destructive_method' => in_array(strtoupper((string) ($step['input']['method'] ?? 'GET')), ['PUT', 'PATCH', 'DELETE'], true),
+      // `id` for webhook-target abilities (enable/update/delete), `webhook_id`
+      // for abilities that attach TO a webhook (assign_snippet, set_mapping…).
+      'when_live'          => $this->webhookIsLive((int) ($input['id'] ?? $input['webhook_id'] ?? 0)),
+      'when_destructive_method' => in_array(strtoupper((string) ($input['method'] ?? 'GET')), ['PUT', 'PATCH', 'DELETE'], true),
       default              => false,
     };
   }

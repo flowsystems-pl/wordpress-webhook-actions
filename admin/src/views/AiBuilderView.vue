@@ -773,6 +773,12 @@ async function scrollDown() {
               </div>
             </div>
 
+            <!-- Snippet code: create_snippet / update_snippet / raw-code previews
+                 carry PHP in their input — show it so the user reviews the exact
+                 code the build will run, not just a one-line summary. -->
+            <ChatMarkdown v-if="typeof focusedStep.input?.code === 'string' && focusedStep.input.code.trim()"
+              :text="'```php\n' + focusedStep.input.code + '\n```'" />
+
             <!-- Active controls (only when this is the step being run) -->
             <AiStepControls
               v-if="focusedIsCurrent"
