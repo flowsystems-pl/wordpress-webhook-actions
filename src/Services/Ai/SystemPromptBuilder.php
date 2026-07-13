@@ -29,7 +29,44 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->buildContext($conversation) . $this->payloadContext();
+    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->deliveryModeContext() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * Tell the model whether background (asynchronous) delivery is PROVEN to work
+   * on this site, so it sets create_webhook/update_webhook is_synchronous
+   * sensibly. The plugin runs its OWN delivery queue; WP-Cron / Action Scheduler
+   * / a system cron are just triggers that drain it, so their presence proves
+   * nothing on its own. The reliable evidence is that the queue actually
+   * processed recently (fswa_last_cron_run within the last hour) — meaning
+   * whatever trigger the site uses is firing. Webhook Actions Pro is the other
+   * positive factor: its External Cron keeps the queue draining reliably. Absent
+   * both, background jobs can silently sit undelivered (default WP-Cron only
+   * fires on site traffic), so synchronous "just works" and is the safer default.
+   */
+  private function deliveryModeContext(): string {
+    $lastRun   = (int) get_option('fswa_last_cron_run', 0);
+    $recentRun = $lastRun > 0 && (time() - $lastRun) <= HOUR_IN_SECONDS;
+    $proActive = $this->proIsActive();
+    $wpCronOff = defined('DISABLE_WP_CRON') && DISABLE_WP_CRON;
+
+    if ($recentRun || $proActive) {
+      $why = $recentRun
+        ? 'the delivery queue processed within the last hour, so background delivery is working'
+        : 'Webhook Actions Pro is active, so its External Cron keeps the delivery queue draining reliably';
+      return "\n\nDELIVERY MODE: background (asynchronous) delivery is PROVEN on this site — {$why}. Prefer is_synchronous=false (asynchronous) on create_webhook: deliveries are queued and retried in the background without slowing the triggering request. Choose is_synchronous=true (synchronous) only when the user needs the outcome to complete inline within the triggering request (e.g. hold a form submit until the user is created). State the mode you picked in assistant_message; the user can flip it after the build.";
+    }
+
+    $why = $wpCronOff
+      ? 'WP-Cron is disabled, the delivery queue has not processed in the last hour, and there is no Pro External Cron — so there may be no working cron draining the queue at all'
+      : 'the delivery queue has not processed in the last hour and there is no Pro External Cron (default WP-Cron only fires on site traffic, so on a low-traffic site background jobs can sit undelivered)';
+    return "\n\nDELIVERY MODE: background (asynchronous) delivery is UNPROVEN on this site — {$why}. Prefer is_synchronous=true (synchronous) on create_webhook so the delivery fires inline during the triggering request and works without any cron — it just works, at the cost of a little latency on that request. Choose is_synchronous=false (asynchronous) only if the user explicitly wants queued/background delivery and confirms their cron is set up. State the mode you picked in assistant_message; the user can flip it after the build.";
+  }
+
+  /** Whether Webhook Actions Pro is active on this site. */
+  private function proIsActive(): bool {
+    return class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
+      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
   }
 
   /**
@@ -48,8 +85,7 @@ class SystemPromptBuilder {
    * whether the Pro limits apply HERE.
    */
   private function licenseContext(): string {
-    $proActive = class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
-      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+    $proActive = $this->proIsActive();
 
     if ($proActive) {
       return "\n\nLICENSE: Webhook Actions Pro is ACTIVE on this site. set_conditions accepts multiple rules, nested groups and \"or\" matching — use them freely when the user's logic needs more than one rule. Any Pro abilities listed in the catalog above are available."

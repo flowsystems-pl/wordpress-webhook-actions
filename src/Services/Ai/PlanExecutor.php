@@ -235,12 +235,28 @@ class PlanExecutor {
     }
     unset($step['missing']);
 
-    // 2) Confirmation gate (go-live / delete / edit-live / unsafe probe).
+    // 2) Confirmation gate (go-live / delete / edit-live / unsafe probe /
+    //    real test delivery). Surface the ability's side-effect notice if any.
     if ($this->stepNeedsConfirm($step) && empty($opts['confirm'])) {
-      $step['status']     = 'needs_confirm';
+      $definitions = $this->registry->definitions();
+      $notice      = (string) ($definitions[(string) $step['ability']]['confirm_notice'] ?? '');
+      $step['status'] = 'needs_confirm';
+      if ($notice !== '') {
+        $step['confirm_notice'] = $notice;
+      }
       $steps[$cursor]     = $step;
       $execution['steps'] = $steps;
       return $this->persistExecution($conversationId, $execution, $step, false, false);
+    }
+
+    // 2a) Past the confirm gate — so if this ability required confirmation, the
+    // user has now given it. probe_endpoint carries its OWN `confirmed` guard for
+    // unsafe methods (it's also callable directly via REST/MCP with no plan gate),
+    // so bridge the confirmation into the input; otherwise a confirmed
+    // POST/PUT/PATCH/DELETE probe rejects itself with "requires confirmation".
+    // Harmless for other abilities, which don't read `confirmed`.
+    if ($this->stepNeedsConfirm($step)) {
+      $input['confirmed'] = true;
     }
 
     // 3) Snapshot the object's state BEFORE mutating it (so we can revert), then
@@ -642,7 +658,7 @@ class PlanExecutor {
     return match ($policy) {
       'always'             => true,
       'when_live'          => $this->webhookIsLive((int) (($step['input']['id'] ?? 0))),
-      'when_unsafe_method' => !in_array(strtoupper((string) ($step['input']['method'] ?? 'GET')), ['GET', 'HEAD'], true),
+      'when_destructive_method' => in_array(strtoupper((string) ($step['input']['method'] ?? 'GET')), ['PUT', 'PATCH', 'DELETE'], true),
       default              => false,
     };
   }

@@ -14,10 +14,8 @@ import {
   Loader2,
   Search,
   Settings2,
-  ExternalLink,
   Undo2,
   RotateCcw,
-  Power,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -26,6 +24,7 @@ import AiDevPanel from '@/components/AiDevPanel.vue';
 import ChatMarkdown from '@/components/ChatMarkdown.vue';
 import AiPlanStepper from '@/components/AiPlanStepper.vue';
 import AiStepControls from '@/components/AiStepControls.vue';
+import BuiltWebhookActions from '@/components/BuiltWebhookActions.vue';
 import { abilityTitle } from '@/lib/aiLabels';
 import { api } from '@/lib/api';
 import { __ } from '@/i18n';
@@ -48,6 +47,9 @@ const messageInput = ref('');
 const sending = ref(false);
 const error = ref('');
 const transcriptEl = ref(null);
+// Transcript index from which assistant replies are "new this turn" and get the
+// reveal animation. Infinity = animate nothing (loaded history renders instantly).
+const revealFrom = ref(Infinity);
 
 // ---- Execution state machine ---------------------------------------------
 const execution = ref(null);      // { mode, cursor, refs, steps[] }
@@ -128,18 +130,42 @@ const hasStepper = computed(() => !!execution.value && execSteps.value.length > 
 const builtWebhookEnabled = ref(null); // null = unknown / not fetched
 const enablingWebhook = ref(false);
 const justEnabled = ref(false);
+// Delivery mode of the built webhook: true = synchronous (inline), false =
+// asynchronous (queued). null = unknown / not fetched. Lets the user flip the
+// mode the AI chose without leaving the builder.
+const builtWebhookSync = ref(null);
+const savingSync = ref(false);
+const syncTooltip = __('Asynchronous: queued and delivered in the background on the next cron run, with automatic retries — it doesn’t slow the triggering request, but nothing is sent until a working cron runs. Synchronous: delivered instantly, inline with the triggering request — it works without any cron, at the cost of a little added latency. Toggle to switch.');
 
 watch([execFinished, builtWebhookId], async ([finished, id]) => {
   builtWebhookEnabled.value = null;
+  builtWebhookSync.value = null;
   justEnabled.value = false;
   if (!finished || !id) return;
   try {
     const wh = await api.webhooks.get(id);
     builtWebhookEnabled.value = Number(wh.is_enabled) === 1;
+    builtWebhookSync.value = wh.is_synchronous === true || Number(wh.is_synchronous) === 1;
   } catch (e) {
     // Leave unknown — no offer rather than a wrong one.
   }
 }, { immediate: true });
+
+async function setBuiltWebhookSync(val) {
+  if (savingSync.value || !builtWebhookId.value) return;
+  savingSync.value = true;
+  error.value = '';
+  const previous = builtWebhookSync.value;
+  builtWebhookSync.value = val; // optimistic
+  try {
+    await api.webhooks.update(builtWebhookId.value, { is_synchronous: val });
+  } catch (e) {
+    builtWebhookSync.value = previous; // roll back on failure
+    error.value = e.message;
+  } finally {
+    savingSync.value = false;
+  }
+}
 
 async function enableBuiltWebhook() {
   if (enablingWebhook.value || !builtWebhookId.value) return;
@@ -294,6 +320,7 @@ function onSwitchConversation(idStr) {
 async function selectConversation(conv) {
   activeId.value = conv.id;
   focusedIndex.value = null;
+  revealFrom.value = Infinity; // loaded history renders instantly, no reveal
   try {
     const full = await api.agent.getConversation(conv.id);
     transcript.value = full.transcript_json || [];
@@ -335,6 +362,7 @@ async function confirmDeleteConversation() {
         transcript.value = [];
         plan.value = [];
         execution.value = null;
+        revealFrom.value = Infinity;
       }
     }
   } catch (e) {
@@ -381,6 +409,7 @@ async function send() {
   error.value = '';
   retryMessage.value = null;
   focusedIndex.value = null;
+  revealFrom.value = transcript.value.length; // animate replies from this turn on
   transcript.value.push({ role: 'user', content: text });
   messageInput.value = '';
   await scrollDown();
@@ -394,6 +423,7 @@ async function retrySend() {
   sending.value = true;
   error.value = '';
   retryMessage.value = null;
+  revealFrom.value = transcript.value.length; // animate the resumed reply
   await dispatchMessage(text);
 }
 
@@ -687,7 +717,7 @@ async function scrollDown() {
                 :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
                 <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
                   m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
-                  <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
+                  <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" :animate="i >= revealFrom" />
                   <template v-else>{{ m.content }}</template>
                 </div>
               </div>
@@ -781,20 +811,11 @@ async function scrollDown() {
                 <span class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
                   <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
                 </span>
-                <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
-                  <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
-                </Button>
-                <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
-                  <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
-                </span>
-                <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
-                  <Button size="sm" variant="outline">
-                    <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
-                  </Button>
-                </RouterLink>
-                <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
-                  <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
-                </Button>
+                <BuiltWebhookActions
+                  :webhook-id="builtWebhookId" :enabled="builtWebhookEnabled" :just-enabled="justEnabled"
+                  :enabling="enablingWebhook" :sync="builtWebhookSync" :saving-sync="savingSync"
+                  :sync-tooltip="syncTooltip" :has-revertible="hasRevertible" :running="running"
+                  @enable="enableBuiltWebhook" @toggle-sync="setBuiltWebhookSync" @revert="revertLast" />
               </template>
               <span v-else-if="running" class="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Working…') }}
@@ -808,20 +829,11 @@ async function scrollDown() {
             <span class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
             </span>
-            <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
-              <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
-            </Button>
-            <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-              <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
-            </span>
-            <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
-              <Button size="sm" variant="outline">
-                <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
-              </Button>
-            </RouterLink>
-            <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
-              <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
-            </Button>
+            <BuiltWebhookActions
+              :webhook-id="builtWebhookId" :enabled="builtWebhookEnabled" :just-enabled="justEnabled"
+              :enabling="enablingWebhook" :sync="builtWebhookSync" :saving-sync="savingSync"
+              :sync-tooltip="syncTooltip" :has-revertible="hasRevertible" :running="running"
+              @enable="enableBuiltWebhook" @toggle-sync="setBuiltWebhookSync" @revert="revertLast" />
           </div>
         </template>
       </section>
