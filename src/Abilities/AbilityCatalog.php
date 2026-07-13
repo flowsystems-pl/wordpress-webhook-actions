@@ -69,6 +69,21 @@ class AbilityCatalog {
         ],
         'callback'     => [$r, 'getTriggerSchema'],
       ],
+      'get_rest_route_schema' => [
+        'label'        => __('Get a REST route\'s argument schema (this site)', 'flowsystems-webhook-actions'),
+        'description'  => __('Describe a REST API route ON THIS SITE (core or any plugin) from its self-declared schema: every argument with its type, description and whether it is REQUIRED. ALWAYS run this before building an internal automation (a webhook whose endpoint_url points at this site\'s own wp-json) and satisfy every required argument — e.g. POST /wp/v2/users requires username, email AND password, which mapping alone cannot always supply. Pass the route path relative to /wp-json (e.g. "/wp/v2/users") and the HTTP method you plan to use. Internal routes only — it cannot describe external APIs.', 'flowsystems-webhook-actions'),
+        'category'     => 'webhook-actions',
+        'scope'        => AuthHelper::SCOPE_READ,
+        'input_schema' => [
+          'type'       => 'object',
+          'properties' => [
+            'route'  => ['type' => 'string', 'description' => 'Route path relative to /wp-json, e.g. "/wp/v2/users". A full URL to this site\'s REST API is also accepted.'],
+            'method' => ['type' => 'string', 'enum' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], 'default' => 'POST'],
+          ],
+          'required'   => ['route'],
+        ],
+        'callback'     => [$r, 'getRestRouteSchema'],
+      ],
       'get_logs' => [
         'label'        => __('Get delivery logs', 'flowsystems-webhook-actions'),
         'description'  => __('Read recent delivery logs (optionally for one webhook) to verify what was sent and how the endpoint responded.', 'flowsystems-webhook-actions'),

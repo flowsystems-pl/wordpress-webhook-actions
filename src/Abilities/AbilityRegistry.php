@@ -17,6 +17,7 @@ use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\CredentialCipher;
+use FlowSystems\WebhookActions\Services\RestRouteInspector;
 use FlowSystems\WebhookActions\Services\WpAppPasswordService;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 use WP_Error;
@@ -230,6 +231,13 @@ class AbilityRegistry {
 
   public function listCredentials(array $input): array {
     return ['credentials' => (new CredentialRepository())->getAll()];
+  }
+
+  public function getRestRouteSchema(array $input): array|WP_Error {
+    return (new RestRouteInspector())->describe(
+      (string) ($input['route'] ?? ''),
+      (string) ($input['method'] ?? 'POST')
+    );
   }
 
   // ===================================================================
