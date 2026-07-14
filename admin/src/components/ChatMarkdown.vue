@@ -22,8 +22,13 @@ const props = defineProps({
 });
 const { copiedKey, copy } = useCopyToClipboard();
 
-const REVEAL_STEP_MS = 26;  // gap between consecutive words
-const REVEAL_CAP = 70;      // items past this share the last delay (tail reveals together)
+const REVEAL_STEP_MS = 26;   // gap between consecutive words
+// Ceiling on the total stagger, sized in TIME rather than items: words past it
+// share the last delay. The old 70-item cap meant any reply longer than a
+// couple of sentences dumped its whole tail after ~1.8s, killing the
+// streaming feel mid-message; ~10s covers a ~380-word reply word-by-word.
+const REVEAL_MAX_MS = 10000;
+const REVEAL_CAP = Math.floor(REVEAL_MAX_MS / REVEAL_STEP_MS);
 
 // Split the message into alternating text / fenced-code segments.
 const blocks = computed(() => {
