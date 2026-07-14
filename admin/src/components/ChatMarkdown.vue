@@ -62,8 +62,12 @@ function inlineHtml(text) {
 
 // Wrap each visible word (text between tags) in a reveal span with a staggered
 // delay, leaving HTML tags and whitespace untouched so formatting is preserved.
+// An inline <code> pill is wrapped as ONE unit from the outside: wrapping only
+// the text inside it leaves the pill's background box visible at t=0, which
+// reads as code being exempt from the stream.
 function wrapWords(html, next) {
-  return html.replace(/(<[^>]+>)|([^<]+)/g, (_m, tag, txt) => {
+  return html.replace(/(<code[^>]*>[\s\S]*?<\/code>)|(<[^>]+>)|([^<]+)/g, (_m, codeEl, tag, txt) => {
+    if (codeEl) return `<span class="fswa-rw" style="animation-delay:${next()}ms">${codeEl}</span>`;
     if (tag) return tag;
     return txt.replace(/(\s+)|(\S+)/g, (_mm, sp, word) =>
       sp != null ? sp : `<span class="fswa-rw" style="animation-delay:${next()}ms">${word}</span>`

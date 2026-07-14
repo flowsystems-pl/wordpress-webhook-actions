@@ -63,10 +63,16 @@ class SystemPromptBuilder {
     return "\n\nDELIVERY MODE: background (asynchronous) delivery is UNPROVEN on this site — {$why}. Prefer is_synchronous=true (synchronous) on create_webhook so the delivery fires inline during the triggering request and works without any cron — it just works, at the cost of a little latency on that request. Choose is_synchronous=false (asynchronous) only if the user explicitly wants queued/background delivery and confirms their cron is set up. State the mode you picked in assistant_message; the user can flip it after the build.";
   }
 
-  /** Whether Webhook Actions Pro is active on this site. */
+  /**
+   * Whether Webhook Actions Pro is active on this site — judged by whether its
+   * abilities actually made it into the catalog. A class_exists check lies
+   * here: Pro's autoloader loads even when Pro bails out at plugins_loaded
+   * (e.g. free-version mismatch), and the prompt would then advertise Code Glue
+   * abilities the plan executor silently drops. create_snippet is registered
+   * exactly when Pro booted AND holds an active license.
+   */
   private function proIsActive(): bool {
-    return class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
-      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+    return isset($this->registry->definitions()['create_snippet']);
   }
 
   /**

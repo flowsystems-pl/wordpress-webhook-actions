@@ -27,6 +27,9 @@ class PlanExecutor {
   private BuildLedger                 $ledger;
   private StepReverter                $reverter;
 
+  /** @var array<int, string> Ability names normalizePlan() last dropped as unknown/unavailable. */
+  private array $lastDroppedAbilities = [];
+
   public function __construct(
     AgentConversationRepository $conversations,
     AbilityRegistry $registry,
@@ -108,6 +111,18 @@ class PlanExecutor {
    * The current execution mode: 'auto' (the agent runs the plan step by step) or
    * 'review' (the user reviews/edits the plan before running). Stored globally.
    */
+  /**
+   * Ability names the most recent normalizePlan() call dropped because they are
+   * not in the catalog (hallucinated, or Pro abilities on a site where Pro
+   * isn't running). Lets the orchestrator warn instead of shipping a silently
+   * thinned plan.
+   *
+   * @return array<int, string>
+   */
+  public function lastDroppedAbilities(): array {
+    return $this->lastDroppedAbilities;
+  }
+
   public function execMode(): string {
     return get_option('fswa_ai_exec_mode', 'auto') === 'review' ? 'review' : 'auto';
   }
@@ -534,6 +549,7 @@ class PlanExecutor {
    * @return array<int, array<string, mixed>>
    */
   public function normalizePlan($plan): array {
+    $this->lastDroppedAbilities = [];
     if (!is_array($plan)) {
       return [];
     }
@@ -544,6 +560,12 @@ class PlanExecutor {
 
     foreach ($plan as $step) {
       if (!is_array($step) || empty($step['ability']) || !isset($definitions[$step['ability']])) {
+        // Remember named-but-unavailable abilities so the orchestrator can warn
+        // the user — a silently thinned plan looks complete but isn't (e.g. Pro
+        // snippet steps vanishing while the prompt still advertised Code Glue).
+        if (is_array($step) && !empty($step['ability'])) {
+          $this->lastDroppedAbilities[] = (string) $step['ability'];
+        }
         continue;
       }
       $normalized[] = [
