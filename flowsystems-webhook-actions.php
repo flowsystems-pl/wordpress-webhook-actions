@@ -3,7 +3,7 @@
  * Plugin Name: Webhook Actions - build automations and integrations with AI help
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
  * Description: Describe what you want in chat — the built-in AI agent plans, builds, and tests your WordPress webhooks, integrations, and automations.
- * Version: 2.1.3
+ * Version: 2.2.0
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
  * License: GPLv2 or later
@@ -17,7 +17,7 @@ use FlowSystems\WebhookActions\Activation;
 
 defined('ABSPATH') || exit;
 
-define('FSWA_VERSION', '2.1.3');
+define('FSWA_VERSION', '2.2.0');
 define('FSWA_FILE', __FILE__);
 
 require_once __DIR__ . '/vendor/autoload.php';

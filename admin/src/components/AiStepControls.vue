@@ -278,7 +278,7 @@ function createCredForInput() {
   <!-- needs_confirm -->
   <div v-else-if="step.status === 'needs_confirm'"
     class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4">
-    <p class="text-sm text-amber-700 dark:text-amber-300 mb-3">{{ __('This step goes live or changes data. Confirm to run it.') }}</p>
+    <p class="text-sm text-amber-700 dark:text-amber-300 mb-3">{{ step.confirm_notice || __('This step goes live or changes data. Confirm to run it.') }}</p>
     <div class="flex gap-2">
       <Button size="sm" :disabled="busy" @click="emit('confirm')">{{ __('Confirm & run') }}</Button>
       <Button size="sm" variant="outline" :disabled="busy" @click="emit('skip')">{{ __('Skip') }}</Button>

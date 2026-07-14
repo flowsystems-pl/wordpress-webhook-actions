@@ -160,6 +160,20 @@ class AgentOrchestrator {
     // on the turn so the chat shows which provider actually answered and why.
     $notice = $this->fallbackNotice($transport);
 
+    // Steps the model proposed with abilities this site cannot run were dropped
+    // from the plan — the remaining plan can look complete while missing a
+    // load-bearing piece (e.g. the Code Glue step injecting a required field),
+    // so the user must hear about it before running the build.
+    $dropped = array_values(array_unique($this->executor->lastDroppedAbilities()));
+    if ($dropped !== []) {
+      $droppedNotice = sprintf(
+        /* translators: %s: comma-separated ability names. */
+        __('Some proposed steps were removed because this site cannot run them: %s. The remaining plan may be incomplete. If these are Code Glue abilities, make sure Webhook Actions Pro is installed, up to date and licensed.', 'flowsystems-webhook-actions'),
+        implode(', ', $dropped)
+      );
+      $notice = $notice === null ? $droppedNotice : $notice . ' ' . $droppedNotice;
+    }
+
     $finalEntry = $this->assistantEntry($envelope, $this->foldReply($assistantText, $clarifying));
     if ($notice !== null) {
       $finalEntry['notice'] = $notice;

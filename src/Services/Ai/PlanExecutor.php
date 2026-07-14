@@ -27,6 +27,9 @@ class PlanExecutor {
   private BuildLedger                 $ledger;
   private StepReverter                $reverter;
 
+  /** @var array<int, string> Ability names normalizePlan() last dropped as unknown/unavailable. */
+  private array $lastDroppedAbilities = [];
+
   public function __construct(
     AgentConversationRepository $conversations,
     AbilityRegistry $registry,
@@ -64,7 +67,7 @@ class PlanExecutor {
       $ability = (string) $step['ability'];
       $input   = (array) ($step['input'] ?? []);
 
-      if ($this->stepNeedsConfirm($step) && !in_array($stepId, $confirmed, true)) {
+      if ($this->stepNeedsConfirm($step, $input) && !in_array($stepId, $confirmed, true)) {
         $this->persistRecipe($conversationId, $applied, $plan);
         return [
           'status'         => 'needs_confirm',
@@ -108,6 +111,18 @@ class PlanExecutor {
    * The current execution mode: 'auto' (the agent runs the plan step by step) or
    * 'review' (the user reviews/edits the plan before running). Stored globally.
    */
+  /**
+   * Ability names the most recent normalizePlan() call dropped because they are
+   * not in the catalog (hallucinated, or Pro abilities on a site where Pro
+   * isn't running). Lets the orchestrator warn instead of shipping a silently
+   * thinned plan.
+   *
+   * @return array<int, string>
+   */
+  public function lastDroppedAbilities(): array {
+    return $this->lastDroppedAbilities;
+  }
+
   public function execMode(): string {
     return get_option('fswa_ai_exec_mode', 'auto') === 'review' ? 'review' : 'auto';
   }
@@ -235,12 +250,28 @@ class PlanExecutor {
     }
     unset($step['missing']);
 
-    // 2) Confirmation gate (go-live / delete / edit-live / unsafe probe).
-    if ($this->stepNeedsConfirm($step) && empty($opts['confirm'])) {
-      $step['status']     = 'needs_confirm';
+    // 2) Confirmation gate (go-live / delete / edit-live / unsafe probe /
+    //    real test delivery). Surface the ability's side-effect notice if any.
+    if ($this->stepNeedsConfirm($step, $input) && empty($opts['confirm'])) {
+      $definitions = $this->registry->definitions();
+      $notice      = (string) ($definitions[(string) $step['ability']]['confirm_notice'] ?? '');
+      $step['status'] = 'needs_confirm';
+      if ($notice !== '') {
+        $step['confirm_notice'] = $notice;
+      }
       $steps[$cursor]     = $step;
       $execution['steps'] = $steps;
       return $this->persistExecution($conversationId, $execution, $step, false, false);
+    }
+
+    // 2a) Past the confirm gate — so if this ability required confirmation, the
+    // user has now given it. probe_endpoint carries its OWN `confirmed` guard for
+    // unsafe methods (it's also callable directly via REST/MCP with no plan gate),
+    // so bridge the confirmation into the input; otherwise a confirmed
+    // POST/PUT/PATCH/DELETE probe rejects itself with "requires confirmation".
+    // Harmless for other abilities, which don't read `confirmed`.
+    if ($this->stepNeedsConfirm($step, $input)) {
+      $input['confirmed'] = true;
     }
 
     // 3) Snapshot the object's state BEFORE mutating it (so we can revert), then
@@ -518,6 +549,7 @@ class PlanExecutor {
    * @return array<int, array<string, mixed>>
    */
   public function normalizePlan($plan): array {
+    $this->lastDroppedAbilities = [];
     if (!is_array($plan)) {
       return [];
     }
@@ -528,6 +560,12 @@ class PlanExecutor {
 
     foreach ($plan as $step) {
       if (!is_array($step) || empty($step['ability']) || !isset($definitions[$step['ability']])) {
+        // Remember named-but-unavailable abilities so the orchestrator can warn
+        // the user — a silently thinned plan looks complete but isn't (e.g. Pro
+        // snippet steps vanishing while the prompt still advertised Code Glue).
+        if (is_array($step) && !empty($step['ability'])) {
+          $this->lastDroppedAbilities[] = (string) $step['ability'];
+        }
         continue;
       }
       $normalized[] = [
@@ -633,16 +671,23 @@ class PlanExecutor {
   /**
    * Resolve whether a plan step must pause for user confirmation, based on the
    * ability's `requires_confirm` policy and live state.
+   *
+   * Pass the ref-RESOLVED input when available: the raw step input may still
+   * hold a {{step_N.id}} placeholder, which a live-state check would misread
+   * as webhook 0. Falls back to the step's own input (pre-run UI metadata).
    */
-  private function stepNeedsConfirm(array $step): bool {
+  private function stepNeedsConfirm(array $step, ?array $input = null): bool {
     $ability     = (string) ($step['ability'] ?? '');
     $definitions = $this->registry->definitions();
     $policy      = $definitions[$ability]['requires_confirm'] ?? false;
+    $input     ??= (array) ($step['input'] ?? []);
 
     return match ($policy) {
       'always'             => true,
-      'when_live'          => $this->webhookIsLive((int) (($step['input']['id'] ?? 0))),
-      'when_unsafe_method' => !in_array(strtoupper((string) ($step['input']['method'] ?? 'GET')), ['GET', 'HEAD'], true),
+      // `id` for webhook-target abilities (enable/update/delete), `webhook_id`
+      // for abilities that attach TO a webhook (assign_snippet, set_mapping…).
+      'when_live'          => $this->webhookIsLive((int) ($input['id'] ?? $input['webhook_id'] ?? 0)),
+      'when_destructive_method' => in_array(strtoupper((string) ($input['method'] ?? 'GET')), ['PUT', 'PATCH', 'DELETE'], true),
       default              => false,
     };
   }

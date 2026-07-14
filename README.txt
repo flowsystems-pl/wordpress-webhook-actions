@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.1.3
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -124,7 +124,12 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.1.3 =
-- Fixed: the AI Builder no longer creates duplicate webhooks or Application Password credentials when a model re-sends a plan it already applied — steps that were already built are recognised and reused instead of run again
-- Improved: when your chosen AI model can't respond and the build falls back to another model or provider, the AI Builder now shows a notice (with the reason) so you can switch models, instead of quietly answering from a different one
-- Fixed: a WP Application Password provisioned during a build is now automatically attached to the webhook that needs it, instead of being created but left unassigned
+= 2.2.0 =
+- New: the AI Builder reads your site's own REST API contracts before building an internal automation (new get_rest_route_schema read), so required fields like a user's password are handled with a Code Glue snippet — or called out honestly — instead of guessed
+- New: test deliveries proposed in a plan now pause for your confirmation with a clear warning when they will create or modify real data (e.g. actually create a WordPress user)
+- New: after a build finishes you can flip the webhook between background and synchronous delivery right in the chat — and the AI now recommends a delivery mode based on real evidence that your queue is draining
+- New: plan review shows the exact PHP code a Code Glue snippet step will install, so you approve the code, not just a summary
+- New: assistant replies stream in with a word-by-word reveal
+- Improved: endpoint probes only ask for confirmation on destructive methods (PUT/PATCH/DELETE); confirming a probe no longer self-rejects
+- Fixed: the AI prompt no longer claims Pro Code Glue is available when the Pro plugin isn't actually running — and any proposed plan steps this site can't run are surfaced as a notice instead of being silently dropped from the plan
+- Dev: deliveries to your own site's REST API work on local environments with self-signed certificates (WP_ENVIRONMENT_TYPE=local, own host only — external endpoints always keep TLS verification)

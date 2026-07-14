@@ -3,30 +3,23 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import {
   BrainCircuit,
   WandSparkles,
-  Plus,
   Trash2,
-  ShieldAlert,
-  Play,
   CheckCircle2,
-  XCircle,
   AlertCircle,
-  Circle,
   Loader2,
   Search,
   Settings2,
-  ExternalLink,
-  Undo2,
   RotateCcw,
-  Power,
 } from 'lucide-vue-next';
-import { Button, Input, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Dialog } from '@/components/ui';
+import { Button, Input, Switch, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
 import AiProviderSettings from '@/components/AiProviderSettings.vue';
 import AiDevPanel from '@/components/AiDevPanel.vue';
 import ChatMarkdown from '@/components/ChatMarkdown.vue';
 import AiPlanStepper from '@/components/AiPlanStepper.vue';
-import AiStepControls from '@/components/AiStepControls.vue';
-import { abilityTitle } from '@/lib/aiLabels';
+import AiStepPanel from '@/components/AiStepPanel.vue';
+import AiBuildsBar from '@/components/AiBuildsBar.vue';
+import BuiltWebhookActions from '@/components/BuiltWebhookActions.vue';
 import { api } from '@/lib/api';
 import { __ } from '@/i18n';
 
@@ -48,6 +41,9 @@ const messageInput = ref('');
 const sending = ref(false);
 const error = ref('');
 const transcriptEl = ref(null);
+// Transcript index from which assistant replies are "new this turn" and get the
+// reveal animation. Infinity = animate nothing (loaded history renders instantly).
+const revealFrom = ref(Infinity);
 
 // ---- Execution state machine ---------------------------------------------
 const execution = ref(null);      // { mode, cursor, refs, steps[] }
@@ -128,18 +124,42 @@ const hasStepper = computed(() => !!execution.value && execSteps.value.length > 
 const builtWebhookEnabled = ref(null); // null = unknown / not fetched
 const enablingWebhook = ref(false);
 const justEnabled = ref(false);
+// Delivery mode of the built webhook: true = synchronous (inline), false =
+// asynchronous (queued). null = unknown / not fetched. Lets the user flip the
+// mode the AI chose without leaving the builder.
+const builtWebhookSync = ref(null);
+const savingSync = ref(false);
+const syncTooltip = __('Asynchronous: queued and delivered in the background on the next cron run, with automatic retries — it doesn’t slow the triggering request, but nothing is sent until a working cron runs. Synchronous: delivered instantly, inline with the triggering request — it works without any cron, at the cost of a little added latency. Toggle to switch.');
 
 watch([execFinished, builtWebhookId], async ([finished, id]) => {
   builtWebhookEnabled.value = null;
+  builtWebhookSync.value = null;
   justEnabled.value = false;
   if (!finished || !id) return;
   try {
     const wh = await api.webhooks.get(id);
     builtWebhookEnabled.value = Number(wh.is_enabled) === 1;
+    builtWebhookSync.value = wh.is_synchronous === true || Number(wh.is_synchronous) === 1;
   } catch (e) {
     // Leave unknown — no offer rather than a wrong one.
   }
 }, { immediate: true });
+
+async function setBuiltWebhookSync(val) {
+  if (savingSync.value || !builtWebhookId.value) return;
+  savingSync.value = true;
+  error.value = '';
+  const previous = builtWebhookSync.value;
+  builtWebhookSync.value = val; // optimistic
+  try {
+    await api.webhooks.update(builtWebhookId.value, { is_synchronous: val });
+  } catch (e) {
+    builtWebhookSync.value = previous; // roll back on failure
+    error.value = e.message;
+  } finally {
+    savingSync.value = false;
+  }
+}
 
 async function enableBuiltWebhook() {
   if (enablingWebhook.value || !builtWebhookId.value) return;
@@ -294,6 +314,7 @@ function onSwitchConversation(idStr) {
 async function selectConversation(conv) {
   activeId.value = conv.id;
   focusedIndex.value = null;
+  revealFrom.value = Infinity; // loaded history renders instantly, no reveal
   try {
     const full = await api.agent.getConversation(conv.id);
     transcript.value = full.transcript_json || [];
@@ -335,6 +356,7 @@ async function confirmDeleteConversation() {
         transcript.value = [];
         plan.value = [];
         execution.value = null;
+        revealFrom.value = Infinity;
       }
     }
   } catch (e) {
@@ -381,6 +403,7 @@ async function send() {
   error.value = '';
   retryMessage.value = null;
   focusedIndex.value = null;
+  revealFrom.value = transcript.value.length; // animate replies from this turn on
   transcript.value.push({ role: 'user', content: text });
   messageInput.value = '';
   await scrollDown();
@@ -394,6 +417,7 @@ async function retrySend() {
   sending.value = true;
   error.value = '';
   retryMessage.value = null;
+  revealFrom.value = transcript.value.length; // animate the resumed reply
   await dispatchMessage(text);
 }
 
@@ -533,6 +557,19 @@ const hasRevertible = computed(() =>
   execSteps.value.some((s) => s.status === 'done' && REVERTIBLE_ABILITIES.includes(s.ability))
 );
 
+// Prop bundle for BuiltWebhookActions (used directly and via AiStepPanel).
+const builtProps = computed(() => ({
+  webhookId: builtWebhookId.value,
+  enabled: builtWebhookEnabled.value,
+  justEnabled: justEnabled.value,
+  enabling: enablingWebhook.value,
+  sync: builtWebhookSync.value,
+  savingSync: savingSync.value,
+  syncTooltip,
+  hasRevertible: hasRevertible.value,
+  running: running.value,
+}));
+
 async function revertLast() {
   if (running.value || !activeId.value) return;
   running.value = true;
@@ -629,30 +666,8 @@ async function scrollDown() {
       </div>
 
       <!-- Builds bar: switcher + delete + new, above the conversation window -->
-      <div class="flex flex-wrap items-center gap-2">
-        <template v-if="conversations.length > 1">
-          <label class="text-xs font-medium text-muted-foreground">{{ __('Your builds') }}</label>
-          <div class="flex-1 min-w-56 max-w-2xl">
-            <Select :model-value="String(activeId ?? '')" @update:model-value="onSwitchConversation">
-              <SelectTrigger><SelectValue :placeholder="__('Your builds')" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem v-for="c in conversations" :key="c.id" :value="String(c.id)">
-                  {{ c.title || __('Untitled build') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </template>
-        <button v-if="activeId" @click="removeConversation({ id: activeId })" :title="__('Delete this build')"
-          class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted shrink-0">
-          <Trash2 class="w-4 h-4" />
-        </button>
-        <div class="flex-1"></div>
-        <button @click="newChat"
-          class="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:bg-muted shrink-0">
-          <Plus class="w-4 h-4" /> {{ __('New build') }}
-        </button>
-      </div>
+      <AiBuildsBar :conversations="conversations" :active-id="activeId"
+        @switch="onSwitchConversation" @delete="removeConversation({ id: activeId })" @new="newChat" />
 
       <div :class="['grid grid-cols-1 gap-6', hasStepper && 'lg:grid-cols-[240px_1fr]']">
       <!-- Aside: build progress stepper (only once a plan is executing) -->
@@ -687,7 +702,7 @@ async function scrollDown() {
                 :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
                 <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
                   m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
-                  <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" />
+                  <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" :animate="i >= revealFrom" />
                   <template v-else>{{ m.content }}</template>
                 </div>
               </div>
@@ -715,92 +730,30 @@ async function scrollDown() {
           </form>
 
           <!-- Focused step detail (one step at a time) -->
-          <div v-if="execution && focusedStep" class="rounded-lg border border-border bg-card p-5 space-y-4">
-            <!-- Header -->
-            <div class="flex items-start gap-3">
-              <div class="mt-0.5 shrink-0 relative">
-                <span v-if="running && focusedIsCurrent && focusedStep.status === 'pending'"
-                  class="absolute inset-0 rounded-full bg-primary/40 animate-ping" aria-hidden="true"></span>
-                <Transition name="fswa-pop" mode="out-in">
-                  <span :key="focusedStep.status + ':' + (running && focusedIsCurrent)" class="relative block">
-                    <CheckCircle2 v-if="focusedStep.status === 'done'" class="w-5 h-5 text-emerald-500" />
-                    <Loader2 v-else-if="running && focusedIsCurrent && focusedStep.status === 'pending'" class="w-5 h-5 animate-spin text-primary" />
-                    <ShieldAlert v-else-if="focusedStep.status === 'needs_confirm'" class="w-5 h-5 text-amber-500" />
-                    <XCircle v-else-if="focusedStep.status === 'failed'" class="w-5 h-5 text-destructive" />
-                    <AlertCircle v-else-if="focusedStep.status === 'blocked_input' || focusedStep.status === 'blocked_prereq' || focusedStep.status === 'blocked_probe'" class="w-5 h-5 text-amber-500" />
-                    <Undo2 v-else-if="focusedStep.status === 'reverted'" class="w-5 h-5 text-muted-foreground" />
-                    <Circle v-else class="w-5 h-5 text-primary" />
-                  </span>
-                </Transition>
-              </div>
-              <div class="min-w-0">
-                <h3 class="text-base font-semibold text-foreground leading-snug">
-                  {{ focusedStep.summary || abilityTitle(abilities, focusedStep.ability) }}
-                </h3>
-                <p class="text-xs text-muted-foreground mt-0.5">
-                  {{ __('Step') }} {{ (focusedIndex ?? execCursor) + 1 }} {{ __('of') }} {{ execSteps.length }} · {{ abilityTitle(abilities, focusedStep.ability) }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Active controls (only when this is the step being run) -->
-            <AiStepControls
-              v-if="focusedIsCurrent"
-              :key="focusedStep.id + ':' + focusedStep.status"
-              :step="focusedStep"
-              :abilities="abilities"
-              :credentials="credentials"
-              :busy="running || creatingCred"
-              @continue="(patch) => advance({ patch })"
-              @confirm="confirmStep"
-              @retry="retryStep"
-              @skip="skipStep"
-              @probe-fix="(fix) => advance({ probe_fix: fix })"
-              @create-credential="onCreateCredential"
-              @provision-app-password="onProvisionAppPassword"
-            />
-
-            <!-- Non-current step states -->
-            <div v-else-if="focusedStep.status === 'done'" class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 class="w-4 h-4" /> {{ __('Done') }}
-            </div>
-            <div v-else-if="focusedStep.status === 'skipped'" class="text-sm text-muted-foreground">{{ __('Skipped') }}</div>
-            <div v-else-if="focusedStep.status === 'reverted'" class="flex items-center gap-1.5 text-sm text-muted-foreground"><Undo2 class="w-4 h-4" /> {{ __('Reverted') }}</div>
-            <div v-else-if="!focusedIsCurrent" class="text-sm text-muted-foreground">{{ __('Waiting for earlier steps…') }}</div>
-
-            <!-- Run / continue / finished -->
-            <div v-if="reviewPreRun || canContinue || execFinished || running"
-              class="flex items-center gap-2 pt-3 border-t border-border">
-              <Button v-if="reviewPreRun" :disabled="running" @click="advance()">
-                <Play class="w-4 h-4 mr-1.5" /> {{ __('Run plan') }}
-              </Button>
-              <Button v-else-if="canContinue" :disabled="running" @click="advance()">
-                <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue build') }}
-              </Button>
-              <template v-if="execFinished">
-                <span class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
-                </span>
-                <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
-                  <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
-                </Button>
-                <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
-                  <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
-                </span>
-                <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
-                  <Button size="sm" variant="outline">
-                    <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
-                  </Button>
-                </RouterLink>
-                <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
-                  <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
-                </Button>
-              </template>
-              <span v-else-if="running" class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 class="w-4 h-4 animate-spin" /> {{ __('Working…') }}
-              </span>
-            </div>
-          </div>
+          <AiStepPanel v-if="execution && focusedStep"
+            :step="focusedStep"
+            :step-number="(focusedIndex ?? execCursor) + 1"
+            :step-count="execSteps.length"
+            :abilities="abilities"
+            :credentials="credentials"
+            :is-current="focusedIsCurrent"
+            :running="running"
+            :busy="running || creatingCred"
+            :review-pre-run="reviewPreRun"
+            :can-continue="canContinue"
+            :finished="execFinished"
+            :built="builtProps"
+            @advance="(opts) => advance(opts)"
+            @confirm="confirmStep"
+            @retry="retryStep"
+            @skip="skipStep"
+            @probe-fix="(fix) => advance({ probe_fix: fix })"
+            @create-credential="onCreateCredential"
+            @provision-app-password="onProvisionAppPassword"
+            @enable="enableBuiltWebhook"
+            @toggle-sync="setBuiltWebhookSync"
+            @revert="revertLast"
+          />
 
           <!-- Finished, nothing focused -->
           <div v-else-if="execution && execFinished"
@@ -808,20 +761,8 @@ async function scrollDown() {
             <span class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 class="w-5 h-5" /> {{ __('Build complete.') }}
             </span>
-            <Button v-if="builtWebhookEnabled === false" size="sm" :disabled="enablingWebhook" @click="enableBuiltWebhook">
-              <Power class="w-4 h-4 mr-1.5" /> {{ __('Enable webhook') }}
-            </Button>
-            <span v-else-if="justEnabled" class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-              <Power class="w-4 h-4" /> {{ __('Webhook is live.') }}
-            </span>
-            <RouterLink v-if="builtWebhookId" :to="{ name: 'WebhookEdit', params: { id: builtWebhookId } }">
-              <Button size="sm" variant="outline">
-                <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Open webhook') }}
-              </Button>
-            </RouterLink>
-            <Button v-if="hasRevertible" size="sm" variant="outline" :disabled="running" @click="revertLast">
-              <Undo2 class="w-4 h-4 mr-1.5" /> {{ __('Undo last change') }}
-            </Button>
+            <BuiltWebhookActions v-bind="builtProps"
+              @enable="enableBuiltWebhook" @toggle-sync="setBuiltWebhookSync" @revert="revertLast" />
           </div>
         </template>
       </section>
@@ -852,21 +793,3 @@ async function scrollDown() {
     </Dialog>
   </div>
 </template>
-
-<style scoped>
-/* Springy pop-in when a step's status icon changes (e.g. spinner → green check). */
-.fswa-pop-enter-active {
-  animation: fswa-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.fswa-pop-leave-active {
-  transition: opacity 0.12s ease, transform 0.12s ease;
-}
-.fswa-pop-leave-to {
-  opacity: 0;
-  transform: scale(0.6);
-}
-@keyframes fswa-pop {
-  0% { transform: scale(0.3); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-</style>

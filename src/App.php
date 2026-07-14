@@ -11,6 +11,7 @@ use FlowSystems\WebhookActions\Services\LogArchiver;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
+use FlowSystems\WebhookActions\Services\LocalDevHttp;
 use FlowSystems\WebhookActions\Services\Scheduler;
 use FlowSystems\WebhookActions\Integrations\IntegrationLoader;
 use FlowSystems\WebhookActions\Abilities\AbilityRegistrar;
@@ -71,6 +72,11 @@ class App {
 
     // Third-party integrations (loaded only when the plugin is active)
     (new IntegrationLoader())->load();
+
+    // Local-dev only: skip TLS verification for loopback calls to our OWN host on
+    // a self-signed local box (off by default; gated on wp_get_environment_type()
+    // === 'local' AND same-host — external endpoints always keep full TLS).
+    (new LocalDevHttp())->register();
 
     // Expose the AI Builder toolset to the WordPress Abilities API (WP 6.9+/7.0)
     // when available — additive, so the agent works on older versions too.

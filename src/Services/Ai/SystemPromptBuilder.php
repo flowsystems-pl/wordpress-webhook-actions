@@ -29,7 +29,50 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->buildContext($conversation) . $this->payloadContext();
+    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->deliveryModeContext() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * Tell the model whether background (asynchronous) delivery is PROVEN to work
+   * on this site, so it sets create_webhook/update_webhook is_synchronous
+   * sensibly. The plugin runs its OWN delivery queue; WP-Cron / Action Scheduler
+   * / a system cron are just triggers that drain it, so their presence proves
+   * nothing on its own. The reliable evidence is that the queue actually
+   * processed recently (fswa_last_cron_run within the last hour) — meaning
+   * whatever trigger the site uses is firing. Webhook Actions Pro is the other
+   * positive factor: its External Cron keeps the queue draining reliably. Absent
+   * both, background jobs can silently sit undelivered (default WP-Cron only
+   * fires on site traffic), so synchronous "just works" and is the safer default.
+   */
+  private function deliveryModeContext(): string {
+    $lastRun   = (int) get_option('fswa_last_cron_run', 0);
+    $recentRun = $lastRun > 0 && (time() - $lastRun) <= HOUR_IN_SECONDS;
+    $proActive = $this->proIsActive();
+    $wpCronOff = defined('DISABLE_WP_CRON') && DISABLE_WP_CRON;
+
+    if ($recentRun || $proActive) {
+      $why = $recentRun
+        ? 'the delivery queue processed within the last hour, so background delivery is working'
+        : 'Webhook Actions Pro is active, so its External Cron keeps the delivery queue draining reliably';
+      return "\n\nDELIVERY MODE: background (asynchronous) delivery is PROVEN on this site — {$why}. Prefer is_synchronous=false (asynchronous) on create_webhook: deliveries are queued and retried in the background without slowing the triggering request. Choose is_synchronous=true (synchronous) only when the user needs the outcome to complete inline within the triggering request (e.g. hold a form submit until the user is created). State the mode you picked in assistant_message; the user can flip it after the build.";
+    }
+
+    $why = $wpCronOff
+      ? 'WP-Cron is disabled, the delivery queue has not processed in the last hour, and there is no Pro External Cron — so there may be no working cron draining the queue at all'
+      : 'the delivery queue has not processed in the last hour and there is no Pro External Cron (default WP-Cron only fires on site traffic, so on a low-traffic site background jobs can sit undelivered)';
+    return "\n\nDELIVERY MODE: background (asynchronous) delivery is UNPROVEN on this site — {$why}. Prefer is_synchronous=true (synchronous) on create_webhook so the delivery fires inline during the triggering request and works without any cron — it just works, at the cost of a little latency on that request. Choose is_synchronous=false (asynchronous) only if the user explicitly wants queued/background delivery and confirms their cron is set up. State the mode you picked in assistant_message; the user can flip it after the build.";
+  }
+
+  /**
+   * Whether Webhook Actions Pro is active on this site — judged by whether its
+   * abilities actually made it into the catalog. A class_exists check lies
+   * here: Pro's autoloader loads even when Pro bails out at plugins_loaded
+   * (e.g. free-version mismatch), and the prompt would then advertise Code Glue
+   * abilities the plan executor silently drops. create_snippet is registered
+   * exactly when Pro booted AND holds an active license.
+   */
+  private function proIsActive(): bool {
+    return isset($this->registry->definitions()['create_snippet']);
   }
 
   /**
@@ -48,8 +91,7 @@ class SystemPromptBuilder {
    * whether the Pro limits apply HERE.
    */
   private function licenseContext(): string {
-    $proActive = class_exists('FlowSystems\WebhookActions\Pro\License\LicenseManager')
-      && (new \FlowSystems\WebhookActions\Pro\License\LicenseManager())->isActive();
+    $proActive = $this->proIsActive();
 
     if ($proActive) {
       return "\n\nLICENSE: Webhook Actions Pro is ACTIVE on this site. set_conditions accepts multiple rules, nested groups and \"or\" matching — use them freely when the user's logic needs more than one rule. Any Pro abilities listed in the catalog above are available."
@@ -222,8 +264,10 @@ You work in TWO PHASES:
 replying with a "reads" array. The plugin executes them locally and hands you the results
 in the same turn, so base your plans on real data, not guesses: get_trigger_schema for a
 trigger's real captured payload (NEVER invent field paths for set_mapping/set_conditions —
-read them), get_webhook/list_webhooks for existing configs, get_logs to check deliveries,
-list_credentials for stored auth. You have a budget of a few read rounds per turn — batch
+read them), get_rest_route_schema for an internal endpoint's real argument contract (NEVER
+guess which fields this site's own REST API requires — read them), get_webhook/list_webhooks
+for existing configs, get_logs to check deliveries, list_credentials for stored auth. You
+have a budget of a few read rounds per turn — batch
 related reads into one array instead of one at a time.
 
 2. PLAN. You never change anything yourself — you PROPOSE an ordered plan of typed [write]
@@ -240,20 +284,32 @@ The user fills blanks directly in the plan, so never withhold a plan just to ask
 you could pair with it. Never ask for anything a read could tell you.
 
 INTERNAL AUTOMATIONS: a webhook's endpoint_url may point at this site's own REST API (see
-SITE below), e.g. POST {rest_api}wp/v2/users to create a user. These calls need a WordPress
-Application Password stored as a "basic" vault credential (value "username:app_password").
-Check list_credentials for a usable "basic" credential (the auto-provisioned one is named
-"WP REST API (internal) — <user>") and attach it via auth_credential_id or assign_credential.
-If there is NONE, do NOT interrogate the user in chat (never ask "do you have an Application
-Password?") and never stall with an empty plan — instead include a provision_wp_app_password
-step: it mints a WordPress Application Password for the current admin and stores it as a "basic"
-vault credential, with NO secret handling in chat (it needs confirmation). A typical internal
-build is: create_webhook disabled (endpoint_url on this site's wp-json) → provision_wp_app_password
-→ assign_credential (credential_id: {{step_N.id}} of the provision step) → set_mapping →
-probe_endpoint. The plan-review UI also lets the user pick an existing credential, create a
-"basic" one inline, or click "Create a WP Application Password for me" on the credential step, so
-auth is always resolved in the plan, not in chat. NEVER ask the user to paste a secret into this
-chat, and never inline credentials in plain headers.
+SITE below), e.g. POST {rest_api}wp/v2/users to create a user. Before building against an
+internal route, ALWAYS run a get_rest_route_schema read for the exact route+method — NEVER
+recall an endpoint's contract from memory — and satisfy every argument it marks REQUIRED in
+the outgoing body. A required value that does not exist in the captured payload (e.g.
+"password" on POST /wp/v2/users) can NEVER come from set_mapping (it only moves existing
+fields): inject it with a pre-dispatch Code Glue snippet (create_snippet → preview_snippet →
+assign_snippet, Pro) — and if Code Glue is not available, say plainly in assistant_message
+that the build cannot supply that value on the Free plugin rather than proposing a mapping
+that will be rejected with a 400.
+These calls need a WordPress Application Password stored as a "basic" vault credential (value
+"username:app_password"). Check list_credentials for a usable "basic" credential (the
+auto-provisioned one is named "WP REST API (internal) — <user>") and attach it via
+auth_credential_id or assign_credential. If there is NONE, do NOT interrogate the user in chat
+(never ask "do you have an Application Password?") and never stall with an empty plan — instead
+include a provision_wp_app_password step: it mints a WordPress Application Password for the
+current admin and stores it as a "basic" vault credential, with NO secret handling in chat (it
+needs confirmation). A typical internal build is: create_webhook disabled (endpoint_url on this
+site's wp-json) → provision_wp_app_password → assign_credential (credential_id: {{step_N.id}} of
+the provision step) → set_mapping (+ snippet steps for generated values) → test_dispatch.
+Validate an internal build with test_dispatch (it sends the REAL mapped payload, so it proves
+the whole contract end to end; it is confirm-gated because it can create data) — NOT a POST
+probe_endpoint: probes send an EMPTY body, so on a create route they always return 400
+missing-params and prove nothing beyond reachability. The plan-review UI also lets the user pick
+an existing credential, create a "basic" one inline, or click "Create a WP Application Password
+for me" on the credential step, so auth is always resolved in the plan, not in chat. NEVER ask
+the user to paste a secret into this chat, and never inline credentials in plain headers.
 
 Keep plans minimal and correct. probe_endpoint is a plan step (it makes a real outbound HTTP
 call): when you probe a webhook you just created, pass its id as probe_endpoint's webhook_id
