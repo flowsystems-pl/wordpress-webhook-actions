@@ -27,6 +27,9 @@ class AnthropicTransport implements LlmTransportInterface {
   /** @var array<string, mixed>|null */
   private ?array $lastRequest = null;
 
+  /** @var array<string, mixed> */
+  private array $lastResponseMeta = [];
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -37,6 +40,8 @@ class AnthropicTransport implements LlmTransportInterface {
     if (is_wp_error($key)) {
       return $key;
     }
+
+    $this->lastResponseMeta = [];
 
     $body = [
       'model'      => $options['model'] ?? $this->model,
@@ -84,6 +89,9 @@ class AnthropicTransport implements LlmTransportInterface {
       return new WP_Error('fswa_anthropic_error', $message, ['status' => $code]);
     }
 
+    $stop                   = $data['stop_reason'] ?? null;
+    $this->lastResponseMeta = is_string($stop) && $stop !== '' ? ['finish_reason' => $stop] : [];
+
     // Concatenate any text blocks in the content array.
     $text = '';
     foreach ((array) ($data['content'] ?? []) as $block) {
@@ -105,6 +113,10 @@ class AnthropicTransport implements LlmTransportInterface {
 
   public function lastRequest(): ?array {
     return $this->lastRequest;
+  }
+
+  public function lastResponseMeta(): array {
+    return $this->lastResponseMeta;
   }
 
   /**

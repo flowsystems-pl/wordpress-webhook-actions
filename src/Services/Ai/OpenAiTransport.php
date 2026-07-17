@@ -30,6 +30,9 @@ class OpenAiTransport implements LlmTransportInterface {
   /** @var array<string, mixed>|null */
   private ?array $lastRequest = null;
 
+  /** @var array<string, mixed> */
+  private array $lastResponseMeta = [];
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -40,6 +43,8 @@ class OpenAiTransport implements LlmTransportInterface {
     if (is_wp_error($key)) {
       return $key;
     }
+
+    $this->lastResponseMeta = [];
 
     $chat = [];
     if ($system !== '') {
@@ -89,6 +94,9 @@ class OpenAiTransport implements LlmTransportInterface {
       return new WP_Error('fswa_openai_error', $message, ['status' => $code]);
     }
 
+    $finish                 = $data['choices'][0]['finish_reason'] ?? null;
+    $this->lastResponseMeta = is_string($finish) && $finish !== '' ? ['finish_reason' => $finish] : [];
+
     $text = (string) ($data['choices'][0]['message']['content'] ?? '');
 
     return $text !== '' ? $text : new WP_Error('fswa_openai_empty', __('The AI provider returned no text.', 'flowsystems-webhook-actions'));
@@ -104,6 +112,10 @@ class OpenAiTransport implements LlmTransportInterface {
 
   public function lastRequest(): ?array {
     return $this->lastRequest;
+  }
+
+  public function lastResponseMeta(): array {
+    return $this->lastResponseMeta;
   }
 
   /**

@@ -25,6 +25,9 @@ class GoogleTransport implements LlmTransportInterface {
   /** @var array<string, mixed>|null */
   private ?array $lastRequest = null;
 
+  /** @var array<string, mixed> */
+  private array $lastResponseMeta = [];
+
   public function __construct(int $credentialId, string $model = self::DEFAULT_MODEL) {
     $this->credentialId = $credentialId;
     $this->model        = $model !== '' ? $model : self::DEFAULT_MODEL;
@@ -37,6 +40,8 @@ class GoogleTransport implements LlmTransportInterface {
     }
 
     $model = (string) ($options['model'] ?? $this->model);
+
+    $this->lastResponseMeta = [];
 
     $body = [
       'contents' => $this->normalizeMessages($messages),
@@ -91,6 +96,9 @@ class GoogleTransport implements LlmTransportInterface {
       return new WP_Error('fswa_google_error', $message, ['status' => $code]);
     }
 
+    $finish                 = $data['candidates'][0]['finishReason'] ?? null;
+    $this->lastResponseMeta = is_string($finish) && $finish !== '' ? ['finish_reason' => $finish] : [];
+
     // Concatenate the text parts of the first candidate.
     $text = '';
     foreach ((array) ($data['candidates'][0]['content']['parts'] ?? []) as $part) {
@@ -110,6 +118,10 @@ class GoogleTransport implements LlmTransportInterface {
 
   public function lastRequest(): ?array {
     return $this->lastRequest;
+  }
+
+  public function lastResponseMeta(): array {
+    return $this->lastResponseMeta;
   }
 
   /**

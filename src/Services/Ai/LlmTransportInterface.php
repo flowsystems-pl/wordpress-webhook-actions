@@ -43,4 +43,16 @@ interface LlmTransportInterface {
    * @return array<string, mixed>|null
    */
   public function lastRequest(): ?array;
+
+  /**
+   * Provider-reported metadata about the most recent response — currently the
+   * finish/stop reason when the provider exposes one (Gemini's
+   * candidates[0].finishReason, Anthropic's stop_reason, OpenAI's
+   * choices[0].finish_reason). Lets the trace distinguish a truncated reply
+   * (MAX_TOKENS / length) from a clean STOP at a glance. Empty array when the
+   * provider hides the wire response or nothing has been sent yet.
+   *
+   * @return array<string, mixed>
+   */
+  public function lastResponseMeta(): array;
 }

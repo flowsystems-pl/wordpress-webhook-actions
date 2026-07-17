@@ -171,6 +171,12 @@ class WpAiClientTransport implements LlmTransportInterface {
     return $this->lastRequest;
   }
 
+  public function lastResponseMeta(): array {
+    // The AI Client owns the HTTP call and does not expose the provider's
+    // finish reason, so there is nothing truthful to report here.
+    return [];
+  }
+
   /**
    * Fold a multi-turn transcript into one prompt string, since the builder takes
    * a single user prompt. The system instruction is passed separately.
