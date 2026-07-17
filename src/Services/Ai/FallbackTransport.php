@@ -107,4 +107,8 @@ class FallbackTransport implements LlmTransportInterface {
   public function lastRequest(): ?array {
     return ($this->used ?? $this->lastAttempted)?->lastRequest();
   }
+
+  public function lastResponseMeta(): array {
+    return ($this->used ?? $this->lastAttempted)?->lastResponseMeta() ?? [];
+  }
 }

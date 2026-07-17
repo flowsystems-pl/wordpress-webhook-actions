@@ -566,9 +566,16 @@ class AgentOrchestrator {
    *   • escapes raw control chars (newline, CR, tab) that appear INSIDE strings,
    *     which models emit unescaped and which json_decode rejects;
    *   • drops a trailing comma immediately before a "}" or "]".
-   * Anything after the balanced object (stray braces, prose) is ignored. Returns
-   * the repaired JSON string, or null when there is no balanced object (e.g. a
-   * truncated reply) — those fail safe rather than being force-closed.
+   * Anything after the balanced object (stray braces, prose) is ignored.
+   *
+   * When the text runs out with structures still open (a truncated reply), the
+   * missing closers are appended ONLY for a purely structural cut: never inside
+   * a string, and only when the last emitted token is already a complete value
+   * ("…", }, ], true/false/null, or a number). Gemini's JSON mode is known to
+   * drop the final "}" of an otherwise complete envelope — that case is now
+   * recovered losslessly. A cut after "," / ":" / an opener means a value was
+   * lost, so those still return null (fail safe) rather than fabricating a
+   * smaller object that looks complete.
    */
   private static function repairJsonObject(string $text): ?string {
     $start = strpos($text, '{');
@@ -577,7 +584,7 @@ class AgentOrchestrator {
     }
 
     $out      = '';
-    $depth    = 0;
+    $stack    = []; // expected closers, innermost last
     $inString = false;
     $escaped  = false;
     $len      = strlen($text);
@@ -611,8 +618,8 @@ class AgentOrchestrator {
         $inString = true;
         $out     .= $ch;
       } elseif ($ch === '{' || $ch === '[') {
-        $depth++;
-        $out .= $ch;
+        $stack[] = $ch === '{' ? '}' : ']';
+        $out    .= $ch;
       } elseif ($ch === '}' || $ch === ']') {
         // Strip a dangling comma (and any whitespace) before the closer.
         $trimmed = rtrim($out);
@@ -620,8 +627,8 @@ class AgentOrchestrator {
           $out = substr($trimmed, 0, -1);
         }
         $out .= $ch;
-        $depth--;
-        if ($depth === 0) {
+        array_pop($stack);
+        if ($stack === []) {
           return $out;
         }
       } else {
@@ -629,7 +636,18 @@ class AgentOrchestrator {
       }
     }
 
-    return null;
+    // Truncated reply: force-close only a structural cut (see docblock).
+    if ($inString || $stack === []) {
+      return null;
+    }
+    $tail = rtrim($out);
+    $last = substr($tail, -1);
+    $endsWithValue = in_array($last, ['"', '}', ']'], true)
+      || preg_match('/(?:true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)$/', $tail) === 1;
+    if (!$endsWithValue) {
+      return null;
+    }
+    return $tail . implode('', array_reverse($stack));
   }
 
   /**
@@ -662,6 +680,7 @@ class AgentOrchestrator {
       'model'           => $transport->model(),
       'latency_ms'      => $latencyMs,
       'temperature'     => $options['temperature'] ?? null,
+      'finish_reason'   => $transport->lastResponseMeta()['finish_reason'] ?? null,
       'system'          => $system,
       'messages'        => array_values($sent),
       'request'         => $transport->lastRequest(),
