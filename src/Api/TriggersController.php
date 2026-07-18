@@ -40,38 +40,34 @@ class TriggersController extends WP_REST_Controller {
   }
 
   /**
-   * Get list of available WordPress triggers
+   * Get list of available WordPress triggers.
+   *
+   * All filtering (excluded internal hooks, known-filter safety exclusion,
+   * static+runtime merge) lives in HookDiscoveryService::discoverAllTriggerable()
+   * — the same method the AI list_triggers ability consumes — so the manual
+   * picker and the AI can never again disagree about which hooks exist. This
+   * method only adds presentation: grouping into human-facing categories.
    *
    * @return array
    */
   private function getAvailableTriggers(): array {
-    $excluded = $this->getExcludedHookPatterns();
     $categories = $this->getCategories();
     $grouped = [];
-    $seen = [];
 
-    // Runtime-registered hooks ($wp_filter)
-    global $wp_filter;
-    foreach (array_keys($wp_filter) as $hookName) {
-      if ($this->isExcludedHook($hookName, $excluded)) {
-        continue;
+    foreach ((new HookDiscoveryService())->discoverAllTriggerable() as $hookName => $slug) {
+      // A resolved slug (real or prefix-inferred plugin/theme) always wins
+      // over the generic keyword guess; only fall back to keyword categories
+      // ("users", "posts", ...) when nothing could be attributed at all.
+      if ($slug !== null) {
+        $category = str_replace('-', '_', $slug);
+        if (!isset($categories[$category])) {
+          $categories[$category] = ucwords(str_replace(['-', '_'], ' ', $slug));
+        }
+      } else {
+        $category = $this->detectHookCategory($hookName);
       }
-      $category = $this->detectHookCategory($hookName);
+
       $grouped[$category][$hookName] = true;
-      $seen[$hookName] = true;
-    }
-
-    // Statically scanned hooks (plugins, themes, WP core)
-    foreach ((new HookDiscoveryService())->discover() as $hookName => $slug) {
-      if (isset($seen[$hookName]) || $this->isExcludedHook($hookName, $excluded)) {
-        continue;
-      }
-      $categoryKey = str_replace('-', '_', $slug);
-      if (!isset($categories[$categoryKey])) {
-        $categories[$categoryKey] = ucwords(str_replace(['-', '_'], ' ', $slug));
-      }
-      $grouped[$categoryKey][$hookName] = true;
-      $seen[$hookName] = true;
     }
 
     // Convert sets to sorted arrays
@@ -104,86 +100,6 @@ class TriggersController extends WP_REST_Controller {
       'categories' => $categories,
       'allowCustom' => true,
     ];
-  }
-
-  /**
-   * Get patterns for hooks to exclude
-   *
-   * @return array
-   */
-  private function getExcludedHookPatterns(): array {
-    return [
-      // Internal WordPress hooks
-      '/^_/',
-      '/^admin_/',
-      '/^wp_ajax/',
-      '/^rest_api/',
-      '/^oembed/',
-      '/^customize_/',
-      '/^wp_head$/',
-      '/^wp_footer$/',
-      '/^wp_enqueue/',
-      '/^admin_enqueue/',
-      '/^login_/',
-      '/^register_/',
-      '/^widgets_/',
-      '/^sidebar/',
-      '/^dynamic_sidebar/',
-      '/^get_header/',
-      '/^get_footer/',
-      '/^get_sidebar/',
-      '/^template_/',
-      '/^the_content$/',
-      '/^the_title$/',
-      '/^the_excerpt$/',
-      '/^body_class$/',
-      '/^post_class$/',
-      '/^comment_class$/',
-      '/^nav_menu/',
-      '/^wp_nav_menu/',
-      '/^pre_get/',
-      '/^posts_/',
-      '/^query$/',
-      '/^parse_/',
-      '/^sanitize_/',
-      '/^clean_/',
-      '/^check_/',
-      '/^is_/',
-      '/^load-/',
-      '/^print_/',
-      '/^show_/',
-      '/^display_/',
-      '/^render_/',
-      '/^do_/',
-      '/^doing_/',
-      '/^current_/',
-      '/^get_/',
-      '/^update_/',
-      '/^remove_/',
-      '/^has_/',
-      '/^can_/',
-      '/^woocommerce_before/',
-      '/^woocommerce_after/',
-      // Filter hooks (usually not useful as triggers)
-      '/_filter$/',
-      '/_filters$/',
-    ];
-  }
-
-  /**
-   * Check if hook matches excluded patterns
-   *
-   * @param string $hookName
-   * @param array $patterns
-   * @return bool
-   */
-  private function isExcludedHook(string $hookName, array $patterns): bool {
-    foreach ($patterns as $pattern) {
-      if (preg_match($pattern, $hookName)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
