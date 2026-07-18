@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -124,6 +124,6 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.2.1 =
-- Fixed: Build with AI no longer loses a turn when the AI provider returns a JSON reply cut off just before its final closing brace (seen in the field with Gemini's JSON mode) — a reply missing only its closing brackets is now completed and parsed, while a reply that lost real content is still rejected rather than guessed at
-- Improved: the AI Dev Trace now records the provider's reported finish reason for every model call, so a truncated reply is distinguishable from a token-limit stop at a glance
+= 2.2.2 =
+- Fixed: Build with AI can now discover and propose Gravity Forms' gform_after_submission trigger — some plugin hooks are fired through a wrapper function instead of a direct WordPress do_action() call, which made them invisible to hook discovery, so the AI would fall back to a less suitable trigger
+- Improved: hook discovery now cross-checks WordPress's registered filters so a filter can never be mistakenly proposed as a webhook trigger, avoiding interference with the filter's normal behavior

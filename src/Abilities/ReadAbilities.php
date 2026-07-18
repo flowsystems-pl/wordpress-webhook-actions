@@ -25,7 +25,7 @@ class ReadAbilities {
   private const TRIGGERS_LIST_MAX = 200;
 
   public function listTriggers(array $input): array {
-    $triggers = (new HookDiscoveryService())->discover();
+    $triggers = (new HookDiscoveryService())->discoverWithRuntimeHooks();
 
     $search = strtolower(trim((string) ($input['search'] ?? '')));
     if ($search !== '') {
