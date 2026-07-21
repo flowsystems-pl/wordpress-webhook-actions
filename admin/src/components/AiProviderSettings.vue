@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { Loader2, Check, Trash2, KeyRound, Plus, AlertTriangle } from 'lucide-vue-next';
+import { Loader2, Check, Trash2, KeyRound, Plus, AlertTriangle, Sparkles, ExternalLink } from 'lucide-vue-next';
 import { Input, Label, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui';
 import ProviderLogo from './ProviderLogo.vue';
 import { api } from '@/lib/api';
@@ -15,6 +15,18 @@ const error = ref('');
 // ---- Source ---------------------------------------------------------------
 const aiAvailable = computed(() => props.status?.wp_ai_client?.available === true);
 const source = computed(() => props.status?.source || 'auto');
+
+// ---- Hosted credits (Pro) -------------------------------------------------
+// Populated by Pro via the fswa_ai_hosted_status filter; null on free installs.
+const hosted = computed(() => props.status?.hosted || null);
+const hostedAvailable = computed(() => hosted.value?.available === true);
+const hostedResetDate = computed(() => {
+  const iso = hosted.value?.resets_at;
+  if (!iso) return '';
+  const d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+});
+const fmt = (n) => Number(n || 0).toLocaleString();
 
 // Is the WordPress 7.0 AI Client code even present? (function_exists on the server)
 const wpClientPresent = computed(() => props.status?.wp_ai_client?.present === true);
@@ -32,16 +44,18 @@ const wpClientLost = computed(() => {
 
 // Which configuration UI to show given the toggle + what's actually available.
 const displaySource = computed(() => {
+  if (source.value === 'hosted' && hostedAvailable.value) return 'hosted';
   if (source.value === 'byok') return 'byok';
   if (source.value === 'wp_ai_client') return aiAvailable.value ? 'wp_ai_client' : 'byok';
-  return aiAvailable.value ? 'wp_ai_client' : 'byok'; // auto
+  return aiAvailable.value ? 'wp_ai_client' : 'byok'; // auto (and hosted without Pro)
 });
 
-const sourceOptions = [
+const sourceOptions = computed(() => [
+  ...(hostedAvailable.value ? [{ value: 'hosted', label: __('WP Webhooks AI (included)') }] : []),
   { value: 'auto', label: __('Auto') },
-  { value: 'wp_ai_client', label: __('WordPress connectors') },
+  ...(aiAvailable.value ? [{ value: 'wp_ai_client', label: __('WordPress connectors') }] : []),
   { value: 'byok', label: __('My own keys') },
-];
+]);
 
 async function run(marker, fn) {
   busy.value = marker;
@@ -141,8 +155,8 @@ initWp();
 
 <template>
   <div class="space-y-4">
-    <!-- Source toggle (only when WordPress connectors are available) -->
-    <div v-if="aiAvailable" class="space-y-1.5">
+    <!-- Source toggle (when WordPress connectors or hosted credits are available) -->
+    <div v-if="aiAvailable || hostedAvailable" class="space-y-1.5">
       <Label>{{ __('Credentials source') }}</Label>
       <div class="inline-flex rounded-md border border-border bg-background p-0.5">
         <button v-for="opt in sourceOptions" :key="opt.value" type="button"
@@ -154,12 +168,49 @@ initWp();
         </button>
       </div>
       <p class="text-xs text-muted-foreground">
-        {{ __('Auto prefers your WordPress connectors when available, otherwise your own keys.') }}
+        <template v-if="hostedAvailable">
+          {{ __('WP Webhooks AI is included with your Pro license — no API keys needed. Your own keys and WordPress connectors remain available.') }}
+        </template>
+        <template v-else>
+          {{ __('Auto prefers your WordPress connectors when available, otherwise your own keys.') }}
+        </template>
       </p>
     </div>
 
+    <!-- Hosted credits (Pro) -->
+    <div v-if="displaySource === 'hosted'" class="rounded-md border border-border bg-background">
+      <div class="flex items-center gap-2 px-3 py-2.5">
+        <Sparkles class="w-4 h-4 text-primary shrink-0" />
+        <span class="text-sm font-medium text-foreground">{{ __('WP Webhooks AI') }}</span>
+        <span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/15 text-primary border border-primary/30">{{ __('Included') }}</span>
+      </div>
+      <div class="border-t border-border p-3 space-y-2">
+        <div class="flex items-baseline justify-between gap-3">
+          <span class="text-xs text-muted-foreground">{{ __('Credits this month') }}</span>
+          <span class="text-sm font-medium text-foreground tabular-nums">
+            {{ fmt(hosted.monthly_remaining) }} / {{ fmt(hosted.monthly_limit) }}
+          </span>
+        </div>
+        <div v-if="Number(hosted.topup_remaining) > 0" class="flex items-baseline justify-between gap-3">
+          <span class="text-xs text-muted-foreground">{{ __('Extra credits (never expire)') }}</span>
+          <span class="text-sm font-medium text-foreground tabular-nums">{{ fmt(hosted.topup_remaining) }}</span>
+        </div>
+        <p v-if="hostedResetDate" class="text-xs text-muted-foreground">
+          {{ __('Monthly credits reset on %s.').replace('%s', hostedResetDate) }}
+        </p>
+        <div class="flex items-center gap-3 pt-1">
+          <Button v-if="hosted.buy_url" size="sm" variant="outline" as="a" :href="hosted.buy_url" target="_blank" rel="noopener">
+            <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Buy credits') }}
+          </Button>
+          <p class="text-xs text-muted-foreground">
+            {{ __('Runs through the WP Webhooks AI service — no API keys needed.') }}
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- WP AI Client provider/model picker -->
-    <div v-if="displaySource === 'wp_ai_client'" class="space-y-3">
+    <div v-else-if="displaySource === 'wp_ai_client'" class="space-y-3">
       <div class="flex flex-col sm:flex-row gap-3">
         <div class="flex-1 space-y-1.5">
           <div class="flex items-center h-5"><Label>{{ __('Provider') }}</Label></div>

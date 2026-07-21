@@ -88,7 +88,9 @@ class AgentOrchestrator {
     }
 
     $system   = $this->prompts->build($conversation);
-    $options  = ['temperature' => 0.2, 'json' => true];
+    // 'purpose' is metadata for transports that meter usage (Pro hosted
+    // credits); BYOK/AI Client transports ignore it.
+    $options  = ['temperature' => 0.2, 'json' => true, 'purpose' => 'agent'];
     $activity = [];
 
     // A turn can be several model round-trips: while the envelope asks for

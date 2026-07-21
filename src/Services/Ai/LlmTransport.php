@@ -21,8 +21,13 @@ use FlowSystems\WebhookActions\Repositories\CredentialRepository;
  *   pin it to 'wp_ai_client' or 'byok'. Either source can pick a provider+model
  *   and falls back across its other configured providers on a runtime failure.
  *
+ * A third source, 'hosted', is Pro-only: WP Webhooks AI credits proxied through
+ * our API. The free plugin only whitelists the value — without Pro's
+ * `fswa_ai_transport` filter supplying a transport, 'hosted' resolves like
+ * 'auto', so the option is inert on free installs.
+ *
  * Option shapes:
- *   fswa_ai_source     : 'auto' | 'wp_ai_client' | 'byok'
+ *   fswa_ai_source     : 'auto' | 'wp_ai_client' | 'byok' | 'hosted'
  *   fswa_ai_client_pref: [ 'provider' => 'google', 'model' => 'gemini-2.5-pro' ]
  *   fswa_ai_byok       : [ 'active' => 'openai', 'providers' => [
  *                            'openai' => [ 'credential_id' => 13, 'model' => 'gpt-4o-mini' ], … ] ]
@@ -147,11 +152,11 @@ class LlmTransport {
 
   public function source(): string {
     $source = (string) get_option(self::SOURCE_KEY, 'auto');
-    return in_array($source, ['auto', 'wp_ai_client', 'byok'], true) ? $source : 'auto';
+    return in_array($source, ['auto', 'wp_ai_client', 'byok', 'hosted'], true) ? $source : 'auto';
   }
 
   public function saveSource(string $source): void {
-    if (in_array($source, ['auto', 'wp_ai_client', 'byok'], true)) {
+    if (in_array($source, ['auto', 'wp_ai_client', 'byok', 'hosted'], true)) {
       update_option(self::SOURCE_KEY, $source);
     }
   }
