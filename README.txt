@@ -49,6 +49,7 @@ The agent doesn't guess — it works from your site's real data. It maps fields 
 
 = Pro features =
 
+- AI credits included — Build with AI runs through the hosted WP Webhooks AI service on every Pro plan: no API keys to create, no provider accounts, a monthly credit allowance that renews automatically, and a live credits counter in the builder. Your own keys and WordPress connectors stay available any time
 - AI writes Code Glue for you — the agent drafts PHP snippets, test-runs them against your real captured payloads, and assigns them to webhooks (with your confirmation) for pre-dispatch payload enrichment or post-dispatch side effects
 - AI sets advanced conditions — with Pro the agent can propose multi-rule AND/OR condition groups instead of a single rule
 - Code Glue — attach PHP snippets to any webhook+trigger (pre-dispatch payload enrichment, post-dispatch side effects)
@@ -86,7 +87,7 @@ Yes. Your provider API keys are encrypted in the Credentials Vault and never ret
 
 = Is this plugin free? =
 
-Yes. The core plugin is completely free and licensed under GPL. Webhook Actions Pro is an optional paid upgrade that adds unlimited conditions, per-webhook retry and backoff settings, Code Glue snippets, External Cron (activated automatically on license activation), and more. [Learn more →](https://wpwebhooks.org/pricing/)
+Yes. The core plugin is completely free and licensed under GPL. Webhook Actions Pro is an optional paid upgrade that adds included AI credits for Build with AI (hosted, no API keys needed), unlimited conditions, per-webhook retry and backoff settings, Code Glue snippets, External Cron (activated automatically on license activation), and more. [Learn more →](https://wpwebhooks.org/pricing/)
 
 = Does it work with WooCommerce, n8n, Make, Zapier, and AI agents? =
 
