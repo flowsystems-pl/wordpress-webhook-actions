@@ -117,13 +117,14 @@ onMounted(loadStatus)
       <div class="mb-6">
         <h2 class="text-xl font-semibold text-foreground">{{ __('Upgrade to Pro') }}</h2>
         <p class="text-sm text-muted-foreground mt-1">
-          {{ __('More sites, advanced conditions, and priority support.') }}
+          {{ __('AI credits included, more sites, advanced conditions, and priority support.') }}
         </p>
       </div>
 
       <Card class="p-6 mb-6">
         <ul class="space-y-3">
           <li v-for="feature in [
+            { text: __('Build with AI (bring your own API key)'), pro: false },
             { text: __('Automation Chains'), pro: false },
             { text: __('Reliable webhooks with queue & retries'), pro: false },
             { text: __('Delivery logs & replay'), pro: false },
@@ -131,6 +132,7 @@ onMounted(loadStatus)
             { text: __('Payload mapping'), pro: false },
             { text: __('Full REST API with API token authentication'), pro: false },
             { text: __('Activity Log'), pro: false },
+            { text: __('AI credits included — hosted AI, no API keys needed'), pro: true },
             { text: __('External Cron (bypass WP-Cron)'), pro: true },
             { text: __('Unlimited conditions per trigger'), pro: true },
             { text: __('Condition groups with AND / OR logic'), pro: true },
