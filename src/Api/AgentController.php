@@ -135,8 +135,6 @@ class AgentController extends WP_REST_Controller {
     // Whether the diagnostic trace panel should be available to this site
     // (Settings → AI Builder). Off by default; the dev server always shows it.
     $status['trace_enabled'] = (bool) get_option('fswa_ai_trace_enabled', false);
-    // Pro supplies hosted-credit availability + balances; null on free installs.
-    $status['hosted']        = apply_filters('fswa_ai_hosted_status', null);
     return rest_ensure_response($status);
   }
 

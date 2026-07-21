@@ -92,6 +92,11 @@ class LlmTransport {
         'preference' => $pref,
       ],
       'byok'             => $this->byokStatus(),
+      // Pro supplies hosted-credit availability + balances; null on free
+      // installs. Lives here (not only in the /status controller) because
+      // save-source/byok/preference endpoints return this array too and the
+      // admin UI replaces its whole status with each response.
+      'hosted'           => apply_filters('fswa_ai_hosted_status', null),
     ];
   }
 
