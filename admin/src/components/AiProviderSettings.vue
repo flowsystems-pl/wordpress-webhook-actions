@@ -199,9 +199,11 @@ initWp();
           {{ __('Monthly credits reset on %s.').replace('%s', hostedResetDate) }}
         </p>
         <div class="flex items-center gap-3 pt-1">
-          <Button v-if="hosted.buy_url" size="sm" variant="outline" as="a" :href="hosted.buy_url" target="_blank" rel="noopener">
-            <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Buy credits') }}
-          </Button>
+          <a href="https://wpwebhooks.org/pricing/#credits" target="_blank" rel="noopener noreferrer">
+            <Button size="sm" variant="outline">
+              <ExternalLink class="w-4 h-4 mr-1.5" /> {{ __('Buy credits') }}
+            </Button>
+          </a>
           <p class="text-xs text-muted-foreground">
             {{ __('Runs through the WP Webhooks AI service — no API keys needed.') }}
           </p>
