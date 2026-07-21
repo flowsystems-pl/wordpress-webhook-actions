@@ -4,7 +4,7 @@ Tags: ai, webhooks, automation, integration, n8n
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 2.2.2
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -49,6 +49,7 @@ The agent doesn't guess — it works from your site's real data. It maps fields 
 
 = Pro features =
 
+- AI credits included — Build with AI runs through the hosted WP Webhooks AI service on every Pro plan: no API keys to create, no provider accounts, a monthly credit allowance that renews automatically, and a live credits counter in the builder. Your own keys and WordPress connectors stay available any time
 - AI writes Code Glue for you — the agent drafts PHP snippets, test-runs them against your real captured payloads, and assigns them to webhooks (with your confirmation) for pre-dispatch payload enrichment or post-dispatch side effects
 - AI sets advanced conditions — with Pro the agent can propose multi-rule AND/OR condition groups instead of a single rule
 - Code Glue — attach PHP snippets to any webhook+trigger (pre-dispatch payload enrichment, post-dispatch side effects)
@@ -86,7 +87,7 @@ Yes. Your provider API keys are encrypted in the Credentials Vault and never ret
 
 = Is this plugin free? =
 
-Yes. The core plugin is completely free and licensed under GPL. Webhook Actions Pro is an optional paid upgrade that adds unlimited conditions, per-webhook retry and backoff settings, Code Glue snippets, External Cron (activated automatically on license activation), and more. [Learn more →](https://wpwebhooks.org/pricing/)
+Yes. The core plugin is completely free and licensed under GPL. Webhook Actions Pro is an optional paid upgrade that adds included AI credits for Build with AI (hosted, no API keys needed), unlimited conditions, per-webhook retry and backoff settings, Code Glue snippets, External Cron (activated automatically on license activation), and more. [Learn more →](https://wpwebhooks.org/pricing/)
 
 = Does it work with WooCommerce, n8n, Make, Zapier, and AI agents? =
 
@@ -124,6 +125,9 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 2.2.2 =
-- Fixed: Build with AI can now discover and propose Gravity Forms' gform_after_submission trigger — some plugin hooks are fired through a wrapper function instead of a direct WordPress do_action() call, which made them invisible to hook discovery, so the AI would fall back to a less suitable trigger
-- Improved: hook discovery now cross-checks WordPress's registered filters so a filter can never be mistakenly proposed as a webhook trigger, avoiding interference with the filter's normal behavior
+= 2.3.0 — 2026-07-22 =
+- New: WP Webhooks AI — Pro licenses now include monthly AI credits for Build with AI, hosted by us with no API keys to configure. Pick "WP Webhooks AI (included)" under Credentials source when Webhook Actions Pro is active
+- New: live credits counter in Build with AI — the model bar shows how many credits are left and counts down after every agent call, with the balance, top-ups, and reset date also shown in provider settings
+- New: hosted status is carried on every settings response, so switching between Auto, connectors, own keys, and WP Webhooks AI never loses the option
+- Improved: the Pro tab now lists AI credits among Pro features
+- Improved: translations (Polish, Dutch, Chinese) for all new strings, plus 37 previously untranslated strings backfilled

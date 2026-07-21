@@ -140,7 +140,7 @@ class AgentController extends WP_REST_Controller {
 
   /**
    * POST /agent/source — pin which credential source the agent uses.
-   * Body: { source: 'auto' | 'wp_ai_client' | 'byok' }
+   * Body: { source: 'auto' | 'wp_ai_client' | 'byok' | 'hosted' }
    */
   public function saveSource(WP_REST_Request $request): WP_REST_Response {
     $source    = sanitize_text_field((string) $request->get_param('source'));
@@ -380,7 +380,7 @@ class AgentController extends WP_REST_Controller {
       return new WP_Error('fswa_empty_message', __('A message is required.', 'flowsystems-webhook-actions'), ['status' => 400]);
     }
     $result = $this->orchestrator->converse((int) $request->get_param('id'), $message);
-    return is_wp_error($result) ? $result : rest_ensure_response($result);
+    return is_wp_error($result) ? $result : rest_ensure_response($this->withHostedStatus($result));
   }
 
   /**
@@ -394,7 +394,7 @@ class AgentController extends WP_REST_Controller {
       is_array($plan) ? $plan : null,
       $confirmed
     );
-    return is_wp_error($result) ? $result : rest_ensure_response($result);
+    return is_wp_error($result) ? $result : rest_ensure_response($this->withHostedStatus($result));
   }
 
   /**
@@ -435,7 +435,7 @@ class AgentController extends WP_REST_Controller {
       }
     }
     $result = $this->orchestrator->advanceStep((int) $request->get_param('id'), $opts);
-    return is_wp_error($result) ? $result : rest_ensure_response($result);
+    return is_wp_error($result) ? $result : rest_ensure_response($this->withHostedStatus($result));
   }
 
   /**
@@ -444,6 +444,22 @@ class AgentController extends WP_REST_Controller {
   public function setExecMode(WP_REST_Request $request): WP_REST_Response {
     $mode = $this->orchestrator->saveExecMode((string) $request->get_param('mode'));
     return rest_ensure_response(['exec_mode' => $mode]);
+  }
+
+  /**
+   * Attach the (Pro-supplied) hosted credit balance to a turn response. The
+   * transport persists the fresh balance during the turn, so the UI can update
+   * its credits chip from every reply without an extra status round-trip.
+   *
+   * @param array<string, mixed> $result
+   * @return array<string, mixed>
+   */
+  private function withHostedStatus(array $result): array {
+    $hosted = apply_filters('fswa_ai_hosted_status', null);
+    if (is_array($hosted)) {
+      $result['hosted'] = $hosted;
+    }
+    return $result;
   }
 
   private function notFound(): WP_Error {

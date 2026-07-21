@@ -2,7 +2,8 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Webhook Actions by Flow Systems 2.0.0\n"
+"Project-Id-Version: Webhook Actions - build automations and integrations "
+"with AI help 2.2.2\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -10,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-04T20:49:39+00:00\n"
+"POT-Creation-Date: 2026-07-21T21:54:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -32,6 +33,12 @@ msgstr "%1$s %2$d min"
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "%1$s %2$ds"
 msgstr "%1$s %2$ds"
+
+#: src/Services/RestRouteInspector.php:74
+#. translators: 1: HTTP method, 2: route path, 3: comma-separated allowed methods
+#, php-format
+msgid "%1$s is not supported on %2$s. Supported methods: %3$s."
+msgstr "%1$s wordt niet ondersteund voor %2$s. Ondersteunde methoden: %3$s."
 
 #: admin/src/views/ExternalCronView.vue
 msgid ""
@@ -238,6 +245,10 @@ msgstr "%s poging"
 msgid "%s auth"
 msgstr "%s-authenticatie"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "%s credits left"
+msgstr "%s credits over"
+
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
 msgstr "%s…"
@@ -275,11 +286,11 @@ msgstr "5 (plugin-standaard)"
 msgid "A chain with that name already exists."
 msgstr "Er bestaat al een keten met die naam."
 
-#: src/Abilities/AbilityRegistry.php:684
+#: src/Abilities/WriteAbilities.php:193
 msgid "A chain with this name already exists."
 msgstr "Er bestaat al een keten met deze naam."
 
-#: src/Abilities/AbilityRegistry.php:586
+#: src/Abilities/WriteAbilities.php:317
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -288,8 +299,8 @@ msgstr ""
 "trigger-payload (gebruik get_trigger_schema om de beschikbare velden te "
 "zien)."
 
-#: src/Api/CredentialsController.php:240
-#: src/Api/CredentialsController.php:289
+#: src/Api/CredentialsController.php:265
+#: src/Api/CredentialsController.php:314
 msgid "A credential with this name already exists."
 msgstr "Er bestaat al een referentie met deze naam."
 
@@ -327,11 +338,11 @@ msgstr "Voor een aangepaste bron is een payloadobject vereist."
 msgid "A provider and model are required."
 msgstr "Een provider en model zijn verplicht."
 
-#: src/Api/CredentialsController.php:403
+#: src/Api/CredentialsController.php:428
 msgid "A secret value is required."
 msgstr "Een geheime waarde is verplicht."
 
-#: src/Abilities/AbilityRegistry.php:754
+#: src/Abilities/TestAbilities.php:73
 msgid "A url or webhook_id is required."
 msgstr "Een url of webhook_id is verplicht."
 
@@ -342,6 +353,16 @@ msgstr "Een webhook kan zichzelf niet triggeren."
 #: admin/src/views/SettingsView.vue
 msgid "AI Builder"
 msgstr "AI Builder"
+
+#: admin/src/views/ProView.vue
+msgid "AI credits included — hosted AI, no API keys needed"
+msgstr "AI-credits inbegrepen — gehoste AI, geen API-sleutels nodig"
+
+#: admin/src/views/ProView.vue
+msgid "AI credits included, more sites, advanced conditions, and priority support."
+msgstr ""
+"AI-credits inbegrepen, meer sites, geavanceerde voorwaarden en "
+"prioriteitssupport."
 
 #: admin/src/views/ActivityView.vue
 msgid "AI reasoning"
@@ -464,7 +485,7 @@ msgstr "Mapping toevoegen"
 msgid "Add Webhook"
 msgstr "Webhook toevoegen"
 
-#: src/Abilities/AbilityRegistry.php:255
+#: src/Abilities/AbilityCatalog.php:258
 msgid "Add a chain link"
 msgstr "Ketenschakel toevoegen"
 
@@ -472,7 +493,7 @@ msgstr "Ketenschakel toevoegen"
 msgid "Add a credential to securely reuse it across webhooks."
 msgstr "Voeg een referentie toe om deze veilig te hergebruiken in meerdere webhooks."
 
-#: src/Abilities/AbilityRegistry.php:256
+#: src/Abilities/AbilityCatalog.php:259
 msgid ""
 "Add a source→target edge to a chain. Rejected if it would create a cycle "
 "across any chain."
@@ -617,6 +638,22 @@ msgstr ""
 "Toegevoegd aan de URL naast de JSON-body. Waarden ondersteunen paden in "
 "puntnotatie of statische tekenreeksen."
 
+#: src/Services/WpAppPasswordService.php:72
+msgid "Application Passwords are disabled for your user account."
+msgstr "Applicatiewachtwoorden zijn uitgeschakeld voor je gebruikersaccount."
+
+#: src/Services/WpAppPasswordService.php:64
+msgid ""
+"Application Passwords are not available on this site. They require HTTPS "
+"(or a local development environment)."
+msgstr ""
+"Applicatiewachtwoorden zijn niet beschikbaar op deze site. Ze vereisen "
+"HTTPS (of een lokale ontwikkelomgeving)."
+
+#: src/Services/WpAppPasswordService.php:47
+msgid "Application Passwords require WordPress 5.6 or newer."
+msgstr "Applicatiewachtwoorden vereisen WordPress 5.6 of nieuwer."
+
 #: admin/src/views/SettingsView.vue
 msgid "Archive logs before deletion"
 msgstr "Logboeken archiveren vóór verwijdering"
@@ -631,9 +668,28 @@ msgstr[1] "Weet je zeker dat je alle %d logboeken wilt verwijderen?"
 msgid "Array of log IDs to retry."
 msgstr "Array van log-ID's om opnieuw te proberen."
 
-#: src/Abilities/AbilityRegistry.php:225
+#: src/Abilities/AbilityCatalog.php:214
 msgid "Assign a vault credential to a webhook"
 msgstr "Wijs een kluisreferentie toe aan een webhook"
+
+#: admin/src/components/BuiltWebhookActions.vue
+msgid "Asynchronous delivery"
+msgstr "Asynchrone bezorging"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"Asynchronous: queued and delivered in the background on the next cron run, "
+"with automatic retries — it doesn’t slow the triggering request, but "
+"nothing is sent until a working cron runs. Synchronous: delivered "
+"instantly, inline with the triggering request — it works without any cron, "
+"at the cost of a little added latency. Toggle to switch."
+msgstr ""
+"Asynchroon: in de wachtrij gezet en op de achtergrond bezorgd bij de "
+"volgende cron-run, met automatische nieuwe pogingen — het vertraagt het "
+"activerende verzoek niet, maar er wordt niets verzonden totdat een werkende "
+"cron draait. Synchroon: direct bezorgd, binnen het activerende verzoek — "
+"werkt zonder cron, ten koste van iets extra vertraging. Schakel om te "
+"wisselen."
 
 #: admin/src/components/LogsTable.vue
 msgid "Attempt #%d"
@@ -741,7 +797,7 @@ msgstr "Basic auth"
 msgid "Basic auth (user + password)"
 msgstr "Basisauthenticatie (gebruiker + wachtwoord)"
 
-#: src/Api/CredentialsController.php:392
+#: src/Api/CredentialsController.php:417
 msgid "Basic auth requires a username and password."
 msgstr "Basisauthenticatie vereist een gebruikersnaam en wachtwoord."
 
@@ -752,10 +808,6 @@ msgstr "Bearer-token"
 #: admin/src/views/VaultView.vue
 msgid "Bearer token (PAT)"
 msgstr "Bearer-token (PAT)"
-
-#: admin/src/views/AiBuilderView.vue
-msgid "Beta"
-msgstr "Bèta"
 
 #: src/Api/ChainsController.php:223
 msgid "Both source_webhook_id and target_webhook_id are required."
@@ -769,7 +821,7 @@ msgstr "Bibliotheek bladeren"
 msgid "Build"
 msgstr "Bouwen"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue admin/src/views/AiBuilderView.vue
 msgid "Build complete."
 msgstr "Build voltooid."
 
@@ -782,8 +834,16 @@ msgid "Build with AI"
 msgstr "Bouwen met AI"
 
 #: admin/src/views/ProView.vue
+msgid "Build with AI (bring your own API key)"
+msgstr "Bouwen met AI (eigen API-sleutel)"
+
+#: admin/src/views/ProView.vue
 msgid "Business"
 msgstr "Business"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid "Buy credits"
+msgstr "Credits kopen"
 
 #: admin/src/views/VaultView.vue
 msgid ""
@@ -887,7 +947,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "Ketennaam"
 
-#: src/Abilities/AbilityRegistry.php:680
+#: src/Abilities/WriteAbilities.php:189
 #: src/Api/ChainsController.php:131
 #: src/Api/ChainsController.php:163
 msgid "Chain name is required."
@@ -965,7 +1025,7 @@ msgstr "Sluiten"
 msgid "Code Glue"
 msgstr "Code Glue"
 
-#: src/Api/TriggersController.php:228
+#: src/Api/TriggersController.php:144
 msgid "Comments"
 msgstr "Reacties"
 
@@ -973,7 +1033,7 @@ msgstr "Reacties"
 msgid "Community support forum"
 msgstr "Communityondersteuningsforum"
 
-#: src/Abilities/AbilityRegistry.php:640
+#: src/Abilities/WriteAbilities.php:140
 msgid ""
 "Condition groups require a Pro license — propose a single simple rule "
 "instead."
@@ -1036,16 +1096,16 @@ msgstr "Koppel een AI-provider"
 msgid "Continue"
 msgstr "Doorgaan"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Continue build"
 msgstr "Build voortzetten"
 
-#: src/Api/AgentController.php:450
-#: src/Services/Ai/AgentOrchestrator.php:60
-#: src/Services/Ai/PlanExecutor.php:49
-#: src/Services/Ai/PlanExecutor.php:127
-#: src/Services/Ai/PlanExecutor.php:310
-#: src/Services/Ai/PlanExecutor.php:382
+#: src/Api/AgentController.php:466
+#: src/Services/Ai/AgentOrchestrator.php:78
+#: src/Services/Ai/PlanExecutor.php:57
+#: src/Services/Ai/PlanExecutor.php:147
+#: src/Services/Ai/PlanExecutor.php:390
+#: src/Services/Ai/PlanExecutor.php:462
 msgid "Conversation not found."
 msgstr "Gesprek niet gevonden."
 
@@ -1119,6 +1179,10 @@ msgstr "Kon taak niet vergrendelen voor verwerking."
 msgid "Create & assign"
 msgstr "Maken en toewijzen"
 
+#: admin/src/components/AiStepControls.vue
+msgid "Create & continue"
+msgstr "Aanmaken en doorgaan"
+
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Create API Token"
 msgstr "API-token maken"
@@ -1127,7 +1191,15 @@ msgstr "API-token maken"
 msgid "Create Webhook"
 msgstr "Webhook maken"
 
-#: src/Abilities/AbilityRegistry.php:241
+#: admin/src/components/AiStepControls.vue
+msgid "Create a WP Application Password for me"
+msgstr "Maak een WP-applicatiewachtwoord voor mij"
+
+#: src/Abilities/AbilityCatalog.php:229
+msgid "Create a WordPress Application Password credential"
+msgstr "Maak een WordPress-applicatiewachtwoord-referentie"
+
+#: src/Abilities/AbilityCatalog.php:244
 msgid ""
 "Create a named chain that wires 2xx completions of one webhook to "
 "downstream webhooks."
@@ -1135,7 +1207,7 @@ msgstr ""
 "Maak een benoemde keten die 2xx-voltooiingen van één webhook doorstuurt "
 "naar volgende webhooks."
 
-#: src/Abilities/AbilityRegistry.php:131
+#: src/Abilities/AbilityCatalog.php:118
 msgid ""
 "Create a new webhook (always created DISABLED until the user enables it). "
 "Provide name, endpoint_url, http_method and triggers."
@@ -1148,11 +1220,11 @@ msgstr ""
 msgid "Create a token to enable programmatic API access."
 msgstr "Maak een token om programmatische API-toegang in te schakelen."
 
-#: src/Abilities/AbilityRegistry.php:130
+#: src/Abilities/AbilityCatalog.php:117
 msgid "Create a webhook"
 msgstr "Maak een webhook"
 
-#: src/Abilities/AbilityRegistry.php:240
+#: src/Abilities/AbilityCatalog.php:243
 msgid "Create a webhook chain"
 msgstr "Maak een webhookketen"
 
@@ -1184,7 +1256,7 @@ msgstr "Maken…"
 msgid "Creation date."
 msgstr "Aanmaakdatum."
 
-#: src/Abilities/AbilityRegistry.php:907
+#: src/Abilities/TestAbilities.php:233
 msgid "Credential could not be decrypted."
 msgstr "Referentie kon niet worden ontsleuteld."
 
@@ -1193,17 +1265,21 @@ msgid "Credential name"
 msgstr "Referentienaam"
 
 #: admin/src/components/AiStepControls.vue
+msgid "Credential name (e.g. WP REST admin)"
+msgstr "Referentienaam (bijv. WP REST admin)"
+
+#: admin/src/components/AiStepControls.vue
 msgid "Credential name (e.g. n8n auth)"
 msgstr "Referentienaam (bijv. n8n auth)"
 
-#: src/Api/CredentialsController.php:232
-#: src/Api/CredentialsController.php:286
+#: src/Api/CredentialsController.php:257
+#: src/Api/CredentialsController.php:311
 msgid "Credential name is required."
 msgstr "Referentienaam is verplicht."
 
-#: src/Abilities/AbilityRegistry.php:670
-#: src/Abilities/AbilityRegistry.php:903
-#: src/Api/CredentialsController.php:434
+#: src/Abilities/TestAbilities.php:229
+#: src/Abilities/WriteAbilities.php:170
+#: src/Api/CredentialsController.php:459
 msgid "Credential not found."
 msgstr "Referentie niet gevonden."
 
@@ -1214,6 +1290,10 @@ msgstr "Referentiekluis"
 #: admin/src/components/AiProviderSettings.vue
 msgid "Credentials source"
 msgstr "Bron van referenties"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid "Credits this month"
+msgstr "Credits deze maand"
 
 #: admin/src/views/ActivityView.vue
 msgid "Cron"
@@ -1323,7 +1403,7 @@ msgstr "Alle logboeken verwijderen"
 msgid "Delete Old Activity"
 msgstr "Oude activiteit verwijderen"
 
-#: src/Abilities/AbilityRegistry.php:328
+#: src/Abilities/AbilityCatalog.php:333
 msgid "Delete a webhook"
 msgstr "Verwijder een webhook"
 
@@ -1367,7 +1447,7 @@ msgstr "Verwijder logboeken ouder dan het opgegeven aantal dagen."
 msgid "Delete old"
 msgstr "Oude verwijderen"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiBuildsBar.vue
 msgid "Delete this build"
 msgstr "Deze build verwijderen"
 
@@ -1409,6 +1489,27 @@ msgstr "Verwijderen…"
 msgid "Delivery logs & replay"
 msgstr "Bezorglogboeken en opnieuw afspelen"
 
+#: src/Abilities/AbilityCatalog.php:79
+msgid ""
+"Describe a REST API route ON THIS SITE (core or any plugin) from its "
+"self-declared schema: every argument with its type, description and whether "
+"it is REQUIRED. ALWAYS run this before building an internal automation (a "
+"webhook whose endpoint_url points at this site's own wp-json) and satisfy "
+"every required argument — e.g. POST /wp/v2/users requires username, email "
+"AND password, which mapping alone cannot always supply. Pass the route path "
+"relative to /wp-json (e.g. \"/wp/v2/users\") and the HTTP method you plan "
+"to use. Internal routes only — it cannot describe external APIs."
+msgstr ""
+"Beschrijf een REST API-route OP DEZE SITE (core of een plugin) op basis van "
+"het eigen schema: elk argument met type, beschrijving en of het VEREIST is. "
+"Voer dit ALTIJD uit voordat je een interne automatisering bouwt (een "
+"webhook waarvan endpoint_url naar de wp-json van deze site wijst) en vul "
+"elk vereist argument in — bijv. POST /wp/v2/users vereist username, email "
+"EN password, wat mapping alleen niet altijd kan leveren. Geef het routepad "
+"relatief aan /wp-json (bijv. \"/wp/v2/users\") en de HTTP-methode die je "
+"wilt gebruiken. Alleen interne routes — externe API's kunnen niet worden "
+"beschreven."
+
 #: admin/src/views/AiBuilderView.vue
 msgid ""
 "Describe the integration or automation you want. The agent proposes a plan "
@@ -1420,6 +1521,19 @@ msgstr ""
 #: admin/src/views/AiBuilderView.vue
 msgid "Describe what to build…"
 msgstr "Beschrijf wat er gebouwd moet worden…"
+
+#: flowsystems-webhook-actions.php
+#. Description of the plugin
+msgid ""
+"Describe what you want in chat — the built-in AI agent plans, builds, and "
+"tests your WordPress webhooks, integrations, and automations."
+msgstr ""
+"Beschrijf in de chat wat je wilt — de ingebouwde AI-agent plant, bouwt en "
+"test je WordPress-webhooks, -integraties en -automatiseringen."
+
+#: src/Abilities/TestAbilities.php:89
+msgid "Destructive probe methods (PUT, PATCH, DELETE) require confirmation."
+msgstr "Destructieve probe-methoden (PUT, PATCH, DELETE) vereisen bevestiging."
 
 #: admin/src/components/WebhookCardContent.vue admin/src/views/SettingsView.vue
 msgid "Disabled"
@@ -1449,7 +1563,7 @@ msgstr "Heb je nog geen licentie?"
 msgid "Don't show this again"
 msgstr "Dit niet meer tonen"
 
-#: admin/src/components/TokenCreatedDialog.vue admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue admin/src/components/TokenCreatedDialog.vue
 msgid "Done"
 msgstr "Klaar"
 
@@ -1481,7 +1595,7 @@ msgstr "Nu verschuldigd"
 msgid "Duration"
 msgstr "Duur"
 
-#: src/Abilities/AbilityRegistry.php:578
+#: src/Abilities/WriteAbilities.php:309
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "Elke voorwaarderegel moet een object {field, operator, value} zijn."
 
@@ -1497,11 +1611,11 @@ msgstr "Webhook bewerken"
 msgid "Edit credential"
 msgstr "Referentie bewerken"
 
-#: src/Abilities/AbilityRegistry.php:313
+#: src/Abilities/AbilityCatalog.php:318
 msgid "Enable (go live) or disable a webhook. Enabling requires confirmation."
 msgstr "Schakel een webhook in (live) of uit. Inschakelen vereist bevestiging."
 
-#: src/Abilities/AbilityRegistry.php:312
+#: src/Abilities/AbilityCatalog.php:317
 msgid "Enable / disable a webhook"
 msgstr "Webhook in-/uitschakelen"
 
@@ -1525,7 +1639,7 @@ msgstr "Synchrone uitvoering inschakelen?"
 msgid "Enable conditional dispatch"
 msgstr "Voorwaardelijke verzending inschakelen"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/BuiltWebhookActions.vue
 msgid "Enable webhook"
 msgstr "Webhook inschakelen"
 
@@ -1585,7 +1699,7 @@ msgstr "Gebeurtenis-UUID"
 msgid "Event UUID:"
 msgstr "Gebeurtenis-UUID:"
 
-#: src/App.php:110
+#: src/App.php:116
 msgid "Every Minute"
 msgstr "Elke minuut"
 
@@ -1657,6 +1771,10 @@ msgstr "Externe cron (WP-Cron omzeilen)"
 msgid "External Cron History"
 msgstr "Geschiedenis externe cron"
 
+#: admin/src/components/AiProviderSettings.vue
+msgid "Extra credits (never expire)"
+msgstr "Extra credits (verlopen nooit)"
+
 #: src/Api/WebhooksController.php:740
 msgid "Extra request headers as key-value pairs."
 msgstr "Extra verzoekheaders als sleutel-waardeparen."
@@ -1677,20 +1795,20 @@ msgstr "Maken van API-token mislukt."
 msgid "Failed to create chain link (it may already exist)."
 msgstr "Maken van ketenkoppeling mislukt (deze bestaat mogelijk al)."
 
-#: src/Abilities/AbilityRegistry.php:706
+#: src/Abilities/WriteAbilities.php:215
 msgid "Failed to create chain link."
 msgstr "Maken van ketenschakel mislukt."
 
-#: src/Abilities/AbilityRegistry.php:688
+#: src/Abilities/WriteAbilities.php:197
 #: src/Api/ChainsController.php:139
 msgid "Failed to create chain."
 msgstr "Maken van keten mislukt."
 
-#: src/Api/CredentialsController.php:259
+#: src/Api/CredentialsController.php:284
 msgid "Failed to create credential."
 msgstr "Maken van referentie mislukt."
 
-#: src/Abilities/AbilityRegistry.php:447
+#: src/Abilities/WriteAbilities.php:70
 #: src/Api/WebhooksController.php:260
 msgid "Failed to create webhook."
 msgstr "Maken van webhook mislukt."
@@ -1699,7 +1817,7 @@ msgstr "Maken van webhook mislukt."
 msgid "Failed to delete API token."
 msgstr "Verwijderen van API-token mislukt."
 
-#: src/Api/CredentialsController.php:371
+#: src/Api/CredentialsController.php:396
 msgid "Failed to delete credential."
 msgstr "Verwijderen van referentie mislukt."
 
@@ -1715,7 +1833,7 @@ msgstr "Verwijderen van wachtrijtaak mislukt."
 msgid "Failed to delete schema."
 msgstr "Verwijderen van schema mislukt."
 
-#: src/Abilities/AbilityRegistry.php:886
+#: src/Abilities/WriteAbilities.php:242
 #: src/Api/WebhooksController.php:429
 msgid "Failed to delete webhook."
 msgstr "Verwijderen van webhook mislukt."
@@ -1768,11 +1886,11 @@ msgstr "Opnieuw proberen van wachtrijtaak mislukt."
 msgid "Failed to rotate API token."
 msgstr "Roteren van API-token mislukt."
 
-#: src/Abilities/AbilityRegistry.php:654
+#: src/Abilities/WriteAbilities.php:154
 msgid "Failed to save conditions."
 msgstr "Opslaan van voorwaarden mislukt."
 
-#: src/Abilities/AbilityRegistry.php:491
+#: src/Abilities/WriteAbilities.php:114
 msgid "Failed to save mapping."
 msgstr "Opslaan van mapping mislukt."
 
@@ -1796,7 +1914,7 @@ msgstr "Wijzigen van webhookstatus mislukt."
 msgid "Failed to update schema."
 msgstr "Bijwerken van schema mislukt."
 
-#: src/Abilities/AbilityRegistry.php:477
+#: src/Abilities/WriteAbilities.php:100
 #: src/Api/WebhooksController.php:371
 msgid "Failed to update webhook."
 msgstr "Bijwerken van webhook mislukt."
@@ -1942,7 +2060,11 @@ msgstr "Genereer een nieuw API-token voor programmatische toegang."
 msgid "Get Pro"
 msgstr "Pro aanschaffen"
 
-#: src/Abilities/AbilityRegistry.php:80
+#: src/Abilities/AbilityCatalog.php:78
+msgid "Get a REST route's argument schema (this site)"
+msgstr "Haal het argumentschema van een REST-route op (deze site)"
+
+#: src/Abilities/AbilityCatalog.php:52
 msgid ""
 "Get a single webhook by id, including triggers, mapping, conditions, "
 "headers and credential assignment."
@@ -1950,15 +2072,15 @@ msgstr ""
 "Haal één webhook op via id, inclusief triggers, mapping, voorwaarden, "
 "headers en referentietoewijzing."
 
-#: src/Abilities/AbilityRegistry.php:79
+#: src/Abilities/AbilityCatalog.php:51
 msgid "Get a webhook"
 msgstr "Haal een webhook op"
 
-#: src/Abilities/AbilityRegistry.php:91
+#: src/Abilities/AbilityCatalog.php:63
 msgid "Get captured payload + mapping for a trigger"
 msgstr "Haal vastgelegde payload + mapping op voor een trigger"
 
-#: src/Abilities/AbilityRegistry.php:106
+#: src/Abilities/AbilityCatalog.php:93
 msgid "Get delivery logs"
 msgstr "Haal bezorglogboeken op"
 
@@ -2088,6 +2210,10 @@ msgstr "Veld opnemen"
 msgid "Include unmapped fields"
 msgstr "Niet-gemapte velden opnemen"
 
+#: admin/src/components/AiProviderSettings.vue
+msgid "Included"
+msgstr "Inbegrepen"
+
 #: src/Api/AuthHelper.php:52
 #. translators: %s: required scope name
 #, php-format
@@ -2106,8 +2232,8 @@ msgstr "Ongeldige JSON"
 msgid "Invalid URL format"
 msgstr "Ongeldig URL-formaat"
 
-#: src/Api/CredentialsController.php:236
-#: src/Api/CredentialsController.php:297
+#: src/Api/CredentialsController.php:261
+#: src/Api/CredentialsController.php:322
 msgid "Invalid credential type."
 msgstr "Ongeldig referentietype."
 
@@ -2238,31 +2364,38 @@ msgstr "Licentiesleutel"
 msgid "Linear"
 msgstr "Lineair"
 
-#: src/Abilities/AbilityRegistry.php:72
+#: src/Abilities/AbilityCatalog.php:33
+msgid ""
+"List WordPress do_action hooks discovered on this site (runtime + static "
+"scan) that can be used as webhook triggers. The full catalog is LARGE "
+"(hundreds of hooks): when hunting for a specific plugin's hooks, always "
+"pass search (matches hook name or plugin slug, e.g. {\"search\":\"cf7\"}) "
+"instead of listing everything. Results cap at 200 with a total count."
+msgstr ""
+"Toon WordPress do_action-hooks die op deze site zijn ontdekt (runtime + "
+"statische scan) en als webhook-triggers kunnen dienen. De volledige "
+"catalogus is GROOT (honderden hooks): zoek je hooks van een specifieke "
+"plugin, geef dan altijd search mee (matcht hooknaam of pluginslug, bijv. "
+"{\"search\":\"cf7\"}) in plaats van alles op te sommen. Resultaten zijn "
+"begrensd op 200, met een totaaltelling."
+
+#: src/Abilities/AbilityCatalog.php:44
 msgid "List all configured webhooks with their triggers and status."
 msgstr "Toon alle geconfigureerde webhooks met hun triggers en status."
 
-#: src/Abilities/AbilityRegistry.php:63
+#: src/Abilities/AbilityCatalog.php:32
 msgid "List available triggers"
 msgstr "Toon beschikbare triggers"
 
-#: src/Abilities/AbilityRegistry.php:120
+#: src/Abilities/AbilityCatalog.php:107
 msgid "List credentials"
 msgstr "Toon referenties"
-
-#: src/Abilities/AbilityRegistry.php:64
-msgid ""
-"List every WordPress do_action hook discovered on this site (runtime + "
-"static scan) that can be used as a webhook trigger."
-msgstr ""
-"Toon elke WordPress do_action-hook die op deze site is ontdekt (runtime + "
-"statische scan) en als webhooktrigger kan worden gebruikt."
 
 #: src/Api/WebhooksController.php:776
 msgid "List of trigger actions."
 msgstr "Lijst van triggeracties."
 
-#: src/Abilities/AbilityRegistry.php:121
+#: src/Abilities/AbilityCatalog.php:108
 msgid ""
 "List vault credentials (names, types and masked hints only — secrets are "
 "never returned)."
@@ -2270,7 +2403,7 @@ msgstr ""
 "Toon kluisreferenties (alleen namen, typen en gemaskeerde hints — geheimen "
 "worden nooit teruggegeven)."
 
-#: src/Abilities/AbilityRegistry.php:71
+#: src/Abilities/AbilityCatalog.php:43
 msgid "List webhooks"
 msgstr "Toon webhooks"
 
@@ -2337,24 +2470,27 @@ msgstr "Logboeken: %s"
 msgid "Love the plugin?"
 msgstr "Vind je de plug-in goed?"
 
-#: src/Abilities/AbilityRegistry.php:274
+#: src/Abilities/AbilityCatalog.php:277
 msgid ""
 "Make a guarded test HTTP call to validate an endpoint before going live. To "
 "probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its "
 "URL, credential and method are reused automatically, so never ask the user "
 "for the endpoint URL again. Only pass url for an endpoint not tied to a "
-"webhook. Defaults to GET/HEAD; other methods require confirmation. Returns "
-"status, redacted headers and a truncated, redacted body. The raw secret is "
-"never exposed."
+"webhook. A probe sends an EMPTY body, so GET, HEAD and POST run without "
+"confirmation; only PUT, PATCH and DELETE (which a body-less call can still "
+"mutate or delete) require confirmation. Returns status, redacted headers "
+"and a truncated, redacted body. The raw secret is never exposed."
 msgstr ""
-"Voer een beveiligde test-HTTP-aanroep uit om een eindpunt te valideren "
-"voordat het live gaat. Om een webhook te testen die je hebt gemaakt, geef "
-"je webhook_id door (bijv. {{step_2.id}}) — de URL, referentie en methode "
-"worden automatisch hergebruikt, dus vraag de gebruiker nooit opnieuw om de "
-"eindpunt-URL. Geef alleen url door voor een eindpunt dat niet aan een "
-"webhook is gekoppeld. Standaard GET/HEAD; andere methoden vereisen "
-"bevestiging. Geeft status, gemaskeerde headers en een ingekorte, "
-"gemaskeerde body terug. Het ruwe geheim wordt nooit blootgesteld."
+"Voer een beveiligde test-HTTP-aanroep uit om een endpoint te valideren vóór "
+"livegang. Om een door jou gemaakte webhook te testen, geef webhook_id mee "
+"(bijv. {{step_2.id}}) — de URL, referentie en methode worden automatisch "
+"hergebruikt, vraag de gebruiker dus nooit opnieuw om de endpoint-URL. Geef "
+"alleen url mee voor een endpoint dat niet aan een webhook is gekoppeld. Een "
+"probe verstuurt een LEGE body, dus GET, HEAD en POST draaien zonder "
+"bevestiging; alleen PUT, PATCH en DELETE (die ook zonder body kunnen "
+"wijzigen of verwijderen) vereisen bevestiging. Geeft status, geredigeerde "
+"headers en een ingekorte, geredigeerde body terug. Het ruwe geheim wordt "
+"nooit blootgelegd."
 
 #: admin/src/components/RotateTokenDialog.vue
 msgid "Make sure to update all systems that use this token before rotating."
@@ -2409,7 +2545,7 @@ msgstr "Max. vertraging (seconden)"
 msgid "Maximum protection"
 msgstr "Maximale bescherming"
 
-#: src/Api/TriggersController.php:230
+#: src/Api/TriggersController.php:146
 msgid "Media"
 msgstr "Media"
 
@@ -2421,15 +2557,40 @@ msgstr "Methode"
 msgid "Migrated %1$s · failed %2$s"
 msgstr "Gemigreerd %1$s · mislukt %2$s"
 
+#: src/Abilities/AbilityCatalog.php:230
+msgid ""
+"Mint a WordPress Application Password for the CURRENT signed-in admin and "
+"store it as a \"basic\" vault credential named \"WP REST API (internal) — "
+"<user>\", for authenticating this site's own REST API. Use it for INTERNAL "
+"automations (endpoint_url on this site's wp-json), then reference the new "
+"credential id from assign_credential as {{step_N.id}}. Requires "
+"confirmation; the secret is written straight to the vault and never "
+"exposed. The optional name only labels the Application Password in the "
+"user's profile."
+msgstr ""
+"Genereer een WordPress-applicatiewachtwoord voor de HUIDIGE ingelogde "
+"beheerder en sla het op als een \"basic\"-referentie in de kluis met de "
+"naam \"WP REST API (internal) — <user>\", voor authenticatie van de REST "
+"API van deze site. Gebruik het voor INTERNE automatiseringen (endpoint_url "
+"op de wp-json van deze site) en verwijs daarna naar het nieuwe "
+"referentie-id in assign_credential als {{step_N.id}}. Vereist bevestiging; "
+"het geheim wordt rechtstreeks in de kluis geschreven en nooit blootgelegd. "
+"De optionele naam is alleen het label van het applicatiewachtwoord in het "
+"gebruikersprofiel."
+
+#: src/Services/WpAppPasswordService.php:102
+msgid "Minted the Application Password but failed to store it in the vault."
+msgstr "Applicatiewachtwoord aangemaakt, maar opslaan in de kluis is mislukt."
+
 #: admin/src/components/AiProviderSettings.vue
 msgid "Model"
 msgstr "Model"
 
-#: admin/src/views/ProView.vue
-msgid "More sites, advanced conditions, and priority support."
-msgstr "Meer sites, geavanceerde voorwaarden en prioriteitsondersteuning."
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
+msgid "Monthly credits reset on %s."
+msgstr "Maandelijkse credits worden vernieuwd op %s."
 
-#: src/Abilities/AbilityRegistry.php:644
+#: src/Abilities/WriteAbilities.php:144
 msgid ""
 "More than 1 condition requires a Pro license — propose a single simple rule "
 "instead."
@@ -2495,7 +2656,7 @@ msgstr "Naam van de webhook."
 msgid "Need help?"
 msgstr "Hulp nodig?"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiBuildsBar.vue
 msgid "New build"
 msgstr "Nieuwe build"
 
@@ -2531,7 +2692,7 @@ msgstr "Volgende poging gepland voor %s"
 msgid "No"
 msgstr "Nee"
 
-#: src/Services/Ai/AgentOrchestrator.php:55
+#: src/Services/Ai/AgentOrchestrator.php:73
 msgid "No AI provider is configured yet. Set one up to use the AI Builder."
 msgstr ""
 "Er is nog geen AI-provider geconfigureerd. Stel er een in om de AI Builder "
@@ -2544,6 +2705,18 @@ msgstr "Geen API-tokens"
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "No Payload Captured Yet"
 msgstr "Nog geen payload vastgelegd"
+
+#: src/Services/RestRouteInspector.php:53
+#. translators: %s: route path
+#, php-format
+msgid ""
+"No REST route matches \"%s\" on this site. Route paths are relative to "
+"/wp-json, e.g. \"/wp/v2/users\". This only describes THIS site's own REST "
+"API — not external endpoints."
+msgstr ""
+"Geen REST-route komt overeen met \"%s\" op deze site. Routepaden zijn "
+"relatief aan /wp-json, bijv. \"/wp/v2/users\". Dit beschrijft alleen de "
+"eigen REST API van DEZE site — geen externe endpoints."
 
 #: admin/src/components/AiProviderSettings.vue
 msgid ""
@@ -2585,7 +2758,7 @@ msgstr ""
 "Geen vastgelegde payload — trigger de webhook één keer om de opgeloste URL "
 "te bekijken."
 
-#: src/Services/Ai/FallbackTransport.php:62
+#: src/Services/Ai/FallbackTransport.php:73
 #: src/Services/Ai/WpAiClientTransport.php:101
 msgid "No configured AI provider could complete the request."
 msgstr "Geen enkele geconfigureerde AI-provider kon het verzoek voltooien."
@@ -2597,6 +2770,14 @@ msgid ""
 msgstr ""
 "Nog geen referenties in de kluis — maak er een en deze wordt aan deze "
 "webhook toegewezen."
+
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"No credentials in the vault yet — create one and it will be used for this "
+"step."
+msgstr ""
+"Nog geen referenties in de kluis — maak er een aan en die wordt voor deze "
+"stap gebruikt."
 
 #: src/Api/SchemasController.php:337
 msgid "No data to update."
@@ -2647,7 +2828,7 @@ msgstr ""
 "Er bestaan nog geen andere webhooks — maak ten minste één webhook om deze "
 "als ketenbron te gebruiken."
 
-#: src/Abilities/AbilityRegistry.php:843
+#: src/Abilities/TestAbilities.php:174
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr ""
 "Geen payload opgegeven en er bestaat nog geen vastgelegd voorbeeld voor "
@@ -2668,6 +2849,14 @@ msgstr "Geen opgeslagen referenties"
 #: admin/src/components/WebhookForm.vue
 msgid "No saved credentials yet. Add one in the"
 msgstr "Nog geen opgeslagen referenties. Voeg er een toe in de"
+
+#: src/Services/WpAppPasswordService.php:56
+msgid ""
+"No signed-in user to provision an Application Password for — open the AI "
+"Builder while logged in as an administrator."
+msgstr ""
+"Geen ingelogde gebruiker om een applicatiewachtwoord voor aan te maken — "
+"open de AI Builder terwijl je bent ingelogd als beheerder."
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "No snippet assigned"
@@ -2703,15 +2892,11 @@ msgstr "Nog geen webhooks geconfigureerd"
 msgid "No webhooks match “%s”."
 msgstr "Geen webhooks komen overeen met “%s”."
 
-#: src/Abilities/AbilityRegistry.php:767
-msgid "Non-idempotent probe methods require confirmation."
-msgstr "Niet-idempotente testmethoden vereisen bevestiging."
-
 #: admin/src/views/ExternalCronView.vue
 msgid "Not configured"
 msgstr "Niet geconfigureerd"
 
-#: src/Abilities/AbilityRegistry.php:966
+#: src/Abilities/AbilityErrors.php:17
 msgid "Not found."
 msgstr "Niet gevonden."
 
@@ -2783,7 +2968,7 @@ msgstr ""
 "Alleen geslaagde of overgeslagen logboekvermeldingen kunnen opnieuw worden "
 "afgespeeld."
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/BuiltWebhookActions.vue
 msgid "Open webhook"
 msgstr "Webhook openen"
 
@@ -2807,7 +2992,7 @@ msgstr ""
 msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
 msgstr "Optioneel: versterken met %1$sFSWA_SECRET_KEY%2$s"
 
-#: src/Api/TriggersController.php:232
+#: src/Api/TriggersController.php:148
 msgid "Options"
 msgstr "Opties"
 
@@ -2823,7 +3008,7 @@ msgstr "Origineel"
 msgid "Original Payload"
 msgstr "Originele payload"
 
-#: src/Api/TriggersController.php:234
+#: src/Api/TriggersController.php:150
 msgid "Other"
 msgstr "Overig"
 
@@ -2867,7 +3052,7 @@ msgstr ""
 "Pagina opnieuw laden is uitgeschakeld op WordPress Playground — het menu "
 "wordt bijgewerkt bij de volgende klik op een WP-menu-item."
 
-#: src/Api/TriggersController.php:227
+#: src/Api/TriggersController.php:143
 msgid "Pages"
 msgstr "Pagina's"
 
@@ -2888,6 +3073,10 @@ msgstr[1] "Onderdeel van ketens:"
 #: admin/src/components/AiStepControls.vue admin/src/views/VaultView.vue
 msgid "Password"
 msgstr "Wachtwoord"
+
+#: admin/src/components/AiStepControls.vue
+msgid "Password (or Application Password)"
+msgstr "Wachtwoord (of applicatiewachtwoord)"
 
 #: admin/src/views/VaultView.vue
 msgid "Password or application password"
@@ -2945,7 +3134,7 @@ msgstr "Perm. mislukt"
 msgid "Permanently Failed"
 msgstr "Permanent mislukt"
 
-#: src/Abilities/AbilityRegistry.php:329
+#: src/Abilities/AbilityCatalog.php:334
 msgid ""
 "Permanently delete a webhook and its triggers / mapping. Requires "
 "confirmation."
@@ -2973,7 +3162,7 @@ msgstr "Plugin-standaard"
 msgid "Plugin queue endpoint"
 msgstr "Plug-in-wachtrijeindpunt"
 
-#: src/Api/TriggersController.php:231
+#: src/Api/TriggersController.php:147
 msgid "Plugins"
 msgstr "Plug-ins"
 
@@ -2997,7 +3186,7 @@ msgstr ""
 "Voorbeeld van Code Glue na verzending is uitgevoerd maar niet opgeslagen. "
 "Sla op of verwerp voordat je doorgaat."
 
-#: src/Api/TriggersController.php:226
+#: src/Api/TriggersController.php:142
 msgid "Posts"
 msgstr "Berichten"
 
@@ -3057,7 +3246,7 @@ msgstr "Pro-plug-in geïnstalleerd"
 msgid "Pro plugin not found."
 msgstr "Pro-plug-in niet gevonden."
 
-#: src/Abilities/AbilityRegistry.php:273
+#: src/Abilities/AbilityCatalog.php:276
 msgid "Probe a target endpoint"
 msgstr "Test een doeleindpunt"
 
@@ -3165,7 +3354,7 @@ msgstr ""
 "Lezen + webhooks aan/uit, logboeken opnieuw proberen/afspelen, "
 "wachtrijtaken uitvoeren/opnieuw proberen"
 
-#: src/Abilities/AbilityRegistry.php:107
+#: src/Abilities/AbilityCatalog.php:94
 msgid ""
 "Read recent delivery logs (optionally for one webhook) to verify what was "
 "sent and how the endpoint responded."
@@ -3181,7 +3370,7 @@ msgstr "Klaar om gegevens te verzenden?"
 msgid "Redirect"
 msgstr "Omleiding"
 
-#: src/Abilities/AbilityRegistry.php:226
+#: src/Abilities/AbilityCatalog.php:215
 msgid ""
 "Reference a stored vault credential from a webhook by id (the secret is "
 "injected at dispatch time and never exposed)."
@@ -3204,16 +3393,6 @@ msgid ""
 msgstr ""
 "Het opnieuw genereren van de token maakt de huidige cron-URL ongeldig. Je "
 "moet je crontab bijwerken."
-
-#: flowsystems-webhook-actions.php
-#. Description of the plugin
-msgid ""
-"Reliable WordPress webhooks with retries, queue, Action Scheduler support, "
-"delivery logs, and replayable events for n8n, APIs, and integrations."
-msgstr ""
-"Betrouwbare WordPress-webhooks met nieuwe pogingen, wachtrij, Action "
-"Scheduler-ondersteuning, bezorglogboeken en herafspeelbare gebeurtenissen "
-"voor n8n, API's en integraties."
 
 #: admin/src/views/ProView.vue
 msgid "Reliable webhooks with queue & retries"
@@ -3319,14 +3498,24 @@ msgstr "Instellingen voor opnieuw proberen"
 msgid "Retry settings saved"
 msgstr "Instellingen voor opnieuw proberen opgeslagen"
 
-#: src/Abilities/AbilityRegistry.php:92
+#: src/Abilities/AbilityCatalog.php:64
 msgid ""
 "Return the last captured example payload, field mapping and conditions for "
-"a webhook+trigger so the agent can map against the real payload shape."
+"a trigger so the agent can map against the real payload shape. Pass "
+"webhook_id to read that webhook's own capture; omit it to get the latest "
+"example for the trigger from any webhook. If the result carries a "
+"capture_warning, the capture is stale/opaque (no mappable fields): follow "
+"the warning — show the user what the capture contains and ask them to "
+"re-fire the event — instead of proposing mappings."
 msgstr ""
-"Geef de laatst vastgelegde voorbeeldpayload, veldmapping en voorwaarden "
-"terug voor een webhook+trigger, zodat de agent kan mappen op de echte "
-"payloadstructuur."
+"Geef de laatst vastgelegde voorbeeld-payload, veldmapping en voorwaarden "
+"voor een trigger terug, zodat de agent kan mappen op de echte payload-vorm. "
+"Geef webhook_id mee om de eigen capture van die webhook te lezen; laat het "
+"weg om het nieuwste voorbeeld voor de trigger uit een willekeurige webhook "
+"te halen. Bevat het resultaat een capture_warning, dan is de capture "
+"verouderd/ondoorzichtig (geen mapbare velden): volg de waarschuwing — toon "
+"de gebruiker wat de capture bevat en vraag om het event opnieuw af te vuren "
+"— in plaats van mappings voor te stellen."
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid ""
@@ -3355,7 +3544,7 @@ msgstr ""
 "Voorbeeld wordt hergebruikt dat voor deze trigger op een andere webhook is "
 "vastgelegd"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Reverted"
 msgstr "Teruggedraaid"
 
@@ -3395,13 +3584,17 @@ msgstr "Voorbeeld uitvoeren"
 msgid "Run Test Now"
 msgstr "Test nu uitvoeren"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Run plan"
 msgstr "Plan uitvoeren"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Running…"
 msgstr "Uitvoeren…"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid "Runs through the WP Webhooks AI service — no API keys needed."
+msgstr "Loopt via de WP Webhooks AI-dienst — geen API-sleutels nodig."
 
 #: admin/src/views/SettingsView.vue
 msgid "Same delay every retry: base seconds"
@@ -3559,15 +3752,19 @@ msgstr "Dit veld selecteren"
 msgid "Select trigger"
 msgstr "Trigger selecteren"
 
-#: src/Abilities/AbilityRegistry.php:295
+#: src/Abilities/AbilityCatalog.php:298
 msgid ""
 "Send a synchronous test delivery for a webhook using a provided or captured "
 "payload, and return the HTTP result so the agent can verify the integration "
-"end to end."
+"end to end. This makes a REAL delivery now, so for an internal REST "
+"endpoint it can actually create or modify data (e.g. create a WordPress "
+"user); it requires confirmation."
 msgstr ""
 "Verstuur een synchrone testbezorging voor een webhook met een opgegeven of "
 "vastgelegde payload, en geef het HTTP-resultaat terug zodat de agent de "
-"integratie volledig kan verifiëren."
+"integratie end-to-end kan verifiëren. Dit doet NU een ECHTE bezorging, dus "
+"voor een intern REST-endpoint kan het daadwerkelijk gegevens aanmaken of "
+"wijzigen (bijv. een WordPress-gebruiker aanmaken); het vereist bevestiging."
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Sending…"
@@ -3585,7 +3782,7 @@ msgstr "Vandaag verzonden"
 msgid "Server Error"
 msgstr "Serverfout"
 
-#: src/Abilities/AbilityRegistry.php:189
+#: src/Abilities/AbilityCatalog.php:178
 msgid ""
 "Set conditional-dispatch rules for a webhook+trigger so only matching "
 "events leave the site. conditions MUST be an object "
@@ -3618,7 +3815,7 @@ msgstr ""
 "toegestaan). Voer eerst get_trigger_schema uit en neem veldpaden uit de "
 "echte vastgelegde payload (bijv. \"args.0.form_id\")."
 
-#: src/Abilities/AbilityRegistry.php:188
+#: src/Abilities/AbilityCatalog.php:177
 msgid "Set conditions"
 msgstr "Voorwaarden instellen"
 
@@ -3626,17 +3823,35 @@ msgstr "Voorwaarden instellen"
 msgid "Set expiration date"
 msgstr "Vervaldatum instellen"
 
-#: src/Abilities/AbilityRegistry.php:172
+#: src/Abilities/AbilityCatalog.php:161
 msgid "Set field mapping"
 msgstr "Veldmapping instellen"
 
-#: src/Abilities/AbilityRegistry.php:173
+#: src/Abilities/AbilityCatalog.php:162
 msgid ""
-"Set the payload field mapping for a webhook+trigger (rename / restructure / "
-"exclude / type-cast fields with dot-notation paths)."
+"Set the payload field mapping for a webhook+trigger. field_mapping MUST be "
+"an object {\"mappings\":[{\"source\":\"<dot.path in the captured "
+"payload>\",\"target\":\"<dot.path in the outgoing "
+"body>\",\"cast\":\"number|string|boolean|stringify\" "
+"(optional)}],\"excluded\":[\"<dot.path to "
+"drop>\"],\"includeUnmapped\":true|false}. It can only move/rename/exclude "
+"EXISTING payload fields — static or constant values are NOT supported "
+"(inject those with a pre-dispatch Code Glue snippet instead). The mapping "
+"runs BEFORE any pre-dispatch snippet, so snippet output cannot be mapped. "
+"Run get_trigger_schema first and take source paths from the real captured "
+"payload."
 msgstr ""
-"Stel de payload-veldmapping in voor een webhook+trigger (velden hernoemen / "
-"herstructureren / uitsluiten / type-casten met puntnotatiepaden)."
+"Stel de payload-veldmapping in voor een webhook+trigger. field_mapping MOET "
+"een object zijn {\"mappings\":[{\"source\":\"<punt.pad in de vastgelegde "
+"payload>\",\"target\":\"<punt.pad in de uitgaande "
+"body>\",\"cast\":\"number|string|boolean|stringify\" "
+"(optioneel)}],\"excluded\":[\"<punt.pad om te laten "
+"vallen>\"],\"includeUnmapped\":true|false}. Het kan alleen BESTAANDE "
+"payload-velden verplaatsen/hernoemen/uitsluiten — statische of constante "
+"waarden worden NIET ondersteund (injecteer die met een pre-dispatch Code "
+"Glue-snippet). De mapping draait VÓÓR een pre-dispatch snippet, dus "
+"snippet-uitvoer kan niet worden gemapt. Voer eerst get_trigger_schema uit "
+"en neem source-paden uit de echte vastgelegde payload."
 
 #: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/SettingsView.vue
 msgid "Settings"
@@ -3702,7 +3917,7 @@ msgstr "Grootte"
 msgid "Skip"
 msgstr "Overslaan"
 
-#: admin/src/views/AiBuilderView.vue admin/src/views/LogsList.vue
+#: admin/src/components/AiStepPanel.vue admin/src/views/LogsList.vue
 msgid "Skipped"
 msgstr "Overgeslagen"
 
@@ -3721,6 +3936,19 @@ msgstr "Snippet opgeslagen en toegewezen."
 #: admin/src/views/ActivityView.vue
 msgid "Snippets"
 msgstr "Snippets"
+
+#: src/Services/Ai/AgentOrchestrator.php:173
+#. translators: %s: comma-separated ability names.
+#, php-format
+msgid ""
+"Some proposed steps were removed because this site cannot run them: %s. The "
+"remaining plan may be incomplete. If these are Code Glue abilities, make "
+"sure Webhook Actions Pro is installed, up to date and licensed."
+msgstr ""
+"Sommige voorgestelde stappen zijn verwijderd omdat deze site ze niet kan "
+"uitvoeren: %s. Het resterende plan kan onvolledig zijn. Zijn dit Code "
+"Glue-mogelijkheden, zorg dan dat Webhook Actions Pro is geïnstalleerd, "
+"up-to-date en gelicentieerd."
 
 #: admin/src/components/MappingEditor.vue
 msgid "Source"
@@ -3750,7 +3978,7 @@ msgstr "Statistieken niet beschikbaar"
 msgid "Status"
 msgstr "Status"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Step"
 msgstr "Stap"
 
@@ -3800,6 +4028,10 @@ msgstr "Synchr."
 msgid "Synchronous Execution"
 msgstr "Synchrone uitvoering"
 
+#: admin/src/components/BuiltWebhookActions.vue
+msgid "Synchronous delivery"
+msgstr "Synchrone bezorging"
+
 #: admin/src/components/WebhookCardContent.vue
 msgid "Synchronous execution"
 msgstr "Synchrone uitvoering"
@@ -3828,7 +4060,7 @@ msgstr "Doelpad (bijv. user_id)"
 msgid "Target webhook does not exist."
 msgstr "Doel-webhook bestaat niet."
 
-#: src/Api/TriggersController.php:229
+#: src/Api/TriggersController.php:145
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
@@ -3852,15 +4084,15 @@ msgstr "Test in wachtrij geplaatst — deze draait bij de volgende cron-cyclus."
 msgid "Test webhook delivery on demand"
 msgstr "Test webhook-bezorging op aanvraag"
 
-#: src/Abilities/AbilityRegistry.php:294
+#: src/Abilities/AbilityCatalog.php:297
 msgid "Test-dispatch a webhook"
 msgstr "Webhook testverzenden"
 
-#: src/Abilities/AbilityRegistry.php:760
+#: src/Abilities/TestAbilities.php:79
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "Die URL is niet toegestaan (privé, gereserveerde of ongeldige host)."
 
-#: src/Abilities/AbilityRegistry.php:702
+#: src/Abilities/WriteAbilities.php:211
 msgid "That link would create a cycle across an existing chain."
 msgstr "Die schakel zou een cyclus in een bestaande keten veroorzaken."
 
@@ -3880,21 +4112,32 @@ msgstr ""
 msgid "The AI Client returned no text."
 msgstr "De AI Client gaf geen tekst terug."
 
-#: src/Services/Ai/AnthropicTransport.php:120
-#: src/Services/Ai/GoogleTransport.php:116
-#: src/Services/Ai/OpenAiTransport.php:116
+#: src/Services/Ai/AnthropicTransport.php:134
+#: src/Services/Ai/GoogleTransport.php:139
+#: src/Services/Ai/OpenAiTransport.php:133
 msgid "The AI provider key could not be decrypted."
 msgstr "De AI-providersleutel kon niet worden ontsleuteld."
 
-#: src/Services/Ai/AnthropicTransport.php:81
-#: src/Services/Ai/GoogleTransport.php:79
-#: src/Services/Ai/OpenAiTransport.php:83
+#: src/Services/Ai/AgentOrchestrator.php:387
+#. translators: %s: the AI provider's error message.
+#, php-format
+msgid ""
+"The AI provider request failed mid-turn (%s). Progress so far is saved — "
+"send the message again to retry from here."
+msgstr ""
+"Het verzoek aan de AI-provider is halverwege mislukt (%s). De voortgang tot "
+"nu toe is opgeslagen — stuur het bericht opnieuw om vanaf hier verder te "
+"gaan."
+
+#: src/Services/Ai/AnthropicTransport.php:88
+#: src/Services/Ai/GoogleTransport.php:95
+#: src/Services/Ai/OpenAiTransport.php:93
 msgid "The AI provider returned an error."
 msgstr "De AI-provider gaf een fout terug."
 
-#: src/Services/Ai/AnthropicTransport.php:93
-#: src/Services/Ai/GoogleTransport.php:89
-#: src/Services/Ai/OpenAiTransport.php:89
+#: src/Services/Ai/AnthropicTransport.php:103
+#: src/Services/Ai/GoogleTransport.php:108
+#: src/Services/Ai/OpenAiTransport.php:102
 msgid "The AI provider returned no text."
 msgstr "De AI-provider gaf geen tekst terug."
 
@@ -3934,7 +4177,7 @@ msgstr ""
 "De keten en al haar koppelingen worden verwijderd. Lid-webhooks blijven "
 "behouden, maar verliezen hun ketenkoppelingstriggers."
 
-#: src/Abilities/AbilityRegistry.php:601
+#: src/Abilities/WriteAbilities.php:332
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -3944,9 +4187,9 @@ msgstr ""
 "De voorwaarderegel op \"%1$s\" (%2$s) heeft een lege waarde — vraag de "
 "gebruiker om de waarde voordat je deze voorwaarde instelt."
 
-#: src/Services/Ai/AnthropicTransport.php:116
-#: src/Services/Ai/GoogleTransport.php:112
-#: src/Services/Ai/OpenAiTransport.php:112
+#: src/Services/Ai/AnthropicTransport.php:130
+#: src/Services/Ai/GoogleTransport.php:135
+#: src/Services/Ai/OpenAiTransport.php:129
 msgid "The configured AI provider key was not found in the vault."
 msgstr "De geconfigureerde AI-providersleutel is niet gevonden in de kluis."
 
@@ -3960,7 +4203,7 @@ msgstr ""
 "(%1$sFSWA_SECRET_KEY%2$s) en wordt niet in de database opgeslagen. Een dump "
 "van alleen de database kan je geheimen niet ontsleutelen."
 
-#: src/Services/Ai/PlanExecutor.php:616
+#: src/Services/Ai/ProbeInterpreter.php:28
 #. translators: %s: underlying HTTP error message.
 #, php-format
 msgid ""
@@ -3970,7 +4213,7 @@ msgstr ""
 "Het eindpunt was niet bereikbaar (%s). Controleer of de URL juist en "
 "publiek bereikbaar is, en probeer het opnieuw."
 
-#: src/Services/Ai/PlanExecutor.php:619
+#: src/Services/Ai/ProbeInterpreter.php:31
 msgid ""
 "The endpoint could not be reached. Check the URL is correct and publicly "
 "reachable, then retry."
@@ -3978,7 +4221,7 @@ msgstr ""
 "Het eindpunt was niet bereikbaar. Controleer of de URL juist en publiek "
 "bereikbaar is, en probeer het opnieuw."
 
-#: src/Services/Ai/PlanExecutor.php:631
+#: src/Services/Ai/ProbeInterpreter.php:43
 #. translators: %d: HTTP status code (401 or 403).
 #, php-format
 msgid ""
@@ -3988,7 +4231,7 @@ msgstr ""
 "Het eindpunt antwoordde %d — het vereist authenticatie. Voeg een referentie "
 "toe aan de webhook en probeer het opnieuw."
 
-#: src/Services/Ai/PlanExecutor.php:643
+#: src/Services/Ai/ProbeInterpreter.php:55
 #. translators: %d: HTTP status code (404, 405 or 410).
 #, php-format
 msgid ""
@@ -4017,19 +4260,19 @@ msgstr ""
 "Het geheim wordt op het moment van bezorging veilig opgelost en nooit "
 "blootgesteld. Beheer referenties in de"
 
-#: src/Abilities/AbilityRegistry.php:833
+#: src/Abilities/TestAbilities.php:162
 msgid "The webhook has no triggers; provide one."
 msgstr "De webhook heeft geen triggers; geef er een op."
 
-#: src/Services/Ai/PlanExecutor.php:135
+#: src/Services/Ai/PlanExecutor.php:155
 msgid "There is no plan to run yet."
 msgstr "Er is nog geen plan om uit te voeren."
 
-#: src/Services/Ai/PlanExecutor.php:369
+#: src/Services/Ai/PlanExecutor.php:449
 msgid "There is nothing left to revert."
 msgstr "Er is niets meer om terug te draaien."
 
-#: src/Services/Ai/PlanExecutor.php:315
+#: src/Services/Ai/PlanExecutor.php:395
 msgid "There is nothing to revert."
 msgstr "Er is niets om terug te draaien."
 
@@ -4062,7 +4305,7 @@ msgstr ""
 "Deze actie kan niet ongedaan worden gemaakt. Alle logboeken worden "
 "permanent verwijderd."
 
-#: src/Api/CredentialsController.php:354
+#: src/Api/CredentialsController.php:379
 #. translators: %d: number of webhooks using this credential
 #, php-format
 msgid "This credential is used by %d webhook. Detach it or delete with force."
@@ -4094,6 +4337,19 @@ msgstr ""
 "Dit verwijdert het gesprek en de buildgeschiedenis. Het verwijdert geen "
 "webhooks die erdoor zijn gemaakt."
 
+#: src/Abilities/AbilityCatalog.php:302
+msgid ""
+"This sends a REAL delivery to the endpoint right now — it is not a dry run. "
+"If the webhook targets this site’s own REST API (e.g. wp-json/wp/v2/users) "
+"it can actually create or modify data, such as creating a WordPress user. "
+"Confirm to send it for real."
+msgstr ""
+"Dit verstuurt NU een ECHTE bezorging naar het endpoint — het is geen "
+"droogoefening. Als de webhook de eigen REST API van deze site aanspreekt "
+"(bijv. wp-json/wp/v2/users), kan het daadwerkelijk gegevens aanmaken of "
+"wijzigen, zoals het aanmaken van een WordPress-gebruiker. Bevestig om echt "
+"te versturen."
+
 #: admin/src/components/AiProviderSettings.vue
 msgid ""
 "This site no longer includes the WordPress 7.0 AI Client. Connect a "
@@ -4107,6 +4363,15 @@ msgstr ""
 #: admin/src/components/AiStepControls.vue
 msgid "This step goes live or changes data. Confirm to run it."
 msgstr "Deze stap gaat live of wijzigt gegevens. Bevestig om uit te voeren."
+
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"This step needs a stored auth credential. Pick one from the vault or create "
+"a new one — the secret stays in the vault and is injected only at dispatch."
+msgstr ""
+"Deze stap heeft een opgeslagen auth-referentie nodig. Kies er een uit de "
+"kluis of maak een nieuwe — het geheim blijft in de kluis en wordt pas bij "
+"verzending geïnjecteerd."
 
 #: admin/src/components/RotateTokenDialog.vue
 msgid ""
@@ -4252,7 +4517,7 @@ msgstr ""
 "browsersessie. Tokenbeheer is altijd alleen voor beheerders, ongeacht het "
 "bereik."
 
-#: src/Abilities/AbilityRegistry.php:771
+#: src/Abilities/TestAbilities.php:93
 msgid "Too many probe calls — try again in a minute."
 msgstr "Te veel testaanroepen — probeer het over een minuut opnieuw."
 
@@ -4374,7 +4639,7 @@ msgstr "URL:"
 msgid "Unchained"
 msgstr "Niet-gekoppeld"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/BuiltWebhookActions.vue
 msgid "Undo last change"
 msgstr "Laatste wijziging ongedaan maken"
 
@@ -4394,13 +4659,13 @@ msgstr "Onbekende AI-provider."
 msgid "Unknown Webhook"
 msgstr "Onbekende webhook"
 
-#: src/Abilities/AbilityRegistry.php:351
+#: src/Abilities/AbilityRegistry.php:95
 #. translators: %s: ability name
 #, php-format
 msgid "Unknown ability: %s"
 msgstr "Onbekende vaardigheid: %s"
 
-#: src/Abilities/AbilityRegistry.php:591
+#: src/Abilities/WriteAbilities.php:322
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -4422,7 +4687,7 @@ msgstr "Niet-opgeslagen wijzigingen"
 msgid "Untitled"
 msgstr "Naamloos"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiBuildsBar.vue
 msgid "Untitled build"
 msgstr "Naamloze build"
 
@@ -4434,11 +4699,11 @@ msgstr "Snippet bijwerken"
 msgid "Update URL & retry"
 msgstr "URL bijwerken en opnieuw proberen"
 
-#: src/Abilities/AbilityRegistry.php:150
+#: src/Abilities/AbilityCatalog.php:138
 msgid "Update a webhook"
 msgstr "Werk een webhook bij"
 
-#: src/Abilities/AbilityRegistry.php:151
+#: src/Abilities/AbilityCatalog.php:139
 msgid ""
 "Update an existing webhook (endpoint, method, triggers, headers, "
 "credential)."
@@ -4488,6 +4753,10 @@ msgstr ""
 "nooit via de API teruggegeven."
 
 #: admin/src/components/AiStepControls.vue
+msgid "Use credential & continue"
+msgstr "Referentie gebruiken en doorgaan"
+
+#: admin/src/components/AiStepControls.vue
 msgid "Use existing"
 msgstr "Bestaande gebruiken"
 
@@ -4519,7 +4788,7 @@ msgstr "Gebruikerstrigger"
 msgid "Username"
 msgstr "Gebruikersnaam"
 
-#: src/Api/TriggersController.php:225
+#: src/Api/TriggersController.php:141
 msgid "Users"
 msgstr "Gebruikers"
 
@@ -4561,6 +4830,22 @@ msgstr "Bekijk webhook-bezorglogboeken"
 msgid "View webhooks, logs, queue, health, triggers, schemas"
 msgstr "Webhooks, logboeken, wachtrij, status, triggers, schema's bekijken"
 
+#: admin/src/components/AiProviderSettings.vue
+msgid "WP Webhooks AI"
+msgstr "WP Webhooks AI"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid "WP Webhooks AI (included)"
+msgstr "WP Webhooks AI (inbegrepen)"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid ""
+"WP Webhooks AI is included with your Pro license — no API keys needed. Your "
+"own keys and WordPress connectors remain available."
+msgstr ""
+"WP Webhooks AI is inbegrepen bij je Pro-licentie — geen API-sleutels nodig. "
+"Je eigen sleutels en WordPress-connectors blijven beschikbaar."
+
 #: admin/src/views/ExternalCronView.vue admin/src/views/SettingsView.vue
 msgid "WP-Cron"
 msgstr "WP-Cron"
@@ -4577,7 +4862,7 @@ msgstr "Wacht %s"
 msgid "Wait before each retry"
 msgstr "Wachttijd vóór elke poging"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Waiting for earlier steps…"
 msgstr "Wachten op eerdere stappen…"
 
@@ -4603,8 +4888,8 @@ msgstr ""
 
 #: flowsystems-webhook-actions.php
 #. Plugin Name of the plugin
-msgid "Webhook Actions by Flow Systems"
-msgstr ""
+msgid "Webhook Actions - build automations and integrations with AI help"
+msgstr "Webhook Actions — bouw automatiseringen en integraties met AI-hulp"
 
 #: src/Controllers/AdminController.php:216
 msgid ""
@@ -4634,7 +4919,7 @@ msgstr "Webhookbezorglogboeken ouder dan dit worden automatisch verwijderd."
 msgid "Webhook has no triggers configured."
 msgstr "Voor de webhook zijn geen triggers geconfigureerd."
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/BuiltWebhookActions.vue
 msgid "Webhook is live."
 msgstr "Webhook is live."
 
@@ -4700,11 +4985,11 @@ msgstr "Of gebruikersgegevens moeten worden opgenomen."
 msgid "Will Retry"
 msgstr "Probeert opnieuw"
 
-#: src/Api/TriggersController.php:233
+#: src/Api/TriggersController.php:149
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Api/TriggersController.php:224
+#: src/Api/TriggersController.php:140
 msgid "WordPress"
 msgstr ""
 
@@ -4720,7 +5005,7 @@ msgstr "WordPress-connectors"
 msgid "WordPress username or API user"
 msgstr "WordPress-gebruikersnaam of API-gebruiker"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "Working…"
 msgstr "Bezig…"
 
@@ -4760,13 +5045,23 @@ msgstr ""
 msgid "Your WordPress AI connectors are no longer available."
 msgstr "Je WordPress AI-connectors zijn niet langer beschikbaar."
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiBuildsBar.vue
 msgid "Your builds"
 msgstr "Je builds"
 
 #: admin/src/views/ProView.vue
 msgid "Your license is active on this site."
 msgstr "Je licentie is actief op deze site."
+
+#: src/Services/Ai/AgentOrchestrator.php:230
+#. translators: 1: selected provider/model, 2: fallback provider/model, 3: error reason
+#, php-format
+msgid ""
+"Your selected model %1$s couldn't respond, so this reply came from %2$s "
+"instead. (%3$s) Pick a different model with Change model."
+msgstr ""
+"Je gekozen model %1$s kon niet antwoorden, dus dit antwoord kwam van %2$s. "
+"(%3$s) Kies een ander model via 'Model wijzigen'."
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "array contains"
@@ -4784,15 +5079,15 @@ msgstr "worden overgeslagen"
 msgid "bool"
 msgstr "bool"
 
-#: src/Abilities/AbilityRegistry.php:698
+#: src/Abilities/WriteAbilities.php:207
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id, source_webhook_id en target_webhook_id zijn verplicht."
 
-#: src/Abilities/AbilityRegistry.php:534
+#: src/Abilities/WriteAbilities.php:265
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions moet een object {enabled, type, rules: [...]} zijn."
 
-#: src/Abilities/AbilityRegistry.php:543
+#: src/Abilities/WriteAbilities.php:274
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules moet een array van regelobjecten zijn."
 
@@ -4906,7 +5201,7 @@ msgstr "kleiner dan"
 msgid "mapped"
 msgstr "gemapt"
 
-#: src/Abilities/AbilityRegistry.php:430
+#: src/Abilities/WriteAbilities.php:52
 msgid "name and endpoint_url are required."
 msgstr "name en endpoint_url zijn verplicht."
 
@@ -4934,7 +5229,7 @@ msgstr "getal"
 msgid "object contains"
 msgstr "object bevat"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiStepPanel.vue
 msgid "of"
 msgstr "van"
 
@@ -4945,6 +5240,18 @@ msgstr "perm. mislukt"
 #: admin/src/components/ConditionsEditor.vue
 msgid "property name (optional)"
 msgstr "eigenschapsnaam (optioneel)"
+
+#: src/Services/Ai/AgentOrchestrator.php:233
+msgid "provider unavailable"
+msgstr "provider niet beschikbaar"
+
+#: admin/src/components/AiPlanStepper.vue
+msgid "reused"
+msgstr "hergebruikt"
+
+#: src/Services/RestRouteInspector.php:40
+msgid "route is required, e.g. \"/wp/v2/users\"."
+msgstr "route is vereist, bijv. \"/wp/v2/users\"."
 
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "string"
@@ -4958,6 +5265,10 @@ msgstr "stringify"
 msgid "then select it here."
 msgstr "selecteer het hier."
 
+#: src/Abilities/ReadAbilities.php:72
+msgid "trigger is required."
+msgstr "trigger is vereist."
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "unknown"
 msgstr "onbekend"
@@ -4966,15 +5277,11 @@ msgstr "onbekend"
 msgid "value"
 msgstr "waarde"
 
-#: src/Abilities/AbilityRegistry.php:382
-msgid "webhook_id and trigger are required."
-msgstr "webhook_id en trigger zijn verplicht."
-
-#: src/Abilities/AbilityRegistry.php:623
+#: src/Abilities/WriteAbilities.php:123
 msgid "webhook_id, trigger and conditions are required."
 msgstr "webhook_id, trigger en conditions zijn verplicht."
 
-#: src/Abilities/AbilityRegistry.php:487
+#: src/Abilities/WriteAbilities.php:110
 msgid "webhook_id, trigger and field_mapping are required."
 msgstr "webhook_id, trigger en field_mapping zijn verplicht."
 
@@ -4990,7 +5297,7 @@ msgstr "· databasesleutel verwijderd"
 msgid "…"
 msgstr "…"
 
-#: src/Services/Ai/PlanExecutor.php:342
+#: src/Services/Ai/PlanExecutor.php:422
 #. translators: %s: what was undone.
 #, php-format
 msgid "↩︎ Reverted: %s"
