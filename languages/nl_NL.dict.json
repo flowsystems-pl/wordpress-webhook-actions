@@ -1147,5 +1147,6 @@
   "provider unavailable": "provider niet beschikbaar",
   "reused": "hergebruikt",
   "route is required, e.g. \"/wp/v2/users\".": "route is vereist, bijv. \"/wp/v2/users\".",
-  "trigger is required.": "trigger is vereist."
+  "trigger is required.": "trigger is vereist.",
+  "%s credits left": "%s credits over"
 }

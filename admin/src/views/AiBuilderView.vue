@@ -10,6 +10,7 @@ import {
   Search,
   Settings2,
   RotateCcw,
+  Sparkles,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -68,6 +69,7 @@ const PROVIDER_LABELS = {
   anthropic: 'Anthropic (Claude)',
   openai: 'OpenAI',
   google: 'Google Gemini',
+  hosted: 'WP Webhooks AI',
 };
 const activeProviderLabel = computed(() => {
   const id = activeProvider.value;
@@ -75,6 +77,33 @@ const activeProviderLabel = computed(() => {
   const byo = status.value?.byok?.providers?.find((p) => p.id === id);
   return wp?.label || byo?.label || PROVIDER_LABELS[id] || id;
 });
+
+// ---- Hosted credits (Pro) -------------------------------------------------
+// Shown while the hosted transport is active; each turn response carries the
+// fresh balance (res.hosted), so the chip counts down as the agent works.
+const hostedCredits = computed(() => {
+  const h = status.value?.hosted;
+  return h?.available && status.value?.source === 'hosted' ? h : null;
+});
+const creditsLeft = computed(() =>
+  Number(hostedCredits.value?.monthly_remaining || 0) + Number(hostedCredits.value?.topup_remaining || 0)
+);
+const creditsLow = computed(() => {
+  const limit = Number(hostedCredits.value?.monthly_limit || 0);
+  return creditsLeft.value < Math.max(50, limit * 0.05);
+});
+const creditsTooltip = computed(() => {
+  const h = hostedCredits.value;
+  if (!h?.resets_at) return '';
+  const d = new Date(h.resets_at);
+  return isNaN(d) ? '' : __('Monthly credits reset on %s.').replace('%s', d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
+});
+
+function applyHosted(res) {
+  if (res?.hosted && status.value) {
+    status.value = { ...status.value, hosted: res.hosted };
+  }
+}
 
 // The settings component returns a fresh status payload after every change.
 function onSettingsUpdate(newStatus, action = '') {
@@ -460,6 +489,7 @@ async function dispatchMessage(text) {
   try {
     const res = await api.agent.message(convId, text);
     clearInterval(poll);
+    applyHosted(res);
     try {
       await reloadTranscript(convId);
     } catch {
@@ -512,6 +542,7 @@ async function advance(opts = {}) {
       const startedAt = Date.now();
       const res = await api.agent.step(activeId.value, first ? opts : {});
       first = false;
+      applyHosted(res);
       // Hold the "running" presentation so even instant steps are noticeable,
       // THEN apply the result (the step flips to done / blocked in one beat).
       const hold = MIN_STEP_MS - (Date.now() - startedAt);
@@ -647,6 +678,13 @@ async function scrollDown() {
               <div class="text-sm font-medium text-foreground truncate">{{ activeProviderLabel }}</div>
               <div class="text-xs text-muted-foreground truncate font-mono">{{ activeModel }}</div>
             </div>
+            <span v-if="hostedCredits" :title="creditsTooltip"
+              :class="['inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs tabular-nums shrink-0',
+                creditsLow ? 'border-amber-400/50 bg-amber-50/60 dark:bg-amber-950/20 text-amber-700 dark:text-amber-300'
+                           : 'border-primary/30 bg-primary/10 text-primary']">
+              <Sparkles class="w-3.5 h-3.5" />
+              {{ __('%s credits left').replace('%s', creditsLeft.toLocaleString()) }}
+            </span>
           </div>
           <div class="flex items-center gap-3 shrink-0">
             <label class="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none">

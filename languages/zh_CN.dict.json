@@ -1096,5 +1096,6 @@
   "provider unavailable": "提供商不可用",
   "reused": "已复用",
   "route is required, e.g. \"/wp/v2/users\".": "route 为必填项，例如 \"/wp/v2/users\"。",
-  "trigger is required.": "trigger 为必填项。"
+  "trigger is required.": "trigger 为必填项。",
+  "%s credits left": "剩余 %s 积分"
 }

@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-21T21:27:28+00:00\n"
+"POT-Creation-Date: 2026-07-21T21:54:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -206,6 +206,10 @@ msgstr ""
 msgid "%s auth"
 msgstr ""
 
+#: admin/src/views/AiBuilderView.vue
+msgid "%s credits left"
+msgstr ""
+
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
 msgstr ""
@@ -258,7 +262,7 @@ msgstr ""
 msgid "A credential with this name already exists."
 msgstr ""
 
-#: src/Api/AgentController.php:382
+#: src/Api/AgentController.php:380
 msgid "A message is required."
 msgstr ""
 
@@ -282,7 +286,7 @@ msgstr ""
 msgid "A payload object is required for custom source."
 msgstr ""
 
-#: src/Api/AgentController.php:265
+#: src/Api/AgentController.php:263
 msgid "A provider and model are required."
 msgstr ""
 
@@ -552,7 +556,7 @@ msgid ""
 "read their values."
 msgstr ""
 
-#: src/Api/AgentController.php:190
+#: src/Api/AgentController.php:188
 msgid "An API key is required to connect this provider."
 msgstr ""
 
@@ -986,7 +990,7 @@ msgstr ""
 msgid "Continue build"
 msgstr ""
 
-#: src/Api/AgentController.php:452
+#: src/Api/AgentController.php:466
 #: src/Services/Ai/AgentOrchestrator.php:78
 #: src/Services/Ai/PlanExecutor.php:57
 #: src/Services/Ai/PlanExecutor.php:147
@@ -1756,11 +1760,11 @@ msgstr ""
 msgid "Failed to save trigger snippet"
 msgstr ""
 
-#: src/Api/AgentController.php:348
+#: src/Api/AgentController.php:346
 msgid "Failed to start a conversation."
 msgstr ""
 
-#: src/Api/AgentController.php:212
+#: src/Api/AgentController.php:210
 msgid "Failed to store the provider key."
 msgstr ""
 
@@ -2403,7 +2407,7 @@ msgstr ""
 msgid "Model"
 msgstr ""
 
-#: admin/src/components/AiProviderSettings.vue
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "Monthly credits reset on %s."
 msgstr ""
 
@@ -4245,8 +4249,8 @@ msgstr ""
 msgid "Unique identifier for the webhook."
 msgstr ""
 
-#: src/Api/AgentController.php:169
-#: src/Api/AgentController.php:232
+#: src/Api/AgentController.php:167
+#: src/Api/AgentController.php:230
 msgid "Unknown AI provider."
 msgstr ""
 

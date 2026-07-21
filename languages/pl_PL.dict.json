@@ -1172,5 +1172,6 @@
   "provider unavailable": "dostawca niedostępny",
   "reused": "użyto ponownie",
   "route is required, e.g. \"/wp/v2/users\".": "route jest wymagane, np. \"/wp/v2/users\".",
-  "trigger is required.": "trigger jest wymagany."
+  "trigger is required.": "trigger jest wymagany.",
+  "%s credits left": "Pozostało kredytów: %s"
 }

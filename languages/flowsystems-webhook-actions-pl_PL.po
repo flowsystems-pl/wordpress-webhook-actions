@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-07-21T21:27:28+00:00\n"
+"POT-Creation-Date: 2026-07-21T21:54:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -256,6 +256,10 @@ msgstr "Ponowienie %s"
 msgid "%s auth"
 msgstr "Uwierzytelnianie %s"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "%s credits left"
+msgstr "Pozostało kredytów: %s"
+
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
 msgstr "%s…"
@@ -310,7 +314,7 @@ msgstr ""
 msgid "A credential with this name already exists."
 msgstr "Uwierzytelnienie o tej nazwie już istnieje."
 
-#: src/Api/AgentController.php:382
+#: src/Api/AgentController.php:380
 msgid "A message is required."
 msgstr "Wiadomość jest wymagana."
 
@@ -339,7 +343,7 @@ msgstr ""
 msgid "A payload object is required for custom source."
 msgstr "Dla źródła niestandardowego wymagany jest obiekt danych."
 
-#: src/Api/AgentController.php:265
+#: src/Api/AgentController.php:263
 msgid "A provider and model are required."
 msgstr "Dostawca i model są wymagane."
 
@@ -632,7 +636,7 @@ msgstr ""
 "Token API %1$sagent%2$s może przypisywać uwierzytelnienia do webhooków, ale "
 "nigdy nie może odczytać ich wartości."
 
-#: src/Api/AgentController.php:190
+#: src/Api/AgentController.php:188
 msgid "An API key is required to connect this provider."
 msgstr "Do połączenia tego dostawcy wymagany jest klucz API."
 
@@ -1108,7 +1112,7 @@ msgstr "Kontynuuj"
 msgid "Continue build"
 msgstr "Kontynuuj budowanie"
 
-#: src/Api/AgentController.php:452
+#: src/Api/AgentController.php:466
 #: src/Services/Ai/AgentOrchestrator.php:78
 #: src/Services/Ai/PlanExecutor.php:57
 #: src/Services/Ai/PlanExecutor.php:147
@@ -1911,11 +1915,11 @@ msgstr "Nie udało się zapisać mapowania."
 msgid "Failed to save trigger snippet"
 msgstr "Nie udało się zapisać fragmentu wyzwalacza"
 
-#: src/Api/AgentController.php:348
+#: src/Api/AgentController.php:346
 msgid "Failed to start a conversation."
 msgstr "Nie udało się rozpocząć rozmowy."
 
-#: src/Api/AgentController.php:212
+#: src/Api/AgentController.php:210
 msgid "Failed to store the provider key."
 msgstr "Nie udało się zapisać klucza dostawcy."
 
@@ -2607,7 +2611,7 @@ msgstr "Wygenerowano hasło aplikacji, ale nie udało się zapisać go w sejfie.
 msgid "Model"
 msgstr "Model"
 
-#: admin/src/components/AiProviderSettings.vue
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "Monthly credits reset on %s."
 msgstr "Miesięczne kredyty odnowią się %s."
 
@@ -4666,8 +4670,8 @@ msgstr "Cofnij ostatnią zmianę"
 msgid "Unique identifier for the webhook."
 msgstr "Unikalny identyfikator webhooka."
 
-#: src/Api/AgentController.php:169
-#: src/Api/AgentController.php:232
+#: src/Api/AgentController.php:167
+#: src/Api/AgentController.php:230
 msgid "Unknown AI provider."
 msgstr "Nieznany dostawca AI."
 
