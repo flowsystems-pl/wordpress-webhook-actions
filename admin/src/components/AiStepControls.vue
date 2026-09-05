@@ -205,6 +205,32 @@ function createCredForInput() {
     </Button>
   </div>
 
+  <!--
+    blocked_prereq, kind: site_defined_paths — the step maps a field that only
+    exists inside a container the SITE defines (order meta, ACF, a form's
+    fields). The reference payload shows that container because every site has
+    one, but its keys are ours, not theirs. Distinct from the capture case
+    below: there is nothing to wait for here, so "fire the event and retry" would
+    be the wrong instruction.
+  -->
+  <div v-else-if="step.status === 'blocked_prereq' && step.prereq?.kind === 'site_defined_paths'"
+    class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4 text-sm">
+    <p class="text-amber-700 dark:text-amber-300 mb-1">
+      {{ __('This step maps a field we cannot see from here. The example payload came from our reference library, and these paths sit inside a container whose contents are specific to your site:') }}
+    </p>
+    <ul class="mb-3 font-mono text-xs text-amber-700 dark:text-amber-300">
+      <li v-for="p in step.prereq?.paths || []" :key="p">{{ p }}</li>
+    </ul>
+    <p class="text-amber-700 dark:text-amber-300 mb-3">
+      {{ __('Fire the event once on this site to capture your real payload, then retry — the mapping will be built from your own fields. Or skip this step and map them by hand.') }}
+      <span v-if="step.prereq?.trigger" class="font-mono text-xs">({{ step.prereq.trigger }})</span>
+    </p>
+    <div class="flex gap-2">
+      <Button size="sm" :disabled="busy" @click="emit('retry')">{{ __('I fired it — retry') }}</Button>
+      <Button size="sm" variant="outline" :disabled="busy" @click="emit('skip')">{{ __('Skip') }}</Button>
+    </div>
+  </div>
+
   <!-- blocked_prereq: need a captured payload -->
   <div v-else-if="step.status === 'blocked_prereq'"
     class="rounded-md border border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/20 p-4 text-sm">

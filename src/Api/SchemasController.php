@@ -10,6 +10,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
+use FlowSystems\WebhookActions\Services\ExampleResolver;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\PayloadTransformer;
 use FlowSystems\WebhookActions\Api\AuthHelper;
@@ -203,10 +204,11 @@ class SchemasController extends WP_REST_Controller {
       ];
 
       // Fall back to a shared example for the same trigger when enabled.
-      $resolved = $this->schemaRepository->resolveExample($webhookId, $triggerName, $row);
+      $resolved = $this->exampleResolver()->resolve($webhookId, $triggerName, $row);
       $schema['example_payload']         = $resolved['example'];
-      $schema['example_source']          = $resolved['source']; // own | shared | null
+      $schema['example_source']          = $resolved['source']; // own | shared | library | null
       $schema['example_from_webhook_id'] = $resolved['from_webhook_id'];
+      $schema['library']                 = $this->libraryMeta($resolved);
       $schema['use_shared_example']      = (int) ($schema['use_shared_example'] ?? 1);
       $schema['supports_user_enrichment'] = in_array($triggerName, $userTriggers, true);
 
@@ -250,10 +252,11 @@ class SchemasController extends WP_REST_Controller {
 
     // Fall back to an example captured for the same trigger on another webhook
     // when this webhook has none of its own and reuse is enabled (the default).
-    $resolved = $this->schemaRepository->resolveExample($webhookId, $trigger, $schema);
+    $resolved = $this->exampleResolver()->resolve($webhookId, $trigger, $schema);
     $schema['example_payload']         = $resolved['example'];
-    $schema['example_source']          = $resolved['source']; // own | shared | null
+    $schema['example_source']          = $resolved['source']; // own | shared | library | null
     $schema['example_from_webhook_id'] = $resolved['from_webhook_id'];
+    $schema['library']                 = $this->libraryMeta($resolved);
     $schema['use_shared_example']      = (int) ($schema['use_shared_example'] ?? 1);
 
     $schema['supports_user_enrichment'] = $this->payloadTransformer->supportsUserEnrichment($trigger);
@@ -329,10 +332,11 @@ class SchemasController extends WP_REST_Controller {
     // example_payload for webhooks that borrow a shared example, and clients that
     // cache the response would blank their Mapping/Conditions previews until the
     // next full fetch.
-    $resolved = $this->schemaRepository->resolveExample($webhookId, $trigger, $schema);
+    $resolved = $this->exampleResolver()->resolve($webhookId, $trigger, $schema);
     $schema['example_payload']         = $resolved['example'];
-    $schema['example_source']          = $resolved['source']; // own | shared | null
+    $schema['example_source']          = $resolved['source']; // own | shared | library | null
     $schema['example_from_webhook_id'] = $resolved['from_webhook_id'];
+    $schema['library']                 = $this->libraryMeta($resolved);
     $schema['use_shared_example']      = (int) ($schema['use_shared_example'] ?? 1);
 
     $schema['supports_user_enrichment'] = $this->payloadTransformer->supportsUserEnrichment($trigger);
@@ -503,5 +507,35 @@ class SchemasController extends WP_REST_Controller {
     }
 
     return $sanitized;
+  }
+
+  private ?ExampleResolver $resolver = null;
+
+  private function exampleResolver(): ExampleResolver {
+    return $this->resolver ??= new ExampleResolver($this->schemaRepository);
+  }
+
+  /**
+   * What the mapping UI needs in order to say whose payload this is.
+   *
+   * Null for an own or shared example — those are the customer's own data and
+   * need no framing. Present only for a library payload, where the UI has to
+   * show the provenance and mark the containers whose keys belong to this site
+   * rather than to our fixture.
+   *
+   * @param array<string, mixed> $resolved An ExampleResolver::resolve() result.
+   * @return array<string, mixed>|null
+   */
+  private function libraryMeta(array $resolved): ?array {
+    if (($resolved['source'] ?? null) !== 'library' || !is_array($resolved['library'])) {
+      return null;
+    }
+
+    return [
+      'captured_from'      => $resolved['library']['captured_from'],
+      'confidence'         => $resolved['library']['confidence'],
+      'caveat'             => $resolved['library']['caveat'],
+      'site_defined_paths' => $resolved['library']['unsafe']['site_defined'] ?? [],
+    ];
   }
 }

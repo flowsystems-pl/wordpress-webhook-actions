@@ -113,20 +113,52 @@ class SystemPromptBuilder {
   }
 
   /**
-   * The trigger names that have a real captured payload on this site. The
-   * payloads themselves are fetched on demand (a get_trigger_schema read), so
-   * the prompt only needs the names — without at least these, the model can't
-   * know a capture exists and would plan set_mapping/set_conditions blind.
+   * What the model must know when a trigger has no local capture but the hosted
+   * reference library might answer for it.
+   *
+   * Deliberately phrased as a procedure rather than a warning. "This may differ
+   * from your site" changes nobody's behaviour; "map these, never those, and
+   * prove it with test_dispatch" does.
+   */
+  private function libraryPromptBlock(): string {
+    if (!(new PayloadLibrary())->isAvailable()) {
+      return '';
+    }
+
+    return "\nA trigger with NO capture on this site may still be answerable: get_trigger_schema also consults our hosted reference library, captured on our own fixtures. So ALWAYS run get_trigger_schema before concluding a trigger cannot be mapped — do not assume from the list above."
+      . "\nWhen a result carries \"example_source\":\"library\" the shape is real but the DATA is ours, not this site's. Two rules follow, both enforced by the plugin and not merely advised:"
+      . "\n  1. Map freely from any path in that payload EXCEPT those under a path listed in \"site_defined_paths\" (typically meta_data, ACF fields, a form plugin's fields). Those containers exist on this site too, but the keys inside them are the user's own and are NOT in our copy. A set_mapping or set_conditions step that reaches into one is REFUSED and pauses the build. If the user needs such a field, say which one, and either omit it or ask them to fire the event once so their real payload is captured."
+      . "\n  2. A library-backed build MUST end with a test_dispatch before enable_webhook. The capture step is not appended for these, so test_dispatch is the only proof the mapping survives contact with the site's real data. Say so in assistant_message: you built the mapping from a reference payload and the test will confirm it."
+      . "\nAlso surface \"captured_from\" to the user when it differs from what they run — a field may have moved between versions.";
+  }
+
+  /**
+   * The trigger names that have a real captured payload on this site, and — for
+   * hosted-AI installs — the fact that a trigger without one may still be
+   * answerable from our reference library.
+   *
+   * The payloads themselves are fetched on demand (a get_trigger_schema read),
+   * so the prompt only needs the names. What it must NOT do any more is state
+   * that the list is complete: that was true before the library existed and is
+   * now false, and a model told an absolute will act on it rather than read.
    */
   private function payloadContext(): string {
     $examples = (new SchemaRepository())->latestExamplesPerTrigger(30);
-    if (empty($examples)) {
+    $library  = (new PayloadLibrary())->isAvailable();
+
+    if (empty($examples) && !$library) {
       return '';
+    }
+
+    if (empty($examples)) {
+      return "\n\nCAPTURED PAYLOADS: none on this site yet."
+        . $this->libraryPromptBlock();
     }
 
     return "\n\nTRIGGERS WITH CAPTURED PAYLOADS: " . implode(', ', array_keys($examples))
       . "\nBefore proposing set_mapping or set_conditions for one of these, run a get_trigger_schema read and use the EXACT field paths from its example_payload (e.g. \"args.0.form_id\") — never invent field names."
-      . "\nThat list is COMPLETE. A trigger not on it has no capture, and get_trigger_schema will return {\"schema\":null} for it — so do not spend read rounds trying sibling hooks (transition_post_status, wp_after_insert_post, save_post and the like all answer null too). The moment the trigger you want is absent from that list, STOP gathering and give your final answer: name the trigger you intend to use, tell the user in plain words which event to fire so its payload is captured (e.g. \"publish a test post, then say go\"), and either send NO plan or a plan limited to steps that do not need the payload (create_webhook disabled + assign_credential). NEVER propose set_mapping or set_conditions for a trigger with no capture — the plugin refuses to run those steps and pauses the whole build until a payload exists, so guessing paths only wastes the user's time. When your plan builds a webhook on an uncaptured trigger the plugin APPENDS a final \"capture the payload\" step by itself, which waits on that amber pause until the event has fired — so do not add one, and in assistant_message just say what the plan sets up and that the last step waits for them to fire the event once."
+      . $this->libraryPromptBlock()
+      . ($library ? "" : "\nThat list is COMPLETE. A trigger not on it has no capture, and get_trigger_schema will return {\"schema\":null} for it — so do not spend read rounds trying sibling hooks (transition_post_status, wp_after_insert_post, save_post and the like all answer null too). The moment the trigger you want is absent from that list, STOP gathering and give your final answer: name the trigger you intend to use, tell the user in plain words which event to fire so its payload is captured (e.g. \"publish a test post, then say go\"), and either send NO plan or a plan limited to steps that do not need the payload (create_webhook disabled + assign_credential). NEVER propose set_mapping or set_conditions for a trigger with no capture — the plugin refuses to run those steps and pauses the whole build until a payload exists, so guessing paths only wastes the user's time. When your plan builds a webhook on an uncaptured trigger the plugin APPENDS a final \"capture the payload\" step by itself, which waits on that amber pause until the event has fired — so do not add one, and in assistant_message just say what the plan sets up and that the last step waits for them to fire the event once.")
       . "\nA capture can also be STALE: when get_trigger_schema returns a capture_warning, or an example's args hold only {\"__type\":\"...\"} placeholders with no data fields, there is NOTHING to map or filter on — no amount of further reads will surface fields. Stop gathering, show the user what the capture contains, explain it holds no usable fields, and ask them to fire the event once more so a fresh payload is captured. Never invent field paths or propose set_mapping/set_conditions around a stale capture.";
   }
 

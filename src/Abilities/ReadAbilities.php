@@ -8,6 +8,7 @@ use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\LogRepository;
 use FlowSystems\WebhookActions\Repositories\CredentialRepository;
+use FlowSystems\WebhookActions\Services\ExampleResolver;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
 use FlowSystems\WebhookActions\Services\RestRouteInspector;
 use WP_Error;
@@ -128,11 +129,12 @@ class ReadAbilities {
     $repo   = new SchemaRepository();
     $schema = $webhookId > 0 ? $repo->findByWebhookAndTrigger($webhookId, $trigger) : null;
 
-    // Resolve the effective example: this webhook's own capture, or — when reuse
-    // is enabled (the default) — the latest one for the same trigger on another
-    // webhook (the do_action payload shape is trigger-global), so we don't force
-    // a fresh test.
-    $resolved = $repo->resolveExample($webhookId, $trigger, $schema);
+    // Resolve the effective example: this webhook's own capture, then a capture
+    // for the same trigger on another webhook here (the do_action payload shape
+    // is trigger-global), then — for hosted-AI installs — our reference payload
+    // for this hook, so a build no longer stalls on a trigger the site has never
+    // fired.
+    $resolved = (new ExampleResolver($repo))->resolve($webhookId, $trigger, $schema);
     if ($resolved['example'] === null) {
       // Nothing captured anywhere yet. A bare null used to send agents hunting:
       // they would spend every read round guessing sibling hooks
@@ -169,6 +171,21 @@ class ReadAbilities {
     if ($resolved['source'] === 'shared') {
       $result['borrowed_from_webhook_id'] = $resolved['from_webhook_id'];
     }
+
+    // A library payload is OUR fixture's, not this site's. Say so, in the same
+    // breath as the shape itself — the model must not treat these field paths
+    // the way it treats a real capture, and the constraint has to travel with
+    // the data rather than sit in the system prompt where it applies to every
+    // trigger equally.
+    if ($resolved['source'] === 'library' && is_array($resolved['library'])) {
+      $result['example_source']  = 'library';
+      $result['captured_from']   = $resolved['library']['captured_from'];
+      $result['confidence']      = $resolved['library']['confidence'];
+      $result['library_caveat']  = $resolved['library']['caveat'];
+      $result['site_defined_paths'] = $resolved['library']['unsafe']['site_defined'] ?? [];
+      $result['must_verify']     = $resolved['library']['verify'];
+    }
+
     return $result;
   }
 

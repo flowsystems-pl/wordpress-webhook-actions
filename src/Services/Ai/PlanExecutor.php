@@ -6,9 +6,9 @@ defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Abilities\AbilityRegistry;
 use FlowSystems\WebhookActions\Repositories\AgentConversationRepository;
-use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
+use FlowSystems\WebhookActions\Services\ExampleResolver;
 use WP_Error;
 
 /**
@@ -692,7 +692,7 @@ class PlanExecutor {
    * @return array<int, array<string, mixed>>
    */
   private function withCaptureStep(array $plan): array {
-    $repo = new SchemaRepository();
+    $resolver = new ExampleResolver();
 
     // Trigger => the webhook reference to read it against. Two sources, because
     // a build does not have to create the webhook: the agent may be finishing
@@ -752,7 +752,7 @@ class PlanExecutor {
       if (str_starts_with((string) $trigger, 'fswa_chain_link:')) {
         continue;
       }
-      if ($repo->resolveExample(is_int($webhookRef) ? $webhookRef : 0, (string) $trigger)['example'] === null) {
+      if ($resolver->resolve(is_int($webhookRef) ? $webhookRef : 0, (string) $trigger)['example'] === null) {
         $pending = ['trigger' => (string) $trigger, 'webhook_ref' => $webhookRef];
         break;
       }
@@ -959,11 +959,83 @@ class PlanExecutor {
     }
 
     $webhookId = (int) ($input['webhook_id'] ?? 0);
-    if ((new SchemaRepository())->resolveExample($webhookId, $trigger)['example'] !== null) {
-      return null;
+    $resolved  = (new ExampleResolver())->resolve($webhookId, $trigger);
+
+    if ($resolved['example'] === null) {
+      return ['kind' => 'capture_payload', 'webhook_id' => $webhookId, 'trigger' => $trigger];
     }
 
-    return ['kind' => 'capture_payload', 'webhook_id' => $webhookId, 'trigger' => $trigger];
+    // The example exists, but when it came from the hosted library the paths
+    // below a site-defined container (meta_data, ACF, a form's fields) are OUR
+    // fixture's keys, not this site's. Mapping one silently ships a null — the
+    // build looks applied and is quietly broken, which is the same failure this
+    // method already refuses for guessed paths. The prompt forbids it too;
+    // weaker models still do it once their read budget runs out, so gate it here
+    // where it cannot be talked around.
+    $offending = $this->siteDefinedSourcePaths($resolved, $input);
+
+    if ($offending !== []) {
+      return [
+        'kind'       => 'site_defined_paths',
+        'webhook_id' => $webhookId,
+        'trigger'    => $trigger,
+        'paths'      => $offending,
+      ];
+    }
+
+    return null;
+  }
+
+  /**
+   * Source paths in this step that reach into a container whose keys belong to
+   * the customer's site rather than to the reference payload we served.
+   *
+   * @param array<string, mixed> $resolved An ExampleResolver::resolve() result.
+   * @param array<string, mixed> $input
+   * @return array<int, string>
+   */
+  private function siteDefinedSourcePaths(array $resolved, array $input): array {
+    if (($resolved['source'] ?? null) !== 'library') {
+      return [];
+    }
+
+    $paths = [];
+
+    foreach ((array) ($input['mapping'] ?? []) as $row) {
+      $source = is_array($row) ? (string) ($row['source'] ?? '') : '';
+      if ($source !== '' && ExampleResolver::pathIsUnsafe($resolved, $source)) {
+        $paths[$source] = true;
+      }
+    }
+
+    foreach ($this->conditionFields((array) ($input['conditions'] ?? [])) as $field) {
+      if (ExampleResolver::pathIsUnsafe($resolved, $field)) {
+        $paths[$field] = true;
+      }
+    }
+
+    return array_keys($paths);
+  }
+
+  /**
+   * Every `field` in a conditions tree, however deeply the groups nest.
+   *
+   * @param array<string, mixed> $conditions
+   * @return array<int, string>
+   */
+  private function conditionFields(array $conditions): array {
+    $fields = [];
+
+    array_walk_recursive(
+      $conditions,
+      static function ($value, $key) use (&$fields): void {
+        if ($key === 'field' && is_string($value) && $value !== '') {
+          $fields[] = $value;
+        }
+      }
+    );
+
+    return $fields;
   }
 
   /**
