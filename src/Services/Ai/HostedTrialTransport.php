@@ -48,6 +48,10 @@ class HostedTrialTransport implements LlmTransportInterface {
       'site_url'    => home_url(),
       'purpose'     => (string) ($options['purpose'] ?? 'agent'),
       'messages'    => $this->normalizeMessages($messages),
+      // Capabilities. `docs_research` says this client understands the 202
+      // "researching_docs" handshake and will wait and re-send; without it
+      // the API never holds a turn for the API Docs Library.
+      'features'    => ['docs_research'],
     ];
 
     if ($system !== '') {
@@ -86,6 +90,12 @@ class HostedTrialTransport implements LlmTransportInterface {
     $code = (int) wp_remote_retrieve_response_code($response);
     $data = json_decode((string) wp_remote_retrieve_body($response), true);
 
+    // The API Docs Library is reading this service's reference for the first
+    // time: not an error, a wait. The orchestrator shows it and re-sends.
+    if ($code === 202 && is_array($data) && ($data['error'] ?? '') === 'researching_docs') {
+      return self::researchingError($data);
+    }
+
     if ($code < 200 || $code >= 300) {
       return $this->mapError($code, is_array($data) ? $data : []);
     }
@@ -100,11 +110,34 @@ class HostedTrialTransport implements LlmTransportInterface {
     $finish = $data['usage']['finish_reason'] ?? null;
     $this->lastResponseMeta = is_string($finish) && $finish !== '' ? ['finish_reason' => $finish] : [];
 
+    // What the API Docs Library added to this turn (service, operation,
+    // verified date, source) — the orchestrator turns it into a pill.
+    if (is_array($data['knowledge'] ?? null)) {
+      $this->lastResponseMeta['knowledge'] = $data['knowledge'];
+    }
+
     $text = (string) ($data['text'] ?? '');
 
     return $text !== ''
       ? $text
       : new WP_Error('fswa_trial_empty', __('The AI returned no text.', 'flowsystems-webhook-actions'));
+  }
+
+  /**
+   * The 202 handshake as a WP_Error the orchestrator recognises by code.
+   * Shared shape with the Pro transport: same code, same data keys.
+   *
+   * @param array<string, mixed> $data
+   */
+  public static function researchingError(array $data): WP_Error {
+    return new WP_Error('fswa_ai_researching_docs', (string) ($data['message'] ?? __('Reading this service\'s API reference…', 'flowsystems-webhook-actions')), [
+      'status'      => 202,
+      'service'     => (string) ($data['service'] ?? ''),
+      'operation'   => (string) ($data['operation'] ?? ''),
+      'retry_after' => max(5, min(60, (int) ($data['retry_after'] ?? 20))),
+      'elapsed'     => (int) ($data['elapsed'] ?? 0),
+      'max_wait'    => (int) ($data['max_wait'] ?? 90),
+    ]);
   }
 
   /**

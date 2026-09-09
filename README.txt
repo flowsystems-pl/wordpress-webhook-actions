@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -151,6 +151,12 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 == Changelog ==
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
+
+= 3.2.0 — 2026-09-09 =
+- Added: the WP Webhooks API Docs Library. When a build targets a named service — HubSpot, Airtable, Slack, Notion, Mailchimp, SendGrid, Stripe, Telegram, Pipedrive, Trello, Discord and more — WP Webhooks AI reads that service's current API reference on our server (endpoint, auth header, body envelope, request-level flags, common errors) and builds from it instead of from memory. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); the reference is injected server-side and costs about one credit per turn
+- Added: every reply built from a reference card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's documentation. A card the library researched on its own is marked auto-researched
+- Added: a service the library has not documented yet is researched on the spot from the vendor's own docs and saved for everyone. The chat shows "Reading …'s API reference for the first time" while it waits — usually under a minute — and no credits are spent on the wait. If the reference is not ready in time the build goes ahead on the model's own knowledge and says so
+- Changed: the hosted transports announce what they can do to the API (`features`), so a plugin that cannot wait for research is never held
 
 = 3.1.0 — 2026-09-07 =
 - Added: the WP Webhooks Payload Library. When a trigger has never fired on your site, Build with AI and the mapping editor now work from a reference payload captured on our own test sites — WordPress core, WooCommerce and the major form plugins, hundreds of hooks — instead of stopping to ask you to fire the event by hand. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); a lookup costs no credits, and the moment the event really fires on your site, your own capture takes over.
