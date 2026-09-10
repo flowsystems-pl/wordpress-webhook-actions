@@ -17,7 +17,7 @@ use FlowSystems\WebhookActions\Activation;
 
 defined('ABSPATH') || exit;
 
-define('FSWA_VERSION', '3.1.0');
+define('FSWA_VERSION', '3.1.1');
 define('FSWA_FILE', __FILE__);
 
 require_once __DIR__ . '/vendor/autoload.php';
