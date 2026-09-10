@@ -3,7 +3,7 @@
  * Plugin Name: Webhook Actions - build automations and integrations with AI help
  * Plugin URI: https://wpwebhooks.org/wordpress-webhook-plugin
  * Description: Describe what you want in chat — the built-in AI agent plans, builds, and tests your WordPress webhooks, integrations, and automations.
- * Version: 3.1.0
+ * Version: 3.1.1
  * Author: Mateusz Skorupa
  * Author URI: https://flowsystems.pl
  * License: GPLv2 or later
