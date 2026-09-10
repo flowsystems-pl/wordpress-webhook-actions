@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.1.0
+Stable tag: 3.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Describe an integration and the AI builds it — no API key needed. Outgoing web
 
 == Description ==
 
-**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, captures a real example payload from your site, maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
+**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
 
 📖 [Full documentation at wpwebhooks.org/docs/](https://wpwebhooks.org/docs/)
 ▶️ [Try it in your browser — no install, no signup, no API key](https://playground.wordpress.net/?blueprint-url=https://wpwebhooks.org/blueprint.json)
@@ -36,7 +36,15 @@ That makes it a no-code way to sync WordPress data outward: describe what you wa
 
 = What the AI works from =
 
-The agent doesn't guess — it works from your site's real data. It maps fields against actually captured payloads, edits existing webhooks by name or id instead of duplicating them, validates endpoints with a guarded probe (SSRF-protected, secrets always redacted), and verifies the result with a real test delivery. Every operation is also published as a WordPress Ability, so external AI tools (Claude Code, Cursor) can drive the same toolset over the Model Context Protocol (MCP) with scoped API tokens.
+The agent doesn't guess — it works from real payloads. It maps fields against actually captured payloads, edits existing webhooks by name or id instead of duplicating them, validates endpoints with a guarded probe (SSRF-protected, secrets always redacted), and verifies the result with a real test delivery. Every operation is also published as a WordPress Ability, so external AI tools (Claude Code, Cursor) can drive the same toolset over the Model Context Protocol (MCP) with scoped API tokens.
+
+= The Payload Library =
+
+Mapping fields needs an example payload, and until a trigger fires on your site there is nothing to map against — which is worst on the events that are hardest to produce on demand: a refunded order, a cancelled subscription, a deleted user.
+
+The Payload Library closes that gap with hundreds of hook payloads captured on our own test sites — WordPress core, WooCommerce, ACF and the major form plugins — so the agent can work from the real shape of an event your site has never fired. Your own capture always wins the moment the event really fires, and a reference payload is always labelled as one: the trigger panel shows a "WP Webhooks Payload Library" badge naming the plugin build it came off, and every build made from one ends with a test delivery before the webhook can go live.
+
+What a reference payload cannot know is your own keys. Fields inside containers your site defines — a form's fields, post or order meta, ACF — are never mapped from it; the agent pauses, names the paths, and asks you to fire the event once. Lookups run while Build with AI is on WP Webhooks AI (the free trial or Pro credits) and cost no credits.
 
 = The engine underneath (free) =
 
@@ -152,39 +160,6 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.1.0 — 2026-09-07 =
-- Added: the WP Webhooks Payload Library. When a trigger has never fired on your site, Build with AI and the mapping editor now work from a reference payload captured on our own test sites — WordPress core, WooCommerce and the major form plugins, hundreds of hooks — instead of stopping to ask you to fire the event by hand. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); a lookup costs no credits, and the moment the event really fires on your site, your own capture takes over.
-- Added: a reference payload is always labelled as one. The webhook editor shows a "WP Webhooks Payload Library" badge on the trigger, with the plugin build the payload was captured on; Build with AI shows the same badge on every step built from it and on the test delivery that proves it.
-- Added: fields inside containers only your site defines — a form's fields, order meta, ACF — are never mapped from a reference payload. Build with AI pauses on that step, names the paths, and asks you to fire the event once so the mapping is built from your real fields; the webhook editor names those containers next to the payload.
-- Changed: a build made from a reference payload always ends with a test delivery, so the mapping is checked against your endpoint before the webhook can go live.
-- Fixed: the plugin's own filters (`fswa_payload`, `fswa_webhook_payload`, `fswa_webhook_url`, `fswa_normalize_object`) were offered as webhook triggers. Picking one silently nulled the payload of every delivery on the site; they are no longer listed.
-- Fixed: a trigger argument that is an object without a string form could throw inside dispatch and take the triggering request down with it. Such values are now reduced to a safe scalar and the delivery goes out.
-- Fixed: after a plugin update the browser could keep running the previous admin bundle from its cache; the bundle's cache-buster now changes with every build.
-- Changed: reading a trigger's schema no longer rescans every active plugin to name the owning plugin's version — a first lookup that took about three seconds now takes well under one.
-
-= 3.0.1 — 2026-09-04 =
-- Fixed: the main admin navigation wrapped onto several cramped rows on phone-width screens; it now collapses into a single dropdown showing the current section.
-- Fixed: Build with AI's active-model bar (provider, credits, "Change model") could clip or overlap on narrow screens instead of wrapping onto its own lines.
-- Fixed: the Webhooks list header buttons and the retry backoff delay preview (Settings and the webhook editor) could overflow the screen on mobile.
-- Fixed: when a test delivery is rejected for missing authentication, Build with AI now offers the same pick-or-create credential control a failed connection check already used, instead of guessing through stored credentials on its own.
-- Added: press Tab on Build with AI's empty prompt box to accept the example sentence currently being typed, instead of tabbing away from it.
-
-= 3.0.0 — 2026-09-02 =
-- Changed: Code Glue, dynamic URL templates, per-webhook retry limits and backoff strategies, unlimited AND/OR conditions and publishing a build are now part of the free plugin. They used to require Webhook Actions Pro. Nothing is lost on upgrade — existing snippets, assignments and retry settings keep working exactly as they were.
-- Added: Code Glue — PHP snippets that reshape the payload before a delivery or run side effects after the response — with a preview that runs your code against a real captured payload before you assign it.
-- Added: dynamic `{{ field.path }}` templates in the endpoint URL, resolved against the payload at dispatch time.
-- Added: per-webhook retry limit and backoff strategy (exponential, linear or fixed), each falling back to a site-wide default you can set in Settings.
-- Added: conditions are no longer limited to a single rule — build as many as you need, group them, and match on ANY or ALL.
-- Added: publish a build to wpwebhooks.org and earn AI credits, from any site, including one running only the free AI trial. Publishing is not offered from a WordPress Playground demo or from an address the internet cannot reach, and the library keeps one page per recipe — if a build like yours is already there, you are pointed at it rather than adding a near-identical second page.
-- Security: writing a Code Glue snippet now requires the same capability WordPress uses for editing plugin code (`edit_plugins`), and is refused entirely on sites that set DISALLOW_FILE_EDIT — that is a wp-config choice and nothing in the plugin can override it. Sites that only set DISALLOW_FILE_MODS (common on managed hosts, where it means "do not install plugins from the dashboard") are unaffected. API tokens — including connected AI tools over MCP — cannot write snippets unless you explicitly allow it in Settings. Reading snippets is unchanged, and snippets already assigned keep running in every case.
-- Note: Webhook Actions Pro 1.9.0 or later is required alongside this release. An older Pro keeps running its own copies of the moved features until you update it, so nothing breaks in the meantime.
-
-= 2.9.0 — 2026-08-30 =
-- Added: connect an external AI tool to your site over MCP. Everything Build with AI can do — reading your triggers, mapping fields, creating and testing webhooks — is now reachable from Claude Code, Cursor and Claude on the web, driving the same toolset against your real configuration. See the setup guides at https://wpwebhooks.org/docs/
-- Fixed: the abilities registered since 2.0.0 never actually reached the WordPress Abilities API, so nothing could discover them. Three separate causes, all silent: ability names used underscores, which core rejects; the category was registered on the wrong hook and was dropped along with everything assigned to it; and the metadata that makes an ability visible over REST and MCP was missing. All 26 are now discoverable and executable.
-- Fixed: abilities that take no arguments — listing your webhooks, triggers or snippets — failed over MCP with a generic error, while abilities taking a parameter worked. Their input schema declared no default, so an empty argument set never validated.
-- Fixed: the AI-facing webhook read now masks a manually entered authorization header, matching what the plugin's own REST endpoints have always done. This only applied to webhooks using the manual header field rather than the Credentials Vault — vault secrets are stored encrypted and have always come back as names and masked hints. Deliveries are unaffected and still send the real header.
-- Added: destructive abilities now require explicit confirmation when called from outside the plugin. Deleting a webhook, taking one live, firing a test delivery or provisioning an application password are refused unless the call confirms the intent, so a connected AI cannot perform them on its own initiative.
-- Added: API tokens now work against the Abilities REST route, honouring their scope exactly as the plugin's own endpoints do — a read token cannot reach a write ability, and the agent token can build without ever revealing a stored secret.
-- Added: a setting to hold connected AI tools to read-only. Building is on by default; switching it off leaves reads working and does not affect Build with AI.
-- Changed: listing webhooks now returns a short snippet of each description rather than the whole thing, so a site with long documented builds no longer sends thousands of words of context on every AI read. Fetching a single webhook still returns the full description.
+= 3.1.1 — 2026-09-10 =
+- Fixed: hooks whose name a plugin builds at runtime were offered as webhook triggers even when they are filters. Advanced Custom Fields is the clearest case — `acf/update_value/type=select` and `acf/validate_field/type=text` were listed, and a webhook on a filter takes the handler's empty return as the filtered value, so choosing one silently destroyed the field being saved. Discovery now recognises a filter name assembled from fragments, and a hook nested under a confirmed filter, and refuses both. 282 such names were being offered on a site running 20 plugins; no real trigger was lost.
+- Fixed: the default retry backoff schedule was documented incorrectly.
