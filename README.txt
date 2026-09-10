@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.1.0
+Stable tag: 3.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Describe an integration and the AI builds it — no API key needed. Outgoing web
 
 == Description ==
 
-**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, captures a real example payload from your site, maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
+**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
 
 📖 [Full documentation at wpwebhooks.org/docs/](https://wpwebhooks.org/docs/)
 ▶️ [Try it in your browser — no install, no signup, no API key](https://playground.wordpress.net/?blueprint-url=https://wpwebhooks.org/blueprint.json)
@@ -36,7 +36,15 @@ That makes it a no-code way to sync WordPress data outward: describe what you wa
 
 = What the AI works from =
 
-The agent doesn't guess — it works from your site's real data. It maps fields against actually captured payloads, edits existing webhooks by name or id instead of duplicating them, validates endpoints with a guarded probe (SSRF-protected, secrets always redacted), and verifies the result with a real test delivery. Every operation is also published as a WordPress Ability, so external AI tools (Claude Code, Cursor) can drive the same toolset over the Model Context Protocol (MCP) with scoped API tokens.
+The agent doesn't guess — it works from real payloads. It maps fields against actually captured payloads, edits existing webhooks by name or id instead of duplicating them, validates endpoints with a guarded probe (SSRF-protected, secrets always redacted), and verifies the result with a real test delivery. Every operation is also published as a WordPress Ability, so external AI tools (Claude Code, Cursor) can drive the same toolset over the Model Context Protocol (MCP) with scoped API tokens.
+
+= The Payload Library =
+
+Mapping fields needs an example payload, and until a trigger fires on your site there is nothing to map against — which is worst on the events that are hardest to produce on demand: a refunded order, a cancelled subscription, a deleted user.
+
+The Payload Library closes that gap with hundreds of hook payloads captured on our own test sites — WordPress core, WooCommerce, ACF and the major form plugins — so the agent can work from the real shape of an event your site has never fired. Your own capture always wins the moment the event really fires, and a reference payload is always labelled as one: the trigger panel shows a "WP Webhooks Payload Library" badge naming the plugin build it came off, and every build made from one ends with a test delivery before the webhook can go live.
+
+What a reference payload cannot know is your own keys. Fields inside containers your site defines — a form's fields, post or order meta, ACF — are never mapped from it; the agent pauses, names the paths, and asks you to fire the event once. Lookups run while Build with AI is on WP Webhooks AI (the free trial or Pro credits) and cost no credits.
 
 = The engine underneath (free) =
 
@@ -151,6 +159,11 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 == Changelog ==
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
+
+= 3.2.0 =
+- Fixed: hooks whose name a plugin builds at runtime were offered as webhook triggers even when they are filters. Advanced Custom Fields is the clearest case — `acf/update_value/type=select` and `acf/validate_field/type=text` were listed, and a webhook on a filter takes the handler's empty return as the filtered value, so choosing one silently destroyed the field being saved. Discovery now recognises a filter name assembled from fragments, and a hook nested under a confirmed filter, and refuses both. 282 such names were being offered on a site running 20 plugins; no real trigger was lost.
+- Added: reference payloads for Advanced Custom Fields in the WP Webhooks Payload Library, including `acf/save_post`.
+- Fixed: the default retry backoff schedule was documented incorrectly.
 
 = 3.1.0 — 2026-09-07 =
 - Added: the WP Webhooks Payload Library. When a trigger has never fired on your site, Build with AI and the mapping editor now work from a reference payload captured on our own test sites — WordPress core, WooCommerce and the major form plugins, hundreds of hooks — instead of stopping to ask you to fire the event by hand. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); a lookup costs no credits, and the moment the event really fires on your site, your own capture takes over.
