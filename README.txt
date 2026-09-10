@@ -160,6 +160,6 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.1.1 =
+= 3.1.1 — 2026-09-10 =
 - Fixed: hooks whose name a plugin builds at runtime were offered as webhook triggers even when they are filters. Advanced Custom Fields is the clearest case — `acf/update_value/type=select` and `acf/validate_field/type=text` were listed, and a webhook on a filter takes the handler's empty return as the filtered value, so choosing one silently destroyed the field being saved. Discovery now recognises a filter name assembled from fragments, and a hook nested under a confirmed filter, and refuses both. 282 such names were being offered on a site running 20 plugins; no real trigger was lost.
 - Fixed: the default retry backoff schedule was documented incorrectly.
