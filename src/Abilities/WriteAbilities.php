@@ -4,6 +4,7 @@ namespace FlowSystems\WebhookActions\Abilities;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\CredentialRepository;
@@ -48,7 +49,7 @@ class WriteAbilities {
 
   public function createWebhook(array $input): array|WP_Error {
     $name = sanitize_text_field((string) ($input['name'] ?? ''));
-    $url  = esc_url_raw((string) ($input['endpoint_url'] ?? ''));
+    $url  = UrlTemplate::sanitize((string) ($input['endpoint_url'] ?? ''));
     if ($name === '' || $url === '') {
       return $this->invalid(__('name and endpoint_url are required.', 'flowsystems-webhook-actions'));
     }
@@ -60,8 +61,8 @@ class WriteAbilities {
       'http_method'        => strtoupper((string) ($input['http_method'] ?? 'POST')),
       'triggers'           => array_map('sanitize_text_field', (array) ($input['triggers'] ?? [])),
       'auth_credential_id' => isset($input['auth_credential_id']) ? (int) $input['auth_credential_id'] : null,
-      'custom_headers'     => $input['custom_headers'] ?? null,
-      'url_params'         => $input['url_params'] ?? null,
+      'custom_headers'     => UrlTemplate::normalizePairs($input['custom_headers'] ?? null),
+      'url_params'         => UrlTemplate::normalizePairs($input['url_params'] ?? null),
       'is_synchronous'     => isset($input['is_synchronous']) ? (int) (bool) $input['is_synchronous'] : 0,
       // Always created disabled — the agent must explicitly enable (with confirm).
       'is_enabled'         => 0,
@@ -118,7 +119,12 @@ class WriteAbilities {
       $data['name'] = sanitize_text_field((string) $data['name']);
     }
     if (isset($data['endpoint_url'])) {
-      $data['endpoint_url'] = esc_url_raw((string) $data['endpoint_url']);
+      $data['endpoint_url'] = UrlTemplate::sanitize((string) $data['endpoint_url']);
+    }
+    foreach (['custom_headers', 'url_params'] as $pairs) {
+      if (array_key_exists($pairs, $data)) {
+        $data[$pairs] = UrlTemplate::normalizePairs($data[$pairs]);
+      }
     }
     if (isset($data['triggers'])) {
       $data['triggers'] = array_map('sanitize_text_field', (array) $data['triggers']);

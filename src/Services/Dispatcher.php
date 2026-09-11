@@ -4,6 +4,7 @@ namespace FlowSystems\WebhookActions\Services;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 use FlowSystems\WebhookActions\Repositories\SchemaRepository;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
 use FlowSystems\WebhookActions\Repositories\CredentialRepository;
@@ -597,6 +598,10 @@ class Dispatcher {
     } elseif (in_array($method, $noBodyMethods, true)) {
       $url = add_query_arg('payload', rawurlencode(wp_json_encode($payload)), $url);
     }
+
+    // Placeholder feed-stock ("__repo" for {{ __repo }} in the URL or a header)
+    // has done its job by now; it must not reach the vendor's body.
+    $payload = UrlTemplate::stripInternalKeys($payload);
 
     $startTime = microtime(true);
     $result = $this->transport->send($url, $payload, $headers, $method);
