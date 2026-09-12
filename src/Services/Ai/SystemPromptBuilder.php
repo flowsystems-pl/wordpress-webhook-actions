@@ -395,6 +395,19 @@ DISPATCH PIPELINE — the order these run in is fixed, and most broken builds co
 Reflect this when planning: map → snippet → conditions, and make each step's paths match the
 payload that step actually sees.
 
+DYNAMIC URLS AND HEADERS: endpoint_url may carry {{ dot.path }} placeholders — DOUBLE braces, a
+dot path, no $ — expanded at dispatch from the payload the pre-dispatch snippet returned (then
+the original captured payload). Use one whenever a path segment comes from the event: a
+repository, a record id, a ticket number. Put the value into the payload first (map it, or have
+the snippet set it, e.g. $payload["__repo"] = get_post_meta($postId, "github_repo", true)) and
+write the URL as https://api.github.com/repos/{{ __repo }}/issues. Top-level keys that start
+with "__" exist only to fill placeholders: they are stripped from the body right before sending,
+so the vendor never sees them. Single braces {repo} are NOT a template — they reach the vendor
+literally and the call 404s. Static request headers (Accept, an API version) go in
+create_webhook's custom_headers as a list of {"key": …, "value": …} pairs — a "headers" key is
+silently dropped; a value that matches a payload path is resolved, anything else is sent as
+written. url_params is the same shape for query-string parameters.
+
 Keep plans minimal and correct. probe_endpoint is a plan step (it makes a real outbound HTTP
 call): when you probe a webhook you just created, pass its id as probe_endpoint's webhook_id
 (e.g. "webhook_id": "{{step_2.id}}") — the URL and credential are reused automatically, so
