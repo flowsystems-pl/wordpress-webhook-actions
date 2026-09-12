@@ -14,6 +14,8 @@ Describe an integration and the AI builds it — no API key needed. Outgoing web
 
 **Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
 
+**It reads the API before it builds.** Name HubSpot, OpenAI, Slack, Stripe, Notion or any of the 300+ services in the [WP Webhooks API Docs Library](https://wpwebhooks.org/api-library/) and the agent works from that vendor's *current* API reference — endpoint, auth header, body envelope, the errors people actually hit — not from the model's memory of it. A service the library has never seen is researched from the vendor's own docs on the spot, and every reply built this way says so.
+
 📖 [Full documentation at wpwebhooks.org/docs/](https://wpwebhooks.org/docs/)
 ▶️ [Try it in your browser — no install, no signup, no API key](https://playground.wordpress.net/?blueprint-url=https://wpwebhooks.org/blueprint.json)
 
@@ -45,6 +47,12 @@ Mapping fields needs an example payload, and until a trigger fires on your site 
 The Payload Library closes that gap with hundreds of hook payloads captured on our own test sites — WordPress core, WooCommerce, ACF and the major form plugins — so the agent can work from the real shape of an event your site has never fired. Your own capture always wins the moment the event really fires, and a reference payload is always labelled as one: the trigger panel shows a "WP Webhooks Payload Library" badge naming the plugin build it came off, and every build made from one ends with a test delivery before the webhook can go live.
 
 What a reference payload cannot know is your own keys. Fields inside containers your site defines — a form's fields, post or order meta, ACF — are never mapped from it; the agent pauses, names the paths, and asks you to fire the event once. Lookups run while Build with AI is on WP Webhooks AI (the free trial or Pro credits) and cost no credits.
+
+= The API Docs Library =
+
+A language model remembers an API the way it was documented when the model was trained: an old version path, a body envelope that has since changed, a required field it never saw. Build with AI does not build from that memory. When a prompt names a service the library knows — HubSpot, Airtable, Slack, Notion, Stripe, Shopify, OpenAI, Anthropic, Gemini and [300+ more](https://wpwebhooks.org/api-library/) — WP Webhooks AI reads that service's current reference card on our server and puts it in front of the model before it plans: the exact endpoint and method, how the auth token enters the plan (as a credential step, not a question in chat), the body envelope, request-level flags, and the 4xx responses that come up in practice.
+
+A service nobody has a card for yet is researched on the spot from the vendor's own documentation — the chat says "Reading …'s API reference for the first time" while it waits, usually under a minute, and the wait costs no credits — and the card is kept for everyone. Every reply built from a card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's page. Available while Build with AI runs on WP Webhooks AI (the free trial or Pro credits); about one credit on the turn that uses a card.
 
 = The engine underneath (free) =
 
@@ -160,7 +168,7 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.2.0 — 2026-09-09 =
+= 3.2.0 — 2026-09-12 =
 - Added: the WP Webhooks API Docs Library. When a build targets a named service — HubSpot, Airtable, Slack, Notion, Mailchimp, SendGrid, Stripe, Telegram, Pipedrive, Trello, Discord and more — WP Webhooks AI reads that service's current API reference on our server (endpoint, auth header, body envelope, request-level flags, common errors) and builds from it instead of from memory. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); the reference is injected server-side and costs about one credit per turn
 - Added: every reply built from a reference card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's documentation. A card the library researched on its own is marked auto-researched
 - Added: a service the library has not documented yet is researched on the spot from the vendor's own docs and saved for everyone. The chat shows "Reading …'s API reference for the first time" while it waits — usually under a minute — and no credits are spent on the wait. If the reference is not ready in time the build goes ahead on the model's own knowledge and says so
@@ -168,7 +176,5 @@ For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.
 - Changed: Build with AI now adds a credential step for any destination that needs a token — HubSpot, Airtable, Slack, an n8n header — and lets you pick or create it in the plan review, instead of asking in chat whether you have one
 - Fixed: a webhook URL carrying a `{{ placeholder }}` — the per-event path segment feature, e.g. `https://api.github.com/repos/{{ __repo }}/issues` — lost its braces when saved through Build with AI, so the call went to a literal path. Templates now survive the save, and payload keys that start with `__` are stripped from the body right before sending, so a value that only exists to fill the URL never reaches the vendor
 - Changed: Build with AI is told how dynamic URLs work (double braces, dot path, value put into the payload first) and that static headers belong in `custom_headers` as key/value pairs, which it can now also write as a plain map
-
-= 3.1.1 — 2026-09-10 =
-- Fixed: hooks whose name a plugin builds at runtime were offered as webhook triggers even when they are filters. Advanced Custom Fields is the clearest case — `acf/update_value/type=select` and `acf/validate_field/type=text` were listed, and a webhook on a filter takes the handler's empty return as the filtered value, so choosing one silently destroyed the field being saved. Discovery now recognises a filter name assembled from fragments, and a hook nested under a confirmed filter, and refuses both. 282 such names were being offered on a site running 20 plugins; no real trigger was lost.
-- Fixed: the default retry backoff schedule was documented incorrectly.
+- Fixed: a static header value that happens to contain a dot — `application/vnd.github+json`, a version string — was flagged in the webhook form as a payload path not found in the capture. Only something shaped like a path (`args.0.form_id`) is checked now, and the warning says the value goes out as text
+- Fixed: retrying or replaying deliveries from the logs looked like it did nothing on sites without External Cron. The job was re-queued but waited for the next WP-Cron visit. Every retry and replay — single or bulk — now says how many deliveries it queued and offers to run them right away; bulk replay's "Execute now" button actually had nothing to execute before; and WP-Cron is nudged after queuing so a quiet site delivers within the minute anyway
