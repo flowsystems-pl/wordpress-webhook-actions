@@ -24,7 +24,11 @@ const update = (i, field, val) => {
   emit('update:modelValue', copy);
 };
 
-const isDotPath = (val) => val && val.includes('.') && !/\s/.test(val);
+// Only something shaped like a payload path gets checked against the capture:
+// identifier segments joined by dots (`args.0.form_id`). A static value that
+// merely contains a dot — `application/vnd.github+json`, `1.0`, an email — is
+// sent as text by the dispatcher and must not be flagged as a missing path.
+const isDotPath = (val) => typeof val === 'string' && /^[A-Za-z0-9_$-]+(\.[A-Za-z0-9_$-]+)+$/.test(val);
 
 const resolveByPath = (obj, path) => {
   if (!obj || !path) return undefined;
@@ -76,7 +80,7 @@ const isKeyInvalid = (key) => key && !/^[a-zA-Z0-9\-_]+$/.test(key);
         <AlertTriangle
           v-if="isPathMissing(row.value)"
           class="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-orange-500"
-          :title="__('Path not found in captured payload')"
+          :title="__('Path not found in captured payload — this value will be sent as static text')"
         />
       </div>
       <Button type="button" variant="ghost" size="icon" class="shrink-0" @click="remove(i)">
