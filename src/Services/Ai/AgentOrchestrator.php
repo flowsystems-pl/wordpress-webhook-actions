@@ -37,6 +37,13 @@ class AgentOrchestrator {
   private const ENVELOPE_REPAIR_MAX = 1;
 
   /**
+   * How long one turn may wait for the API Docs Library to research a service
+   * it has never documented. The API gives up holding the turn after its own
+   * max_wait (~90s) and answers without docs; this is the backstop above it.
+   */
+  private const DOCS_RESEARCH_WAIT_MAX = 150;
+
+  /**
    * Sent back with the model's own prose reply when it breaks the JSON
    * contract. It names the consequence (nothing runs) rather than restating
    * the schema — the system prompt already carries the schema, and repeating
@@ -141,6 +148,13 @@ TXT;
     $repair  = [];
     $repairs = 0;
 
+    // API Docs Library bookkeeping: the cards the API injected across the
+    // turn's rounds (for the pill), whether research was wanted and did not
+    // deliver, and how long this turn has already waited for it.
+    $apiDocs      = [];
+    $researchFlag = null;
+    $waited       = 0;
+
     // A turn can be several model round-trips: while the envelope asks for
     // "reads" (read-only abilities), execute them locally, feed the results
     // back, and ask again. Bounded, so the whole turn stays one HTTP request.
@@ -157,6 +171,39 @@ TXT;
       $raw     = $transport->generateText($system, $sent, $options);
       $latency = (int) round((microtime(true) - $started) * 1000);
 
+      // The API is reading a third-party API's reference for the first time
+      // and asked us to wait. Show that in the chat (the UI polls the
+      // transcript while a turn runs), sleep, and re-send the same round.
+      if (is_wp_error($raw) && $raw->get_error_code() === 'fswa_ai_researching_docs' && $waited < self::DOCS_RESEARCH_WAIT_MAX) {
+        $data       = (array) $raw->get_error_data();
+        $retryAfter = (int) ($data['retry_after'] ?? 20);
+        $waited    += $retryAfter;
+
+        $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
+          'iteration'   => $iteration,
+          'researching' => ['service' => $data['service'] ?? '', 'operation' => $data['operation'] ?? '', 'elapsed' => $data['elapsed'] ?? 0],
+        ]);
+
+        $transcript   = self::withoutResearching($transcript);
+        $transcript[] = [
+          'role'        => 'assistant',
+          'content'     => $raw->get_error_message(),
+          // Excluded from model replay like a transport-failure notice, and
+          // removed again before the turn's final persist.
+          'error'       => true,
+          'researching' => ['service' => (string) ($data['service'] ?? ''), 'operation' => (string) ($data['operation'] ?? '')],
+        ];
+        $this->conversations->update($conversationId, ['transcript' => $transcript]);
+
+        if (function_exists('set_time_limit')) {
+          // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- The wait is bounded by DOCS_RESEARCH_WAIT_MAX; without this the turn dies mid-wait on hosts with a short default.
+          @set_time_limit($retryAfter + 180);
+        }
+        sleep($retryAfter);
+        $iteration--;
+        continue;
+      }
+
       if (is_wp_error($raw)) {
         $this->trace->record($this->traceBase($conversationId, $transport, $system, $sent, $options, $latency) + [
           'iteration'  => $iteration,
@@ -168,6 +215,19 @@ TXT;
         // reads — before this, a mid-turn failure silently discarded it all.
         $this->persistFailedTurn($conversationId, $conversation, $transport, $transcript, $userMessage, $raw);
         return $raw;
+      }
+
+      // The round answered: drop any "researching…" notice and collect what
+      // the API Docs Library added to it.
+      $transcript = self::withoutResearching($transcript);
+      $knowledge  = (array) ($transport->lastResponseMeta()['knowledge'] ?? []);
+      foreach ((array) ($knowledge['api_docs'] ?? []) as $doc) {
+        if (is_array($doc) && !empty($doc['service'])) {
+          $apiDocs[(string) $doc['service'] . '/' . (string) ($doc['operation'] ?? '')] = $doc;
+        }
+      }
+      if (!empty($knowledge['api_docs_research'])) {
+        $researchFlag = (string) $knowledge['api_docs_research'];
       }
 
       $envelope = $this->parseEnvelope($raw);
@@ -251,9 +311,21 @@ TXT;
       $notice = $notice === null ? $droppedNotice : $notice . ' ' . $droppedNotice;
     }
 
+    // Research was wanted for a service we had no card for, and it did not
+    // land in time (or failed): the plan below rests on the model's own
+    // knowledge of that API, and the user should know before trusting it.
+    if ($researchFlag !== null && $apiDocs === []) {
+      $researchNotice = __('The API Docs Library tried to read this service\'s reference but it was not ready in time, so this plan relies on the model\'s own knowledge of that API. Test before enabling.', 'flowsystems-webhook-actions');
+      $notice = $notice === null ? $researchNotice : $notice . ' ' . $researchNotice;
+    }
+
     $finalEntry = $this->assistantEntry($envelope, $this->foldReply($assistantText, $clarifying));
     if ($notice !== null) {
       $finalEntry['notice'] = $notice;
+    }
+    if ($apiDocs !== []) {
+      // For the pill: which reference cards the API injected into this turn.
+      $finalEntry['api_docs'] = array_values($apiDocs);
     }
     $transcript[] = $finalEntry;
 
@@ -286,7 +358,19 @@ TXT;
       'transport'            => $transport->id(),
       'model'                => $transport->model(),
       'notice'               => $notice,
+      'api_docs'             => array_values($apiDocs),
     ];
+  }
+
+  /**
+   * The transcript without the transient "reading this service's API
+   * reference…" notices a turn shows while it waits for the API Docs Library.
+   *
+   * @param array<int, array<string, mixed>> $transcript
+   * @return array<int, array<string, mixed>>
+   */
+  private static function withoutResearching(array $transcript): array {
+    return array_values(array_filter($transcript, static fn($entry) => empty($entry['researching'])));
   }
 
   /**
@@ -475,6 +559,7 @@ TXT;
    * @param array<int, array<string, mixed>> $transcript
    */
   private function persistFailedTurn(int $conversationId, array $conversation, LlmTransportInterface $transport, array $transcript, string $userMessage, WP_Error $error): void {
+    $transcript   = self::withoutResearching($transcript);
     $transcript[] = [
       'role'    => 'assistant',
       'content' => sprintf(
@@ -778,6 +863,7 @@ TXT;
       'latency_ms'      => $latencyMs,
       'temperature'     => $options['temperature'] ?? null,
       'finish_reason'   => $transport->lastResponseMeta()['finish_reason'] ?? null,
+      'api_docs'        => $transport->lastResponseMeta()['knowledge']['api_docs'] ?? null,
       'system'          => $system,
       'messages'        => array_values($sent),
       'request'         => $transport->lastRequest(),

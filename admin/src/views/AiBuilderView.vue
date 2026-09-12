@@ -16,6 +16,7 @@ import {
   History,
   KeyRound,
   ExternalLink,
+  BookOpen,
 } from 'lucide-vue-next';
 import { Button, Input, Switch, Dialog } from '@/components/ui';
 import ProviderLogo from '@/components/ProviderLogo.vue';
@@ -805,7 +806,7 @@ async function dispatchMessage(text, origin = '') {
       if (res.activity?.length) {
         transcript.value.push({ role: 'tool', reads: res.activity });
       }
-      transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions), notice: res.notice || undefined });
+      transcript.value.push({ role: 'assistant', content: foldReply(res.assistant_message, res.clarifying_questions), notice: res.notice || undefined, api_docs: res.api_docs?.length ? res.api_docs : undefined });
     }
     // Only swap the plan when the reply carries a new one — a clarifying-only
     // reply must not blank out the progress aside (mirrors server persistence,
@@ -1259,12 +1260,37 @@ async function scrollDown() {
                   <div class="whitespace-pre-wrap font-mono text-xs text-muted-foreground">{{ m.content }}</div>
                 </div>
               </div>
+              <!-- The API Docs Library is reading a service's reference for the
+                   first time. A transient entry the server writes while the
+                   turn waits, and removes once the reply lands. -->
+              <div v-else-if="m.researching" class="flex justify-start">
+                <div class="max-w-[80%] flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+                  <Loader2 class="w-4 h-4 shrink-0 animate-spin" />
+                  <span>{{ m.content }}</span>
+                </div>
+              </div>
               <div v-else-if="m.content"
                 :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
                 <div :class="['max-w-[80%] min-w-0 rounded-lg px-3 py-2 text-sm',
                   m.role === 'user' ? 'bg-primary text-primary-foreground whitespace-pre-wrap' : 'bg-muted text-foreground']">
                   <ChatMarkdown v-if="m.role === 'assistant'" :text="m.content" :animate="i >= revealFrom" />
                   <template v-else>{{ m.content }}</template>
+                </div>
+              </div>
+              <!-- The reply was built against a reference card from the WP Webhooks
+                   API Docs Library (injected server-side), not from the model's
+                   memory of the service's API. Same badge family as the Payload
+                   Library one on the plan steps. -->
+              <div v-if="m.api_docs?.length" class="flex justify-start">
+                <div class="max-w-[80%] flex flex-wrap items-center gap-x-2 gap-y-1 px-1 text-[11px] text-muted-foreground">
+                  <span class="inline-flex items-center gap-1 rounded bg-yellow-500/15 px-1.5 py-0.5 font-medium text-yellow-700 dark:text-yellow-400"
+                    :title="__('The AI read this reference on our server — the request shape below comes from the vendor\'s documentation, not from memory.')">
+                    <BookOpen class="w-3 h-3" /> {{ __('WP Webhooks API Docs Library') }}
+                  </span>
+                  <a v-for="(d, j) in m.api_docs" :key="j" :href="d.docs_url" target="_blank" rel="noopener noreferrer"
+                    class="underline decoration-dotted underline-offset-2 hover:text-foreground">
+                    {{ d.service }} — {{ d.operation }}<template v-if="d.verified_at"> · {{ sprintf(__('verified %s'), d.verified_at) }}</template><template v-if="d.source === 'researched'"> · {{ __('auto-researched') }}</template>
+                  </a>
                 </div>
               </div>
               <!-- Provider fallback notice: the selected model failed, another answered -->
