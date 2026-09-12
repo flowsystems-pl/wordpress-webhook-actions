@@ -296,6 +296,23 @@ class QueueService {
   }
 
   /**
+   * Ask WP-Cron to run now, so a job that was just (re)queued from the admin
+   * does not sit until the next visitor on a quiet site. The queue drains on
+   * the every-minute fswa_process_queue event; without traffic that event is
+   * simply overdue, and spawn_cron() fires it in a non-blocking request. A
+   * no-op when WP-Cron is disabled — a system cron or External Cron already
+   * picks the job up on its own schedule.
+   */
+  public function nudge(): void {
+    if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+      return;
+    }
+    if (function_exists('spawn_cron')) {
+      spawn_cron();
+    }
+  }
+
+  /**
    * Get the repository instance
    *
    * @return QueueRepository
