@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 2.6.0\n"
+"with AI help 3.2.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,12 +11,20 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-03T11:02:55+00:00\n"
+"POT-Creation-Date: 2026-09-12T18:16:49+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
 "Language: zh_CN\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: src/Abilities/AbilityRegistrar.php:128
+#. translators: %s: ability name
+#, php-format
+msgid ""
+"\"%s\" changes or deletes live data. Re-send the same call with "
+"\"confirmed\": true once a human has approved it."
+msgstr "“%s” 会更改或删除线上数据。请在人工批准后，带上 \"confirmed\": true 重新发送同一调用。"
 
 #: admin/src/components/ImportDialog.vue
 msgid "%1$d webhook(s) and %2$d chain(s) to import."
@@ -177,6 +185,10 @@ msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] "%d 天"
 
+#: admin/src/views/LogsList.vue
+msgid "%d deliveries queued"
+msgstr "已将 %d 次投递加入队列"
+
 #: admin/src/components/ImportDialog.vue
 msgid "%d duplicate(s) skipped."
 msgstr "已跳过 %d 个重复项。"
@@ -185,6 +197,10 @@ msgstr "已跳过 %d 个重复项。"
 msgid "%d entry"
 msgid_plural "%d entries"
 msgstr[0] "%d 个条目"
+
+#: admin/src/views/LogsList.vue
+msgid "%d events replayed"
+msgstr "已重放 %d 个事件"
 
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "%d hour"
@@ -200,6 +216,16 @@ msgstr[0] "将移除 %d 个连接"
 msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] "%d 分钟"
+
+#: admin/src/views/LogsList.vue
+msgid ""
+"%d of the selected entries could not be queued: no queue job is left for "
+"them."
+msgstr "所选条目中有 %d 条无法加入队列：它们已没有对应的队列任务。"
+
+#: admin/src/views/LogsList.vue
+msgid "%d retries queued"
+msgstr "已将 %d 次重试加入队列"
 
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "%d second"
@@ -219,11 +245,6 @@ msgstr[0] "已选择 %d 个触发器"
 msgid "%d webhook"
 msgid_plural "%d webhooks"
 msgstr[0] "%d 个 Webhook"
-
-#: admin/src/views/WebhooksList.vue
-msgid "%d webhook uses Webhook Actions Pro features that are not running"
-msgid_plural "%d webhooks use Webhook Actions Pro features that are not running"
-msgstr[0] "%d 个 Webhook 使用了未运行的 Webhook Actions Pro 功能"
 
 #: admin/src/components/ImportDialog.vue
 msgid "%d webhook(s) already exist here (same UUID)."
@@ -253,9 +274,17 @@ msgstr "第 %s 次重试"
 msgid "%s auth"
 msgstr "%s 认证"
 
-#: admin/src/views/AiBuilderView.vue
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "%s credits left"
 msgstr "剩余 %s 积分"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "%s credits left on your free trial."
+msgstr "你的免费试用还剩 %s 个积分。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "%s free credits"
+msgstr "%s 个免费积分"
 
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
@@ -272,6 +301,10 @@ msgstr "（本地，不计入）"
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "(no output)"
 msgstr "（无输出）"
+
+#: src/Abilities/ReadAbilities.php:154
+msgid "(none yet on this site)"
+msgstr "（本站点尚无）"
 
 #: admin/src/components/MappingEditor.vue
 msgid "(param name)"
@@ -298,11 +331,11 @@ msgstr "此文件中有一条链没有名称，未被导入。"
 msgid "A chain with that name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:193
+#: src/Abilities/WriteAbilities.php:211
 msgid "A chain with this name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:317
+#: src/Abilities/WriteAbilities.php:335
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -329,7 +362,7 @@ msgid ""
 "on itself."
 msgstr "“%s”中的一跳已被略过，因为它会让链形成循环。"
 
-#: src/Api/AgentController.php:380
+#: src/Api/AgentController.php:443
 msgid "A message is required."
 msgstr "消息为必填项。"
 
@@ -337,7 +370,7 @@ msgstr "消息为必填项。"
 msgid "A named header such as X-API-Key"
 msgstr "命名标头，例如 X-API-Key"
 
-#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+#: admin/src/views/WebhookLogs.vue
 msgid ""
 "A new delivery attempt has been queued. The result will appear in this "
 "log's attempt history on the next cron run."
@@ -349,17 +382,24 @@ msgid ""
 "invalidated%2$s and all existing integrations using it will stop working."
 msgstr "将生成一个新令牌。当前令牌将%1$s立即失效%2$s，所有使用它的现有集成都将停止工作。"
 
-#: src/Api/WebhooksController.php:572
+#: src/Api/WebhooksController.php:570
 msgid "A payload object is required for custom source."
 msgstr "自定义源需要一个数据对象。"
 
-#: src/Api/AgentController.php:263
+#: src/Api/AgentController.php:321
 msgid "A provider and model are required."
 msgstr "必须提供提供商和模型。"
 
 #: src/Api/CredentialsController.php:428
 msgid "A secret value is required."
 msgstr "密钥值为必填项。"
+
+#: src/Services/GluePermissions.php:193
+msgid ""
+"A token that could would be able to run arbitrary PHP on this site, so it "
+"is off by default. Turn on \"Let API tokens write Code Glue\" in Settings "
+"to allow it."
+msgstr "能做到这一点的令牌就能在本站点运行任意 PHP，因此默认关闭。要允许，请在“设置”中开启“允许 API 令牌写入 Code Glue”。"
 
 #: src/Abilities/TestAbilities.php:73
 msgid "A url or webhook_id is required."
@@ -378,8 +418,10 @@ msgid "AI credits included — hosted AI, no API keys needed"
 msgstr "AI 积分已包含 — 托管 AI，无需 API 密钥"
 
 #: admin/src/views/ProView.vue
-msgid "AI credits included, more sites, advanced conditions, and priority support."
-msgstr "包含 AI 积分、更多站点、高级条件和优先支持。"
+msgid ""
+"AI credits included, External Cron, more sites, and priority support. "
+"Everything else is free."
+msgstr "包含 AI 积分、External Cron、更多站点和优先支持。其余一切免费。"
 
 #: admin/src/views/ActivityView.vue
 msgid "AI reasoning"
@@ -449,11 +491,7 @@ msgstr "激活许可证"
 msgid "Activate Plugin"
 msgstr "启用插件"
 
-#: admin/src/views/WebhooksList.vue
-msgid "Activate Pro"
-msgstr "激活 Pro"
-
-#: admin/src/views/ProView.vue admin/src/views/WebhooksList.vue
+#: admin/src/views/ProView.vue
 msgid "Activating…"
 msgstr "正在启用…"
 
@@ -502,7 +540,7 @@ msgstr "添加映射"
 msgid "Add Webhook"
 msgstr "添加 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:258
+#: src/Abilities/AbilityCatalog.php:271
 msgid "Add a chain link"
 msgstr "添加链环节"
 
@@ -510,7 +548,7 @@ msgstr "添加链环节"
 msgid "Add a credential to securely reuse it across webhooks."
 msgstr "添加凭据，以便在各个 Webhook 中安全地重复使用。"
 
-#: src/Abilities/AbilityCatalog.php:259
+#: src/Abilities/AbilityCatalog.php:272
 msgid ""
 "Add a source→target edge to a chain. Rejected if it would create a cycle "
 "across any chain."
@@ -585,6 +623,14 @@ msgstr "早于此期限的管理操作历史将被自动删除。"
 msgid "Admin and API action history"
 msgstr "管理员和 API 操作历史"
 
+#: admin/src/components/MappingEditor.vue
+msgid "After Mapping Payload Preview"
+msgstr "映射后的载荷预览"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "After Pre-dispatch Code Glue Payload"
+msgstr "预发送 Code Glue 之后的载荷"
+
 #: admin/src/components/WebhookForm.vue
 msgid "After saving, the value is encrypted at rest and never shown again."
 msgstr "保存后，该值将被静态加密，且绝不会再次显示。"
@@ -609,7 +655,7 @@ msgstr "所有链"
 msgid "All logs have been cleared"
 msgstr "所有日志已清除"
 
-#: src/Api/SettingsController.php:224
+#: src/Api/SettingsController.php:255
 msgid "All logs have been cleared."
 msgstr "所有日志已清除。"
 
@@ -635,7 +681,7 @@ msgid ""
 "read their values."
 msgstr "%1$sagent%2$s API 令牌可以将凭据分配给 Webhook，但绝不能读取它们的值。"
 
-#: src/Api/AgentController.php:188
+#: src/Api/AgentController.php:246
 msgid "An API key is required to connect this provider."
 msgstr "连接此提供商需要 API 密钥。"
 
@@ -680,7 +726,18 @@ msgstr[0] "确定要删除全部 %d 条日志吗？"
 msgid "Array of log IDs to retry."
 msgstr "要重试的日志 ID 数组。"
 
-#: src/Abilities/AbilityCatalog.php:214
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"Ask the agent to fix the payload — it can see this response now — then "
+"retry. Skipping leaves the rest of the plan (including going live) to run "
+"on a delivery that failed."
+msgstr "让智能体修复载荷——它现在能看到这个响应——然后重试。跳过会让计划的其余部分（包括上线）在一次失败的投递上继续执行。"
+
+#: src/Abilities/GlueAbilities.php:126
+msgid "Assign a Code Glue snippet to a webhook"
+msgstr "将 Code Glue 代码片段分配给 Webhook"
+
+#: src/Abilities/AbilityCatalog.php:227
 msgid "Assign a vault credential to a webhook"
 msgstr "将保险库凭据分配给 Webhook"
 
@@ -698,6 +755,21 @@ msgid ""
 msgstr ""
 "异步：进入队列并在下次 cron 运行时在后台投递，自动重试 — 不会拖慢触发请求，但在 cron "
 "正常运行之前不会发送任何内容。同步：立即投递，在触发请求内完成 — 无需 cron 即可工作，代价是略微增加延迟。切换开关即可更换。"
+
+#: src/Abilities/GlueAbilities.php:127
+msgid ""
+"Attach a snippet to a webhook+trigger and enable it: stage \"pre\" "
+"transforms the payload before dispatch, stage \"post\" runs side effects "
+"after the response. Snippet errors never break a delivery (the payload "
+"falls back unmodified and the error is logged). Attaching to a LIVE webhook "
+"requires confirmation; on a still-disabled webhook being built it runs "
+"without one. Pass snippet_id 0 to unassign, or enabled false to keep it "
+"assigned but paused."
+msgstr ""
+"将代码片段附加到 Webhook+触发器并启用：\"pre\" 阶段在发送前转换载荷，\"post\" "
+"阶段在收到响应后执行副作用。代码片段出错绝不会中断投递（载荷按原样回退并记录错误）。附加到已上线的 Webhook "
+"需要确认；附加到仍处于禁用、正在构建的 Webhook 则无需确认。传 snippet_id 0 可取消分配，传 enabled false "
+"可保持分配但暂停。"
 
 #: admin/src/components/LogsTable.vue
 msgid "Attempt #%d"
@@ -727,7 +799,7 @@ msgstr ""
 msgid "Authorization (optional)"
 msgstr "授权（可选）"
 
-#: src/Api/WebhooksController.php:771
+#: src/Api/WebhookSchema.php:51
 msgid "Authorization header value."
 msgstr "Authorization 标头值。"
 
@@ -795,6 +867,12 @@ msgid ""
 "exponential, interval for linear, and constant wait for fixed."
 msgstr "用于计算重试延迟的基础秒数。在指数策略中作为乘数，在线性策略中作为间隔，在固定策略中作为恒定等待。"
 
+#: src/Api/WebhookSchema.php:117
+msgid ""
+"Base wait in seconds the backoff strategy multiplies. Null inherits the "
+"site-wide setting, then 30."
+msgstr "退避策略所乘的基础等待秒数。Null 继承站点设置，否则为 30。"
+
 #: admin/src/components/AiStepControls.vue
 msgid "Basic auth"
 msgstr "Basic 认证"
@@ -851,6 +929,12 @@ msgstr "使用 AI 构建（自备 API 密钥）"
 msgid "Building your page…"
 msgstr "正在生成你的页面…"
 
+#: admin/src/components/AiStepPanel.vue
+msgid ""
+"Built from a reference payload — the shape is real, the values are ours. "
+"The test step checks it against your endpoint."
+msgstr "基于参考载荷构建——结构是真实的，数值是我们的。测试步骤会用你的端点检查它。"
+
 #: admin/src/views/ProView.vue
 msgid "Business"
 msgstr "商业版"
@@ -892,6 +976,14 @@ msgid ""
 "Cap on the wait between retries. Prevents exponential backoff from growing "
 "indefinitely — any delay above this value is clamped to it."
 msgstr "重试之间等待的上限。防止指数退避无限增长 — 超过此值的任何延迟都会被限制到该值。"
+
+#: src/Services/Ai/PlanExecutor.php:786
+#. translators: %s: trigger (do_action hook) name.
+#, php-format
+msgid ""
+"Capture an example payload for \"%s\" — fire the event once (e.g. publish a "
+"test post)"
+msgstr "为“%s”捕获一个示例载荷——触发该事件一次（例如发布一篇测试文章）"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Capture an example payload to enable live preview."
@@ -938,6 +1030,12 @@ msgstr "应用了字段映射的已捕获数据"
 msgid "Cast"
 msgstr "转换"
 
+#: src/Api/WebhookSchema.php:124
+msgid ""
+"Ceiling in seconds for an exponential backoff. Null inherits the site-wide "
+"setting, then 3600."
+msgstr "指数退避的上限秒数。Null 继承站点设置，否则为 3600。"
+
 #: admin/src/components/ChainPicker.vue admin/src/components/ShareBuildDialog.vue
 msgid "Chain"
 msgstr "链"
@@ -972,7 +1070,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "链名称"
 
-#: src/Abilities/WriteAbilities.php:189
+#: src/Abilities/WriteAbilities.php:207
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -1023,11 +1121,20 @@ msgstr "正在检查页面是否已上线…"
 msgid "Choose a credential"
 msgstr "选择凭据"
 
+#: src/Api/PublishBuildController.php:109
+msgid "Choose whether this is an integration or an automation."
+msgstr "选择这是一个集成还是一个自动化。"
+
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid ""
-"Choose which payload the conditions read from: Original is the raw payload "
-"before field mapping; Transformed is the payload after mapping is applied."
-msgstr "选择条件读取的数据：原始是字段映射前的原始数据；转换后是应用映射后的数据。"
+"Choose which payload the conditions read from. Original is the raw payload, "
+"before field mapping. Transformed is the payload after mapping AND after "
+"the pre-dispatch Code Glue snippet — pick it when you filter on a value the "
+"snippet adds. Note: if a field does not exist in the payload you pick, "
+"negative operators like 'not equals' still pass, so the event is sent."
+msgstr ""
+"选择条件读取哪个载荷。“原始”是字段映射之前的原始载荷。“转换后”是映射之后且经过预发送 Code Glue "
+"代码片段之后的载荷——当你按代码片段添加的值过滤时选它。注意：如果字段在所选载荷中不存在，“不等于”之类的否定运算符仍会通过，事件就会被发送。"
 
 #: admin/src/views/SettingsView.vue
 msgid "Clear All Logs"
@@ -1067,6 +1174,27 @@ msgid ""
 "Only import builds from a source you trust — review each snippet below."
 msgstr "Code Glue 是这些 Webhook 触发时在你站点上运行的自定义 PHP 代码。只导入你信任来源的配置——请先查看下面的每个代码片段。"
 
+#: src/Services/GluePermissions.php:188
+msgid "Code Glue is switched off in wp-config.php."
+msgstr "Code Glue 已在 wp-config.php 中关闭。"
+
+#: admin/src/views/SettingsView.vue
+msgid ""
+"Code Glue snippets are PHP that runs on this site, so writing one normally "
+"requires a signed-in user who is allowed to edit plugin code. Turning this "
+"on lets a full-scope API token — including a connected AI tool over MCP — "
+"write and assign snippets too. That makes the token as powerful as a plugin "
+"editor, so leave it off unless you need it. Reading snippets never required "
+"it."
+msgstr ""
+"Code Glue 代码片段是在本站点运行的 PHP，因此写入通常需要一位有权编辑插件代码的已登录用户。开启此项后，具有完整权限范围的 API "
+"令牌——包括通过 MCP 连接的 AI "
+"工具——也可以写入和分配代码片段。这会让该令牌拥有与插件编辑器同等的权力，所以除非确有需要，否则请保持关闭。读取代码片段从不需要此权限。"
+
+#: admin/src/views/ProView.vue
+msgid "Code Glue — PHP snippets before and after dispatch"
+msgstr "Code Glue——发送前后运行的 PHP 代码片段"
+
 #: src/Api/TriggersController.php:144
 msgid "Comments"
 msgstr "评论"
@@ -1074,20 +1202,6 @@ msgstr "评论"
 #: admin/src/views/ProView.vue
 msgid "Community support forum"
 msgstr "社区支持论坛"
-
-#: src/Abilities/WriteAbilities.php:140
-msgid ""
-"Condition groups require a Pro license — propose a single simple rule "
-"instead."
-msgstr "条件组需要 Pro 许可证——请改为提出单条简单规则。"
-
-#: src/Api/SchemasController.php:308
-msgid "Condition groups require a Pro license."
-msgstr "条件组需要 Pro 许可证。"
-
-#: admin/src/views/ProView.vue
-msgid "Condition groups with AND / OR logic"
-msgstr "支持 AND / OR 逻辑的条件组"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Conditions"
@@ -1099,7 +1213,7 @@ msgid ""
 "against' toggle above to choose original or transformed."
 msgstr "条件根据数据进行评估 — 使用上方的“评估条件依据”开关选择原始或转换后。"
 
-#: src/Api/LogsController.php:404
+#: src/Api/LogsController.php:405
 msgid "Conditions are not met with current settings — event would be skipped."
 msgstr "当前设置不满足条件 — 事件将被跳过。"
 
@@ -1107,23 +1221,25 @@ msgstr "当前设置不满足条件 — 事件将被跳过。"
 msgid "Configure plugin behavior"
 msgstr "配置插件行为"
 
-#: admin/src/views/SettingsView.vue
-msgid ""
-"Configure retry attempts and backoff delay strategy for failed webhooks, "
-"globally and per webhook."
-msgstr "为失败的 Webhook 配置重试次数和退避延迟策略，可全局设置或按 Webhook 设置。"
-
 #: admin/src/components/AiStepControls.vue
 msgid "Confirm & run"
 msgstr "确认并运行"
 
-#: admin/src/components/AiProviderSettings.vue
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "Connect"
 msgstr "连接"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Connect an AI provider"
 msgstr "连接 AI 提供商"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Connect your own key"
+msgstr "连接你自己的密钥"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Connect your own provider, or add Pro credits, to keep building."
+msgstr "连接你自己的服务商，或添加 Pro 积分，以继续构建。"
 
 #: admin/src/components/BuildPublishFields.vue
 msgid "Connects WordPress to a named service — a CRM, a spreadsheet, a chat app."
@@ -1137,12 +1253,12 @@ msgstr "继续"
 msgid "Continue build"
 msgstr "继续构建"
 
-#: src/Api/AgentController.php:466
-#: src/Services/Ai/AgentOrchestrator.php:78
-#: src/Services/Ai/PlanExecutor.php:57
-#: src/Services/Ai/PlanExecutor.php:147
-#: src/Services/Ai/PlanExecutor.php:390
-#: src/Services/Ai/PlanExecutor.php:462
+#: src/Api/AgentController.php:552
+#: src/Services/Ai/AgentOrchestrator.php:122
+#: src/Services/Ai/PlanExecutor.php:60
+#: src/Services/Ai/PlanExecutor.php:169
+#: src/Services/Ai/PlanExecutor.php:487
+#: src/Services/Ai/PlanExecutor.php:559
 msgid "Conversation not found."
 msgstr "未找到对话。"
 
@@ -1202,10 +1318,6 @@ msgstr "复制到剪贴板"
 msgid "Copy trigger name"
 msgstr "复制触发器名称"
 
-#: admin/src/views/WebhooksList.vue
-msgid "Could not activate Pro. Activate it from the Plugins screen."
-msgstr "无法激活 Pro。请在“插件”页面中激活。"
-
 #: admin/src/components/ImportDialog.vue
 msgid "Could not create the Application Password."
 msgstr "无法创建应用程序密码。"
@@ -1218,6 +1330,12 @@ msgstr "无法加载此密钥的模型——请检查密钥是否有效。"
 msgid "Could not lock job for processing."
 msgstr "无法锁定任务以进行处理。"
 
+#: src/Services/Builds/PublishBuildClient.php:79
+#. translators: %s: HTTP error message.
+#, php-format
+msgid "Could not reach the WP Webhooks publishing service: %s"
+msgstr "无法连接 WP Webhooks 发布服务：%s"
+
 #: admin/src/components/ShareBuildDialog.vue
 msgid "Could not read this build."
 msgstr "无法读取此配置。"
@@ -1227,6 +1345,14 @@ msgid ""
 "Could not read this file. Make sure it is a build JSON exported from "
 "Webhook Actions."
 msgstr "无法读取此文件。请确认它是从 Webhook Actions 导出的配置 JSON。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Could not start the free trial."
+msgstr "无法开始免费试用。"
+
+#: src/Services/Ai/TrialClient.php:195
+msgid "Could not start the free trial. Please try again."
+msgstr "无法开始免费试用。请重试。"
 
 #: admin/src/components/AiStepControls.vue
 msgid "Create & assign"
@@ -1244,6 +1370,43 @@ msgstr "创建 API 令牌"
 msgid "Create Webhook"
 msgstr "创建 Webhook"
 
+#: src/Abilities/GlueAbilities.php:73
+msgid ""
+"Create a Code Glue PHP snippet (inert until assigned to a webhook). Write "
+"plain PHP without a <?php tag. PRE-dispatch snippets receive $payload — the "
+"payload AFTER the field mapping has already run — and MUST end with `return "
+"$payload;`, returning the FULL modified array (a non-array return leaves "
+"the payload unchanged). CRITICAL: $args is just $payload[\"args\"], so it "
+"is an EMPTY ARRAY unless the mapping preserved an \"args\" key; with "
+"includeUnmapped:false only the mapping's target names exist and $args[0] is "
+"silently missing, so any `if ($postId)` guard around it never runs and the "
+"snippet no-ops. Read values from the mapped target names "
+"($payload[\"post_id\"]) — and if you need a source field the mapping drops, "
+"add it to set_mapping first (e.g. source \"args.0\" → target \"post_id\") "
+"and unset it before returning if it must not be sent. The shorthand {{ "
+"$args.0.total }} expands to $args[0][\"total\"] and is only safe when "
+"\"args\" survives the mapping. POST-dispatch snippets receive $payload (as "
+"sent), $originalPayload (pre-mapping), $responseCode and $responseBody, and "
+"run for side effects only (return value ignored). Always test with "
+"preview_snippet (it feeds the real mapped payload) before assign_snippet."
+msgstr ""
+"创建一个 Code Glue PHP 代码片段（分配给 Webhook 前处于闲置状态）。编写不带 <?php 标签的纯 PHP。预发送代码片段接收 "
+"$payload——即字段映射已执行之后的载荷——并且必须以 `return $payload;` "
+"结尾，返回完整的修改后数组（返回非数组会让载荷保持不变）。关键：$args 只是 $payload[\"args\"]，因此除非映射保留了 "
+"\"args\" 键，否则它是空数组；在 includeUnmapped:false 时只存在映射的目标名称，$args[0] "
+"会悄悄消失，围绕它的任何 `if ($postId)` "
+"判断都不会执行，代码片段就什么也不做。请从映射的目标名称读取值（$payload[\"post_id\"]"
+"）——如果需要一个被映射丢弃的源字段，先把它加入 set_mapping（例如 source \"args.0\" → target "
+"\"post_id\"），若不应发送则在返回前 unset 它。简写 {{ $args.0.total }} 展开为 "
+"$args[0][\"total\"]，仅在 \"args\" 经过映射后仍然存在时才安全。发送后代码片段接收 "
+"$payload（已发送的内容）、$originalPayload（映射前）、$responseCode 和 "
+"$responseBody，只用于副作用（返回值被忽略）。在 assign_snippet 之前务必用 preview_snippet "
+"测试（它提供真实的映射后载荷）。"
+
+#: src/Abilities/GlueAbilities.php:72
+msgid "Create a Code Glue snippet"
+msgstr "创建 Code Glue 代码片段"
+
 #: admin/src/components/BuildPublishFields.vue
 msgid "Create a HubSpot deal when a WooCommerce order is placed"
 msgstr "WooCommerce 下单时在 HubSpot 中创建交易"
@@ -1256,11 +1419,11 @@ msgstr "创建 WP 应用程序密码"
 msgid "Create a WP Application Password for me"
 msgstr "为我创建 WP 应用程序密码"
 
-#: src/Abilities/AbilityCatalog.php:229
+#: src/Abilities/AbilityCatalog.php:242
 msgid "Create a WordPress Application Password credential"
 msgstr "创建 WordPress 应用程序密码凭据"
 
-#: src/Abilities/AbilityCatalog.php:244
+#: src/Abilities/AbilityCatalog.php:257
 msgid ""
 "Create a named chain that wires 2xx completions of one webhook to "
 "downstream webhooks."
@@ -1286,9 +1449,15 @@ msgstr "创建令牌以启用程序化 API 访问。"
 msgid "Create a webhook"
 msgstr "创建 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:243
+#: src/Abilities/AbilityCatalog.php:256
 msgid "Create a webhook chain"
 msgstr "创建 Webhook 链"
+
+#: src/Abilities/AbilityRegistrar.php:95
+msgid ""
+"Create and manage outgoing webhooks: triggers, field mappings, conditions, "
+"chains, credentials and delivery logs."
+msgstr "创建和管理出站 Webhook：触发器、字段映射、条件、链、凭据和投递日志。"
 
 #: admin/src/views/VaultView.vue
 msgid "Create credential"
@@ -1318,11 +1487,11 @@ msgstr "已创建“%s”"
 msgid "Creating…"
 msgstr "正在创建…"
 
-#: src/Api/WebhooksController.php:830
+#: src/Api/WebhookSchema.php:137
 msgid "Creation date."
 msgstr "创建日期。"
 
-#: src/Abilities/TestAbilities.php:233
+#: src/Abilities/TestAbilities.php:292
 msgid "Credential could not be decrypted."
 msgstr "无法解密凭据。"
 
@@ -1343,8 +1512,8 @@ msgstr "凭据名称（例如 n8n auth）"
 msgid "Credential name is required."
 msgstr "凭据名称为必填项。"
 
-#: src/Abilities/TestAbilities.php:229
-#: src/Abilities/WriteAbilities.php:170
+#: src/Abilities/TestAbilities.php:288
+#: src/Abilities/WriteAbilities.php:188
 #: src/Api/CredentialsController.php:459
 msgid "Credential not found."
 msgstr "未找到凭据。"
@@ -1385,7 +1554,7 @@ msgstr "Cron 令牌已重新生成。请使用新命令更新你的 crontab。"
 msgid "Crontab Command"
 msgstr "Crontab 命令"
 
-#: src/Api/LogsController.php:517
+#: src/Api/LogsController.php:529
 msgid "Current page of results."
 msgstr "结果的当前页。"
 
@@ -1405,15 +1574,11 @@ msgstr "自定义数据"
 msgid "Custom Request Headers"
 msgstr "自定义请求标头"
 
-#: admin/src/views/ProView.vue
-msgid "Custom backoff strategy (exponential, linear, fixed)"
-msgstr "自定义退避策略（指数、线性、固定）"
-
 #: admin/src/components/AiStepControls.vue
 msgid "Custom header"
 msgstr "自定义标头"
 
-#: src/Api/WebhooksController.php:126
+#: src/Api/WebhooksController.php:124
 msgid "Custom payload JSON (required when payload_source is custom)."
 msgstr "自定义数据 JSON（当 payload_source 为 custom 时必填）。"
 
@@ -1473,7 +1638,11 @@ msgstr "删除所有日志"
 msgid "Delete Old Activity"
 msgstr "删除旧活动"
 
-#: src/Abilities/AbilityCatalog.php:333
+#: src/Abilities/GlueAbilities.php:150
+msgid "Delete a Code Glue snippet"
+msgstr "删除 Code Glue 代码片段"
+
+#: src/Abilities/AbilityCatalog.php:346
 msgid "Delete a webhook"
 msgstr "删除 Webhook"
 
@@ -1573,9 +1742,15 @@ msgstr ""
 
 #: admin/src/views/AiBuilderView.vue
 msgid ""
+"Describe the integration in plain words. The agent plans it, then builds "
+"and tests it for you."
+msgstr "用平实的语言描述集成。智能体会规划它，然后为你构建并测试。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
 "Describe the integration or automation you want. The agent proposes a plan "
-"you can edit, then builds and tests it for you."
-msgstr "描述您想要的集成或自动化。代理会提出一个可编辑的计划，然后为您构建并测试。"
+"you can review and ask for changes, then builds and tests it for you."
+msgstr "描述你想要的集成或自动化。智能体会提出一个你可以审阅并要求修改的计划，然后为你构建并测试。"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Describe what to build…"
@@ -1597,7 +1772,7 @@ msgid "Description (optional)"
 msgstr "说明（可选）"
 
 #: src/Api/ChainsController.php:141
-#: src/Api/WebhooksController.php:318
+#: src/Api/WebhooksController.php:314
 #. translators: %d: maximum character count
 #, php-format
 msgid "Description must be %d characters or fewer."
@@ -1626,6 +1801,10 @@ msgstr "已禁用的 Webhook 仍会捕获数据示例，以供映射和条件配
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Discard"
 msgstr "放弃"
+
+#: admin/src/App.vue
+msgid "Dismiss"
+msgstr "关闭"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "Does not match example payload"
@@ -1693,7 +1872,11 @@ msgstr "现在到期"
 msgid "Duration"
 msgstr "耗时"
 
-#: src/Abilities/WriteAbilities.php:309
+#: admin/src/views/ProView.vue
+msgid "Dynamic URL templates resolved from the payload"
+msgstr "从载荷解析的动态 URL 模板"
+
+#: src/Abilities/WriteAbilities.php:327
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "每条条件规则必须是 {field, operator, value} 对象。"
 
@@ -1717,11 +1900,11 @@ msgstr "编辑凭据"
 msgid "Edit “%s”"
 msgstr "编辑“%s”"
 
-#: src/Abilities/AbilityCatalog.php:318
+#: src/Abilities/AbilityCatalog.php:331
 msgid "Enable (go live) or disable a webhook. Enabling requires confirmation."
 msgstr "启用（上线）或禁用 Webhook。启用需要确认。"
 
-#: src/Abilities/AbilityCatalog.php:317
+#: src/Abilities/AbilityCatalog.php:330
 msgid "Enable / disable a webhook"
 msgstr "启用 / 禁用 Webhook"
 
@@ -1757,7 +1940,7 @@ msgstr "端点 URL"
 msgid "Endpoint URL is required"
 msgstr "端点 URL 为必填项"
 
-#: src/Api/WebhooksController.php:248
+#: src/Api/WebhooksController.php:244
 msgid "Endpoint URL is required."
 msgstr "端点 URL 为必填项。"
 
@@ -1768,6 +1951,10 @@ msgstr "请先输入 Authorization 标头值。"
 #: admin/src/components/TriggerSelect.vue
 msgid "Enter custom hook name..."
 msgstr "输入自定义钩子名称…"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Enter to build, Shift+Enter for a new line."
+msgstr "按 Enter 开始构建，Shift+Enter 换行。"
 
 #: admin/src/views/ProView.vue
 msgid "Enter your license key to unlock Pro features on this site."
@@ -1789,7 +1976,7 @@ msgstr "错误"
 msgid "Evaluate conditions against"
 msgstr "评估条件依据"
 
-#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+#: admin/src/views/WebhookLogs.vue
 msgid "Event Replayed"
 msgstr "事件已重放"
 
@@ -1801,9 +1988,27 @@ msgstr "事件 UUID"
 msgid "Event UUID:"
 msgstr "事件 UUID："
 
-#: src/App.php:116
+#: admin/src/views/LogsList.vue
+msgid "Event replayed"
+msgstr "事件已重放"
+
+#: src/App.php:133
 msgid "Every Minute"
 msgstr "每分钟"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Every time a WooCommerce order is completed, post the line items to Airtable"
+msgstr "每当一个 WooCommerce 订单完成，就把订单行项目发布到 Airtable"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"Everything you have built stays on this site. Connect a model to keep going "
+"— the first two cost nothing."
+msgstr "你构建的一切都保留在本站点。连接一个模型即可继续——前两种不花一分钱。"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "Example from the WP Webhooks Payload Library — not captured on this site"
+msgstr "来自 WP Webhooks Payload Library 的示例——并非在本站点捕获"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Example payload captured"
@@ -1829,7 +2034,7 @@ msgstr "已排除字段"
 msgid "Execute"
 msgstr "执行"
 
-#: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
+#: admin/src/views/WebhookLogs.vue
 msgid "Execute Now"
 msgstr "立即执行"
 
@@ -1885,6 +2090,17 @@ msgstr "导出 Webhook 与链"
 msgid "Exporting…"
 msgstr "正在导出…"
 
+#: admin/src/views/SettingsView.vue
+msgid ""
+"External AI tools connected over MCP — Claude, Cursor and the like — can "
+"create, edit and test webhooks for you, the same way Build with AI does. "
+"Deleting a webhook, taking one live or firing a test always needs an "
+"explicit confirmation first. Turn this off to hold connected tools to "
+"read-only; Build with AI is unaffected either way."
+msgstr ""
+"通过 MCP 连接的外部 AI 工具——Claude、Cursor 之类——可以像 Build with AI 一样为你创建、编辑和测试 "
+"Webhook。删除 Webhook、使其上线或发送测试始终需要先明确确认。关闭此项可将已连接工具限制为只读；Build with AI 不受影响。"
+
 #: admin/src/App.vue admin/src/views/ExternalCronView.vue
 msgid "External Cron"
 msgstr "外部 Cron"
@@ -1901,7 +2117,7 @@ msgstr "外部 Cron 历史"
 msgid "Extra credits (never expire)"
 msgstr "额外积分（永不过期）"
 
-#: src/Api/WebhooksController.php:788
+#: src/Api/WebhookSchema.php:68
 msgid "Extra request headers as key-value pairs."
 msgstr "作为键值对的额外请求标头。"
 
@@ -1921,11 +2137,11 @@ msgstr "创建 API 令牌失败。"
 msgid "Failed to create chain link (it may already exist)."
 msgstr "创建链接失败（它可能已存在）。"
 
-#: src/Abilities/WriteAbilities.php:215
+#: src/Abilities/WriteAbilities.php:233
 msgid "Failed to create chain link."
 msgstr "创建链环节失败。"
 
-#: src/Abilities/WriteAbilities.php:197
+#: src/Abilities/WriteAbilities.php:215
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "创建链失败。"
@@ -1934,8 +2150,13 @@ msgstr "创建链失败。"
 msgid "Failed to create credential."
 msgstr "创建凭据失败。"
 
-#: src/Abilities/WriteAbilities.php:70
-#: src/Api/WebhooksController.php:274
+#: src/Abilities/GlueAbilities.php:231
+#: src/Api/SnippetsController.php:176
+msgid "Failed to create snippet."
+msgstr "创建代码片段失败。"
+
+#: src/Abilities/WriteAbilities.php:72
+#: src/Api/WebhooksController.php:270
 msgid "Failed to create webhook."
 msgstr "创建 Webhook 失败。"
 
@@ -1955,12 +2176,12 @@ msgstr "删除日志失败。"
 msgid "Failed to delete queue job."
 msgstr "删除队列任务失败。"
 
-#: src/Api/SchemasController.php:397
+#: src/Api/SchemasController.php:371
 msgid "Failed to delete schema."
 msgstr "删除架构失败。"
 
-#: src/Abilities/WriteAbilities.php:242
-#: src/Api/WebhooksController.php:472
+#: src/Abilities/WriteAbilities.php:260
+#: src/Api/WebhooksController.php:470
 msgid "Failed to delete webhook."
 msgstr "删除 Webhook 失败。"
 
@@ -1996,7 +2217,7 @@ msgstr "获取用户触发器失败"
 msgid "Failed to rename chain."
 msgstr "重命名链失败。"
 
-#: src/Api/SchemasController.php:429
+#: src/Api/SchemasController.php:403
 msgid "Failed to reset capture."
 msgstr "重置捕获失败。"
 
@@ -2012,11 +2233,11 @@ msgstr "重试队列任务失败。"
 msgid "Failed to rotate API token."
 msgstr "轮换 API 令牌失败。"
 
-#: src/Abilities/WriteAbilities.php:154
+#: src/Abilities/WriteAbilities.php:172
 msgid "Failed to save conditions."
 msgstr "保存条件失败。"
 
-#: src/Abilities/WriteAbilities.php:114
+#: src/Abilities/WriteAbilities.php:148
 msgid "Failed to save mapping."
 msgstr "保存映射失败。"
 
@@ -2024,24 +2245,24 @@ msgstr "保存映射失败。"
 msgid "Failed to save trigger snippet"
 msgstr "保存触发器代码片段失败"
 
-#: src/Api/AgentController.php:346
+#: src/Api/AgentController.php:404
 msgid "Failed to start a conversation."
 msgstr "启动对话失败。"
 
-#: src/Api/AgentController.php:210
+#: src/Api/AgentController.php:268
 msgid "Failed to store the provider key."
 msgstr "存储提供商密钥失败。"
 
-#: src/Api/WebhooksController.php:514
+#: src/Api/WebhooksController.php:512
 msgid "Failed to toggle webhook status."
 msgstr "切换 Webhook 状态失败。"
 
-#: src/Api/SchemasController.php:350
+#: src/Api/SchemasController.php:323
 msgid "Failed to update schema."
 msgstr "更新架构失败。"
 
-#: src/Abilities/WriteAbilities.php:100
-#: src/Api/WebhooksController.php:414
+#: src/Abilities/WriteAbilities.php:134
+#: src/Api/WebhooksController.php:412
 msgid "Failed to update webhook."
 msgstr "更新 Webhook 失败。"
 
@@ -2055,7 +2276,7 @@ msgid ""
 "order"
 msgstr "先应用字段映射，再运行发送前 Code Glue——即实际发送顺序"
 
-#: src/Api/SchemasController.php:89
+#: src/Api/SchemasController.php:90
 msgid "Field mapping configuration."
 msgstr "字段映射配置。"
 
@@ -2071,7 +2292,7 @@ msgstr "按 X-Webhook-ID 筛选…"
 msgid "Filter by action prefix (e.g. \"webhook\")."
 msgstr "按操作前缀筛选（例如“webhook”）。"
 
-#: src/Api/LogsController.php:551
+#: src/Api/LogsController.php:563
 msgid "Filter by event UUID (exact match)."
 msgstr "按事件 UUID 筛选（精确匹配）。"
 
@@ -2083,11 +2304,11 @@ msgstr "按事件 UUID 筛选…"
 msgid "Filter by exact action string."
 msgstr "按精确的操作字符串筛选。"
 
-#: src/Api/LogsController.php:534
+#: src/Api/LogsController.php:546
 msgid "Filter by status."
 msgstr "按状态筛选。"
 
-#: src/Api/LogsController.php:555
+#: src/Api/LogsController.php:567
 msgid "Filter by target URL (partial match)."
 msgstr "按目标 URL 筛选（部分匹配）。"
 
@@ -2095,16 +2316,16 @@ msgstr "按目标 URL 筛选（部分匹配）。"
 msgid "Filter by target URL…"
 msgstr "按目标 URL 筛选…"
 
-#: src/Api/LogsController.php:539
+#: src/Api/LogsController.php:551
 msgid "Filter by trigger name."
 msgstr "按触发器名称筛选。"
 
 #: src/Api/LogsController.php:134
-#: src/Api/LogsController.php:530
+#: src/Api/LogsController.php:542
 msgid "Filter by webhook ID."
 msgstr "按 Webhook ID 筛选。"
 
-#: src/Api/LogsController.php:559
+#: src/Api/LogsController.php:571
 msgid "Filter by webhook UUID (X-Webhook-Id header value)."
 msgstr "按 Webhook UUID（X-Webhook-Id 标头值）筛选。"
 
@@ -2112,11 +2333,11 @@ msgstr "按 Webhook UUID（X-Webhook-Id 标头值）筛选。"
 msgid "Filter from UTC datetime (Y-m-d H:i:s)."
 msgstr "从 UTC 日期时间筛选（Y-m-d H:i:s）。"
 
-#: src/Api/LogsController.php:543
+#: src/Api/LogsController.php:555
 msgid "Filter logs from this date."
 msgstr "从该日期筛选日志。"
 
-#: src/Api/LogsController.php:547
+#: src/Api/LogsController.php:559
 msgid "Filter logs until this date."
 msgstr "筛选日志至该日期。"
 
@@ -2127,6 +2348,23 @@ msgstr "筛选至 UTC 日期时间（Y-m-d H:i:s）。"
 #: admin/src/views/VaultView.vue
 msgid "Finish moving the key into wp-config.php"
 msgstr "完成将密钥移入 wp-config.php"
+
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"Fire the event once on this site to capture your real payload, then retry — "
+"the mapping will be built from your own fields. Or skip this step and map "
+"them by hand."
+msgstr "在本站点触发该事件一次以捕获你的真实载荷，然后重试——映射将根据你自己的字段构建。或者跳过这一步，手动映射它们。"
+
+#: admin/src/components/AiStepControls.vue
+msgid "Fix it"
+msgstr "修复它"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"Fix the build so this passes — adjust the field mapping or the pre-dispatch "
+"Code Glue snippet as needed — then test again before enabling."
+msgstr "修复构建使此项通过——按需调整字段映射或预发送 Code Glue 代码片段——然后在启用前再次测试。"
 
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "Fixed"
@@ -2146,6 +2384,14 @@ msgstr "为确保 Webhook 可靠投递，请设置系统 cron 任务每分钟处
 #: admin/src/views/VaultView.vue
 msgid "Force delete & detach"
 msgstr "强制删除并分离"
+
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
+msgid "Free trial"
+msgstr "免费试用"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Free trial — starts with your first prompt"
+msgstr "免费试用——从你的第一条提示开始"
 
 #: admin/src/views/ActivityView.vue
 msgid "From date"
@@ -2191,9 +2437,25 @@ msgstr "生成新的 API 令牌以进行程序化访问。"
 msgid "Get Pro"
 msgstr "获取 Pro"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "Get Pro credits"
+msgstr "获取 Pro 积分"
+
+#: src/Abilities/GlueAbilities.php:59
+msgid "Get a Code Glue snippet"
+msgstr "获取 Code Glue 代码片段"
+
 #: src/Abilities/AbilityCatalog.php:78
 msgid "Get a REST route's argument schema (this site)"
 msgstr "获取 REST 路由的参数 schema（本站点）"
+
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
+msgid "Get a free Gemini key"
+msgstr "获取免费的 Gemini 密钥"
+
+#: src/Abilities/GlueAbilities.php:60
+msgid "Get a single Code Glue snippet by id, including its full PHP code."
+msgstr "按 id 获取单个 Code Glue 代码片段，包含完整 PHP 代码。"
 
 #: src/Abilities/AbilityCatalog.php:52
 msgid ""
@@ -2213,9 +2475,19 @@ msgstr "获取触发器的已捕获数据 + 映射"
 msgid "Get delivery logs"
 msgstr "获取投递日志"
 
+#: src/Api/PublishBuildController.php:103
+msgid "Give the build a title."
+msgstr "给这个构建起个标题。"
+
 #: admin/src/components/WebhookForm.vue
 msgid "Give this credential a name."
 msgstr "为此凭据命名。"
+
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"Go and fire the event once — publish a test post, submit the form, place a "
+"test order — then come back and retry."
+msgstr "去触发该事件一次——发布一篇测试文章、提交表单、下一个测试订单——然后回来重试。"
 
 #: admin/src/components/ui/UpgradeBadge.vue
 msgid "Go to Pro"
@@ -2224,6 +2496,10 @@ msgstr "前往 Pro"
 #: admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
 msgid "Go to Queue"
 msgstr "前往队列"
+
+#: admin/src/views/SettingsView.vue
+msgid "Greyed out because this site sets DISALLOW_FILE_EDIT — see the notice above."
+msgstr "已置灰，因为本站点设置了 DISALLOW_FILE_EDIT——见上方通知。"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "Group does not match example payload"
@@ -2250,7 +2526,7 @@ msgstr "HTTP 代码"
 msgid "HTTP Method"
 msgstr "HTTP 方法"
 
-#: src/Api/WebhooksController.php:781
+#: src/Api/WebhookSchema.php:61
 msgid "HTTP method used for delivery."
 msgstr "用于投递的 HTTP 方法。"
 
@@ -2298,23 +2574,29 @@ msgstr "提示"
 msgid "How secrets are protected"
 msgstr "密钥如何受保护"
 
+#: src/Api/WebhookSchema.php:111
+msgid ""
+"How the wait between retries grows. Null inherits the site-wide setting, "
+"then exponential."
+msgstr "重试之间的等待时间如何增长。Null 继承站点设置，否则为指数增长。"
+
 #: admin/src/components/WebhookForm.vue
 msgid "How to calculate the wait between retries. Overrides the global setting."
 msgstr "如何计算重试之间的等待时间。覆盖全局设置。"
 
-#: src/Api/WebhooksController.php:130
+#: src/Api/WebhooksController.php:128
 msgid "How to run the test: now (synchronous) or queue (async)."
 msgstr "如何运行测试：now（同步）或 queue（异步）。"
 
 #: admin/src/components/AiStepControls.vue
-msgid "I sent a test — retry"
-msgstr "我已发送测试——重试"
+msgid "I fired it — retry"
+msgstr "我已触发——重试"
 
 #: admin/src/components/TokenCreatedDialog.vue
 msgid "I've saved it elsewhere"
 msgstr "我已将其保存到别处"
 
-#: src/Api/WebhooksController.php:776
+#: src/Api/WebhookSchema.php:56
 msgid ""
 "ID of a vault credential to use for authorization. Takes precedence over "
 "auth_header."
@@ -2407,12 +2689,12 @@ msgstr "无效的凭据类型。"
 msgid "Invalid cron token."
 msgstr "无效的 cron 令牌。"
 
-#: src/Api/WebhooksController.php:256
-#: src/Api/WebhooksController.php:361
+#: src/Api/WebhooksController.php:252
+#: src/Api/WebhooksController.php:357
 msgid "Invalid endpoint URL."
 msgstr "无效的端点 URL。"
 
-#: src/Services/Export/BuildSchemaValidator.php:408
+#: src/Services/Export/BuildSchemaValidator.php:409
 #. translators: 1: JSON path, 2: reason
 #, php-format
 msgid "Invalid import file — %1$s %2$s"
@@ -2521,7 +2803,7 @@ msgstr "上次拉取统计：%s"
 msgid "Last successful response (used as preview context)"
 msgstr "上次成功的响应（用作预览上下文）"
 
-#: src/Api/WebhooksController.php:837
+#: src/Api/WebhookSchema.php:144
 msgid "Last update date."
 msgstr "上次更新日期。"
 
@@ -2537,6 +2819,18 @@ msgstr "在 WordPress.org 上发表评价"
 msgid "Leave blank to keep current"
 msgstr "留空以保留当前值"
 
+#: admin/src/views/SettingsView.vue
+msgid "Let API tokens write Code Glue"
+msgstr "允许 API 令牌写入 Code Glue"
+
+#: admin/src/views/SettingsView.vue
+msgid "Let connected AI tools build webhooks"
+msgstr "允许已连接的 AI 工具构建 Webhook"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Let’s build something."
+msgstr "来构建点什么吧。"
+
 #: admin/src/views/ProView.vue
 msgid "License Key"
 msgstr "许可证密钥"
@@ -2548,6 +2842,10 @@ msgstr "线性"
 #: admin/src/components/BuildPublishFields.vue
 msgid "LinkedIn"
 msgstr "LinkedIn"
+
+#: src/Abilities/GlueAbilities.php:47
+msgid "List Code Glue snippets"
+msgstr "列出 Code Glue 代码片段"
 
 #: src/Abilities/AbilityCatalog.php:33
 msgid ""
@@ -2573,9 +2871,18 @@ msgstr "列出可用触发器"
 msgid "List credentials"
 msgstr "列出凭据"
 
-#: src/Api/WebhooksController.php:824
+#: src/Api/WebhookSchema.php:131
 msgid "List of trigger actions."
 msgstr "触发器操作列表。"
+
+#: src/Abilities/GlueAbilities.php:48
+msgid ""
+"List saved Code Glue PHP snippets (id, name, tags — use get_snippet for the "
+"code). Snippets transform the payload before dispatch (pre) or run side "
+"effects after the response (post) once assigned to a webhook+trigger."
+msgstr ""
+"列出已保存的 Code Glue PHP 代码片段（id、名称、标签——代码请用 get_snippet 获取）。代码片段一旦分配给 "
+"Webhook+触发器，就会在发送前转换载荷（pre）或在响应后执行副作用（post）。"
 
 #: src/Abilities/AbilityCatalog.php:108
 msgid ""
@@ -2642,7 +2949,7 @@ msgstr "日志保留"
 #: src/Api/LogsController.php:242
 #: src/Api/LogsController.php:260
 #: src/Api/LogsController.php:316
-#: src/Api/LogsController.php:368
+#: src/Api/LogsController.php:369
 msgid "Log not found."
 msgstr "未找到日志。"
 
@@ -2658,7 +2965,7 @@ msgstr "日志：%s"
 msgid "Love the plugin?"
 msgstr "喜欢这个插件吗？"
 
-#: src/Abilities/AbilityCatalog.php:277
+#: src/Abilities/AbilityCatalog.php:290
 msgid ""
 "Make a guarded test HTTP call to validate an endpoint before going live. To "
 "probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its "
@@ -2727,6 +3034,12 @@ msgstr "最大延迟（秒）"
 msgid "Max Delay (seconds)"
 msgstr "最大延迟（秒）"
 
+#: src/Api/WebhookSchema.php:104
+msgid ""
+"Maximum delivery attempts for this webhook. Null inherits the site-wide "
+"setting, then the default of 5."
+msgstr "此 Webhook 的最大投递尝试次数。Null 继承站点设置，否则为默认的 5。"
+
 #: admin/src/views/VaultView.vue
 msgid "Maximum protection"
 msgstr "最高保护"
@@ -2743,7 +3056,7 @@ msgstr "方法"
 msgid "Migrated %1$s · failed %2$s"
 msgstr "已迁移 %1$s · 失败 %2$s"
 
-#: src/Abilities/AbilityCatalog.php:230
+#: src/Abilities/AbilityCatalog.php:243
 msgid ""
 "Mint a WordPress Application Password for the CURRENT signed-in admin and "
 "store it as a \"basic\" vault credential named \"WP REST API (internal) — "
@@ -2776,15 +3089,9 @@ msgstr "模型"
 msgid "Monthly credits reset on %s."
 msgstr "每月积分将于 %s 重置。"
 
-#: src/Abilities/WriteAbilities.php:144
-msgid ""
-"More than 1 condition requires a Pro license — propose a single simple rule "
-"instead."
-msgstr "超过 1 个条件需要 Pro 许可证——请改为提出单条简单规则。"
-
-#: src/Api/SchemasController.php:317
-msgid "More than 1 condition requires a Pro license."
-msgstr "超过 1 个条件需要 Pro 许可证。"
+#: admin/src/views/ProView.vue
+msgid "More sites per licence"
+msgstr "每个许可证更多站点"
 
 #: admin/src/views/SettingsView.vue
 msgid "Move the admin menu item under Tools instead of the top-level sidebar."
@@ -2828,7 +3135,7 @@ msgstr "名称为必填项"
 msgid "Name is required."
 msgstr "名称为必填项。"
 
-#: src/Api/WebhooksController.php:753
+#: src/Api/WebhookSchema.php:33
 msgid "Name of the webhook."
 msgstr "Webhook 的名称。"
 
@@ -2872,9 +3179,23 @@ msgstr "下次尝试计划于 %s"
 msgid "No"
 msgstr "否"
 
-#: src/Services/Ai/AgentOrchestrator.php:73
+#: src/Services/Ai/AgentOrchestrator.php:117
 msgid "No AI provider is configured yet. Set one up to use the AI Builder."
 msgstr "尚未配置任何 AI 提供商。请先设置一个以使用 AI 构建器。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "No API key needed — %1$s free credits, about %2$s builds."
+msgstr "无需 API 密钥——%1$s 个免费积分，约 %2$s 次构建。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "No API key needed — your first builds are free."
+msgstr "无需 API 密钥——你的前几次构建免费。"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid ""
+"No API key needed. Connect your own provider below at any time — it will be "
+"used instead of the trial."
+msgstr "无需 API 密钥。你随时可以在下方连接自己的服务商——它将代替试用被使用。"
 
 #: admin/src/views/ApiTokensView.vue
 msgid "No API tokens"
@@ -2905,7 +3226,7 @@ msgstr "当前未配置任何 WordPress AI 连接器。请在“设置 → 连�
 msgid "No activity recorded yet."
 msgstr "尚未记录任何活动。"
 
-#: src/Api/SettingsController.php:195
+#: src/Api/SettingsController.php:226
 msgid "No archive files found or failed to create ZIP."
 msgstr "未找到归档文件或创建 ZIP 失败。"
 
@@ -2925,9 +3246,9 @@ msgstr "此配置无需授权。"
 msgid "No body sent"
 msgstr "未发送主体"
 
-#: src/Api/WebhooksController.php:586
-#: src/Api/WebhooksController.php:603
-#: src/Api/WebhooksController.php:622
+#: src/Api/WebhooksController.php:584
+#: src/Api/WebhooksController.php:601
+#: src/Api/WebhooksController.php:620
 msgid ""
 "No captured payload found for this trigger. Fire the trigger at least once "
 "first."
@@ -2958,19 +3279,14 @@ msgid ""
 "step."
 msgstr "保险库中还没有凭据 — 创建一个后将用于此步骤。"
 
-#: src/Api/SchemasController.php:337
+#: src/Api/SchemasController.php:310
+#: src/Api/SnippetsController.php:310
 msgid "No data to update."
 msgstr "没有要更新的数据。"
 
 #: admin/src/components/MappingEditor.vue
 msgid "No example payload captured yet."
 msgstr "尚未捕获示例数据。"
-
-#: admin/src/components/AiStepControls.vue
-msgid ""
-"No example payload captured yet. Open a page with your form and submit a "
-"test entry, then retry so the agent can map the real fields."
-msgstr "尚未捕获示例数据。请打开包含您表单的页面并提交一条测试记录，然后重试，以便代理映射真实字段。"
 
 #: admin/src/components/MappingEditor.vue
 msgid "No field mappings configured. Fields will be sent as-is."
@@ -2983,6 +3299,10 @@ msgstr "未找到字段"
 #: admin/src/components/MappingEditor.vue
 msgid "No fields found in payload"
 msgstr "数据中未找到字段"
+
+#: src/Services/Ai/HostedTrialTransport.php:41
+msgid "No free trial is active on this site."
+msgstr "本站点没有生效中的免费试用。"
 
 #: admin/src/components/ExternalCronChart.vue
 msgid "No heartbeat data yet"
@@ -3002,7 +3322,24 @@ msgid ""
 "chain source."
 msgstr "尚不存在其他 Webhook — 请至少创建一个 Webhook 以将其用作链来源。"
 
-#: src/Abilities/TestAbilities.php:174
+#: src/Abilities/ReadAbilities.php:152
+#. translators: 1: trigger name, 2: comma-separated list of triggers that have captures.
+#, php-format
+msgid ""
+"No payload has ever been captured for \"%1$s\", so there is nothing to map "
+"or filter on. Reading other triggers will not help: the ONLY triggers with "
+"a capture are: %2$s. Do NOT retry this with a different hook name, and do "
+"NOT propose set_mapping or set_conditions with guessed field paths. Either "
+"pick a trigger from that list, or stop and tell the user in plain words "
+"which event to fire (e.g. \"publish a test post\") so the payload is "
+"captured — then read this again."
+msgstr ""
+"从未为“%1$s”捕获过载荷，因此没有可映射或过滤的内容。读取其他触发器也无济于事：唯一有捕获记录的触发器是：%2$"
+"s。不要换一个钩子名重试，也不要用猜测的字段路径提出 set_mapping 或 "
+"set_"
+"conditions。要么从该列表中选一个触发器，要么停下来用平实的语言告诉用户该触发哪个事件（例如“发布一篇测试文章”）以捕获载荷——然后再读取一次。"
+
+#: src/Abilities/TestAbilities.php:192
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr "未提供数据，且此触发器尚无已捕获的示例。"
 
@@ -3064,6 +3401,10 @@ msgstr "没有匹配的 Webhook。"
 msgid "No webhooks match “%s”."
 msgstr "没有 Webhook 匹配“%s”。"
 
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "No-op"
+msgstr "无操作"
+
 #: admin/src/views/ExternalCronView.vue
 msgid "Not configured"
 msgstr "未配置"
@@ -3084,11 +3425,22 @@ msgstr ""
 msgid "Nothing to preview yet — switch to Write to add a description."
 msgstr "暂无可预览的内容——切换到“撰写”添加说明。"
 
+#: admin/src/components/AiProviderSettings.vue
+msgid ""
+"Nothing to set up: your first builds are free and start the moment you send "
+"a prompt. Connect your own provider here whenever you want — it will be "
+"used instead of the trial."
+msgstr "无需设置：你的前几次构建免费，从你发送提示的那一刻开始。你随时可以在这里连接自己的服务商——它将代替试用被使用。"
+
+#: admin/src/views/LogsList.vue
+msgid "Nothing was queued"
+msgstr "没有任何内容加入队列"
+
 #: src/Api/LogsController.php:127
 msgid "Number of days to look back."
 msgstr "回溯的天数。"
 
-#: src/Api/LogsController.php:523
+#: src/Api/LogsController.php:535
 msgid "Number of results per page."
 msgstr "每页结果数。"
 
@@ -3135,13 +3487,17 @@ msgstr "只有失败的日志条目才能重试。"
 msgid "Only pending or permanently failed jobs can be retried."
 msgstr "只有待处理或永久失败的任务才能重试。"
 
-#: src/Api/WebhooksController.php:726
+#: src/Api/WebhooksController.php:724
 msgid "Only return enabled webhooks."
 msgstr "仅返回已启用的 Webhook。"
 
-#: src/Api/LogsController.php:376
+#: src/Api/LogsController.php:377
 msgid "Only successful or skipped log entries can be replayed."
 msgstr "只有成功或已跳过的日志条目才能重放。"
+
+#: admin/src/App.vue
+msgid "Open Settings"
+msgstr "打开设置"
 
 #: admin/src/components/BuiltWebhookActions.vue
 msgid "Open webhook"
@@ -3159,7 +3515,7 @@ msgstr "操作 + 创建/更新/删除 Webhook、架构和队列任务"
 msgid "Operational + create/update/delete webhooks, schemas, queue jobs"
 msgstr "操作 + 创建/更新/删除 Webhook、架构、队列任务"
 
-#: src/Api/WebhooksController.php:759
+#: src/Api/WebhookSchema.php:39
 msgid "Optional markdown description documenting what this webhook does."
 msgstr "可选的 Markdown 说明，用于记录此 Webhook 的作用。"
 
@@ -3174,6 +3530,10 @@ msgstr "选项"
 #: admin/src/components/TriggerSelect.vue
 msgid "Or select from available hooks..."
 msgstr "或从可用钩子中选择…"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid "Or use Pro AI credits"
+msgstr "或使用 Pro AI 积分"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Original"
@@ -3253,8 +3613,8 @@ msgid "Paste the token / key"
 msgstr "粘贴令牌 / 密钥"
 
 #: admin/src/components/KeyValueEditor.vue
-msgid "Path not found in captured payload"
-msgstr "在已捕获数据中未找到路径"
+msgid "Path not found in captured payload — this value will be sent as static text"
+msgstr "在捕获的载荷中未找到该路径——此值将作为静态文本发送"
 
 #: admin/src/components/FieldSelector.vue admin/src/components/MappingEditor.vue
 msgid "Path not found in payload"
@@ -3289,8 +3649,8 @@ msgid "Pending"
 msgstr "待处理"
 
 #: admin/src/views/ProView.vue
-msgid "Per-webhook retry limit override"
-msgstr "按 Webhook 覆盖重试上限"
+msgid "Per-webhook retry limit and backoff strategy"
+msgstr "按 Webhook 设置重试上限和退避策略"
 
 #: admin/src/views/QueueView.vue
 msgid "Perm. Failed"
@@ -3300,7 +3660,13 @@ msgstr "永久失败"
 msgid "Permanently Failed"
 msgstr "永久失败"
 
-#: src/Abilities/AbilityCatalog.php:334
+#: src/Abilities/GlueAbilities.php:151
+msgid ""
+"Permanently delete a Code Glue snippet. Requires confirmation. Webhooks "
+"referencing it fall back to no snippet."
+msgstr "永久删除一个 Code Glue 代码片段。需要确认。引用它的 Webhook 将回退为无代码片段。"
+
+#: src/Abilities/AbilityCatalog.php:347
 msgid ""
 "Permanently delete a webhook and its triggers / mapping. Requires "
 "confirmation."
@@ -3342,7 +3708,7 @@ msgstr "投递后 Glue"
 msgid "Post-dispatch"
 msgstr "投递后"
 
-#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+#: admin/src/components/TriggerSchemaPanel.vue
 msgid "Post-dispatch Code Glue"
 msgstr "投递后 Code Glue"
 
@@ -3364,7 +3730,7 @@ msgstr "投递前 Glue"
 msgid "Pre-dispatch"
 msgstr "投递前"
 
-#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+#: admin/src/components/TriggerSchemaPanel.vue
 msgid "Pre-dispatch Code Glue"
 msgstr "投递前 Code Glue"
 
@@ -3377,6 +3743,10 @@ msgstr "投递前 Code Glue 预览处于活动状态。请在保存映射与条�
 #: admin/src/components/MarkdownField.vue
 msgid "Preview"
 msgstr "预览"
+
+#: src/Abilities/GlueAbilities.php:107
+msgid "Preview (test-run) a Code Glue snippet"
+msgstr "预览（试运行）Code Glue 代码片段"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Preview active"
@@ -3406,15 +3776,11 @@ msgstr "Pro 许可证"
 msgid "Pro Plugin Installed"
 msgstr "已安装 Pro 插件"
 
-#: admin/src/components/WebhookCardContent.vue
-msgid "Pro inactive"
-msgstr "Pro 未激活"
-
 #: src/Api/ProStatusController.php:48
 msgid "Pro plugin not found."
 msgstr "未找到 Pro 插件。"
 
-#: src/Abilities/AbilityCatalog.php:276
+#: src/Abilities/AbilityCatalog.php:289
 msgid "Probe a target endpoint"
 msgstr "探测目标端点"
 
@@ -3436,9 +3802,17 @@ msgstr "处理中"
 msgid "Processing…"
 msgstr "正在处理…"
 
+#: src/Abilities/GlueAbilities.php:272
+msgid "Provide code or a snippet_id to preview."
+msgstr "请提供代码或 snippet_id 以进行预览。"
+
 #: admin/src/components/AiProviderSettings.vue
 msgid "Provider"
 msgstr "提供商"
+
+#: admin/src/views/ProView.vue
+msgid "Publish a build and earn AI credits"
+msgstr "发布构建并赚取 AI 积分"
 
 #: admin/src/components/ShareBuildDialog.vue
 msgid "Publish build"
@@ -3469,6 +3843,12 @@ msgstr "已发布的配置在上线前会自动审核，之后也可以从你的
 msgid "Published — your build is live."
 msgstr "已发布 — 你的配置已上线。"
 
+#: src/Services/Builds/PublishBuildClient.php:41
+msgid ""
+"Publishing a build needs a licence this site is known by. Run a build with "
+"AI once to claim the free trial licence, or enter a Pro key."
+msgstr "发布构建需要一个本站点已被识别的许可证。先用 AI 运行一次构建以领取免费试用许可证，或输入 Pro 密钥。"
+
 #: admin/src/components/ShareBuildDialog.vue
 msgid "Publishing failed."
 msgstr "发布失败。"
@@ -3481,7 +3861,7 @@ msgstr "正在发布…"
 msgid "Query Parameters"
 msgstr "查询参数"
 
-#: src/Api/WebhooksController.php:800
+#: src/Api/WebhookSchema.php:80
 msgid "Query parameters appended to the URL."
 msgstr "附加到 URL 的查询参数。"
 
@@ -3558,8 +3938,19 @@ msgid ""
 msgstr "读取最近的投递日志（可选仅针对一个 Webhook），以核实发送了什么以及端点如何响应。"
 
 #: admin/src/components/ShareBuildDialog.vue
+msgid ""
+"Read that build first. If yours does something it does not — another "
+"destination, an extra step, different conditions — make that difference "
+"part of the build and publish again."
+msgstr "先阅读那个构建。如果你的构建做了它没做的事——另一个目标、多一个步骤、不同的条件——把这个差异做进构建里再重新发布。"
+
+#: admin/src/components/ShareBuildDialog.vue
 msgid "Reading this build…"
 msgstr "正在读取此配置…"
+
+#: src/Services/Ai/HostedTrialTransport.php:133
+msgid "Reading this service's API reference…"
+msgstr "正在读取该服务的 API 参考文档…"
 
 #: admin/src/components/ImportDialog.vue
 msgid "Reading…"
@@ -3583,7 +3974,7 @@ msgstr ""
 msgid "Redirect"
 msgstr "重定向"
 
-#: src/Abilities/AbilityCatalog.php:215
+#: src/Abilities/AbilityCatalog.php:228
 msgid ""
 "Reference a stored vault credential from a webhook by id (the secret is "
 "injected at dispatch time and never exposed)."
@@ -3704,6 +4095,14 @@ msgstr "重试 / 重放所选的 %d 项"
 msgid "Retry Settings"
 msgstr "重试设置"
 
+#: admin/src/components/AiStepControls.vue
+msgid "Retry probe"
+msgstr "重试探测"
+
+#: admin/src/views/LogsList.vue
+msgid "Retry queued"
+msgstr "重试已加入队列"
+
 #: admin/src/views/SettingsView.vue
 msgid "Retry settings saved"
 msgstr "重试设置已保存"
@@ -3732,7 +4131,7 @@ msgstr ""
 "用于副作用：%1$supdate_post_meta()%2$s、%1$swp_mail()%2$s、%1$serror_log()%2$s、后续 "
 "API 调用等。"
 
-#: src/Api/SchemasController.php:97
+#: src/Api/SchemasController.php:98
 msgid ""
 "Reuse an example payload captured for the same trigger on another webhook "
 "when this one has none."
@@ -3749,6 +4148,10 @@ msgstr "正在复用另一 Webhook 上为此触发器捕获的示例"
 #: admin/src/components/AiStepPanel.vue
 msgid "Reverted"
 msgstr "已还原"
+
+#: admin/src/components/AiStepPanel.vue
+msgid "Review is on — nothing runs until you start it."
+msgstr "审阅已开启——在你启动之前不会运行任何内容。"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Review plan before running"
@@ -3778,6 +4181,10 @@ msgstr "轮换令牌：%s"
 msgid "Rotating…"
 msgstr "正在轮换…"
 
+#: admin/src/views/LogsList.vue
+msgid "Run %d now"
+msgstr "立即运行 %d 项"
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Run Preview"
 msgstr "运行预览"
@@ -3786,17 +4193,27 @@ msgstr "运行预览"
 msgid "Run Test Now"
 msgstr "立即运行测试"
 
+#: admin/src/views/LogsList.vue
+msgid "Run now"
+msgstr "立即运行"
+
 #: admin/src/components/AiStepPanel.vue
 msgid "Run plan"
 msgstr "运行计划"
 
-#: admin/src/components/PayloadGlueDrawer.vue
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/views/LogsList.vue
 msgid "Running…"
 msgstr "正在运行…"
 
 #: admin/src/components/BuildPublishFields.vue
 msgid "Runs a process end to end — a chain of steps, a scheduled job, a workflow."
 msgstr "端到端地跑完一个流程——一串步骤、一个定时任务或一条工作流。"
+
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Runs after the mapping above, on the mapped payload — %1$s$args%2$s is "
+"empty unless %1$sargs%2$s was mapped through."
+msgstr "在上方映射之后、于映射后的载荷上运行——除非 %1$sargs%2$s 被映射保留，否则 %1$s$args%2$s 为空。"
 
 #: admin/src/components/AiProviderSettings.vue
 msgid "Runs through the WP Webhooks AI service — no API keys needed."
@@ -3972,16 +4389,24 @@ msgstr "选择此字段"
 msgid "Select trigger"
 msgstr "选择触发器"
 
-#: src/Abilities/AbilityCatalog.php:298
+#: src/Abilities/AbilityCatalog.php:311
 msgid ""
 "Send a synchronous test delivery for a webhook using a provided or captured "
 "payload, and return the HTTP result so the agent can verify the integration "
 "end to end. This makes a REAL delivery now, so for an internal REST "
 "endpoint it can actually create or modify data (e.g. create a WordPress "
-"user); it requires confirmation."
+"user); it requires confirmation. It sends the REAL mapped-and-glued "
+"payload, so any non-2xx response means the build does not work and the run "
+"STOPS there — the result (status + the endpoint's response body) comes back "
+"to you, so fix the mapping or the pre-dispatch snippet from that response "
+"and re-test. Order every plan so test_dispatch comes before enable_webhook, "
+"and never treat a step as done just because you proposed it."
 msgstr ""
-"使用提供的或已捕获的数据为 Webhook 发送一次同步测试投递，并返回 HTTP 结果，以便代理端到端验证集成。这会立即执行真实投递，因此对于内部 "
-"REST 端点可能真的创建或修改数据（例如创建 WordPress 用户）；需要确认。"
+"使用提供的或已捕获的载荷为 Webhook 发送一次同步测试投递，并返回 HTTP "
+"结果，以便智能体端到端验证集成。这是一次立即执行的真实投递，因此对内部 REST 端点它可能真的创建或修改数据（例如创建一个 WordPress "
+"用户）；需要确认。它发送的是真实的映射并经 glue 处理后的载荷，所以任何非 2xx 响应都意味着构建不可用，运行会在此停止——结果（状态码 + "
+"端点的响应体）会返回给你，请根据该响应修复映射或预发送代码片段并重新测试。安排每个计划时让 test_dispatch 在 "
+"enable_webhook 之前，并且绝不要因为提出了某个步骤就把它当作已完成。"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Sending…"
@@ -3991,6 +4416,18 @@ msgstr "正在发送…"
 msgid "Sent as Authorization: Bearer <token>"
 msgstr "以 Authorization: Bearer <token> 形式发送"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "Sent for you by the panel"
+msgstr "由面板代你发送"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Sent for you by “Fix it”"
+msgstr "由“修复它”代你发送"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Sent for you — the run resumed"
+msgstr "代你发送——运行已恢复"
+
 #: admin/src/components/HealthStatusBar.vue
 msgid "Sent today"
 msgstr "今日已发送"
@@ -3999,7 +4436,7 @@ msgstr "今日已发送"
 msgid "Server Error"
 msgstr "服务器错误"
 
-#: src/Abilities/AbilityCatalog.php:178
+#: src/Abilities/AbilityCatalog.php:186
 msgid ""
 "Set conditional-dispatch rules for a webhook+trigger so only matching "
 "events leave the site. conditions MUST be an object "
@@ -4011,23 +4448,38 @@ msgid ""
 "\"cast\":\"number\"|\"string\"|\"boolean\"|\"stringify\" to coerce the "
 "payload value before comparing (e.g. numeric compare on a string field). A "
 "rules item may also be a nested group "
-"{\"type\":\"group\",\"match\":\"and\"|\"or\",\"rules\":[...]} (Pro only; "
-"without a Pro license only ONE simple rule with type \"and\" is allowed). "
-"Run get_trigger_schema first and take field paths from the real captured "
-"payload (e.g. \"args.0.form_id\")."
+"{\"type\":\"group\",\"match\":\"and\"|\"or\",\"rules\":[...]}, and there is "
+"no limit on how many rules a webhook may carry — use as many as the user's "
+"logic actually needs. conditions_evaluate_on decides WHICH payload the "
+"field paths address, so set it deliberately: \"original\" (default) = the "
+"raw captured payload, so paths look like \"args.0.form_id\" — read them "
+"from get_trigger_schema; \"transformed\" = the payload AFTER the field "
+"mapping AND after any pre-dispatch Code Glue snippet, so paths are the "
+"mapping's target names plus any key the snippet injects — use this, and "
+"ONLY this, when filtering on something a snippet computes. Mixing them up "
+"silently breaks the filter: a path that does not exist evaluates to null, "
+"and the NEGATIVE operators (not_equals, not_contains, is_empty) then PASS, "
+"so the event is dispatched rather than filtered out. For a rule that must "
+"fail closed when its field is missing, prefer a positive operator "
+"(is_internal equals \"false\" rather than is_internal not_equals \"true\")."
 msgstr ""
-"为 Webhook+触发器设置条件发送规则，使只有匹配的事件才会离开站点。conditions 必须是对象 "
+"为 Webhook+触发器设置条件发送规则，只让匹配的事件离开站点。conditions 必须是一个对象 "
 "{\"enabled\":true,\"type\":\"and\"|\"or\",\"rules\":[{\"field\":\""
-"<指向已捕获数据的点路径>\",\"operator\":\"equals|not_equals|contains|not_contains|"
+"<捕获载荷中的点分路径>\",\"operator\":\"equals|not_equals|contains|not_contains|"
 "greater_than|less_than|is_empty|is_not_empty|is_true|is_false|array_"
 "contains|object_contains\",\"value\":\"...\"}]}。规则可添加可选的 "
 "\"cast\":\"number\"|\"string\"|\"boolean\"|\"stringify\""
-"，在比较前转换数据值（例如对字符串字段做数值比较）。rules 项也可以是嵌套组 "
-"{\"type\":\"group\",\"match\":\"and\"|\"or\",\"rules\":[...]}（仅限 Pro；没有 Pro "
-"许可证时只允许一条 type 为 \"and\" 的简单规则）。请先运行 get_trigger_schema，并从真实捕获的数据中获取字段路径（例如 "
-"\"args.0.form_id\"）。"
+"，在比较前强制转换载荷值（例如对字符串字段做数值比较）。rules 项也可以是嵌套组 "
+"{\"type\":\"group\",\"match\":\"and\"|\"or\",\"rules\":[...]}，一个 Webhook "
+"可携带的规则数量没有限制——用户逻辑确实需要多少就用多少。conditions_evaluate_on "
+"决定字段路径指向哪个载荷，因此要有意识地设置：\"original\"（默认）= 原始捕获的载荷，路径形如 \"args.0.form_id\"——从 "
+"get_trigger_schema 读取；\"transformed\" = 字段映射之后并经过任何预发送 Code Glue "
+"代码片段之后的载荷，路径是映射的目标名称加上代码片段注入的键——当且仅当按代码片段计算出的内容过滤时使用它。混淆两者会悄悄破坏过滤：不存在的路径求值为 "
+"null，否定运算符（not_equals、not_contains、is_"
+"empty）随即通过，事件就会被发送而不是被过滤掉。对于字段缺失时必须安全失败的规则，优先用肯定运算符（is_internal equals "
+"\"false\" 而不是 is_internal not_equals \"true\"）。"
 
-#: src/Abilities/AbilityCatalog.php:177
+#: src/Abilities/AbilityCatalog.php:185
 msgid "Set conditions"
 msgstr "设置条件"
 
@@ -4035,11 +4487,11 @@ msgstr "设置条件"
 msgid "Set expiration date"
 msgstr "设置到期日期"
 
-#: src/Abilities/AbilityCatalog.php:161
+#: src/Abilities/AbilityCatalog.php:169
 msgid "Set field mapping"
 msgstr "设置字段映射"
 
-#: src/Abilities/AbilityCatalog.php:162
+#: src/Abilities/AbilityCatalog.php:170
 msgid ""
 "Set the payload field mapping for a webhook+trigger. field_mapping MUST be "
 "an object {\"mappings\":[{\"source\":\"<dot.path in the captured "
@@ -4049,16 +4501,24 @@ msgid ""
 "drop>\"],\"includeUnmapped\":true|false}. It can only move/rename/exclude "
 "EXISTING payload fields — static or constant values are NOT supported "
 "(inject those with a pre-dispatch Code Glue snippet instead). The mapping "
-"runs BEFORE any pre-dispatch snippet, so snippet output cannot be mapped. "
-"Run get_trigger_schema first and take source paths from the real captured "
-"payload."
+"runs BEFORE any pre-dispatch snippet, so snippet output cannot be mapped — "
+"and, in the other direction, the snippet only ever sees what the mapping "
+"LEFT BEHIND. With includeUnmapped:false everything unmapped is deleted, "
+"including \"args\", so a snippet reading $args[0] gets nothing: whenever a "
+"snippet needs a source field, map it through explicitly (e.g. source "
+"\"args.0\" → target \"post_id\") and have the snippet unset it before "
+"returning if it must not be sent. Run get_trigger_schema first and take "
+"source paths from the real captured payload."
 msgstr ""
-"为 Webhook+触发器设置数据字段映射。field_mapping 必须是对象 "
-"{\"mappings\":[{\"source\":\"<捕获数据中的点路径>\",\"target\":\"<发出 body "
-"中的点路径>\",\"cast\":\"number|string|boolean|stringify\"（可选）}],\"excluded\":[\""
-"<要丢弃的点路径>\"],\"includeUnmapped\":true|false}。它只能移动/重命名/排除已有的数据字段 — "
-"不支持静态或常量值（请改用 pre-dispatch Code Glue 代码片段注入）。映射在 pre-dispatch "
-"片段之前运行，因此片段的输出无法被映射。请先运行 get_trigger_schema，并从真实捕获的数据中获取 source 路径。"
+"为 Webhook+触发器设置载荷字段映射。field_mapping 必须是一个对象 "
+"{\"mappings\":[{\"source\":\"<捕获载荷中的点分路径>\",\"target\":\"<出站请求体中的点分路径>\",\""
+"cast\":\"number|string|boolean|stringify\"（可选）}],\"excluded\":[\"<要丢弃的点分路径>\""
+"],\"includeUnmapped\":true|false}。它只能移动/重命名/排除已存在的载荷字段——不支持静态或常量值（请用预发送 "
+"Code Glue "
+"代码片段注入）。映射在任何预发送代码片段之前运行，所以代码片段的输出无法被映射——反过来，代码片段只能看到映射留下的内容。includeUnmapped"
+":false 时所有未映射的内容都会被删除，包括 \"args\"，因此读取 $args[0] "
+"的代码片段什么也拿不到：当代码片段需要某个源字段时，请显式映射它（例如 source \"args.0\" → target "
+"\"post_id\"），若不应发送则让代码片段在返回前 unset 它。先运行 get_trigger_schema，并从真实捕获的载荷中获取源路径。"
 
 #: admin/src/App.vue admin/src/views/ActivityView.vue admin/src/views/SettingsView.vue
 msgid "Settings"
@@ -4076,10 +4536,6 @@ msgstr "分享此配置"
 msgid "Shared Example"
 msgstr "共享示例"
 
-#: admin/src/components/ShareBuildDialog.vue
-msgid "Sharing the AI conversation alongside a build is a Pro feature."
-msgstr "随配置一起分享 AI 对话是 Pro 功能。"
-
 #: admin/src/components/BuildPublishFields.vue
 msgid "Short summary"
 msgstr "简短摘要"
@@ -4096,7 +4552,7 @@ msgstr "显示 AI 开发追踪面板"
 msgid "Show all compatible (%d)"
 msgstr "显示所有兼容项（%d）"
 
-#: admin/src/components/MappingEditor.vue
+#: admin/src/components/MappingEditor.vue admin/src/components/TriggerSchemaPanel.vue
 msgid "Show full"
 msgstr "显示完整"
 
@@ -4104,7 +4560,7 @@ msgstr "显示完整"
 msgid "Show in list"
 msgstr "在列表中显示"
 
-#: admin/src/components/MappingEditor.vue
+#: admin/src/components/MappingEditor.vue admin/src/components/TriggerSchemaPanel.vue
 msgid "Show less"
 msgstr "显示更少"
 
@@ -4164,6 +4620,21 @@ msgstr "已跳过："
 msgid "Snippet Name"
 msgstr "代码片段名称"
 
+#: src/Abilities/GlueAbilities.php:199
+#: src/Abilities/GlueAbilities.php:243
+#: src/Abilities/GlueAbilities.php:267
+#: src/Abilities/GlueAbilities.php:355
+#: src/Abilities/GlueAbilities.php:374
+#: src/Api/SnippetsController.php:193
+#: src/Api/SnippetsController.php:202
+#: src/Api/SnippetsController.php:235
+msgid "Snippet not found."
+msgstr "未找到代码片段。"
+
+#: admin/src/components/PayloadGlueDrawer.vue
+msgid "Snippet ran but changed nothing"
+msgstr "代码片段已运行但没有任何更改"
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Snippet saved and assigned."
 msgstr "代码片段已保存并分配。"
@@ -4172,11 +4643,24 @@ msgstr "代码片段已保存并分配。"
 msgid "Snippets"
 msgstr "代码片段"
 
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"Snippets already assigned keep running, but they cannot be edited or "
+"previewed here."
+msgstr "已分配的代码片段继续运行，但无法在此编辑或预览。"
+
+#: src/Services/GluePermissions.php:201
+msgid ""
+"Snippets are PHP that runs on this site, so WordPress gates them the same "
+"way it gates editing plugin code. Ask an administrator to make the change, "
+"or to grant your role that capability."
+msgstr "代码片段是在本站点运行的 PHP，因此 WordPress 对它们的限制与编辑插件代码相同。请管理员进行更改，或为你的角色授予该权限。"
+
 #: admin/src/components/ImportDialog.vue
 msgid "Some parts were left out"
 msgstr "部分内容已被略过"
 
-#: src/Services/Ai/AgentOrchestrator.php:173
+#: src/Services/Ai/AgentOrchestrator.php:308
 #. translators: %s: comma-separated ability names.
 #, php-format
 msgid ""
@@ -4218,6 +4702,10 @@ msgstr "状态"
 #: admin/src/components/AiStepPanel.vue
 msgid "Step"
 msgstr "步骤"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "Step %1$s (%2$s) did not succeed: %3$s"
+msgstr "步骤 %1$s（%2$s）未成功：%3$s"
 
 #: admin/src/views/VaultView.vue
 msgid ""
@@ -4318,15 +4806,42 @@ msgstr "测试已加入队列 — 它将在下个 cron 周期运行。"
 msgid "Test webhook delivery on demand"
 msgstr "按需测试 Webhook 投递"
 
-#: src/Abilities/AbilityCatalog.php:297
+#: src/Abilities/AbilityCatalog.php:310
 msgid "Test-dispatch a webhook"
 msgstr "测试发送 Webhook"
+
+#: src/Abilities/GlueAbilities.php:108
+msgid ""
+"Test-run a snippet (by snippet_id, or raw code) against a real captured "
+"payload WITHOUT dispatching anything. Pass webhook_id+trigger to use that "
+"webhook's captured example WITH ITS STORED FIELD MAPPING APPLIED — the "
+"exact array the snippet gets at dispatch — or provide an explicit payload "
+"to test a shape yourself. Returns input_payload (what the snippet received; "
+"check that the keys your code reads are actually there), the resulting "
+"payload, any PHP error and printed output. If result is identical to "
+"input_payload, your code matched nothing and no-oped — fix it before "
+"assigning. Always preview before assigning."
+msgstr ""
+"在不发送任何内容的前提下，用真实捕获的载荷试运行一个代码片段（通过 snippet_id 或原始代码）。传入 webhook_id+trigger "
+"以使用该 Webhook 已捕获的示例并应用其已保存的字段映射——正是代码片段在发送时得到的数组——或提供一个显式载荷来自行测试某种结构。返回 "
+"input_payload（代码片段收到的内容；检查你的代码读取的键确实存在）、结果载荷、任何 PHP 错误和打印输出。如果结果与 "
+"input_payload 完全相同，说明你的代码没有匹配到任何内容、什么也没做——请在分配前修复。分配前务必先预览。"
 
 #: src/Abilities/TestAbilities.php:79
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "不允许该 URL（私有、保留或无效的主机）。"
 
-#: src/Abilities/WriteAbilities.php:211
+#: src/Services/Builds/PublishedPageProbe.php:29
+msgid "That is not a published build address."
+msgstr "那不是一个已发布构建的地址。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"That is roughly %s agent runs. A run is one message you send; most "
+"integrations take two or three to plan, build and test."
+msgstr "这大约相当于 %s 次智能体运行。一次运行就是你发送的一条消息；大多数集成需要两到三次来规划、构建和测试。"
+
+#: src/Abilities/WriteAbilities.php:229
 msgid "That link would create a cycle across an existing chain."
 msgstr "该环节会在现有链中产生循环。"
 
@@ -4344,13 +4859,20 @@ msgstr "%1$s推荐的方式是异步投递%2$s，通过内置系统 cron 或外�
 msgid "The AI Client returned no text."
 msgstr "AI 客户端未返回文本。"
 
+#: src/Services/Ai/AgentOrchestrator.php:296
+msgid ""
+"The AI answered in prose instead of a runnable plan, so no steps were "
+"proposed and nothing has been applied. Ask it to \"send that as a plan\" to "
+"try again."
+msgstr "AI 用文字作答而不是给出可执行的计划，因此没有提出任何步骤，也没有应用任何更改。让它“以计划形式发送”再试一次。"
+
 #: src/Services/Ai/AnthropicTransport.php:134
 #: src/Services/Ai/GoogleTransport.php:139
 #: src/Services/Ai/OpenAiTransport.php:133
 msgid "The AI provider key could not be decrypted."
 msgstr "无法解密 AI 提供商密钥。"
 
-#: src/Services/Ai/AgentOrchestrator.php:387
+#: src/Services/Ai/AgentOrchestrator.php:567
 #. translators: %s: the AI provider's error message.
 #, php-format
 msgid ""
@@ -4369,6 +4891,27 @@ msgstr "AI 提供商返回错误。"
 #: src/Services/Ai/OpenAiTransport.php:102
 msgid "The AI provider returned no text."
 msgstr "AI 提供商未返回文本。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"The AI read this reference on our server — the request shape below comes "
+"from the vendor's documentation, not from memory."
+msgstr "AI 已在我们的服务器上读取了这份参考文档——下方的请求结构来自供应商的文档，而不是凭记忆。"
+
+#: src/Services/Ai/HostedTrialTransport.php:123
+msgid "The AI returned no text."
+msgstr "AI 没有返回任何文本。"
+
+#: src/Services/Ai/HostedTrialTransport.php:154
+msgid "The AI service returned an error."
+msgstr "AI 服务返回了错误。"
+
+#: src/Services/Ai/AgentOrchestrator.php:318
+msgid ""
+"The API Docs Library tried to read this service's reference but it was not "
+"ready in time, so this plan relies on the model's own knowledge of that "
+"API. Test before enabling."
+msgstr "API Docs Library 曾尝试读取该服务的参考文档，但未能及时准备好，因此此计划依赖模型自身对该 API 的了解。请在启用前测试。"
 
 #: admin/src/views/ProView.vue
 msgid "The Pro plugin is installed but not activated in WordPress."
@@ -4406,7 +4949,7 @@ msgid ""
 "their chain-link triggers."
 msgstr "该链及其所有连接将被移除。成员 Webhook 会保留，但会失去其链接触发器。"
 
-#: src/Abilities/WriteAbilities.php:332
+#: src/Abilities/WriteAbilities.php:350
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -4419,6 +4962,12 @@ msgstr "\"%1$s\"（%2$s）上的条件规则值为空——请在设置此条件
 #: src/Services/Ai/OpenAiTransport.php:129
 msgid "The configured AI provider key was not found in the vault."
 msgstr "在保险库中找不到已配置的 AI 提供商密钥。"
+
+#: admin/src/views/LogsList.vue
+msgid ""
+"The delivery runs when the queue next drains — on the next cron tick. On a "
+"quiet site that can take a while, so you can also run it right now."
+msgstr "投递将在队列下一次清空时运行——也就是下一次 cron 触发时。在访问量少的站点上这可能要等一会儿，所以你也可以立即运行它。"
 
 #: admin/src/views/VaultView.vue
 msgid ""
@@ -4443,6 +4992,35 @@ msgid ""
 "reachable, then retry."
 msgstr "无法连接到端点。请检查 URL 是否正确且可公开访问，然后重试。"
 
+#: src/Services/Ai/ProbeInterpreter.php:75
+#. translators: %d: HTTP status code returned to the empty-body probe.
+#, php-format
+msgid ""
+"The endpoint is reachable but answered %d — expected, because a probe sends "
+"an EMPTY body. This does NOT show the integration works. Validate it with a "
+"test delivery (test_dispatch), which sends the real mapped payload, before "
+"going live."
+msgstr ""
+"端点可达但返回了 "
+"%d——这是预期的，因为探测发送的是空请求体。这并不能证明集成可用。请在上线前用测试投递（test_dispatch）验证，它会发送真实的映射后载荷。"
+
+#: src/Services/Ai/DispatchInterpreter.php:47
+#. translators: %d: HTTP status code (401 or 403).
+#, php-format
+msgid ""
+"The endpoint rejected the test delivery with %d — it needs authentication. "
+"Attach a credential to the webhook, then retry."
+msgstr "端点以 %d 拒绝了测试投递——它需要身份验证。请为 Webhook 附加一个凭据，然后重试。"
+
+#: src/Services/Ai/DispatchInterpreter.php:75
+#. translators: %d: HTTP status code returned by the endpoint.
+#, php-format
+msgid ""
+"The endpoint rejected the test delivery with %d — nothing was created on "
+"the far side. Fix the payload (field mapping or the pre-dispatch snippet) "
+"and retry before going live."
+msgstr "端点以 %d 拒绝了测试投递——对方什么也没创建。请修复载荷（字段映射或预发送代码片段），并在上线前重试。"
+
 #: src/Services/Ai/ProbeInterpreter.php:43
 #. translators: %d: HTTP status code (401 or 403).
 #, php-format
@@ -4451,6 +5029,7 @@ msgid ""
 "the webhook, then retry."
 msgstr "端点响应 %d——需要身份验证。请为 Webhook 添加凭据后重试。"
 
+#: src/Services/Ai/DispatchInterpreter.php:60
 #: src/Services/Ai/ProbeInterpreter.php:55
 #. translators: %d: HTTP status code (404, 405 or 410).
 #, php-format
@@ -4458,6 +5037,28 @@ msgid ""
 "The endpoint responded %d — the URL may be wrong or not accept this "
 "request. Double-check the endpoint URL on the webhook, then retry."
 msgstr "端点响应 %d——URL 可能有误或不接受此请求。请仔细核对 Webhook 的端点 URL 后重试。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "The endpoint responded:"
+msgstr "端点的响应："
+
+#: src/Services/Ai/PlanExecutor.php:942
+#. translators: %s: trigger (do_action hook) name.
+#, php-format
+msgid ""
+"The example payload for \"%s\" has now been captured, so the field paths "
+"are readable. Read it with get_trigger_schema and finish the build: set the "
+"field mapping from the REAL paths, add a pre-dispatch Code Glue snippet if "
+"the destination needs a shape mapping alone cannot produce, then "
+"test_dispatch before enabling."
+msgstr ""
+"“%s”的示例载荷现已捕获，字段路径可以读取了。用 get_trigger_schema "
+"读取它并完成构建：根据真实路径设置字段映射，如果目标需要仅靠映射无法生成的结构就添加预发送 Code Glue 代码片段，然后在启用前执行 "
+"test_dispatch。"
+
+#: src/Services/Builds/PublishBuildClient.php:148
+msgid "The library already has a build like this one."
+msgstr "库中已经有一个类似的构建。"
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
@@ -4472,25 +5073,61 @@ msgid ""
 "webhook to capture its own."
 msgstr "同一触发器的数据结构在任何地方都相同，因此新 Webhook 可以借用已在别处捕获的示例。关闭后将要求此 Webhook 捕获自己的示例。"
 
+#: src/Services/Builds/PublishBuildClient.php:179
+msgid ""
+"The publishing service had a temporary problem — nothing was published. "
+"Please try again."
+msgstr "发布服务出现了临时问题——没有发布任何内容。请重试。"
+
+#: src/Services/Builds/PublishBuildClient.php:117
+msgid "The publishing service rejected this build."
+msgstr "发布服务拒绝了这个构建。"
+
+#: src/Services/Builds/PublishBuildClient.php:188
+#. translators: %d: HTTP status code.
+#, php-format
+msgid "The publishing service returned an unexpected error (HTTP %d)."
+msgstr "发布服务返回了意外错误（HTTP %d）。"
+
 #: admin/src/components/WebhookForm.vue
 msgid ""
 "The secret is resolved securely at delivery time and never exposed. Manage "
 "credentials in the"
 msgstr "密钥在投递时安全解析，绝不暴露。请在以下位置管理凭据"
 
-#: src/Abilities/TestAbilities.php:162
+#: src/Services/Ai/DispatchInterpreter.php:36
+msgid ""
+"The test delivery never reached the endpoint. Check the URL is correct and "
+"publicly reachable, then retry."
+msgstr "测试投递从未到达端点。请检查 URL 是否正确且可公开访问，然后重试。"
+
+#: src/Services/Ai/TrialClient.php:192
+msgid ""
+"The trial service is not responding right now. Please try again in a few "
+"minutes."
+msgstr "试用服务目前没有响应。请几分钟后重试。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "The verification challenge could not be completed. Please try again."
+msgstr "无法完成验证挑战。请重试。"
+
+#: src/Abilities/TestAbilities.php:167
 msgid "The webhook has no triggers; provide one."
 msgstr "该 Webhook 没有触发器；请提供一个。"
 
-#: src/Services/Ai/PlanExecutor.php:155
+#: src/Services/Ai/PlanExecutor.php:177
 msgid "There is no plan to run yet."
 msgstr "还没有可运行的计划。"
 
-#: src/Services/Ai/PlanExecutor.php:449
+#: src/Services/Ai/PlanExecutor.php:546
 msgid "There is nothing left to revert."
 msgstr "没有可再还原的内容。"
 
-#: src/Services/Ai/PlanExecutor.php:395
+#: src/Api/PublishBuildController.php:136
+msgid "There is nothing to publish — this build has no webhooks."
+msgstr "没有可发布的内容——这个构建没有任何 Webhook。"
+
+#: src/Services/Ai/PlanExecutor.php:492
 msgid "There is nothing to revert."
 msgstr "没有可还原的内容。"
 
@@ -4500,6 +5137,13 @@ msgid ""
 "the mapped payload is sent as %2$s?payload=&lt;json&gt;%3$s."
 msgstr "这是 %1$s 请求发送数据的主要方式。如果未设置，则映射后的数据会以 %2$s?payload=&lt;json&gt;%3$s 形式发送。"
 
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"These containers exist on your site too, but the keys inside them are yours "
+"and are not in our copy — do not map a field below one until you have your "
+"own capture:"
+msgstr "这些容器在你的站点上也存在，但其中的键是你的，不在我们的副本里——在你拥有自己的捕获之前，不要映射它们下面的任何字段："
+
 #: admin/src/views/WebhooksList.vue
 msgid "They will move to the Unchained section with “No trigger assigned”."
 msgstr "它们将移至“未链接”部分，并显示“未分配触发器”。"
@@ -4507,6 +5151,10 @@ msgstr "它们将移至“未链接”部分，并显示“未分配触发器”
 #: admin/src/views/AiBuilderView.vue
 msgid "Thinking…"
 msgstr "思考中…"
+
+#: src/Services/GluePermissions.php:192
+msgid "This API token cannot write Code Glue."
+msgstr "此 API 令牌无法写入 Code Glue。"
 
 #: admin/src/components/LogsTable.vue
 msgid "This action cannot be undone."
@@ -4531,6 +5179,10 @@ msgid "This build contains %d Code Glue snippet"
 msgid_plural "This build contains %d Code Glue snippets"
 msgstr[0] "此配置包含 %d 个 Code Glue 代码片段"
 
+#: src/Services/Builds/PublishBuildClient.php:109
+msgid "This build did not pass our content check."
+msgstr "这个构建没有通过我们的内容审核。"
+
 #: admin/src/components/ImportDialog.vue
 msgid ""
 "This build includes a Build-with-AI transcript, shown for reference on the "
@@ -4548,11 +5200,50 @@ msgid "This credential is used by %d webhook. Detach it or delete with force."
 msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
 msgstr[0] "该凭据被 %d 个 Webhook 使用。请将其分离或强制删除。"
 
-#: admin/src/components/PayloadGlueDrawer.vue
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid ""
+"This example comes from the WP Webhooks Payload Library, captured on our "
+"own test sites — the SHAPE is real, the VALUES are ours. Fire this event "
+"once on your site and your own capture replaces it automatically."
+msgstr ""
+"此示例来自 WP Webhooks Payload "
+"Library，是在我们自己的测试站点上捕获的——结构是真实的，数值是我们的。在你的站点上触发该事件一次，你自己的捕获就会自动替换它。"
+
+#: src/Services/SiteEnvironment.php:78
+msgid ""
+"This is a WordPress Playground demo — it disappears when you close the tab, "
+"so builds cannot be published from it. Install Webhook Actions on your own "
+"site to publish."
+msgstr ""
+"这是一个 WordPress Playground 演示——关闭标签页后它就会消失，因此无法从这里发布构建。请在你自己的站点上安装 Webhook "
+"Actions 以发布。"
+
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/components/TriggerSchemaPanel.vue
 msgid ""
 "This is the final payload on the wire — used for Transformed Conditions and "
-"URL/param templates below."
-msgstr "这是实际发送的最终数据——用于下面的转换后条件以及网址/参数模板。"
+"URL/param templates."
+msgstr "这是最终发送到线上的载荷——用于“转换后”条件和 URL/参数模板。"
+
+#: src/Services/Ai/DispatchInterpreter.php:122
+#. translators: %d: how many times this identical failure has now occurred.
+#, php-format
+msgid ""
+"This is the same rejection for the %d time running — the endpoint returned "
+"an identical response, so the last change did not touch what it objects to. "
+"Do not reformat that value again. Read the endpoint's own error text and "
+"ask what its API contract wants that the request does not carry: a "
+"request-level option or flag (many APIs need one before they will coerce or "
+"accept a value), a wrapper key the record has to sit inside, a field that "
+"must be a different type, or a value that must already exist on the far "
+"side. Name the specific API and what you believe it needs; if you are not "
+"sure, say so plainly and ask the user to confirm it from that API's "
+"documentation instead of guessing a third format."
+msgstr ""
+"这已是连续第 %d "
+"次相同的拒绝——端点返回了完全相同的响应，说明上一次更改没有触及它所反对的内容。不要再次重新格式化那个值。阅读端点自己的错误文本，问问它的 API "
+"契约需要什么而请求中没有携带：请求级别的选项或标志（许多 API "
+"需要它才会转换或接受某个值）、记录必须放入的包装键、必须是另一种类型的字段，或者对方必须已经存在的值。说出具体的 API "
+"以及你认为它需要什么；如果不确定，就直说，并请用户从该 API 的文档中确认，而不是猜测第三种格式。"
 
 #: admin/src/components/WebhookForm.vue
 msgid ""
@@ -4570,7 +5261,7 @@ msgid ""
 "webhooks it created."
 msgstr "这将删除该对话及其构建历史。不会删除其创建的任何 Webhook。"
 
-#: src/Abilities/AbilityCatalog.php:302
+#: src/Abilities/AbilityCatalog.php:315
 msgid ""
 "This sends a REAL delivery to the endpoint right now — it is not a dry run. "
 "If the webhook targets this site’s own REST API (e.g. wp-json/wp/v2/users) "
@@ -4580,6 +5271,16 @@ msgstr ""
 "这会立即向端点发送一次真实投递 — 不是演练。如果 Webhook 指向本站点自身的 REST API（例如 "
 "wp-json/wp/v2/users），它可能真的创建或修改数据，例如创建 WordPress 用户。确认后将真实发送。"
 
+#: src/Services/GluePermissions.php:189
+msgid ""
+"This site defines DISALLOW_FILE_EDIT, which turns off editing code from the "
+"dashboard. That is a server-level choice and nothing in this plugin can "
+"override it — it has to be changed in wp-config.php. Snippets that are "
+"already assigned keep running."
+msgstr ""
+"本站点定义了 DISALLOW_FILE_EDIT，它关闭了从仪表盘编辑代码的功能。这是服务器级别的选择，本插件中没有任何东西可以覆盖它——必须在 "
+"wp-config.php 中更改。已分配的代码片段继续运行。"
+
 #: admin/src/components/AiProviderSettings.vue
 msgid ""
 "This site no longer includes the WordPress 7.0 AI Client. Connect a "
@@ -4587,15 +5288,59 @@ msgid ""
 "connectors again."
 msgstr "此站点不再包含 WordPress 7.0 AI 客户端。请在下方连接提供商密钥，或恢复到 WordPress 7.0 及以上版本以继续使用您的连接器。"
 
+#: src/Services/SiteEnvironment.php:82
+msgid ""
+"This site's address is not reachable from the internet, so a build "
+"published from it could not be verified or visited. Publish from the site "
+"that actually runs this integration."
+msgstr "本站点的地址无法从互联网访问，因此从这里发布的构建无法被验证或访问。请从真正运行此集成的站点发布。"
+
 #: admin/src/components/AiStepControls.vue
 msgid "This step goes live or changes data. Confirm to run it."
 msgstr "此步骤将上线或更改数据。请确认后运行。"
 
 #: admin/src/components/AiStepControls.vue
 msgid ""
+"This step maps a field we cannot see from here. The example payload came "
+"from the WP Webhooks Payload Library, and these paths sit inside a "
+"container whose contents are specific to your site:"
+msgstr ""
+"此步骤映射了一个我们从这里看不到的字段。示例载荷来自 WP Webhooks Payload "
+"Library，而这些路径位于一个内容特定于你站点的容器内："
+
+#: admin/src/components/AiStepControls.vue
+msgid ""
 "This step needs a stored auth credential. Pick one from the vault or create "
 "a new one — the secret stays in the vault and is injected only at dispatch."
 msgstr "此步骤需要已存储的身份验证凭据。从保险库中选择一个或新建一个 — 密钥保留在保险库中，仅在投递时注入。"
+
+#: src/Abilities/TestAbilities.php:275
+#. translators: %s: plugin slug and version the reference payload was captured on, e.g. "contact-form-7 6.1.7".
+#, php-format
+msgid ""
+"This test sent our reference payload, captured on %s, not data from this "
+"site: a 2xx proves the endpoint accepts the shape the mapping produces, not "
+"that the field VALUES are right. Tell the user, and ask them to fire the "
+"real event once if those values matter."
+msgstr ""
+"此测试发送的是我们在 %s 捕获的参考载荷，而不是本站点的数据：2xx "
+"证明端点接受映射生成的结构，并不证明字段值正确。请告知用户，如果这些值很重要，请他们触发一次真实事件。"
+
+#: admin/src/components/AiStepPanel.vue
+msgid ""
+"This test sent our reference payload, not data from this site — it proves "
+"the endpoint accepts the shape, not the values."
+msgstr "此测试发送的是我们的参考载荷，而不是本站点的数据——它证明端点接受该结构，而不是这些值。"
+
+#: src/Abilities/TestAbilities.php:272
+msgid ""
+"This test sent our reference payload, not data from this site: a 2xx proves "
+"the endpoint accepts the shape the mapping produces, not that the field "
+"VALUES are right. Tell the user, and ask them to fire the real event once "
+"if those values matter."
+msgstr ""
+"此测试发送的是我们的参考载荷，而不是本站点的数据：2xx "
+"证明端点接受映射生成的结构，并不证明字段值正确。请告知用户，如果这些值很重要，请他们触发一次真实事件。"
 
 #: admin/src/components/RotateTokenDialog.vue
 msgid ""
@@ -4624,6 +5369,13 @@ msgid ""
 "This webhook executes synchronously. Slow or unreachable endpoints will "
 "delay page loads and frontend interactions."
 msgstr "该 Webhook 同步执行。缓慢或无法访问的端点将延迟页面加载和前端交互。"
+
+#: src/Abilities/GlueAbilities.php:134
+msgid ""
+"This webhook is LIVE — the snippet's PHP will run on every real dispatch "
+"from now on. A snippet error never breaks the delivery (the payload is sent "
+"unmodified and the error is logged). Confirm to attach it."
+msgstr "此 Webhook 已上线——从现在起代码片段的 PHP 会在每次真实发送时运行。代码片段出错绝不会中断投递（载荷按原样发送并记录错误）。确认以附加它。"
 
 #: admin/src/views/WebhooksList.vue
 msgid "This webhook participates in a chain:"
@@ -4720,9 +5472,17 @@ msgid ""
 "session. Token management is always admin-only regardless of scope."
 msgstr "令牌允许外部系统无需浏览器会话即可访问 REST API。无论作用域如何，令牌管理始终仅限管理员。"
 
+#: src/Services/Builds/PublishBuildClient.php:171
+msgid "Too many builds published from this license — wait a moment and try again."
+msgstr "此许可证发布的构建过多——请稍等片刻再试。"
+
 #: src/Abilities/TestAbilities.php:93
 msgid "Too many probe calls — try again in a minute."
 msgstr "探测调用过多——请一分钟后重试。"
+
+#: src/Services/Ai/TrialClient.php:188
+msgid "Too many trial requests from this network. Please try again in an hour."
+msgstr "来自此网络的试用请求过多。请一小时后重试。"
 
 #: admin/src/views/QueueView.vue
 msgid "Total"
@@ -4770,22 +5530,18 @@ msgstr "转换后"
 msgid "Transformed Payload (Sent)"
 msgstr "转换后数据（已发送）"
 
-#: admin/src/components/MappingEditor.vue
-msgid "Transformed Payload Preview"
-msgstr "转换后数据预览"
-
 #: admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
 msgid "Trigger"
 msgstr "触发器"
 
-#: src/Api/WebhooksController.php:122
+#: src/Api/WebhooksController.php:120
 msgid "Trigger name to use for the test."
 msgstr "用于测试的触发器名称。"
 
-#: src/Api/SchemasController.php:67
-#: src/Api/SchemasController.php:84
-#: src/Api/SchemasController.php:113
-#: src/Api/SchemasController.php:134
+#: src/Api/SchemasController.php:68
+#: src/Api/SchemasController.php:85
+#: src/Api/SchemasController.php:114
+#: src/Api/SchemasController.php:135
 msgid "Trigger name."
 msgstr "触发器名称。"
 
@@ -4821,11 +5577,7 @@ msgstr "URL 查询参数"
 msgid "URL must be HTTP or HTTPS"
 msgstr "URL 必须是 HTTP 或 HTTPS"
 
-#: admin/src/components/WebhookCardContent.vue
-msgid "URL templates ({{ }})"
-msgstr "网址模板（{{ }}）"
-
-#: src/Api/WebhooksController.php:764
+#: src/Api/WebhookSchema.php:44
 msgid "URL to send the webhook to."
 msgstr "发送 Webhook 的目标 URL。"
 
@@ -4841,15 +5593,15 @@ msgstr "未链接"
 msgid "Undo last change"
 msgstr "撤销上次更改"
 
-#: src/Api/WebhooksController.php:75
-#: src/Api/WebhooksController.php:100
-#: src/Api/WebhooksController.php:112
-#: src/Api/WebhooksController.php:747
+#: src/Api/WebhookSchema.php:27
+#: src/Api/WebhooksController.php:73
+#: src/Api/WebhooksController.php:98
+#: src/Api/WebhooksController.php:110
 msgid "Unique identifier for the webhook."
 msgstr "Webhook 的唯一标识符。"
 
-#: src/Api/AgentController.php:167
-#: src/Api/AgentController.php:230
+#: src/Api/AgentController.php:225
+#: src/Api/AgentController.php:288
 msgid "Unknown AI provider."
 msgstr "未知的 AI 提供商。"
 
@@ -4857,13 +5609,13 @@ msgstr "未知的 AI 提供商。"
 msgid "Unknown Webhook"
 msgstr "未知 Webhook"
 
-#: src/Abilities/AbilityRegistry.php:95
+#: src/Abilities/AbilityRegistry.php:134
 #. translators: %s: ability name
 #, php-format
 msgid "Unknown ability: %s"
 msgstr "未知能力：%s"
 
-#: src/Abilities/WriteAbilities.php:322
+#: src/Abilities/WriteAbilities.php:340
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -4874,8 +5626,8 @@ msgid "Unknown error"
 msgstr "未知错误"
 
 #: admin/src/views/ProView.vue
-msgid "Unlimited conditions per trigger"
-msgstr "每个触发器不限条件数量"
+msgid "Unlimited conditions and AND / OR groups"
+msgstr "无限条件与 AND / OR 分组"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Unsaved changes"
@@ -4897,11 +5649,36 @@ msgstr "更新代码片段"
 msgid "Update URL & retry"
 msgstr "更新 URL 并重试"
 
-#: src/Abilities/AbilityCatalog.php:138
+#: src/Services/ProCompatibility.php:63
+#. translators: %s: required Webhook Actions Pro version, e.g. 1.9.0.
+#, php-format
+msgid ""
+"Update Webhook Actions Pro to %s. Code Glue, dynamic URL templates and "
+"retry settings now ship in the free Webhook Actions plugin — until Pro is "
+"updated it keeps running its own copies, so nothing breaks, but you are on "
+"the old versions of those features."
+msgstr ""
+"请将 Webhook Actions Pro 更新到 %s。Code Glue、动态 URL 模板和重试设置现已随免费的 Webhook "
+"Actions 插件提供——在 Pro 更新之前它会继续运行自己的副本，所以不会出问题，但你用的是这些功能的旧版本。"
+
+#: src/Abilities/GlueAbilities.php:89
+msgid "Update a Code Glue snippet"
+msgstr "更新 Code Glue 代码片段"
+
+#: src/Abilities/AbilityCatalog.php:142
 msgid "Update a webhook"
 msgstr "更新 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:139
+#: src/Abilities/GlueAbilities.php:90
+msgid ""
+"Update an existing Code Glue snippet's name, code or tags. If the snippet "
+"is already assigned and enabled on a webhook, the new code runs on the next "
+"dispatch — re-test with preview_snippet after editing."
+msgstr ""
+"更新现有 Code Glue 代码片段的名称、代码或标签。如果该代码片段已分配并在某个 Webhook "
+"上启用，新代码将在下一次发送时运行——编辑后请用 preview_snippet 重新测试。"
+
+#: src/Abilities/AbilityCatalog.php:143
 msgid ""
 "Update an existing webhook (endpoint, method, triggers, headers, "
 "credential)."
@@ -5000,6 +5777,10 @@ msgid ""
 "%1$sevent.id%2$s) or static strings."
 msgstr "值支持指向传出数据的点号路径（例如 %1$sevent.id%2$s）或静态字符串。"
 
+#: admin/src/components/TriggerSchemaPanel.vue
+msgid "View"
+msgstr "查看"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "View full log"
 msgstr "查看完整日志"
@@ -5020,7 +5801,7 @@ msgstr "查看 Webhook 投递日志"
 msgid "View webhooks, logs, queue, health, triggers, schemas"
 msgstr "查看 Webhook、日志、队列、健康状况、触发器、架构"
 
-#: admin/src/components/AiProviderSettings.vue
+#: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "WP Webhooks AI"
 msgstr "WP Webhooks AI"
 
@@ -5033,6 +5814,14 @@ msgid ""
 "WP Webhooks AI is included with your Pro license — no API keys needed. Your "
 "own keys and WordPress connectors remain available."
 msgstr "WP Webhooks AI 已包含在您的 Pro 许可证中 — 无需 API 密钥。您自己的密钥和 WordPress 连接器仍然可用。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "WP Webhooks API Docs Library"
+msgstr "WP Webhooks API Docs Library"
+
+#: admin/src/components/AiPlanStepper.vue admin/src/components/AiStepPanel.vue admin/src/components/TriggerSchemaPanel.vue
+msgid "WP Webhooks Payload Library"
+msgstr "WP Webhooks Payload Library"
 
 #: admin/src/views/ExternalCronView.vue admin/src/views/SettingsView.vue
 msgid "WP-Cron"
@@ -5050,6 +5839,12 @@ msgstr "等待 %s"
 msgid "Wait before each retry"
 msgstr "每次重试前的等待时间"
 
+#: admin/src/components/AiStepControls.vue
+msgid ""
+"Waiting for an example payload. Nothing has fired this trigger yet, so "
+"there are no real field names to map against."
+msgstr "正在等待示例载荷。此触发器尚未被触发过，因此没有真实的字段名可供映射。"
+
 #: admin/src/components/AiStepPanel.vue
 msgid "Waiting for earlier steps…"
 msgstr "等待前面的步骤…"
@@ -5066,11 +5861,11 @@ msgstr "Webhook"
 msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
-#: src/Abilities/AbilityRegistrar.php:41
-#: src/Controllers/AdminController.php:38
-#: src/Controllers/AdminController.php:39
-#: src/Controllers/AdminController.php:46
-#: src/Controllers/AdminController.php:47
+#: src/Abilities/AbilityRegistrar.php:92
+#: src/Controllers/AdminController.php:42
+#: src/Controllers/AdminController.php:43
+#: src/Controllers/AdminController.php:50
+#: src/Controllers/AdminController.php:51
 msgid "Webhook Actions"
 msgstr ""
 
@@ -5079,32 +5874,17 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — 借助 AI 构建自动化与集成"
 
-#: admin/src/views/WebhooksList.vue
-msgid ""
-"Webhook Actions Pro is inactive, so assigned Code Glue snippets are skipped "
-"and {{ }} URL templates are sent literally. Field mapping and conditions "
-"still work. Reactivate Pro to restore these — no data is lost."
-msgstr ""
-"Webhook Actions Pro 未激活，因此已分配的 Code Glue 代码片段会被跳过，{{ }} "
-"网址模板将按原样发送。字段映射和条件仍然有效。重新激活 Pro 即可恢复——数据不会丢失。"
-
-#: admin/src/components/WebhookCardContent.vue
-msgid ""
-"Webhook Actions Pro is inactive, so this webhook dispatches without: %s. "
-"Reactivate Pro to restore it."
-msgstr "Webhook Actions Pro 未激活，因此此 Webhook 在发送时缺少：%s。重新激活 Pro 即可恢复。"
-
-#: src/Controllers/AdminController.php:218
+#: src/Controllers/AdminController.php:250
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
 msgstr "Webhook Actions by Flow Systems：你的 Webhook 已迁移到新的数据库格式。"
 
-#: src/Api/SchemasController.php:46
-#: src/Api/SchemasController.php:62
-#: src/Api/SchemasController.php:79
-#: src/Api/SchemasController.php:108
-#: src/Api/SchemasController.php:129
+#: src/Api/SchemasController.php:47
+#: src/Api/SchemasController.php:63
+#: src/Api/SchemasController.php:80
+#: src/Api/SchemasController.php:109
+#: src/Api/SchemasController.php:130
 msgid "Webhook ID."
 msgstr "Webhook ID。"
 
@@ -5116,7 +5896,7 @@ msgstr "Webhook 认证"
 msgid "Webhook delivery logs older than this will be automatically deleted."
 msgstr "早于此期限的 Webhook 投递日志将被自动删除。"
 
-#: src/Api/WebhooksController.php:551
+#: src/Api/WebhooksController.php:549
 msgid "Webhook has no triggers configured."
 msgstr "该 Webhook 未配置触发器。"
 
@@ -5124,21 +5904,22 @@ msgstr "该 Webhook 未配置触发器。"
 msgid "Webhook is live."
 msgstr "Webhook 已上线。"
 
-#: src/Api/WebhooksController.php:240
+#: src/Api/WebhooksController.php:236
 msgid "Webhook name is required."
 msgstr "Webhook 名称为必填项。"
 
-#: src/Api/LogsController.php:386
-#: src/Api/SchemasController.php:171
-#: src/Api/SchemasController.php:231
-#: src/Api/SchemasController.php:276
-#: src/Api/SchemasController.php:387
-#: src/Api/SchemasController.php:419
-#: src/Api/WebhooksController.php:207
-#: src/Api/WebhooksController.php:340
-#: src/Api/WebhooksController.php:450
-#: src/Api/WebhooksController.php:502
-#: src/Api/WebhooksController.php:542
+#: src/Abilities/GlueAbilities.php:350
+#: src/Api/LogsController.php:387
+#: src/Api/SchemasController.php:172
+#: src/Api/SchemasController.php:233
+#: src/Api/SchemasController.php:279
+#: src/Api/SchemasController.php:361
+#: src/Api/SchemasController.php:393
+#: src/Api/WebhooksController.php:201
+#: src/Api/WebhooksController.php:336
+#: src/Api/WebhooksController.php:448
+#: src/Api/WebhooksController.php:500
+#: src/Api/WebhooksController.php:540
 msgid "Webhook not found."
 msgstr "未找到 Webhook。"
 
@@ -5166,6 +5947,18 @@ msgstr "这个 Webhook 有什么作用？支持 Markdown。"
 msgid "What this build contains"
 msgstr "此配置包含的内容"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"
+msgstr "当 Contact Form 7 表单提交时，把它作为 JSON 发送到我的 n8n Webhook"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "When a new user registers, add them to my CRM and tag them by role"
+msgstr "当新用户注册时，把他们加入我的 CRM 并按角色打标签"
+
+#: admin/src/views/AiBuilderView.vue
+msgid "When a post is published, notify my Slack channel with the title and link"
+msgstr "当文章发布时，用标题和链接通知我的 Slack 频道"
+
 #: admin/src/views/SettingsView.vue
 msgid "When enabled, logs are exported to JSON files before being deleted."
 msgstr "启用后，日志在删除前会导出为 JSON 文件。"
@@ -5185,19 +5978,19 @@ msgstr "当 Webhook 被触发时，任务将显示在此处以供处理。"
 msgid "Where does this belong?"
 msgstr "它属于哪一类？"
 
-#: src/Api/WebhooksController.php:116
+#: src/Api/WebhooksController.php:114
 msgid "Where to source the test payload from."
 msgstr "测试数据的来源。"
 
-#: src/Api/WebhooksController.php:818
+#: src/Api/WebhookSchema.php:98
 msgid "Whether the webhook executes synchronously (blocking, bypasses queue)."
 msgstr "Webhook 是否同步执行（阻塞，绕过队列）。"
 
-#: src/Api/WebhooksController.php:812
+#: src/Api/WebhookSchema.php:92
 msgid "Whether the webhook is enabled."
 msgstr "Webhook 是否已启用。"
 
-#: src/Api/SchemasController.php:93
+#: src/Api/SchemasController.php:94
 msgid "Whether to include user data."
 msgstr "是否包含用户数据。"
 
@@ -5237,6 +6030,12 @@ msgstr "撰写"
 msgid "Write your own JSON payload"
 msgstr "编写你自己的 JSON 数据"
 
+#: src/Services/GluePermissions.php:198
+#. translators: %s: WordPress capability name, e.g. edit_plugins.
+#, php-format
+msgid "Writing Code Glue needs the \"%s\" capability."
+msgstr "写入 Code Glue 需要“%s”权限。"
+
 #: admin/src/views/QueueView.vue
 msgid "X-Webhook-Id:"
 msgstr "X-Webhook-Id："
@@ -5245,9 +6044,17 @@ msgstr "X-Webhook-Id："
 msgid "Yes"
 msgstr "是"
 
-#: src/Api/WebhooksController.php:170
+#: src/Api/RetrySettingsController.php:49
+msgid "You do not have permission."
+msgstr "你没有权限。"
+
+#: src/Api/WebhooksController.php:168
 msgid "You don't have permissions to see it."
 msgstr "你没有查看它的权限。"
+
+#: src/Services/Builds/PublishBuildClient.php:127
+msgid "You have already published this build."
+msgstr "你已经发布过这个构建。"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid ""
@@ -5277,6 +6084,26 @@ msgstr "已收到你的配置。"
 msgid "Your builds"
 msgstr "您的构建"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "Your free trial is used up."
+msgstr "你的免费试用已用完。"
+
+#: admin/src/components/AiProviderSettings.vue
+msgid ""
+"Your free trial is used up. Connect your own provider below — Google AI "
+"Studio gives you a free Gemini key with no credit card — or get Pro credits."
+msgstr "你的免费试用已用完。在下方连接你自己的服务商——Google AI Studio 提供免费的 Gemini 密钥，无需信用卡——或获取 Pro 积分。"
+
+#: admin/src/views/AiBuilderView.vue
+msgid ""
+"Your free trial starts with %s credits — nothing to set up, no card, no "
+"account."
+msgstr "你的免费试用从 %s 个积分开始——无需设置，无需银行卡，无需账户。"
+
+#: src/Services/Builds/PublishBuildClient.php:163
+msgid "Your license does not allow publishing from this site."
+msgstr "你的许可证不允许从本站点发布。"
+
 #: admin/src/views/ProView.vue
 msgid "Your license is active on this site."
 msgstr "你的许可证已在本站点激活。"
@@ -5289,7 +6116,11 @@ msgstr "你的链接会显示在配置页面上，并以 nofollow 方式发布�
 msgid "Your name"
 msgstr "你的名字"
 
-#: src/Services/Ai/AgentOrchestrator.php:230
+#: admin/src/views/AiBuilderView.vue
+msgid "Your previous builds, read-only. Connect a provider to continue building."
+msgstr "你之前的构建，只读。连接一个服务商以继续构建。"
+
+#: src/Services/Ai/AgentOrchestrator.php:389
 #. translators: 1: selected provider/model, 2: fallback provider/model, 3: error reason
 #, php-format
 msgid ""
@@ -5305,6 +6136,22 @@ msgstr "数组包含"
 msgid "auto"
 msgstr "自动"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "auto-researched"
+msgstr "自动调研"
+
+#: src/Api/RetrySettingsController.php:119
+msgid "backoff_base_delay must be between 1 and 86400 seconds."
+msgstr "backoff_base_delay 必须介于 1 到 86400 秒之间。"
+
+#: src/Api/RetrySettingsController.php:139
+msgid "backoff_max_delay must be between 1 and 86400 seconds."
+msgstr "backoff_max_delay 必须介于 1 到 86400 秒之间。"
+
+#: src/Api/RetrySettingsController.php:99
+msgid "backoff_strategy must be exponential, linear, or fixed."
+msgstr "backoff_strategy 必须是 exponential、linear 或 fixed。"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "be skipped"
 msgstr "被跳过"
@@ -5313,15 +6160,15 @@ msgstr "被跳过"
 msgid "bool"
 msgstr "布尔"
 
-#: src/Abilities/WriteAbilities.php:207
+#: src/Abilities/WriteAbilities.php:225
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 
-#: src/Abilities/WriteAbilities.php:265
+#: src/Abilities/WriteAbilities.php:283
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions 必须是 {enabled, type, rules: [...]} 对象。"
 
-#: src/Abilities/WriteAbilities.php:274
+#: src/Abilities/WriteAbilities.php:292
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules 必须是规则对象数组。"
 
@@ -5329,7 +6176,7 @@ msgstr "conditions.rules 必须是规则对象数组。"
 msgid "contains"
 msgstr "包含"
 
-#: src/Services/Export/BuildSchemaValidator.php:97
+#: src/Services/Export/BuildSchemaValidator.php:98
 msgid "contains no webhooks."
 msgstr "不包含任何 Webhook。"
 
@@ -5361,12 +6208,6 @@ msgstr "例如 HubSpot PAT、Stripe 密钥"
 msgid "e.g. Order to HubSpot"
 msgstr "例如 订单同步到 HubSpot"
 
-#: admin/src/views/AiBuilderView.vue
-msgid ""
-"e.g. “When a Contact Form 7 form is submitted, send it as JSON to my n8n "
-"webhook.”"
-msgstr "例如：“当 Contact Form 7 表单提交时，将其作为 JSON 发送到我的 n8n Webhook。”"
-
 #: admin/src/components/ConditionsEditor.vue
 msgid "empty"
 msgstr "为空"
@@ -5375,7 +6216,7 @@ msgstr "为空"
 msgid "equals"
 msgstr "等于"
 
-#: src/Services/Export/BuildSchemaValidator.php:386
+#: src/Services/Export/BuildSchemaValidator.php:387
 #. translators: %d: max length
 #, php-format
 msgid "exceeds the maximum length of %d bytes."
@@ -5389,6 +6230,10 @@ msgstr "通过父级排除"
 msgid "excludes"
 msgstr "排除"
 
+#: src/Api/RetrySettingsController.php:80
+msgid "global_max_attempts must be between 1 and 100."
+msgstr "global_max_attempts 必须介于 1 到 100 之间。"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "greater than"
 msgstr "大于"
@@ -5397,7 +6242,7 @@ msgstr "大于"
 msgid "has item"
 msgstr "含项"
 
-#: src/Services/Export/BuildSchemaValidator.php:376
+#: src/Services/Export/BuildSchemaValidator.php:377
 #. translators: %s: comma-separated key names
 #, php-format
 msgid "has unexpected key(s): %s."
@@ -5425,7 +6270,7 @@ msgstr "https://your-endpoint.example/webhook"
 msgid "instead."
 msgstr "。"
 
-#: src/Services/Export/BuildSchemaValidator.php:69
+#: src/Services/Export/BuildSchemaValidator.php:70
 #. translators: 1: found version, 2: supported version
 #, php-format
 msgid "is %1$d; this plugin imports version %2$d builds."
@@ -5439,7 +6284,7 @@ msgstr "为空"
 msgid "is false"
 msgstr "为假"
 
-#: src/Services/Export/BuildSchemaValidator.php:366
+#: src/Services/Export/BuildSchemaValidator.php:367
 #. translators: %s: key name
 #, php-format
 msgid "is missing required key \"%s\"."
@@ -5449,11 +6294,11 @@ msgstr "缺少必需的键“%s”。"
 msgid "is not empty"
 msgstr "不为空"
 
-#: src/Services/Export/BuildSchemaValidator.php:62
+#: src/Services/Export/BuildSchemaValidator.php:63
 msgid "is required and must be an integer."
 msgstr "为必填项，且必须是整数。"
 
-#: src/Services/Export/BuildSchemaValidator.php:227
+#: src/Services/Export/BuildSchemaValidator.php:228
 msgid "is required when mode is \"vault\"."
 msgstr "当模式为“vault”时为必填项。"
 
@@ -5465,86 +6310,94 @@ msgstr "为真"
 msgid "less than"
 msgstr "小于"
 
+#: admin/src/components/AiPlanStepper.vue
+msgid "library"
+msgstr "库"
+
 #: admin/src/components/MappingEditor.vue
 msgid "mapped"
 msgstr "已映射"
 
-#: src/Services/Export/BuildSchemaValidator.php:350
+#: src/Services/Export/BuildSchemaValidator.php:351
 msgid "may only contain letters, numbers, hyphens and underscores."
 msgstr "只能包含字母、数字、连字符和下划线。"
 
-#: src/Services/Export/BuildSchemaValidator.php:393
+#: src/Services/Export/BuildSchemaValidator.php:394
 msgid "must be a boolean."
 msgstr "必须是布尔值。"
 
-#: src/Services/Export/BuildSchemaValidator.php:80
-#: src/Services/Export/BuildSchemaValidator.php:230
+#: src/Services/Export/BuildSchemaValidator.php:81
+#: src/Services/Export/BuildSchemaValidator.php:231
 msgid "must be a string or null."
 msgstr "必须是字符串或 null。"
 
-#: src/Services/Export/BuildSchemaValidator.php:77
-#: src/Services/Export/BuildSchemaValidator.php:131
-#: src/Services/Export/BuildSchemaValidator.php:148
-#: src/Services/Export/BuildSchemaValidator.php:301
-#: src/Services/Export/BuildSchemaValidator.php:383
+#: src/Services/Export/BuildSchemaValidator.php:78
+#: src/Services/Export/BuildSchemaValidator.php:132
+#: src/Services/Export/BuildSchemaValidator.php:149
+#: src/Services/Export/BuildSchemaValidator.php:302
+#: src/Services/Export/BuildSchemaValidator.php:384
 msgid "must be a string."
 msgstr "必须是字符串。"
 
-#: src/Services/Export/BuildSchemaValidator.php:345
+#: src/Services/Export/BuildSchemaValidator.php:346
 msgid "must be a {key, value} object."
 msgstr "必须是 {key, value} 对象。"
 
-#: src/Services/Export/BuildSchemaValidator.php:299
+#: src/Services/Export/BuildSchemaValidator.php:300
 msgid "must be an array of strings."
 msgstr "必须是字符串数组。"
 
-#: src/Services/Export/BuildSchemaValidator.php:342
+#: src/Services/Export/BuildSchemaValidator.php:343
 msgid "must be an array of {key, value} pairs."
 msgstr "必须是 {key, value} 键值对数组。"
 
-#: src/Services/Export/BuildSchemaValidator.php:86
-#: src/Services/Export/BuildSchemaValidator.php:95
-#: src/Services/Export/BuildSchemaValidator.php:108
-#: src/Services/Export/BuildSchemaValidator.php:140
-#: src/Services/Export/BuildSchemaValidator.php:206
-#: src/Services/Export/BuildSchemaValidator.php:318
+#: src/Services/Export/BuildSchemaValidator.php:87
+#: src/Services/Export/BuildSchemaValidator.php:96
+#: src/Services/Export/BuildSchemaValidator.php:109
+#: src/Services/Export/BuildSchemaValidator.php:141
+#: src/Services/Export/BuildSchemaValidator.php:207
+#: src/Services/Export/BuildSchemaValidator.php:319
 msgid "must be an array."
 msgstr "必须是数组。"
 
-#: src/Services/Export/BuildSchemaValidator.php:190
+#: src/Services/Export/BuildSchemaValidator.php:191
 msgid "must be an http:// or https:// URL."
 msgstr "必须是 http:// 或 https:// 网址。"
 
-#: src/Services/Export/BuildSchemaValidator.php:59
-#: src/Services/Export/BuildSchemaValidator.php:127
-#: src/Services/Export/BuildSchemaValidator.php:144
-#: src/Services/Export/BuildSchemaValidator.php:161
-#: src/Services/Export/BuildSchemaValidator.php:178
-#: src/Services/Export/BuildSchemaValidator.php:219
-#: src/Services/Export/BuildSchemaValidator.php:239
-#: src/Services/Export/BuildSchemaValidator.php:263
-#: src/Services/Export/BuildSchemaValidator.php:277
-#: src/Services/Export/BuildSchemaValidator.php:292
-#: src/Services/Export/BuildSchemaValidator.php:312
-#: src/Services/Export/BuildSchemaValidator.php:321
+#: src/Services/Export/BuildSchemaValidator.php:60
+#: src/Services/Export/BuildSchemaValidator.php:128
+#: src/Services/Export/BuildSchemaValidator.php:145
+#: src/Services/Export/BuildSchemaValidator.php:162
+#: src/Services/Export/BuildSchemaValidator.php:179
+#: src/Services/Export/BuildSchemaValidator.php:220
+#: src/Services/Export/BuildSchemaValidator.php:240
+#: src/Services/Export/BuildSchemaValidator.php:264
+#: src/Services/Export/BuildSchemaValidator.php:278
+#: src/Services/Export/BuildSchemaValidator.php:293
+#: src/Services/Export/BuildSchemaValidator.php:313
+#: src/Services/Export/BuildSchemaValidator.php:322
 msgid "must be an object."
 msgstr "必须是对象。"
 
-#: src/Services/Export/BuildSchemaValidator.php:399
+#: src/Services/Export/BuildSchemaValidator.php:400
 #. translators: %s: comma-separated allowed values
 #, php-format
 msgid "must be one of: %s."
 msgstr "必须是以下之一：%s。"
 
-#: src/Services/Export/BuildSchemaValidator.php:384
+#: src/Services/Export/BuildSchemaValidator.php:385
 msgid "must not be empty."
 msgstr "不能为空。"
 
-#: src/Services/Export/BuildSchemaValidator.php:354
+#: src/Services/Export/BuildSchemaValidator.php:355
 msgid "must not contain line breaks."
 msgstr "不能包含换行符。"
 
-#: src/Abilities/WriteAbilities.php:52
+#: src/Abilities/GlueAbilities.php:220
+msgid "name and code are required."
+msgstr "name 和 code 为必填。"
+
+#: src/Abilities/WriteAbilities.php:54
 msgid "name and endpoint_url are required."
 msgstr "name 和 endpoint_url 为必填项。"
 
@@ -5584,15 +6437,15 @@ msgstr "永久失败"
 msgid "property name (optional)"
 msgstr "属性名称（可选）"
 
-#: src/Services/Ai/AgentOrchestrator.php:233
+#: src/Services/Ai/AgentOrchestrator.php:392
 msgid "provider unavailable"
 msgstr "提供商不可用"
 
-#: src/Services/Export/BuildSchemaValidator.php:228
+#: src/Services/Export/BuildSchemaValidator.php:229
 msgid "references a credential that is not listed in credentials[]."
 msgstr "引用了未列在 credentials[] 中的凭据。"
 
-#: src/Services/Export/BuildSchemaValidator.php:327
+#: src/Services/Export/BuildSchemaValidator.php:328
 msgid "references a webhook UUID not present in webhooks[]."
 msgstr "引用了 webhooks[] 中不存在的 Webhook UUID。"
 
@@ -5624,11 +6477,15 @@ msgstr "字符串"
 msgid "stringify"
 msgstr "字符串化"
 
+#: admin/src/views/AiBuilderView.vue
+msgid "the step failed."
+msgstr "该步骤失败。"
+
 #: admin/src/components/WebhookForm.vue
 msgid "then select it here."
 msgstr "然后在此处选择它。"
 
-#: src/Abilities/ReadAbilities.php:72
+#: src/Abilities/ReadAbilities.php:125
 msgid "trigger is required."
 msgstr "trigger 为必填项。"
 
@@ -5640,13 +6497,21 @@ msgstr "未知"
 msgid "value"
 msgstr "值"
 
-#: src/Abilities/WriteAbilities.php:123
+#: admin/src/views/AiBuilderView.vue
+msgid "verified %s"
+msgstr "已验证 %s"
+
+#: src/Abilities/WriteAbilities.php:157
 msgid "webhook_id, trigger and conditions are required."
 msgstr "webhook_id、trigger 和 conditions 为必填项。"
 
-#: src/Abilities/WriteAbilities.php:110
+#: src/Abilities/WriteAbilities.php:144
 msgid "webhook_id, trigger and field_mapping are required."
 msgstr "webhook_id、trigger 和 field_mapping 为必填项。"
+
+#: src/Abilities/GlueAbilities.php:347
+msgid "webhook_id, trigger, stage (pre|post) and snippet_id are required."
+msgstr "webhook_id、trigger、stage（pre|post）和 snippet_id 为必填。"
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
@@ -5666,7 +6531,7 @@ msgstr "· 数据库密钥已移除"
 msgid "…"
 msgstr "…"
 
-#: src/Services/Ai/PlanExecutor.php:422
+#: src/Services/Ai/PlanExecutor.php:519
 #. translators: %s: what was undone.
 #, php-format
 msgid "↩︎ Reverted: %s"
@@ -5685,5 +6550,5 @@ msgid ""
 "subdomains of a licensed domain."
 msgstr ""
 "💡 "
-"预发布和开发副本与主站共用同一个站点名额——%1$sstaging.%2$s、%1$sdev.%2$s、%1$sstage.%2$s、%1$stest.%2$"
-"s、%1$sqa.%2$s 等已授权域名的子域名会与主域名合并计算。"
+"预发布和开发副本共享其站点的名额——%1$sstaging.%2$s、%1$sdev.%2$s、%1$sstage.%2$s、%1$stest.%2$"
+"s、%1$sqa.%2$s 以及已授权域名的类似子域名。"
