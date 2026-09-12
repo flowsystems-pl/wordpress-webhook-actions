@@ -347,6 +347,7 @@ class LogsController extends WP_REST_Controller {
     }
 
     $this->activityLog->log('log.retried', 'log', $logId);
+    $this->queueService->nudge();
 
     return rest_ensure_response([
       'success' => true,
@@ -421,6 +422,7 @@ class LogsController extends WP_REST_Controller {
     $jobId = $this->queueService->enqueue((int) $log['webhook_id'], $log['trigger_name'], $payload, null, $logId);
 
     $this->activityLog->log('log.replayed', 'log', $logId);
+    $this->queueService->nudge();
 
     return rest_ensure_response([
       'success' => true,
@@ -435,6 +437,7 @@ class LogsController extends WP_REST_Controller {
     $ids = (array) $request->get_param('ids');
     $retried = 0;
     $skipped = 0;
+    $jobIds  = [];
 
     foreach ($ids as $logId) {
       $logId = (int) $logId;
@@ -449,14 +452,23 @@ class LogsController extends WP_REST_Controller {
 
       if ($this->queueService->forceRetry((int) $job['id'])) {
         $retried++;
+        $jobIds[] = (int) $job['id'];
+        $this->activityLog->log('log.retried', 'log', $logId);
       } else {
         $skipped++;
       }
     }
 
+    if ($retried > 0) {
+      $this->queueService->nudge();
+    }
+
+    // job_ids lets the admin offer "run now" for exactly what was re-queued,
+    // the way a single replay already does.
     return rest_ensure_response([
       'retried' => $retried,
       'skipped' => $skipped,
+      'job_ids' => $jobIds,
     ]);
   }
 

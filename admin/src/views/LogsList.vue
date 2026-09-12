@@ -52,10 +52,41 @@ const chainFilterSelect = computed({
 
 const selectedIds = ref([])
 const bulkRetrying = ref(false)
-const showReplaySuccess = ref(false)
-const replayedJobId = ref(null)
-const replayedLogId = ref(null)
+// What the last retry/replay re-queued. A retry or replay only marks the
+// queue job pending; the delivery itself happens when the queue next drains,
+// which on a quiet site without External Cron can be a long wait that looks
+// like "nothing happened". So every path that queues something opens the
+// same dialog with a "Run now" that executes those exact jobs.
+const queued = ref(null)   // { jobIds: [], logIds: [], kind: 'retry' | 'replay' | 'mixed', skipped: 0 }
+const runningQueued = ref(false)
 const logsTable = ref(null)
+
+const openQueued = ({ jobIds, logIds, kind, skipped = 0 }) => {
+  const ids = jobIds.filter(Boolean)
+  if (!ids.length && !skipped) return
+  queued.value = { jobIds: ids, logIds, kind, skipped }
+}
+
+const queuedTitle = computed(() => {
+  if (!queued.value) return ''
+  const n = queued.value.jobIds.length
+  if (n === 0) return __('Nothing was queued')
+  if (queued.value.kind === 'retry')  return n === 1 ? __('Retry queued') : sprintf(__('%d retries queued'), n)
+  if (queued.value.kind === 'replay') return n === 1 ? __('Event replayed') : sprintf(__('%d events replayed'), n)
+  return sprintf(__('%d deliveries queued'), n)
+})
+
+const queuedDescription = computed(() => {
+  if (!queued.value) return ''
+  const parts = []
+  if (queued.value.jobIds.length) {
+    parts.push(__('The delivery runs when the queue next drains — on the next cron tick. On a quiet site that can take a while, so you can also run it right now.'))
+  }
+  if (queued.value.skipped) {
+    parts.push(sprintf(__('%d of the selected entries could not be queued: no queue job is left for them.'), queued.value.skipped))
+  }
+  return parts.join(' ')
+})
 
 const loadLogs = async () => {
   loading.value = true
@@ -130,8 +161,9 @@ const handleDelete = async (id) => {
 
 const handleRetry = async (id) => {
   try {
-    await api.logs.retry(id)
+    const res = await api.logs.retry(id)
     await loadLogs()
+    openQueued({ jobIds: [res?.job_id], logIds: [id], kind: 'retry' })
   } catch (e) {
     console.error('Failed to retry log:', e)
     error.value = e.message
@@ -141,39 +173,50 @@ const handleRetry = async (id) => {
 const handleReplay = async (log) => {
   try {
     const res = await api.logs.replay(log.id)
-    replayedJobId.value = res?.job_id ?? null
-    replayedLogId.value = log.id
     await loadLogs()
-    showReplaySuccess.value = true
+    openQueued({ jobIds: [res?.job_id], logIds: [log.id], kind: 'replay' })
   } catch (e) {
     error.value = e.message
   }
 }
 
-const executeReplayedJob = async () => {
-  if (!replayedJobId.value) return
+// Execute the queued jobs one after another (each is a real HTTP delivery).
+// A job the cron already picked up answers rest_job_completed — that is the
+// outcome we wanted, not an error.
+const runQueuedNow = async () => {
+  if (!queued.value?.jobIds.length || runningQueued.value) return
+  runningQueued.value = true
+  const { jobIds, logIds } = queued.value
   try {
-    await api.queue.execute({ id: replayedJobId.value })
-    showReplaySuccess.value = false
-    await loadLogs()
-    const log = logs.value.find(l => l.id === replayedLogId.value)
-    if (log) logsTable.value?.openDetails(log)
-  } catch (e) {
-    if (e.code === 'rest_job_completed') {
-      // Job already ran in background — close modal and show log details
-      showReplaySuccess.value = false
-      await loadLogs()
-      const log = logs.value.find(l => l.id === replayedLogId.value)
-      if (log) logsTable.value?.openDetails(log)
-    } else {
-      error.value = e.message
+    for (const id of jobIds) {
+      try {
+        await api.queue.execute({ id })
+      } catch (e) {
+        if (e.code !== 'rest_job_completed') throw e
+      }
     }
+    queued.value = null
+    await loadLogs()
+    await loadStats()
+    if (logIds.length === 1) {
+      const log = logs.value.find(l => l.id === logIds[0])
+      if (log) logsTable.value?.openDetails(log)
+    }
+  } catch (e) {
+    error.value = e.message
+  } finally {
+    runningQueued.value = false
   }
 }
 
+// Same split the handler uses: failed entries are retried (their queue job
+// is re-armed), delivered or skipped ones are replayed (a fresh job).
+const RETRY_STATUSES  = ['error', 'permanently_failed']
+const REPLAY_STATUSES = ['success', 'skipped']
+
 const bulkActionLabel = computed(() => {
-  const hasRetry  = selectedIds.value.some(id => logs.value.find(l => l.id === id)?.status === 'error')
-  const hasReplay = selectedIds.value.some(id => ['success', 'permanently_failed'].includes(logs.value.find(l => l.id === id)?.status))
+  const hasRetry  = selectedIds.value.some(id => RETRY_STATUSES.includes(logs.value.find(l => l.id === id)?.status))
+  const hasReplay = selectedIds.value.some(id => REPLAY_STATUSES.includes(logs.value.find(l => l.id === id)?.status))
   if (hasRetry && hasReplay) return sprintf(__('Retry / Replay %d selected'), selectedIds.value.length)
   if (hasReplay) return sprintf(__('Replay %d selected'), selectedIds.value.length)
   return sprintf(__('Retry %d selected'), selectedIds.value.length)
@@ -188,16 +231,22 @@ const handleBulkRetry = async () => {
     const replayIds = []
     for (const id of selectedIds.value) {
       const status = logs.value.find(l => l.id === id)?.status
-      if (status === 'error' || status === 'permanently_failed') retryIds.push(id)
-      else if (status === 'success') replayIds.push(id)
+      if (RETRY_STATUSES.includes(status)) retryIds.push(id)
+      else if (REPLAY_STATUSES.includes(status)) replayIds.push(id)
     }
-    const calls = []
-    if (retryIds.length)  calls.push(api.logs.bulkRetry(retryIds))
-    for (const id of replayIds) calls.push(api.logs.replay(id))
-    await Promise.all(calls)
+    const jobIds = []
+    let skipped  = 0
+    if (retryIds.length) {
+      const res = await api.logs.bulkRetry(retryIds)
+      jobIds.push(...(res?.job_ids ?? []))
+      skipped += res?.skipped ?? 0
+    }
+    const replays = await Promise.all(replayIds.map(id => api.logs.replay(id)))
+    jobIds.push(...replays.map(r => r?.job_id))
     selectedIds.value = []
     await loadLogs()
-    if (replayIds.length) showReplaySuccess.value = true
+    const kind = retryIds.length && replayIds.length ? 'mixed' : (replayIds.length ? 'replay' : 'retry')
+    openQueued({ jobIds, logIds: [...retryIds, ...replayIds], kind, skipped })
   } catch (e) {
     console.error('Failed to bulk action:', e)
     error.value = e.message
@@ -341,22 +390,22 @@ onMounted(() => {
       {{ error }}
     </Alert>
 
-    <!-- Replay success dialog -->
+    <!-- Queued dialog: a retry or replay was re-queued; offer to run it now -->
     <Dialog
-      :open="showReplaySuccess"
-      :title="__('Event Replayed')"
-      :description="__('A new delivery attempt has been queued. The result will appear in this log\'s attempt history on the next cron run.')"
-      @close="showReplaySuccess = false"
+      :open="!!queued"
+      :title="queuedTitle"
+      :description="queuedDescription"
+      @close="queued = null"
     >
       <template #footer>
         <div class="flex gap-2">
-          <Button @click="executeReplayedJob">
-            {{ __('Execute Now') }}
+          <Button v-if="queued?.jobIds.length" :disabled="runningQueued" @click="runQueuedNow">
+            {{ runningQueued ? __('Running…') : (queued?.jobIds.length === 1 ? __('Run now') : sprintf(__('Run %d now'), queued?.jobIds.length ?? 0)) }}
           </Button>
-          <Button variant="outline" @click="() => { showReplaySuccess = false; router.push({ name: 'Queue' }) }">
+          <Button variant="outline" @click="() => { queued = null; router.push({ name: 'Queue' }) }">
             {{ __('Go to Queue') }}
           </Button>
-          <Button variant="outline" @click="showReplaySuccess = false">{{ __('Close') }}</Button>
+          <Button variant="outline" @click="queued = null">{{ __('Close') }}</Button>
         </div>
       </template>
     </Dialog>
