@@ -36,6 +36,42 @@ class TestAbilities {
    * dispatch, with an SSRF guard, a rate limit, body-size cap, and vault-secret
    * injection by credential id (the raw secret never leaves the server).
    */
+  /**
+   * Render a rule and send it for real to every channel it names.
+   */
+  public function testNotificationRule(array $input): array|WP_Error {
+    $rule = (new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository())->find((int) ($input['id'] ?? 0));
+    if (!$rule) {
+      return $this->notFound();
+    }
+    $preview = (new \FlowSystems\WebhookActions\Services\Notifications\PreviewContext())->build(
+      $rule['event'],
+      $rule['webhook_id'] ? (int) $rule['webhook_id'] : null,
+      (int) ($input['log_id'] ?? 0) ?: null
+    );
+    $message = (new \FlowSystems\WebhookActions\Services\Notifications\MessageBuilder())->buildFromRoots($rule['event'], $rule['template'], $preview['roots'], $preview['ctx']);
+    $message['title'] = '[' . __('Test', 'flowsystems-webhook-actions') . '] ' . $message['title'];
+
+    $channels = new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository();
+    $sender   = new \FlowSystems\WebhookActions\Services\Notifications\NotificationSender();
+    $results  = [];
+    foreach ($channels->findManyWithSecrets($rule['channel_ids']) as $channelId => $channel) {
+      $outcome = $sender->deliver($message, $channel);
+      if ($outcome === true) {
+        $channels->recordSent($channelId);
+      } else {
+        $channels->recordError($channelId, $outcome->get_error_message());
+      }
+      $results[] = ['channel_id' => $channelId, 'channel' => $channel['name'], 'sent' => $outcome === true, 'error' => $outcome === true ? null : $outcome->get_error_message()];
+    }
+
+    return [
+      'results' => $results,
+      'rendered' => ['subject' => $message['subject'], 'title' => $message['title'], 'body' => $message['body'], 'short' => $message['short']],
+      'source'   => $preview['source'],
+    ];
+  }
+
   public function probeEndpoint(array $input): array|WP_Error {
     $url    = esc_url_raw((string) ($input['url'] ?? ''));
     $method = strtoupper((string) ($input['method'] ?? ''));

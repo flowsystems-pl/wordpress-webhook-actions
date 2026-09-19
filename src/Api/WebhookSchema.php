@@ -127,6 +127,19 @@ class WebhookSchema {
         'maximum'     => RetryPolicy::DELAY_MAX,
         'context'     => ['view', 'edit'],
       ],
+      'notifications_mode' => [
+        'description' => __('Which notification rules apply: inherit the site-wide rules, custom rules for this webhook only, or off.', 'flowsystems-webhook-actions'),
+        'type'        => 'string',
+        'enum'        => ['inherit', 'custom', 'off'],
+        'default'     => 'inherit',
+        'context'     => ['view', 'edit'],
+      ],
+      'muted_rule_ids' => [
+        'description' => __('IDs of site-wide notification rules muted for this webhook (inherit mode only).', 'flowsystems-webhook-actions'),
+        'type'        => 'array',
+        'items'       => ['type' => 'integer'],
+        'context'     => ['view', 'edit'],
+      ],
       'triggers' => [
         'description' => __('List of trigger actions.', 'flowsystems-webhook-actions'),
         'type' => 'array',

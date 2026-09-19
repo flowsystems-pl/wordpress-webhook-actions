@@ -157,7 +157,45 @@ class BuildExporter {
       'is_synchronous' => (bool) ($webhook['is_synchronous'] ?? false),
       'auth'           => $auth,
       'triggers'       => $triggerDocs,
+      'notification_rules' => $this->exportNotificationRules($webhookId),
     ];
+  }
+
+  /**
+   * The webhook's own notification rules, with channels named rather than
+   * referenced — a channel holds secrets and belongs to one site, so an import
+   * re-attaches rules to whatever channel carries the same name, or leaves
+   * them disabled for the user to pick one.
+   *
+   * @return array<int, array<string, mixed>>
+   */
+  private function exportNotificationRules(int $webhookId): array {
+    $channels = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->getAll() as $channel) {
+      $channels[(int) $channel['id']] = (string) $channel['name'];
+    }
+
+    $out = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository())->getByWebhook($webhookId) as $rule) {
+      $names = [];
+      foreach ($rule['channel_ids'] as $id) {
+        if (isset($channels[$id])) {
+          $names[] = $channels[$id];
+        }
+      }
+      $out[] = [
+        'name'             => $rule['name'],
+        'event'            => $rule['event'],
+        'is_enabled'       => (bool) $rule['is_enabled'],
+        'filters'          => $rule['filters'] ?: (object) [],
+        'template'         => $rule['template'],
+        'throttle_seconds' => $rule['throttle_seconds'],
+        'digest'           => $rule['digest'],
+        'channel_names'    => $names,
+      ];
+    }
+
+    return $out;
   }
 
   /**

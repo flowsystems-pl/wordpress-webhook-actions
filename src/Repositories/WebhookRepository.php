@@ -251,6 +251,12 @@ class WebhookRepository {
     }
     $webhook['backoff_strategy'] = $webhook['backoff_strategy'] ?? null;
 
+    // Notifications: inherit the site-wide rules (default), custom, or off.
+    $mode = (string) ($webhook['notifications_mode'] ?? 'inherit');
+    $webhook['notifications_mode'] = in_array($mode, ['inherit', 'custom', 'off'], true) ? $mode : 'inherit';
+    $muted = !empty($webhook['muted_rule_ids']) ? json_decode((string) $webhook['muted_rule_ids'], true) : [];
+    $webhook['muted_rule_ids'] = is_array($muted) ? array_values(array_map('intval', $muted)) : [];
+
     return $webhook;
   }
 
@@ -283,8 +289,10 @@ class WebhookRepository {
         'backoff_strategy'   => $data['backoff_strategy'] ?? null,
         'backoff_base_delay' => $data['backoff_base_delay'] ?? null,
         'backoff_max_delay'  => $data['backoff_max_delay'] ?? null,
+        'notifications_mode' => in_array($data['notifications_mode'] ?? '', ['inherit', 'custom', 'off'], true) ? $data['notifications_mode'] : 'inherit',
+        'muted_rule_ids'     => !empty($data['muted_rule_ids']) ? wp_json_encode(array_values(array_map('intval', (array) $data['muted_rule_ids']))) : null,
       ],
-      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%d', '%d']
+      ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%d', '%d', '%s', '%s']
     );
 
     if (!$result) {
@@ -373,6 +381,16 @@ class WebhookRepository {
       }
     }
 
+    if (isset($data['notifications_mode']) && in_array($data['notifications_mode'], ['inherit', 'custom', 'off'], true)) {
+      $updateData['notifications_mode'] = $data['notifications_mode'];
+      $format[]                         = '%s';
+    }
+
+    if (array_key_exists('muted_rule_ids', $data)) {
+      $updateData['muted_rule_ids'] = !empty($data['muted_rule_ids']) ? wp_json_encode(array_values(array_map('intval', (array) $data['muted_rule_ids']))) : null;
+      $format[]                     = '%s';
+    }
+
     if (!empty($updateData)) {
       // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
       $result = $wpdb->update(
@@ -413,6 +431,9 @@ class WebhookRepository {
     $schemasTable = $wpdb->prefix . 'fswa_trigger_schemas';
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $wpdb->delete($schemasTable, ['webhook_id' => $id], ['%d']);
+
+    // Per-webhook notification rules go with the webhook.
+    (new NotificationRuleRepository())->deleteByWebhook($id);
 
     // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
     $result = $wpdb->delete($this->webhooksTable, ['id' => $id], ['%d']);

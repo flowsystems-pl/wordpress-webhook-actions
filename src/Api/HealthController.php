@@ -140,6 +140,7 @@ class HealthController extends WP_REST_Controller {
         'last_day' => $velocityStats['last_day'],
         'avg_duration_ms' => $velocityStats['avg_duration_ms'],
       ],
+      'notifications' => $this->notificationHealth(),
       'observability' => [
         'avg_attempts_per_event' => $this->logRepository->getAvgAttemptsPerEvent(),
         'oldest_pending_age_seconds' => $oldestPendingAge,
@@ -147,5 +148,29 @@ class HealthController extends WP_REST_Controller {
         'wp_cron_only' => !Scheduler::hasActionScheduler() && (int) get_option('fswa_last_cron_run', 0) === 0,
       ],
     ]);
+  }
+
+  /**
+   * Channels whose last send failed, so a rotated Slack URL or a revoked bot
+   * token surfaces in the health bar instead of failing quietly forever.
+   *
+   * @return array{failing: array<int, array{id:int, name:string, type:string, error:string}>, pending:int}
+   */
+  private function notificationHealth(): array {
+    $failing = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->failing() as $channel) {
+      $failing[] = [
+        'id'    => (int) $channel['id'],
+        'name'  => (string) $channel['name'],
+        'type'  => (string) $channel['type'],
+        'error' => mb_substr((string) $channel['last_error'], 0, 200),
+        'at'    => $channel['last_error_at'],
+      ];
+    }
+
+    return [
+      'failing' => $failing,
+      'pending' => (new \FlowSystems\WebhookActions\Repositories\NotificationLogRepository())->countPending(),
+    ];
   }
 }

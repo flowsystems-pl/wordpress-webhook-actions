@@ -177,7 +177,7 @@ class BuildSchemaValidator {
    */
   private function validateWebhook($webhook, array $credRefs, string $path) {
     if (!$this->isObject($webhook)) return $this->err($path, __('must be an object.', 'flowsystems-webhook-actions'));
-    $allowed = ['uuid', 'name', 'description', 'endpoint_url', 'http_method', 'custom_headers', 'url_params', 'is_enabled', 'is_synchronous', 'auth', 'triggers'];
+    $allowed = ['uuid', 'name', 'description', 'endpoint_url', 'http_method', 'custom_headers', 'url_params', 'is_enabled', 'is_synchronous', 'auth', 'triggers', 'notification_rules'];
     if ($e = $this->allowOnly($webhook, $allowed, $path)) return $e;
     if ($e = $this->requireKeys($webhook, ['uuid', 'name', 'endpoint_url', 'auth', 'triggers'], $path)) return $e;
 
@@ -202,6 +202,17 @@ class BuildSchemaValidator {
     // auth
     $err = $this->validateAuth($webhook['auth'], $credRefs, "$path.auth");
     if ($err) return $err;
+
+    // notification_rules[] — portable rule definitions; channels are site-specific and never travel.
+    if (isset($webhook['notification_rules']) && $webhook['notification_rules'] !== null) {
+      if (!$this->isList($webhook['notification_rules'])) return $this->err("$path.notification_rules", __('must be an array.', 'flowsystems-webhook-actions'));
+      foreach ($webhook['notification_rules'] as $i => $rule) {
+        if (!$this->isObject($rule)) return $this->err("$path.notification_rules[$i]", __('must be an object.', 'flowsystems-webhook-actions'));
+        if ($e = $this->allowOnly($rule, ['name', 'event', 'is_enabled', 'filters', 'template', 'throttle_seconds', 'digest', 'channel_names'], "$path.notification_rules[$i]")) return $e;
+        if ($e = $this->requireKeys($rule, ['event'], "$path.notification_rules[$i]")) return $e;
+        if ($e = $this->enum($rule['event'], \FlowSystems\WebhookActions\Services\Notifications\DeliveryEvents::ALL, "$path.notification_rules[$i].event")) return $e;
+      }
+    }
 
     // triggers[]
     if (!$this->isList($webhook['triggers'])) return $this->err("$path.triggers", __('must be an array.', 'flowsystems-webhook-actions'));

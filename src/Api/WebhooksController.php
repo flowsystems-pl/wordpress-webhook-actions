@@ -739,6 +739,15 @@ class WebhooksController extends WP_REST_Controller {
   private function retryFields(WP_REST_Request $request): array {
     $fields = [];
 
+    if ($request->has_param('notifications_mode')) {
+      $mode = sanitize_key((string) $request->get_param('notifications_mode'));
+      $fields['notifications_mode'] = in_array($mode, ['inherit', 'custom', 'off'], true) ? $mode : 'inherit';
+    }
+    if ($request->has_param('muted_rule_ids')) {
+      $muted = $request->get_param('muted_rule_ids');
+      $fields['muted_rule_ids'] = is_array($muted) ? array_values(array_filter(array_map('intval', $muted))) : [];
+    }
+
     if ($request->has_param('retry_limit')) {
       $fields['retry_limit'] = RetryPolicy::clampAttempts($request->get_param('retry_limit'));
     }

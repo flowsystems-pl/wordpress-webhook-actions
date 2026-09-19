@@ -30,7 +30,29 @@ class SystemPromptBuilder {
    * @param array<string, mixed> $conversation
    */
   public function build(array $conversation): string {
-    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->deliveryModeContext() . $this->buildContext($conversation) . $this->payloadContext();
+    return $this->systemPrompt() . $this->licenseContext() . $this->siteContext() . $this->deliveryModeContext() . $this->notificationsContext() . $this->buildContext($conversation) . $this->payloadContext();
+  }
+
+  /**
+   * How to alert the user when a delivery fails or succeeds: which channels
+   * exist (so the model picks a real id), and the template placeholder
+   * language, so "ping me on Slack when it fails" becomes one rule step with
+   * a message that renders.
+   */
+  private function notificationsContext(): string {
+    $channels = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->getAll() as $channel) {
+      if (!empty($channel['is_enabled'])) {
+        $channels[] = sprintf('#%d "%s" (%s)', (int) $channel['id'], $channel['name'], $channel['type']);
+      }
+    }
+    $list = $channels
+      ? 'CHANNELS ON THIS SITE: ' . implode(', ', $channels) . '.'
+      : 'CHANNELS ON THIS SITE: none yet. When the user wants alerts, say they must first add a channel under Notifications → Channels (email, Slack, Discord, Telegram, Teams, SMS…) — a channel holds a secret, so it cannot be created from a plan. Do not propose create_notification_rule without a channel id.';
+
+    return "\n\nNOTIFICATIONS. When the user wants to be told about deliveries (\"alert me\", \"notify\", \"email me if it fails\", \"ping Slack\"), add a create_notification_rule step AFTER the webhook step, with webhook_id {{step_N.id}}. Pick the event from what they said: failures → permanently_failed (default for \"if it fails\"; add filters.reason when they care about exhausted vs 4xx), every failed try → failed_attempt with filters.attempts, retries → retry_scheduled, \"when it works again\" → recovered, every delivery → success (warn that this can be noisy; suggest throttle_seconds or digest). "
+      . $list
+      . " NOTIFICATION TEMPLATES: optional {subject, title, body, short}; body is 2-6 plain-text lines, short is one line for SMS/push. Placeholders: {{ webhook.name }}, {{ event.trigger_label }}, {{ delivery.attempt }}, {{ delivery.max_attempts }}, {{ delivery.http_code }}, {{ delivery.error_message | truncate:200 }}, {{ delivery.next_attempt_at }}, {{ delivery.log_url }}, {{ site.name }}, and payload values: {{ payload.<path> }} (the mapped body that was sent), {{ original.<path> }} (raw captured envelope), {{ args.<path> }} (= original.args). Modifiers: upper, lower, truncate:N, json, default:\"text\", date:\"Y-m-d H:i\", number:N, money, count, join:\", \". Use ONLY payload paths you saw in get_trigger_schema — an unknown path is rejected and the step fails. Standard facts (webhook, trigger, attempt, HTTP, error, log link) are appended automatically, so a template should add what identifies the record (order number, customer email, form name). Omit template entirely for a sensible default.";
   }
 
   /**

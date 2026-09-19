@@ -217,6 +217,7 @@ class Activation {
   public static function deactivate(): void {
     Scheduler::unschedule('fswa_process_queue');
     Scheduler::unschedule('fswa_cleanup_logs');
+    \FlowSystems\WebhookActions\Services\Notifications\NotificationService::unschedule();
   }
 
   /**
@@ -229,6 +230,9 @@ class Activation {
     // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
     // Code Glue. Named fswa_pro_* from when it shipped in the Pro plugin; this
     // plugin owns them now, so uninstalling it takes them with it.
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_notification_log");
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_notification_rules");
+    $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_notification_channels");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_pro_trigger_snippets");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_pro_snippets");
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}fswa_credentials");

@@ -14,6 +14,7 @@ use FlowSystems\WebhookActions\Services\HookDiscoveryService;
 use FlowSystems\WebhookActions\Services\LocalDevHttp;
 use FlowSystems\WebhookActions\Services\ProCompatibility;
 use FlowSystems\WebhookActions\Services\Scheduler;
+use FlowSystems\WebhookActions\Services\Notifications\NotificationService;
 use FlowSystems\WebhookActions\Hooks\PayloadGlueHooks;
 use FlowSystems\WebhookActions\Hooks\BuildGlueExportHooks;
 use FlowSystems\WebhookActions\Integrations\IntegrationLoader;
@@ -97,6 +98,9 @@ class App {
     if (is_admin()) {
       $proCompat->registerNotice();
     }
+
+    // Delivery notifications: listens on fswa_delivery_event, sends off-request.
+    (new NotificationService())->register();
 
     // Register cleanup cron
     add_action('fswa_cleanup_logs', [$this, 'runLogCleanup']);

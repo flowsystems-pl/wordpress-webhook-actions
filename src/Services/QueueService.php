@@ -307,6 +307,11 @@ class QueueService {
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
       return;
     }
+    // No web request to spawn from under WP-CLI (ALTERNATE_WP_CRON would try
+    // to redirect the "browser"); the caller's own cron loop drains the queue.
+    if (defined('WP_CLI') && WP_CLI) {
+      return;
+    }
     if (function_exists('spawn_cron')) {
       spawn_cron();
     }

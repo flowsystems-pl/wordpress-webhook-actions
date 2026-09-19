@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2, Copy, Check, Network } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ChevronDown, Eye, Trash2, ArrowRight, RotateCcw, Play, CheckCircle2, XCircle, Loader2, Copy, Check, Network, BellRing } from 'lucide-vue-next'
 import { Badge, Button, Checkbox, Dialog } from '@/components/ui'
 import { formatUtcDate } from '@/lib/dates'
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard'
@@ -258,6 +258,15 @@ const { copiedKey, copy } = useCopyToClipboard()
                 <Badge v-if="log.mapping_applied" variant="outline" class="text-xs">
                   <ArrowRight class="h-3 w-3 mr-0.5" />
                   {{ __('Mapped') }}
+                </Badge>
+                <Badge
+                  v-if="log.notifications && (log.notifications.sent || log.notifications.failed)"
+                  :variant="log.notifications.failed ? 'destructive' : 'outline'"
+                  class="text-xs"
+                  :title="log.notifications.failed ? sprintf(__('%1$d notification(s) sent, %2$d failed'), log.notifications.sent, log.notifications.failed) : sprintf(__('%d notification(s) sent'), log.notifications.sent)"
+                >
+                  <BellRing class="h-3 w-3 mr-0.5" />
+                  {{ log.notifications.sent + log.notifications.failed }}
                 </Badge>
               </div>
             </td>

@@ -201,7 +201,72 @@ class BuildImporter {
       $this->importTrigger($newId, $trigger);
     }
 
+    $this->importNotificationRules($newId, (string) $data['name'], $webhook['notification_rules'] ?? [], $created);
+
     return $newId;
+  }
+
+  /**
+   * Re-create the webhook's notification rules. A channel is matched by name;
+   * a rule whose channels are all missing is imported DISABLED and reported in
+   * problems[] so the user can pick a channel and switch it on.
+   *
+   * @param array<int, array<string, mixed>> $rules
+   */
+  private function importNotificationRules(int $webhookId, string $webhookName, array $rules, array &$created): void {
+    if (empty($rules)) {
+      return;
+    }
+    $byName = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->getAll() as $channel) {
+      $byName[strtolower((string) $channel['name'])] = (int) $channel['id'];
+    }
+    $repo = new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository();
+
+    foreach ($rules as $rule) {
+      if (!is_array($rule) || empty($rule['event'])) {
+        continue;
+      }
+      $channelIds = [];
+      foreach ((array) ($rule['channel_names'] ?? []) as $name) {
+        $key = strtolower((string) $name);
+        if (isset($byName[$key])) {
+          $channelIds[] = $byName[$key];
+        }
+      }
+      $enabled = (bool) ($rule['is_enabled'] ?? true);
+      if (empty($channelIds)) {
+        $enabled = false;
+        $created['problems'][] = sprintf(
+          /* translators: 1: rule name or event, 2: webhook name */
+          __('The notification rule "%1$s" on "%2$s" was imported switched off: none of its channels exist on this site. Pick a channel in the webhook\'s Notifications section and enable it.', 'flowsystems-webhook-actions'),
+          (string) ($rule['name'] ?: $rule['event']),
+          $webhookName
+        );
+      }
+      $input = \FlowSystems\WebhookActions\Services\Notifications\RuleInput::fromRequest([
+        'webhook_id'       => $webhookId,
+        'name'             => (string) ($rule['name'] ?? ''),
+        'event'            => (string) $rule['event'],
+        'is_enabled'       => $enabled,
+        'filters'          => is_array($rule['filters'] ?? null) ? $rule['filters'] : [],
+        'channel_ids'      => $channelIds ?: [0],
+        'template'         => $rule['template'] ?? null,
+        'throttle_seconds' => $rule['throttle_seconds'] ?? null,
+        'digest'           => $rule['digest'] ?? null,
+      ], true);
+      if (is_wp_error($input)) {
+        $created['problems'][] = sprintf(
+          /* translators: 1: webhook name, 2: error */
+          __('A notification rule on "%1$s" was left out: %2$s', 'flowsystems-webhook-actions'),
+          $webhookName,
+          $input->get_error_message()
+        );
+        continue;
+      }
+      $input['channel_ids'] = $channelIds;
+      $repo->create($input);
+    }
   }
 
   private function importTrigger(int $webhookId, array $trigger): void {

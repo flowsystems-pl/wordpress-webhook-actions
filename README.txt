@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -168,13 +168,12 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.2.0 — 2026-09-12 =
-- Added: the WP Webhooks API Docs Library. When a build targets a named service — HubSpot, Airtable, Slack, Notion, Mailchimp, SendGrid, Stripe, Telegram, Pipedrive, Trello, Discord and more — WP Webhooks AI reads that service's current API reference on our server (endpoint, auth header, body envelope, request-level flags, common errors) and builds from it instead of from memory. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); the reference is injected server-side and costs about one credit per turn
-- Added: every reply built from a reference card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's documentation. A card the library researched on its own is marked auto-researched
-- Added: a service the library has not documented yet is researched on the spot from the vendor's own docs and saved for everyone. The chat shows "Reading …'s API reference for the first time" while it waits — usually under a minute — and no credits are spent on the wait. If the reference is not ready in time the build goes ahead on the model's own knowledge and says so
-- Changed: the hosted transports announce what they can do to the API (`features`), so a plugin that cannot wait for research is never held
-- Changed: Build with AI now adds a credential step for any destination that needs a token — HubSpot, Airtable, Slack, an n8n header — and lets you pick or create it in the plan review, instead of asking in chat whether you have one
-- Fixed: a webhook URL carrying a `{{ placeholder }}` — the per-event path segment feature, e.g. `https://api.github.com/repos/{{ __repo }}/issues` — lost its braces when saved through Build with AI, so the call went to a literal path. Templates now survive the save, and payload keys that start with `__` are stripped from the body right before sending, so a value that only exists to fill the URL never reaches the vendor
-- Changed: Build with AI is told how dynamic URLs work (double braces, dot path, value put into the payload first) and that static headers belong in `custom_headers` as key/value pairs, which it can now also write as a plain map
-- Fixed: a static header value that happens to contain a dot — `application/vnd.github+json`, a version string — was flagged in the webhook form as a payload path not found in the capture. Only something shaped like a path (`args.0.form_id`) is checked now, and the warning says the value goes out as text
-- Fixed: retrying or replaying deliveries from the logs looked like it did nothing on sites without External Cron. The job was re-queued but waited for the next WP-Cron visit. Every retry and replay — single or bulk — now says how many deliveries it queued and offers to run them right away; bulk replay's "Execute now" button actually had nothing to execute before; and WP-Cron is nudged after queuing so a quiet site delivers within the minute anyway
+= 3.3.0 — 2026-09-19 =
+- Added: Notifications. Get told when a delivery fails, retries, gives up, is skipped, succeeds or recovers — by email, Slack, Discord, Telegram, Microsoft Teams (Workflows), Google Chat, Mattermost/Rocket.Chat, Pushover, ntfy, SMS and WhatsApp through Twilio, PagerDuty (an incident that opens on failure and resolves on recovery), or any URL as JSON. Channels keep their secrets encrypted in the vault's envelope and never return them; each has a "Send test" button
+- Added: rules decide when and where. Site-wide rules apply to every webhook; a webhook can inherit them, mute single ones, keep only its own, or switch notifications off. Filters: which attempt number, which HTTP codes (503, 5xx, 500-504, or no response), out-of-attempts vs not-retryable, trigger name patterns. A per-webhook quiet time and hourly or daily digests keep a noisy site quiet; a site-wide "every success" rule starts with a one-hour quiet time
+- Added: every message is a template. Subject, title, body and a one-liner for SMS use the same `{{ path }}` placeholders as dynamic URLs, over the webhook, the event, the delivery (attempt, HTTP code, error, next try, log link), the mapped payload, the raw payload (`{{ args.0.email }}`) and the site, with modifiers such as `| truncate:120`, `| default:"—"`, `| date:"Y-m-d H:i"` and `| json`. A live preview renders against the captured payload or a real delivery, a field picker inserts paths, and a linter flags paths that are not in the payload
+- Added: Draft with AI. The rule editor asks the site's AI provider to write the message from the captured payload, and Build with AI can add a notification rule to a plan ("and ping me on Slack if it fails") — the same linter feeds unknown paths back to the model. New abilities: list_notification_channels, list_notification_rules, create_notification_rule, update_notification_rule, test_notification_rule — also reachable over MCP
+- Added: a Sent tab with every notification, its status and a resend button; a bell on delivery-log rows that produced notifications; a health-bar warning when a channel keeps failing
+- Added: the `fswa_delivery_event` action fires at every delivery state change with the full context (webhook, trigger, attempt, HTTP code, error, payloads), so your own code can react too; `fswa_notification_message` filters a rendered message before it is sent; `fswa_notification_channel_drivers` adds a channel type; `fswa_notification_http_args` tunes the outgoing request
+- Changed: builds export a webhook's notification rules (channels never travel); on import a rule whose channels do not exist here is created switched off and listed in the import problems
+- Changed: database schema 2.5.0 adds the notification tables and two webhook columns

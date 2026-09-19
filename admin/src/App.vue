@@ -15,6 +15,7 @@ import {
   BrainCircuit,
   X,
   ChevronDown,
+  BellRing,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useTheme } from './composables/useTheme';
@@ -41,6 +42,7 @@ const navItems = [
   { path: '/queue', label: __('Queue'), icon: Clock },
   { path: '/tokens', label: __('API Tokens'), icon: KeyRound },
   { path: '/vault', label: __('Credentials Vault'), icon: ShieldCheck },
+  { path: '/notifications', label: __('Notifications'), icon: BellRing },
   { path: '/external-cron', label: __('External Cron'), icon: Timer },
   { path: '/activity', label: __('Activity'), icon: History },
   { path: '/settings', label: __('Settings'), icon: Settings },

@@ -229,6 +229,29 @@ class ReadAbilities {
     return ['credentials' => (new CredentialRepository())->getAll()];
   }
 
+  public function listNotificationChannels(array $input): array {
+    $out = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->getAll() as $channel) {
+      // Metadata only: config may name recipients but never carries a secret.
+      $out[] = [
+        'id'         => (int) $channel['id'],
+        'name'       => (string) $channel['name'],
+        'type'       => (string) $channel['type'],
+        'is_enabled' => (bool) $channel['is_enabled'],
+        'last_error' => $channel['last_error'] ? mb_substr((string) $channel['last_error'], 0, 120) : null,
+      ];
+    }
+
+    return ['channels' => $out];
+  }
+
+  public function listNotificationRules(array $input): array {
+    $repo      = new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository();
+    $webhookId = (int) ($input['webhook_id'] ?? 0);
+
+    return ['rules' => $webhookId > 0 ? $repo->getByWebhook($webhookId) : $repo->getGlobal()];
+  }
+
   public function getRestRouteSchema(array $input): array|WP_Error {
     return (new RestRouteInspector())->describe(
       (string) ($input['route'] ?? ''),

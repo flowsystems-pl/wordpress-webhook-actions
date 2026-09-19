@@ -759,7 +759,7 @@ TXT;
    * lost, so those still return null (fail safe) rather than fabricating a
    * smaller object that looks complete.
    */
-  private static function repairJsonObject(string $text): ?string {
+  public static function repairJsonObject(string $text): ?string {
     $start = strpos($text, '{');
     if ($start === false) {
       return null;
