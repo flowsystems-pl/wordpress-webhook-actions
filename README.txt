@@ -179,7 +179,7 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.3.0 — 2026-09-19 =
+= 3.3.0 — 2026-09-23 =
 - Added: Notifications. Get told when a delivery fails, retries, gives up, is skipped, succeeds or recovers — by email, Slack, Discord, Telegram, Microsoft Teams (Workflows), Google Chat, Mattermost/Rocket.Chat, Pushover, ntfy, SMS and WhatsApp through Twilio, PagerDuty (an incident that opens on failure and resolves on recovery), or any URL as JSON. Channels keep their secrets encrypted in the vault's envelope and never return them; each has a "Send test" button
 - Added: rules decide when and where. Site-wide rules apply to every webhook; a webhook can inherit them, mute single ones, keep only its own, or switch notifications off. Filters: which attempt number, which HTTP codes (503, 5xx, 500-504, or no response), out-of-attempts vs not-retryable, trigger name patterns. A per-webhook quiet time and hourly or daily digests keep a noisy site quiet; a site-wide "every success" rule starts with a one-hour quiet time
 - Added: every message is a template. Subject, title, body and a one-liner for SMS use the same `{{ path }}` placeholders as dynamic URLs, over the webhook, the event, the delivery (attempt, HTTP code, error, next try, log link), the mapped payload, the raw payload (`{{ args.0.email }}`) and the site, with modifiers such as `| truncate:120`, `| default:"—"`, `| date:"Y-m-d H:i"` and `| json`. A live preview renders against the captured payload or a real delivery, a field picker inserts paths, and a linter flags paths that are not in the payload
