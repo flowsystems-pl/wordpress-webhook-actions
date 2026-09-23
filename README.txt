@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.2.0
+Stable tag: 3.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -54,6 +54,10 @@ A language model remembers an API the way it was documented when the model was t
 
 A service nobody has a card for yet is researched on the spot from the vendor's own documentation — the chat says "Reading …'s API reference for the first time" while it waits, usually under a minute, and the wait costs no credits — and the card is kept for everyone. Every reply built from a card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's page. Available while Build with AI runs on WP Webhooks AI (the free trial or Pro credits); about one credit on the turn that uses a card.
 
+= Notifications =
+
+Retries handle the flaky minute; Notifications handle the endpoint that stays down at 3 a.m. Get told when a delivery fails, retries, gives up, is skipped, succeeds or recovers — by email, Slack, Discord, Telegram, Microsoft Teams, Google Chat, Mattermost, Pushover, ntfy, SMS and WhatsApp through Twilio, PagerDuty (an incident that opens on failure and resolves on recovery), or any URL as JSON. Rules decide when and where: which attempt, which HTTP codes, which triggers; a quiet time per webhook so a bad hour is one message, not a hundred; hourly or daily digests. Every webhook inherits the site-wide rules, can mute single ones, keep only its own, or switch notifications off. Every message is a template with `{{ payload.order.id }}`-style placeholders, a field picker, a live preview against your captured payload, a linter — and a Draft with AI button. Channel secrets are encrypted and never shown again. Entirely free. [Five-minute setup guide](https://wpwebhooks.org/docs/alert-on-failed-webhooks/) · [Feature overview](https://wpwebhooks.org/features/notifications/)
+
 = The engine underneath (free) =
 
 - Turn any WordPress do_action into a first-class automation trigger your CRMs, n8n flows, AI agents, and internal services can consume — every dispatch is an outgoing webhook you fully control
@@ -70,13 +74,14 @@ A service nobody has a card for yet is researched on the spot from the vendor's 
 - Webhook Chains — wire 2xx completions to downstream webhooks with full observability
 - Import & Export — move webhooks and chains between sites as portable JSON (triggers, field mapping, conditions and Code Glue snippets included), with strict validation and a per-item result summary on import
 - Markdown descriptions — document what each webhook and chain does inline, with a Write/Preview toggle while editing
+- Notifications — email, Slack, Discord, Telegram, Teams, SMS, PagerDuty and more when a delivery fails, gives up or recovers; rules with filters, quiet times and digests; templated messages the AI can draft
 - Credentials Vault — store reusable auth secrets (Bearer, Basic, API key, custom) encrypted at rest; reference them from webhooks instead of pasting raw Authorization headers. Secrets are write-only over the API — never returned, only a masked hint
 - Activity History — persistent audit log of every admin and API-token action
 - Built-in CF7 and IvyForms integrations — structured payloads, no extra plugins
 - Action Scheduler auto-detection — more reliable delivery on high-traffic sites
 - Fully translatable — the entire admin interface and all server-side strings are internationalized; ships with Polish, Simplified Chinese, and Dutch, and is compatible with WPML and Polylang String Translation
 - Full REST API with scoped API token authentication (`read` / `operational` / `full` / `agent`) — the `agent` scope grants full write access for AI assistants while never exposing stored secrets
-- Developer extensibility — 16 filters and 7 action hooks ([reference](https://wpwebhooks.org/docs/))
+- Developer extensibility — 26 filters and 11 action hooks ([reference](https://wpwebhooks.org/docs/))
 
 = Pro features =
 
@@ -140,6 +145,10 @@ Yes — any destination that accepts an HTTP request works. For Slack or Discord
 
 No. Both integrations are built in. When CF7 or IvyForms is active, submissions are automatically normalized into clean JSON payloads — no additional plugins or custom code required.
 
+= Can it alert me when a webhook fails? =
+
+Yes, for free. Notifications → Channels holds where messages go (email, Slack, Discord, Telegram, Teams, Google Chat, Mattermost, Pushover, ntfy, Twilio SMS/WhatsApp, PagerDuty, any URL); Notifications → Rules decides when — a failed attempt, a scheduled retry, a delivery that gave up, a skipped event, a success, or a recovery — with filters on the attempt number, HTTP code and trigger, a quiet time per webhook and hourly or daily digests. Each webhook can inherit the site-wide rules, mute some, or have its own. The Sent tab shows every message and its status.
+
 = How does retry work? =
 
 The dispatcher retries 5xx and 429 responses automatically with exponential backoff. The delay before attempt N is `base_delay × 2^N`, capped at the maximum delay — so on the defaults (exponential, 30s base, 1 hour cap, 5 attempts) a failing delivery is retried after 60s, 120s, 240s and 480s, and is marked `permanently_failed` roughly 15 minutes after the first attempt. The 1 hour cap only comes into play if you raise the attempt limit or the base delay. 4xx and 3xx responses are marked `permanently_failed` immediately — bad payloads are not worth retrying. Override the attempt limit per webhook in the UI, or globally with the `fswa_max_attempts` filter; the backoff strategy (exponential, linear or fixed) and its base and maximum delays are per-webhook settings too, each falling back to a site-wide default.
@@ -163,18 +172,19 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 11. Test webhook drawer — send a test delivery and inspect request details inline
 12. Webhook Chains — pick an existing chain or create a new one, then select which upstream webhooks should fire this one on their 2xx response
 13. Credentials Vault — store reusable authentication secrets (Bearer, Basic, API key, custom) encrypted at rest and reference them from webhooks instead of pasting raw Authorization headers
+14. Notifications — site-wide rules that decide when a message goes out (a failed attempt, a scheduled retry, a delivery that gave up, a recovery, a daily summary) and to which channels, with quiet times and digests
+15. Notification rule editor — subject, title, body and SMS one-liner templates with `{{ }}` placeholders, a live preview rendered against the captured payload with the standard facts, and the quiet-time and digest controls
 
 == Changelog ==
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.2.0 — 2026-09-12 =
-- Added: the WP Webhooks API Docs Library. When a build targets a named service — HubSpot, Airtable, Slack, Notion, Mailchimp, SendGrid, Stripe, Telegram, Pipedrive, Trello, Discord and more — WP Webhooks AI reads that service's current API reference on our server (endpoint, auth header, body envelope, request-level flags, common errors) and builds from it instead of from memory. Available when Build with AI runs on WP Webhooks AI (Pro credits or the free trial); the reference is injected server-side and costs about one credit per turn
-- Added: every reply built from a reference card carries a "WP Webhooks API Docs Library" pill naming the service, the operation and the date the reference was verified, linking to the vendor's documentation. A card the library researched on its own is marked auto-researched
-- Added: a service the library has not documented yet is researched on the spot from the vendor's own docs and saved for everyone. The chat shows "Reading …'s API reference for the first time" while it waits — usually under a minute — and no credits are spent on the wait. If the reference is not ready in time the build goes ahead on the model's own knowledge and says so
-- Changed: the hosted transports announce what they can do to the API (`features`), so a plugin that cannot wait for research is never held
-- Changed: Build with AI now adds a credential step for any destination that needs a token — HubSpot, Airtable, Slack, an n8n header — and lets you pick or create it in the plan review, instead of asking in chat whether you have one
-- Fixed: a webhook URL carrying a `{{ placeholder }}` — the per-event path segment feature, e.g. `https://api.github.com/repos/{{ __repo }}/issues` — lost its braces when saved through Build with AI, so the call went to a literal path. Templates now survive the save, and payload keys that start with `__` are stripped from the body right before sending, so a value that only exists to fill the URL never reaches the vendor
-- Changed: Build with AI is told how dynamic URLs work (double braces, dot path, value put into the payload first) and that static headers belong in `custom_headers` as key/value pairs, which it can now also write as a plain map
-- Fixed: a static header value that happens to contain a dot — `application/vnd.github+json`, a version string — was flagged in the webhook form as a payload path not found in the capture. Only something shaped like a path (`args.0.form_id`) is checked now, and the warning says the value goes out as text
-- Fixed: retrying or replaying deliveries from the logs looked like it did nothing on sites without External Cron. The job was re-queued but waited for the next WP-Cron visit. Every retry and replay — single or bulk — now says how many deliveries it queued and offers to run them right away; bulk replay's "Execute now" button actually had nothing to execute before; and WP-Cron is nudged after queuing so a quiet site delivers within the minute anyway
+= 3.3.0 — 2026-09-23 =
+- Added: Notifications. Get told when a delivery fails, retries, gives up, is skipped, succeeds or recovers — by email, Slack, Discord, Telegram, Microsoft Teams (Workflows), Google Chat, Mattermost/Rocket.Chat, Pushover, ntfy, SMS and WhatsApp through Twilio, PagerDuty (an incident that opens on failure and resolves on recovery), or any URL as JSON. Channels keep their secrets encrypted in the vault's envelope and never return them; each has a "Send test" button
+- Added: rules decide when and where. Site-wide rules apply to every webhook; a webhook can inherit them, mute single ones, keep only its own, or switch notifications off. Filters: which attempt number, which HTTP codes (503, 5xx, 500-504, or no response), out-of-attempts vs not-retryable, trigger name patterns. A per-webhook quiet time and hourly or daily digests keep a noisy site quiet; a site-wide "every success" rule starts with a one-hour quiet time
+- Added: every message is a template. Subject, title, body and a one-liner for SMS use the same `{{ path }}` placeholders as dynamic URLs, over the webhook, the event, the delivery (attempt, HTTP code, error, next try, log link), the mapped payload, the raw payload (`{{ args.0.email }}`) and the site, with modifiers such as `| truncate:120`, `| default:"—"`, `| date:"Y-m-d H:i"` and `| json`. A live preview renders against the captured payload or a real delivery, a field picker inserts paths, and a linter flags paths that are not in the payload
+- Added: Draft with AI. The rule editor asks the site's AI provider to write the message from the captured payload, and Build with AI can add a notification rule to a plan ("and ping me on Slack if it fails") — the same linter feeds unknown paths back to the model. New abilities: list_notification_channels, list_notification_rules, create_notification_rule, update_notification_rule, test_notification_rule — also reachable over MCP
+- Added: a Sent tab with every notification, its status and a resend button; a bell on delivery-log rows that produced notifications; a health-bar warning when a channel keeps failing
+- Added: the `fswa_delivery_event` action fires at every delivery state change with the full context (webhook, trigger, attempt, HTTP code, error, payloads), so your own code can react too; `fswa_notification_message` filters a rendered message before it is sent; `fswa_notification_channel_drivers` adds a channel type; `fswa_notification_http_args` tunes the outgoing request; `fswa_notification_inline_send` decides whether a synchronous webhook's notifications go out at the end of the same request (the default, so they never wait for a cron that may not run) or through cron like a queued delivery's
+- Changed: builds export a webhook's notification rules (channels never travel); on import a rule whose channels do not exist here is created switched off and listed in the import problems
+- Changed: database schema 2.5.0 adds the notification tables and two webhook columns

@@ -192,6 +192,107 @@ class WriteAbilities {
     return ['webhook_id' => $webhookId, 'auth_credential_id' => $credentialId];
   }
 
+  public function createNotificationRule(array $input): array|WP_Error {
+    $data = \FlowSystems\WebhookActions\Services\Notifications\RuleInput::fromRequest($input, true);
+    if (is_wp_error($data)) {
+      return $this->invalid($data->get_error_message());
+    }
+    if ($data['webhook_id'] !== null && !(new WebhookRepository())->find((int) $data['webhook_id'])) {
+      return $this->notFound();
+    }
+    $check = $this->checkNotificationRule($data, (int) ($data['webhook_id'] ?? 0));
+    if (is_wp_error($check)) {
+      return $check;
+    }
+
+    $repo = new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository();
+    $id   = $repo->create($data);
+    if (!$id) {
+      return $this->invalid(__('The rule could not be saved.', 'flowsystems-webhook-actions'));
+    }
+
+    return ['id' => $id, 'rule' => $repo->find($id)] + ($check ?: []);
+  }
+
+  public function updateNotificationRule(array $input): array|WP_Error {
+    $id   = (int) ($input['id'] ?? 0);
+    $repo = new \FlowSystems\WebhookActions\Repositories\NotificationRuleRepository();
+    $rule = $repo->find($id);
+    if (!$rule) {
+      return $this->notFound();
+    }
+    unset($input['id']);
+    $data = \FlowSystems\WebhookActions\Services\Notifications\RuleInput::fromRequest($input, false);
+    if (is_wp_error($data)) {
+      return $this->invalid($data->get_error_message());
+    }
+    $check = $this->checkNotificationRule($data + $rule, (int) ($rule['webhook_id'] ?? 0));
+    if (is_wp_error($check)) {
+      return $check;
+    }
+    $repo->update($id, $data);
+
+    return ['id' => $id, 'rule' => $repo->find($id)] + ($check ?: []);
+  }
+
+  /**
+   * Channels must exist; a template must lint against the webhook's captured
+   * example, and unknown paths come back as the error so the model corrects
+   * itself instead of storing a template that renders blanks.
+   *
+   * @return array<string, mixed>|WP_Error Preview data on success
+   */
+  private function checkNotificationRule(array $data, int $webhookId): array|WP_Error {
+    if (!empty($data['channel_ids'])) {
+      $known   = array_keys((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->findManyWithSecrets($data['channel_ids']));
+      $missing = array_values(array_diff(array_map('intval', $data['channel_ids']), $known));
+      if (!empty($missing)) {
+        return $this->invalid(sprintf(
+          /* translators: %s: comma-separated ids */
+          __('Unknown channel id(s): %s. Call list_notification_channels for the real ids; channels are created in the admin UI.', 'flowsystems-webhook-actions'),
+          implode(', ', $missing)
+        ));
+      }
+    }
+
+    $template = $data['template'] ?? null;
+    if (!is_array($template)) {
+      return [];
+    }
+
+    $event   = (string) ($data['event'] ?? \FlowSystems\WebhookActions\Services\Notifications\DeliveryEvents::FAILED_ATTEMPT);
+    $preview = (new \FlowSystems\WebhookActions\Services\Notifications\PreviewContext())->build($event, $webhookId ?: null);
+    $types   = [];
+    foreach ((new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository())->findManyWithSecrets($data['channel_ids'] ?? []) as $channel) {
+      $types[] = (string) $channel['type'];
+    }
+    $lint = (new \FlowSystems\WebhookActions\Services\Notifications\TemplateLinter())->lint($template, $preview['example'], $preview['mapped'], $types);
+    if (!$lint['ok']) {
+      $problems = [];
+      if ($lint['unknown_roots']) {
+        $problems[] = 'unknown roots: ' . implode(', ', $lint['unknown_roots']);
+      }
+      if ($lint['unknown_paths']) {
+        $problems[] = 'paths not in the captured payload: ' . implode(', ', $lint['unknown_paths']);
+      }
+      if ($lint['unknown_modifiers']) {
+        $problems[] = 'unknown modifiers: ' . implode(', ', $lint['unknown_modifiers']);
+      }
+      return $this->invalid(sprintf(
+        /* translators: %s: lint problems */
+        __('Template rejected — %s. Use only roots webhook/event/delivery/site/payload/original/args and paths from get_trigger_schema.', 'flowsystems-webhook-actions'),
+        implode('; ', $problems)
+      ));
+    }
+
+    $message = (new \FlowSystems\WebhookActions\Services\Notifications\MessageBuilder())->buildFromRoots($event, $template, $preview['roots'], $preview['ctx']);
+
+    return [
+      'preview'  => ['subject' => $message['subject'], 'title' => $message['title'], 'body' => $message['body'], 'short' => $message['short']],
+      'warnings' => $lint['warnings'],
+    ];
+  }
+
   public function provisionWpAppPassword(array $input): array|WP_Error {
     $created = (new WpAppPasswordService())->provisionForCurrentUser((string) ($input['name'] ?? ''));
     if (is_wp_error($created)) {

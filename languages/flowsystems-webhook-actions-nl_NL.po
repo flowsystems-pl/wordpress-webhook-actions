@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.2.0\n"
+"with AI help 3.3.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-12T18:16:49+00:00\n"
+"POT-Creation-Date: 2026-09-23T10:11:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -27,6 +27,18 @@ msgid ""
 msgstr ""
 "\"%s\" wijzigt of verwijdert live gegevens. Stuur dezelfde aanroep opnieuw "
 "met \"confirmed\": true zodra een mens het heeft goedgekeurd."
+
+#: src/Services/Notifications/DigestFlusher.php:146
+#. translators: 1: number of notifications, 2: rule name
+#, php-format
+msgid "%1$d notification — %2$s"
+msgid_plural "%1$d notifications — %2$s"
+msgstr[0] "%1$d melding — %2$s"
+msgstr[1] "%1$d meldingen — %2$s"
+
+#: admin/src/components/LogsTable.vue
+msgid "%1$d notification(s) sent, %2$d failed"
+msgstr "%1$d melding(en) verzonden, %2$d mislukt"
 
 #: admin/src/components/ImportDialog.vue
 msgid "%1$d webhook(s) and %2$d chain(s) to import."
@@ -71,6 +83,16 @@ msgid ""
 msgstr ""
 "%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — verwerkt alleen de "
 "webhook-wachtrij. Min. interval: 20s."
+
+#: src/Services/Notifications/TemplateLinter.php:78
+#. translators: 1: channel type, 2: rendered length, 3: limit
+#, php-format
+msgid ""
+"%1$s: the body renders to about %2$d characters, over the %3$d limit; it "
+"will be truncated."
+msgstr ""
+"%1$s: de tekst wordt ongeveer %2$d tekens lang, boven de limiet van %3$d; "
+"hij wordt afgekapt."
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid ""
@@ -219,6 +241,10 @@ msgstr "%d leveringen in de wachtrij gezet"
 msgid "%d duplicate(s) skipped."
 msgstr "%d duplica(a)t(en) overgeslagen."
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "%d entries"
+msgstr "%d vermeldingen"
+
 #: admin/src/views/ActivityView.vue
 msgid "%d entry"
 msgid_plural "%d entries"
@@ -247,6 +273,10 @@ msgid_plural "%d minutes"
 msgstr[0] "%d minuut"
 msgstr[1] "%d minuten"
 
+#: admin/src/components/LogsTable.vue
+msgid "%d notification(s) sent"
+msgstr "%d melding(en) verzonden"
+
 #: admin/src/views/LogsList.vue
 msgid ""
 "%d of the selected entries could not be queued: no queue job is left for "
@@ -254,6 +284,10 @@ msgid ""
 msgstr ""
 "%d van de geselecteerde items konden niet in de wachtrij: er is geen "
 "wachtrijtaak meer voor."
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "%d pending"
+msgstr "%d in behandeling"
 
 #: admin/src/views/LogsList.vue
 msgid "%d retries queued"
@@ -321,6 +355,23 @@ msgstr "Nog %s credits over op je gratis proefperiode."
 msgid "%s free credits"
 msgstr "%s gratis credits"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "%s is not in the captured payload and will render empty."
+msgstr "%s staat niet in de vastgelegde payload en wordt leeg weergegeven."
+
+#: src/Services/Notifications/Channels/AbstractHttpDriver.php:148
+#: src/Services/Notifications/Channels/AbstractHttpDriver.php:161
+#. translators: %s: field label
+#, php-format
+msgid "%s is not set on this channel."
+msgstr "%s is niet ingesteld op dit kanaal."
+
+#: src/Api/NotificationChannelsController.php:357
+#. translators: %s: field label
+#, php-format
+msgid "%s is required."
+msgstr "%s is verplicht."
+
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
 msgstr "%s…"
@@ -345,6 +396,10 @@ msgstr "(nog geen op deze site)"
 msgid "(param name)"
 msgstr "(parameternaam)"
 
+#: src/Services/Notifications/TemplateDrafter.php:102
+msgid "(site-wide rule, any webhook)"
+msgstr "(sitebrede regel, elke webhook)"
+
 #: admin/src/components/MappingEditor.vue
 msgid "(value)"
 msgstr "(waarde)"
@@ -357,7 +412,21 @@ msgstr "+ Nieuwe referentie"
 msgid "5 (plugin default)"
 msgstr "5 (plugin-standaard)"
 
-#: src/Services/Export/BuildImporter.php:242
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "503, 500-504"
+msgstr "503, 500-504"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:31
+msgid "A Twilio number in E.164 (+15551234567) or a Messaging Service SID (MG…)."
+msgstr ""
+"Een Twilio-nummer in E.164 (+15551234567) of een Messaging Service SID "
+"(MG…)."
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:25
+msgid "A bot token from @BotFather and the chat or group ID to post to."
+msgstr "Een bottoken van @BotFather en het chat- of groeps-ID om naar te posten."
+
+#: src/Services/Export/BuildImporter.php:307
 msgid "A chain in this file has no name and was not imported."
 msgstr "Een keten in dit bestand heeft geen naam en is niet geïmporteerd."
 
@@ -366,11 +435,34 @@ msgstr "Een keten in dit bestand heeft geen naam en is niet geïmporteerd."
 msgid "A chain with that name already exists."
 msgstr "Er bestaat al een keten met die naam."
 
-#: src/Abilities/WriteAbilities.php:211
+#: src/Abilities/WriteAbilities.php:312
 msgid "A chain with this name already exists."
 msgstr "Er bestaat al een keten met deze naam."
 
-#: src/Abilities/WriteAbilities.php:335
+#: admin/src/components/notifications/ChannelForm.vue
+msgid ""
+"A channel is a destination rules send to. Secrets are encrypted and never "
+"shown again after saving."
+msgstr ""
+"Een kanaal is een bestemming waar regels naartoe sturen. Geheimen worden "
+"versleuteld en na het opslaan nooit meer getoond."
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"A channel is somewhere a message can go: an inbox, a Slack or Discord "
+"channel, a Telegram chat, a phone number, PagerDuty. Add one, then "
+"reference it from rules."
+msgstr ""
+"Een kanaal is een plek waar een bericht heen kan: een inbox, een Slack- of "
+"Discord-kanaal, een Telegram-chat, een telefoonnummer, PagerDuty. Voeg er "
+"een toe en verwijs er dan naar vanuit regels."
+
+#: src/Api/NotificationChannelsController.php:133
+#: src/Api/NotificationChannelsController.php:176
+msgid "A channel with this name already exists."
+msgstr "Er bestaat al een kanaal met deze naam."
+
+#: src/Abilities/WriteAbilities.php:436
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -379,12 +471,22 @@ msgstr ""
 "trigger-payload (gebruik get_trigger_schema om de beschikbare velden te "
 "zien)."
 
-#: src/Api/CredentialsController.php:265
-#: src/Api/CredentialsController.php:314
+#: src/Api/CredentialsController.php:278
+#: src/Api/CredentialsController.php:327
 msgid "A credential with this name already exists."
 msgstr "Er bestaat al een referentie met deze naam."
 
-#: src/Services/Export/BuildImporter.php:269
+#: admin/src/composables/useNotifications.js
+msgid "A delivery that succeeded after at least one failed attempt."
+msgstr "Een bezorging die slaagde na minstens één mislukte poging."
+
+#: admin/src/composables/useNotifications.js
+msgid "A failed attempt that will be retried, with the time of the next try."
+msgstr ""
+"Een mislukte poging die opnieuw wordt geprobeerd, met het tijdstip van de "
+"volgende poging."
+
+#: src/Services/Export/BuildImporter.php:334
 #. translators: %s: chain name.
 #, php-format
 msgid ""
@@ -394,7 +496,7 @@ msgstr ""
 "Een stap van “%s” verwijst naar een webhook die niet in dit bestand staat "
 "en is weggelaten."
 
-#: src/Services/Export/BuildImporter.php:274
+#: src/Services/Export/BuildImporter.php:339
 #. translators: %s: chain name.
 #, php-format
 msgid ""
@@ -430,6 +532,16 @@ msgstr ""
 "%1$sonmiddellijk ongeldig%2$s en alle bestaande integraties die het "
 "gebruiken, stoppen met werken."
 
+#: admin/src/components/HealthStatusBar.vue
+msgid "A notification channel is failing:"
+msgstr "Een meldingskanaal faalt:"
+
+#: src/Services/Export/BuildImporter.php:261
+#. translators: 1: webhook name, 2: error
+#, php-format
+msgid "A notification rule on \"%1$s\" was left out: %2$s"
+msgstr "Een meldingsregel op \"%1$s\" is weggelaten: %2$s"
+
 #: src/Api/WebhooksController.php:570
 msgid "A payload object is required for custom source."
 msgstr "Voor een aangepaste bron is een payloadobject vereist."
@@ -438,9 +550,19 @@ msgstr "Voor een aangepaste bron is een payloadobject vereist."
 msgid "A provider and model are required."
 msgstr "Een provider en model zijn verplicht."
 
-#: src/Api/CredentialsController.php:428
+#: src/Api/CredentialsController.php:441
 msgid "A secret value is required."
 msgstr "Een geheime waarde is verplicht."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"A site-wide rule on every success fires for every delivery of every "
+"webhook. A quiet time of one hour per webhook is pre-filled below; consider "
+"a daily digest instead."
+msgstr ""
+"Een sitebrede regel op elk succes vuurt bij elke bezorging van elke "
+"webhook. Hieronder is een stiltetijd van één uur per webhook vooraf "
+"ingevuld; overweeg in plaats daarvan een dagelijkse samenvatting."
 
 #: src/Services/GluePermissions.php:193
 msgid ""
@@ -452,9 +574,17 @@ msgstr ""
 "daarom staat dit standaard uit. Zet \"API-tokens Code Glue laten "
 "schrijven\" aan in Instellingen om het toe te staan."
 
-#: src/Abilities/TestAbilities.php:73
+#: src/Abilities/TestAbilities.php:110
 msgid "A url or webhook_id is required."
 msgstr "Een url of webhook_id is verplicht."
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:31
+msgid ""
+"A user, group (-100…) or channel (@name) ID. Send the bot a message first "
+"so it can reach you."
+msgstr ""
+"Een gebruikers-, groeps- (-100…) of kanaal-ID (@naam). Stuur de bot eerst "
+"een bericht zodat hij je kan bereiken."
 
 #: src/Api/ChainsController.php:257
 msgid "A webhook cannot trigger itself."
@@ -514,6 +644,15 @@ msgstr "API-sleutel (header)"
 msgid "API token not found."
 msgstr "API-token niet gevonden."
 
+#: src/Services/Notifications/Channels/NtfyDriver.php:30
+msgid "Access token"
+msgstr "Toegangstoken"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:29
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:58
+msgid "Account SID"
+msgstr "Account SID"
+
 #: admin/src/views/ActivityView.vue
 msgid "Action"
 msgstr "Actie"
@@ -554,6 +693,10 @@ msgstr "Activeren…"
 #: admin/src/components/AiProviderSettings.vue admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/views/ExternalCronView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue
 msgid "Active"
 msgstr "Actief"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Active for this webhook — click to mute"
+msgstr "Actief voor deze webhook — klik om te dempen"
 
 #: admin/src/components/HealthStatusBar.vue
 msgid "Active/Total"
@@ -597,7 +740,7 @@ msgstr "Mapping toevoegen"
 msgid "Add Webhook"
 msgstr "Webhook toevoegen"
 
-#: src/Abilities/AbilityCatalog.php:271
+#: src/Abilities/AbilityCatalog.php:366
 msgid "Add a chain link"
 msgstr "Ketenschakel toevoegen"
 
@@ -605,7 +748,7 @@ msgstr "Ketenschakel toevoegen"
 msgid "Add a credential to securely reuse it across webhooks."
 msgstr "Voeg een referentie toe om deze veilig te hergebruiken in meerdere webhooks."
 
-#: src/Abilities/AbilityCatalog.php:272
+#: src/Abilities/AbilityCatalog.php:367
 msgid ""
 "Add a source→target edge to a chain. Rejected if it would create a cycle "
 "across any chain."
@@ -623,6 +766,10 @@ msgstr ""
 "wordt eerst gebruikt; als deze tegen limieten aanloopt of faalt, schakelt "
 "de agent automatisch over naar een andere gekoppelde provider."
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Add an email, Slack, Telegram or SMS channel"
+msgstr "Voeg een e-mail-, Slack-, Telegram- of sms-kanaal toe"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "Add condition"
 msgstr "Voorwaarde toevoegen"
@@ -630,6 +777,10 @@ msgstr "Voorwaarde toevoegen"
 #: admin/src/components/AiStepControls.vue
 msgid "Add credential & retry"
 msgstr "Referentie toevoegen en opnieuw proberen"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Add first channel"
+msgstr "Eerste kanaal toevoegen"
 
 #: admin/src/views/VaultView.vue
 msgid "Add first credential"
@@ -712,6 +863,36 @@ msgstr "Agency"
 msgid "Agent (AI)"
 msgstr "Agent (AI)"
 
+#: src/Abilities/AbilityCatalog.php:247
+msgid ""
+"Alert someone when a delivery reaches a state. event: success | recovered | "
+"failed_attempt | retry_scheduled | permanently_failed | skipped. webhook_id "
+"scopes the rule to one webhook (use {{step_N.id}} for a webhook created "
+"earlier in the plan); omit it for a site-wide rule. channel_ids come from "
+"list_notification_channels. filters (all optional): attempts [1,3] (which "
+"attempt numbers), http_codes [\"5xx\",\"429\",\"transport\"], reason "
+"exhausted|non_retryable (permanently_failed only), triggers "
+"[\"woocommerce_*\"], only_after_retry, include_tests. template (optional) = "
+"{subject, title, body, short} using {{ path | modifier }} placeholders — "
+"see the NOTIFICATION TEMPLATES section; unknown paths are rejected with the "
+"list of what is available, so read get_trigger_schema first. "
+"throttle_seconds quiets repeats per webhook; digest hourly|daily batches "
+"them."
+msgstr ""
+"Waarschuw iemand wanneer een bezorging een status bereikt. event: success | "
+"recovered | failed_attempt | retry_scheduled | permanently_failed | "
+"skipped. webhook_id beperkt de regel tot één webhook (gebruik {{step_N.id}} "
+"voor een webhook die eerder in het plan is aangemaakt); laat het weg voor "
+"een sitebrede regel. channel_ids komen uit list_notification_channels. "
+"filters (allemaal optioneel): attempts [1,3] (welke pogingsnummers), "
+"http_codes [\"5xx\",\"429\",\"transport\"], reason exhausted|non_retryable "
+"(alleen permanently_failed), triggers [\"woocommerce_*\"], "
+"only_after_retry, include_tests. template (optioneel) = {subject, title, "
+"body, short} met {{ path | modifier }}-placeholders — zie de sectie "
+"NOTIFICATION TEMPLATES; onbekende paden worden geweigerd met de lijst van "
+"wat beschikbaar is, lees dus eerst get_trigger_schema. throttle_seconds "
+"dempt herhalingen per webhook; digest hourly|daily bundelt ze."
+
 #: admin/src/views/ActivityView.vue
 msgid "All actions"
 msgstr "Alle acties"
@@ -728,9 +909,13 @@ msgstr "Alle logboeken zijn gewist"
 msgid "All logs have been cleared."
 msgstr "Alle logboeken zijn gewist."
 
-#: admin/src/views/LogsList.vue
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/views/LogsList.vue
 msgid "All statuses"
 msgstr "Alle statussen"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Also for test dispatches"
+msgstr "Ook voor testverzendingen"
 
 #: admin/src/components/RotateTokenDialog.vue
 msgid "Also update expiry"
@@ -756,13 +941,39 @@ msgstr ""
 msgid "An API key is required to connect this provider."
 msgstr "Een API-sleutel is vereist om deze provider te koppelen."
 
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:34
+msgid ""
+"An approved template from Twilio → Content Template Builder. Required "
+"outside the 24-hour window."
+msgstr ""
+"Een goedgekeurde template uit Twilio → Content Template Builder. Vereist "
+"buiten het 24-uursvenster."
+
 #: admin/src/components/ShareBuildDialog.vue
 msgid "Anonymize my site address"
 msgstr "Mijn siteadres anonimiseren"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Any"
+msgstr "Elke"
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"Any single failed attempt, before retries are exhausted. Filter by attempt "
+"number or HTTP code."
+msgstr ""
+"Elke afzonderlijke mislukte poging, voordat de nieuwe pogingen op zijn. "
+"Filter op pogingsnummer of HTTP-code."
+
 #: admin/src/components/ui/UpgradeBadge.vue
 msgid "Any unsaved changes on this form will be lost."
 msgstr "Alle niet-opgeslagen wijzigingen in dit formulier gaan verloren."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Append the standard facts (webhook, trigger, attempt, HTTP, error, log link)"
+msgstr ""
+"Voeg de standaardfeiten toe (webhook, trigger, poging, HTTP, fout, "
+"logboeklink)"
 
 #: admin/src/components/WebhookForm.vue
 msgid ""
@@ -788,6 +999,27 @@ msgstr ""
 msgid "Application Passwords require WordPress 5.6 or newer."
 msgstr "Applicatiewachtwoorden vereisen WordPress 5.6 of nieuwer."
 
+#: src/Services/Notifications/Channels/PushoverDriver.php:27
+#: src/Services/Notifications/Channels/PushoverDriver.php:41
+msgid "Application token"
+msgstr "Applicatietoken"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Applies to every webhook that inherits site-wide rules."
+msgstr "Geldt voor elke webhook die sitebrede regels overneemt."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Applies to this webhook only."
+msgstr "Geldt alleen voor deze webhook."
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid ""
+"Apply to every webhook set to inherit. A webhook can mute any of them "
+"individually."
+msgstr ""
+"Gelden voor elke webhook die op overnemen staat. Een webhook kan ze elk "
+"afzonderlijk dempen."
+
 #: admin/src/views/SettingsView.vue
 msgid "Archive logs before deletion"
 msgstr "Logboeken archiveren vóór verwijdering"
@@ -812,11 +1044,17 @@ msgstr ""
 "probeer dan opnieuw. Overslaan laat de rest van het plan (inclusief live "
 "gaan) doorgaan op een levering die mislukt is."
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Ask the site's AI provider to write this message from the captured payload"
+msgstr ""
+"Vraag de AI-provider van de site dit bericht te schrijven op basis van de "
+"vastgelegde payload"
+
 #: src/Abilities/GlueAbilities.php:126
 msgid "Assign a Code Glue snippet to a webhook"
 msgstr "Een Code Glue-snippet aan een webhook koppelen"
 
-#: src/Abilities/AbilityCatalog.php:227
+#: src/Abilities/AbilityCatalog.php:322
 msgid "Assign a vault credential to a webhook"
 msgstr "Wijs een kluisreferentie toe aan een webhook"
 
@@ -839,6 +1077,14 @@ msgstr ""
 "werkt zonder cron, ten koste van iets extra vertraging. Schakel om te "
 "wisselen."
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"At most one message per webhook in this window; the rest are recorded as "
+"throttled."
+msgstr ""
+"Hooguit één bericht per webhook in dit venster; de rest wordt vastgelegd "
+"als beperkt."
+
 #: src/Abilities/GlueAbilities.php:127
 msgid ""
 "Attach a snippet to a webhook+trigger and enable it: stage \"pre\" "
@@ -857,6 +1103,10 @@ msgstr ""
 "gebeurt het zonder. Geef snippet_id 0 om te ontkoppelen, of enabled false "
 "om hem gekoppeld maar gepauzeerd te houden."
 
+#: src/Services/Notifications/MessageBuilder.php:126
+msgid "Attempt"
+msgstr "Poging"
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempt #%d"
 msgstr "Poging #%d"
@@ -865,13 +1115,32 @@ msgstr "Poging #%d"
 msgid "Attempt %1$d/%2$d"
 msgstr "Poging %1$d/%2$d"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Attempt 1 is the first try. Leave empty to fire on every failed attempt."
+msgstr ""
+"Poging 1 is de eerste poging. Laat leeg om bij elke mislukte poging te "
+"vuren."
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempt History"
 msgstr "Pogingsgeschiedenis"
 
+#: src/Services/Notifications/TemplateContext.php:117
+msgid "Attempt failed"
+msgstr "Poging mislukt"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Attempt number is"
+msgstr "Pogingsnummer is"
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempted At"
 msgstr "Geprobeerd op"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:30
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:62
+msgid "Auth token"
+msgstr "Auth-token"
 
 #: src/Api/AuthHelper.php:42
 msgid ""
@@ -885,6 +1154,10 @@ msgstr ""
 #: admin/src/components/WebhookForm.vue
 msgid "Authorization (optional)"
 msgstr "Autorisatie (optioneel)"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:32
+msgid "Authorization (vault credential)"
+msgstr "Authorization (kluisreferentie)"
 
 #: src/Api/WebhookSchema.php:51
 msgid "Authorization header value."
@@ -934,6 +1207,10 @@ msgstr "Gem. ping"
 msgid "Avg response"
 msgstr "Gem. respons"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Back to the default message"
+msgstr "Terug naar het standaardbericht"
+
 #: admin/src/views/WebhookEdit.vue admin/src/views/WebhookLogs.vue
 msgid "Back to webhooks"
 msgstr "Terug naar webhooks"
@@ -975,7 +1252,7 @@ msgstr "Basic auth"
 msgid "Basic auth (user + password)"
 msgstr "Basisauthenticatie (gebruiker + wachtwoord)"
 
-#: src/Api/CredentialsController.php:417
+#: src/Api/CredentialsController.php:430
 msgid "Basic auth requires a username and password."
 msgstr "Basisauthenticatie vereist een gebruikersnaam en wachtwoord."
 
@@ -986,6 +1263,19 @@ msgstr "Bearer-token"
 #: admin/src/views/VaultView.vue
 msgid "Bearer token (PAT)"
 msgstr "Bearer-token (PAT)"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Body"
+msgstr "Tekst"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:28
+msgid "Bot name"
+msgstr "Botnaam"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:30
+#: src/Services/Notifications/Channels/TelegramDriver.php:38
+msgid "Bot token"
+msgstr "Bottoken"
 
 #: src/Api/ChainsController.php:254
 msgid "Both source_webhook_id and target_webhook_id are required."
@@ -1031,6 +1321,14 @@ msgstr ""
 "Gebouwd op een referentiepayload — de vorm is echt, de waarden zijn van "
 "ons. De teststap controleert hem tegen je endpoint."
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Bundle into a daily digest"
+msgstr "Bundelen in een dagelijkse samenvatting"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Bundle into an hourly digest"
+msgstr "Bundelen in een uurlijkse samenvatting"
+
 #: admin/src/views/ProView.vue
 msgid "Business"
 msgstr "Business"
@@ -1050,7 +1348,19 @@ msgstr ""
 "database geen geheimen kan ontsleutelen — verplaats je de sleutel naar "
 "%1$swp-config.php%2$s:"
 
-#: admin/src/components/AiProviderSettings.vue admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/ExportDialog.vue admin/src/components/ImportDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/ShareBuildDialog.vue admin/src/components/WebhookForm.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:34
+msgid "By event (permanent failure = critical, attempt = warning)"
+msgstr "Per gebeurtenis (permanent mislukt = kritiek, poging = waarschuwing)"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:31
+msgid "By severity (failures high, success low)"
+msgstr "Per ernst (mislukkingen hoog, succes laag)"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:29
+msgid "CC"
+msgstr "CC"
+
+#: admin/src/components/AiProviderSettings.vue admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/ExportDialog.vue admin/src/components/ImportDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/ShareBuildDialog.vue admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RuleEditor.vue admin/src/components/notifications/RulesPanel.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -1186,7 +1496,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "Ketennaam"
 
-#: src/Abilities/WriteAbilities.php:207
+#: src/Abilities/WriteAbilities.php:308
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -1199,6 +1509,12 @@ msgstr "Ketennaam is verplicht."
 msgid "Chain not found."
 msgstr "Keten niet gevonden."
 
+#: src/Services/Notifications/TemplateContext.php:142
+#. translators: 1: chain name, 2: source webhook name, 3: target webhook name
+#, php-format
+msgid "Chain: %1$s (%2$s → %3$s)"
+msgstr "Keten: %1$s (%2$s → %3$s)"
+
 #: admin/src/views/ActivityView.vue
 msgid "Chains"
 msgstr "Ketens"
@@ -1206,6 +1522,16 @@ msgstr "Ketens"
 #: admin/src/components/ExportDialog.vue
 msgid "Chains (member webhooks included automatically)"
 msgstr "Ketens (bijbehorende webhooks worden automatisch meegenomen)"
+
+#: src/Abilities/AbilityCatalog.php:282
+msgid ""
+"Change a notification rule: its event, channels, filters, template, "
+"throttle, digest or enabled state. Same fields as create_notification_rule "
+"plus id."
+msgstr ""
+"Wijzig een meldingsregel: de gebeurtenis, kanalen, filters, template, "
+"beperking, samenvatting of ingeschakelde status. Dezelfde velden als "
+"create_notification_rule plus id."
 
 #: admin/src/views/ApiTokensView.vue
 msgid "Change expiry"
@@ -1230,6 +1556,44 @@ msgstr ""
 #: admin/src/views/ActivityView.vue
 msgid "Changes"
 msgstr "Wijzigingen"
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:29 admin/src/components/notifications/NotificationLogTable.vue
+msgid "Channel"
+msgstr "Kanaal"
+
+#: src/Services/Notifications/NotificationSender.php:60
+msgid "Channel is disabled."
+msgstr "Kanaal is uitgeschakeld."
+
+#: src/Api/NotificationChannelsController.php:126
+#: src/Api/NotificationChannelsController.php:173
+msgid "Channel name is required."
+msgstr "Kanaalnaam is verplicht."
+
+#: src/Services/Notifications/NotificationSender.php:55
+msgid "Channel no longer exists."
+msgstr "Kanaal bestaat niet meer."
+
+#: src/Api/NotificationChannelsController.php:390
+msgid "Channel not found."
+msgstr "Kanaal niet gevonden."
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:22
+msgid "Channel webhook URL from Discord → Integrations. Posts an embed."
+msgstr "Kanaal-webhook-URL uit Discord → Integraties. Post een embed."
+
+#: admin/src/views/NotificationsView.vue
+msgid "Channels"
+msgstr "Kanalen"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Chat"
+msgstr "Chat"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:31
+#: src/Services/Notifications/Channels/TelegramDriver.php:42
+msgid "Chat ID"
+msgstr "Chat-ID"
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid "Checking whether the page is live…"
@@ -1323,6 +1687,10 @@ msgstr ""
 msgid "Code Glue — PHP snippets before and after dispatch"
 msgstr "Code Glue — PHP-snippets vóór en na verzending"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Comma-separated hook names; * matches anything."
+msgstr "Door komma's gescheiden hooknamen; * komt overeen met alles."
+
 #: src/Api/TriggersController.php:144
 msgid "Comments"
 msgstr "Reacties"
@@ -1344,7 +1712,7 @@ msgstr ""
 "'Voorwaarden evalueren tegen' hierboven om origineel of getransformeerd te "
 "kiezen."
 
-#: src/Api/LogsController.php:405
+#: src/Api/LogsController.php:413
 msgid "Conditions are not met with current settings — event would be skipped."
 msgstr ""
 "Aan de voorwaarden wordt met de huidige instellingen niet voldaan — de "
@@ -1366,6 +1734,10 @@ msgstr "Koppelen"
 msgid "Connect an AI provider"
 msgstr "Koppel een AI-provider"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Connect an AI provider under Build with AI to draft messages"
+msgstr "Koppel een AI-provider onder Bouwen met AI om berichten te laten opstellen"
+
 #: admin/src/views/AiBuilderView.vue
 msgid "Connect your own key"
 msgstr "Koppel je eigen sleutel"
@@ -1379,6 +1751,10 @@ msgid "Connects WordPress to a named service — a CRM, a spreadsheet, a chat ap
 msgstr ""
 "Verbindt WordPress met een specifieke dienst — een CRM, een spreadsheet, "
 "een chat-app."
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:34
+msgid "Content Template SID"
+msgstr "Content Template SID"
 
 #: admin/src/components/AiStepControls.vue
 msgid "Continue"
@@ -1568,11 +1944,11 @@ msgstr "Een WP-applicatiewachtwoord aanmaken"
 msgid "Create a WP Application Password for me"
 msgstr "Maak een WP-applicatiewachtwoord voor mij"
 
-#: src/Abilities/AbilityCatalog.php:242
+#: src/Abilities/AbilityCatalog.php:337
 msgid "Create a WordPress Application Password credential"
 msgstr "Maak een WordPress-applicatiewachtwoord-referentie"
 
-#: src/Abilities/AbilityCatalog.php:257
+#: src/Abilities/AbilityCatalog.php:352
 msgid ""
 "Create a named chain that wires 2xx completions of one webhook to "
 "downstream webhooks."
@@ -1593,6 +1969,10 @@ msgstr ""
 "gebruiker deze inschakelt). Geef name, endpoint_url, http_method en "
 "triggers op."
 
+#: src/Abilities/AbilityCatalog.php:246
+msgid "Create a notification rule"
+msgstr "Een meldingsregel aanmaken"
+
 #: admin/src/views/ApiTokensView.vue
 msgid "Create a token to enable programmatic API access."
 msgstr "Maak een token om programmatische API-toegang in te schakelen."
@@ -1601,7 +1981,7 @@ msgstr "Maak een token om programmatische API-toegang in te schakelen."
 msgid "Create a webhook"
 msgstr "Maak een webhook"
 
-#: src/Abilities/AbilityCatalog.php:256
+#: src/Abilities/AbilityCatalog.php:351
 msgid "Create a webhook chain"
 msgstr "Maak een webhookketen"
 
@@ -1613,6 +1993,10 @@ msgstr ""
 "Maak en beheer uitgaande webhooks: triggers, veldmappings, voorwaarden, "
 "ketens, referenties en leveringslogs."
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Create channel"
+msgstr "Kanaal aanmaken"
+
 #: admin/src/views/VaultView.vue
 msgid "Create credential"
 msgstr "Referentie maken"
@@ -1620,6 +2004,10 @@ msgstr "Referentie maken"
 #: admin/src/views/ApiTokensView.vue
 msgid "Create first token"
 msgstr "Eerste token maken"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Create rule"
+msgstr "Regel aanmaken"
 
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Create token"
@@ -1641,11 +2029,11 @@ msgstr "“%s” aangemaakt"
 msgid "Creating…"
 msgstr "Maken…"
 
-#: src/Api/WebhookSchema.php:137
+#: src/Api/WebhookSchema.php:150
 msgid "Creation date."
 msgstr "Aanmaakdatum."
 
-#: src/Abilities/TestAbilities.php:292
+#: src/Abilities/TestAbilities.php:329
 msgid "Credential could not be decrypted."
 msgstr "Referentie kon niet worden ontsleuteld."
 
@@ -1661,14 +2049,14 @@ msgstr "Referentienaam (bijv. WP REST admin)"
 msgid "Credential name (e.g. n8n auth)"
 msgstr "Referentienaam (bijv. n8n auth)"
 
-#: src/Api/CredentialsController.php:257
-#: src/Api/CredentialsController.php:311
+#: src/Api/CredentialsController.php:270
+#: src/Api/CredentialsController.php:324
 msgid "Credential name is required."
 msgstr "Referentienaam is verplicht."
 
-#: src/Abilities/TestAbilities.php:288
+#: src/Abilities/TestAbilities.php:325
 #: src/Abilities/WriteAbilities.php:188
-#: src/Api/CredentialsController.php:459
+#: src/Api/CredentialsController.php:472
 msgid "Credential not found."
 msgstr "Referentie niet gevonden."
 
@@ -1708,7 +2096,7 @@ msgstr "Cron-token opnieuw gegenereerd. Werk je crontab bij met het nieuwe comma
 msgid "Crontab Command"
 msgstr "Crontab-commando"
 
-#: src/Api/LogsController.php:529
+#: src/Api/LogsController.php:537
 msgid "Current page of results."
 msgstr "Huidige pagina met resultaten."
 
@@ -1780,9 +2168,13 @@ msgstr "Vertraging groeit gelijkmatig: n × basis seconden"
 msgid "Delay preview"
 msgstr "Voorbeeld vertraging"
 
-#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
 msgid "Delete"
 msgstr "Verwijderen"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete \"%s\"? Its secret is erased and cannot be recovered."
+msgstr "\"%s\" verwijderen? Het geheim wordt gewist en kan niet worden hersteld."
 
 #: admin/src/views/SettingsView.vue
 msgid "Delete All Logs"
@@ -1796,9 +2188,13 @@ msgstr "Oude activiteit verwijderen"
 msgid "Delete a Code Glue snippet"
 msgstr "Een Code Glue-snippet verwijderen"
 
-#: src/Abilities/AbilityCatalog.php:346
+#: src/Abilities/AbilityCatalog.php:441
 msgid "Delete a webhook"
 msgstr "Verwijder een webhook"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete anyway"
+msgstr "Toch verwijderen"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Delete build"
@@ -1811,6 +2207,10 @@ msgstr "Keten verwijderen"
 #: admin/src/views/WebhooksList.vue
 msgid "Delete chain “%s”?"
 msgstr "Keten “%s” verwijderen?"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete channel?"
+msgstr "Kanaal verwijderen?"
 
 #: admin/src/views/VaultView.vue
 msgid "Delete credential"
@@ -1839,6 +2239,10 @@ msgstr "Verwijder logboeken ouder dan het opgegeven aantal dagen."
 #: admin/src/views/ActivityView.vue
 msgid "Delete old"
 msgstr "Oude verwijderen"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Delete rule?"
+msgstr "Regel verwijderen?"
 
 #: admin/src/components/AiBuildsBar.vue
 msgid "Delete this build"
@@ -1874,9 +2278,13 @@ msgstr[1] ""
 "Geforceerd verwijderen koppelt deze los van %d webhooks; die webhooks "
 "verzenden geen Authorization-header totdat ze opnieuw zijn geconfigureerd."
 
-#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Deleting…"
 msgstr "Verwijderen…"
+
+#: src/Services/Notifications/TemplateContext.php:115
+msgid "Delivered"
+msgstr "Bezorgd"
 
 #: admin/src/views/ProView.vue
 msgid "Delivery logs & replay"
@@ -1956,9 +2364,17 @@ msgstr ""
 "Omschrijvingen reizen mee met de build en worden hier ook opgeslagen — ze "
 "maken een gedeelde build begrijpelijk voor iemand anders."
 
-#: src/Abilities/TestAbilities.php:89
+#: src/Abilities/TestAbilities.php:126
 msgid "Destructive probe methods (PUT, PATCH, DELETE) require confirmation."
 msgstr "Destructieve probe-methoden (PUT, PATCH, DELETE) vereisen bevestiging."
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:29
+msgid "Device"
+msgstr "Apparaat"
+
+#: src/Services/Notifications/DigestFlusher.php:150 admin/src/components/notifications/RuleEditor.vue
+msgid "Digest"
+msgstr "Samenvatting"
 
 #: admin/src/components/WebhookCardContent.vue admin/src/views/SettingsView.vue
 msgid "Disabled"
@@ -1975,6 +2391,10 @@ msgstr ""
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Discard"
 msgstr "Verwerpen"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:18
+msgid "Discord"
+msgstr "Discord"
 
 #: admin/src/App.vue
 msgid "Dismiss"
@@ -2033,6 +2453,18 @@ msgstr ""
 "Downstream-webhooks die hun enige trigger verliezen, worden gemarkeerd als "
 "wees (geen trigger toegewezen)."
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Draft"
+msgstr "Concept"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Draft with AI"
+msgstr "Opstellen met AI"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Drafting…"
+msgstr "Opstellen…"
+
 #: admin/src/components/ImportDialog.vue
 msgid "Drop a build JSON here, or click to browse"
 msgstr "Sleep hier een build-JSON naartoe, of klik om te bladeren"
@@ -2049,7 +2481,7 @@ msgstr "Verschuldigd"
 msgid "Due Now"
 msgstr "Nu verschuldigd"
 
-#: admin/src/components/LogsTable.vue
+#: src/Services/Notifications/MessageBuilder.php:132 admin/src/components/LogsTable.vue
 msgid "Duration"
 msgstr "Duur"
 
@@ -2057,11 +2489,11 @@ msgstr "Duur"
 msgid "Dynamic URL templates resolved from the payload"
 msgstr "Dynamische URL-sjablonen opgelost uit de payload"
 
-#: src/Abilities/WriteAbilities.php:327
+#: src/Abilities/WriteAbilities.php:428
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "Elke voorwaarderegel moet een object {field, operator, value} zijn."
 
-#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue
 msgid "Edit"
 msgstr "Bewerken"
 
@@ -2073,19 +2505,31 @@ msgstr "Webhook bewerken"
 msgid "Edit chain"
 msgstr "Keten bewerken"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Edit channel"
+msgstr "Kanaal bewerken"
+
 #: admin/src/views/VaultView.vue
 msgid "Edit credential"
 msgstr "Referentie bewerken"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Edit rule"
+msgstr "Regel bewerken"
 
 #: admin/src/components/ImportDialog.vue
 msgid "Edit “%s”"
 msgstr "“%s” bewerken"
 
-#: src/Abilities/AbilityCatalog.php:331
+#: src/Services/Notifications/Channels/EmailDriver.php:19
+msgid "Email"
+msgstr "E-mail"
+
+#: src/Abilities/AbilityCatalog.php:426
 msgid "Enable (go live) or disable a webhook. Enabling requires confirmation."
 msgstr "Schakel een webhook in (live) of uit. Inschakelen vereist bevestiging."
 
-#: src/Abilities/AbilityCatalog.php:330
+#: src/Abilities/AbilityCatalog.php:425
 msgid "Enable / disable a webhook"
 msgstr "Webhook in-/uitschakelen"
 
@@ -2108,6 +2552,10 @@ msgstr "Voorwaardelijke verzending inschakelen"
 #: admin/src/components/BuiltWebhookActions.vue
 msgid "Enable webhook"
 msgstr "Webhook inschakelen"
+
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Enabled"
+msgstr "Ingeschakeld"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Enabled Webhook"
@@ -2141,7 +2589,7 @@ msgstr "Enter om te bouwen, Shift+Enter voor een nieuwe regel."
 msgid "Enter your license key to unlock Pro features on this site."
 msgstr "Voer je licentiesleutel in om Pro-functies op deze site te ontgrendelen."
 
-#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:94 src/Services/Notifications/MessageBuilder.php:135 admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
 msgid "Error"
 msgstr "Fout"
 
@@ -2156,6 +2604,10 @@ msgstr "Fouten"
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Evaluate conditions against"
 msgstr "Voorwaarden evalueren tegen"
+
+#: src/Services/Notifications/MessageBuilder.php:141 admin/src/components/notifications/NotificationLogTable.vue
+msgid "Event"
+msgstr "Gebeurtenis"
 
 #: admin/src/views/WebhookLogs.vue
 msgid "Event Replayed"
@@ -2173,9 +2625,25 @@ msgstr "Gebeurtenis-UUID:"
 msgid "Event replayed"
 msgstr "Gebeurtenis opnieuw afgespeeld"
 
-#: src/App.php:133
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:26
+msgid ""
+"Events API v2 integration key. Failures open an incident; a later success "
+"resolves it."
+msgstr ""
+"Events API v2-integratiesleutel. Mislukkingen openen een incident; een "
+"later succes lost het op."
+
+#: src/App.php:137
 msgid "Every Minute"
 msgstr "Elke minuut"
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"Every successful delivery. Noisy on a busy site — combine with a throttle "
+"or a digest."
+msgstr ""
+"Elke geslaagde bezorging. Druk op een actieve site — combineer met een "
+"beperking of een samenvatting."
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Every time a WooCommerce order is completed, post the line items to Airtable"
@@ -2305,6 +2773,10 @@ msgstr "Geschiedenis externe cron"
 msgid "Extra credits (never expire)"
 msgstr "Extra credits (verlopen nooit)"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
+msgid "Extra headers"
+msgstr "Extra headers"
+
 #: src/Api/WebhookSchema.php:68
 msgid "Extra request headers as key-value pairs."
 msgstr "Extra verzoekheaders als sleutel-waardeparen."
@@ -2313,7 +2785,7 @@ msgstr "Extra verzoekheaders als sleutel-waardeparen."
 msgid "Fail"
 msgstr "Mislukt"
 
-#: admin/src/components/TestWebhookDrawer.vue
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Failed"
 msgstr "Mislukt"
 
@@ -2325,18 +2797,26 @@ msgstr "Maken van API-token mislukt."
 msgid "Failed to create chain link (it may already exist)."
 msgstr "Maken van ketenkoppeling mislukt (deze bestaat mogelijk al)."
 
-#: src/Abilities/WriteAbilities.php:233
+#: src/Abilities/WriteAbilities.php:334
 msgid "Failed to create chain link."
 msgstr "Maken van ketenschakel mislukt."
 
-#: src/Abilities/WriteAbilities.php:215
+#: src/Abilities/WriteAbilities.php:316
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "Maken van keten mislukt."
 
-#: src/Api/CredentialsController.php:284
+#: src/Api/NotificationChannelsController.php:150
+msgid "Failed to create channel."
+msgstr "Kanaal aanmaken mislukt."
+
+#: src/Api/CredentialsController.php:297
 msgid "Failed to create credential."
 msgstr "Maken van referentie mislukt."
+
+#: src/Api/NotificationRulesController.php:129
+msgid "Failed to create rule."
+msgstr "Regel aanmaken mislukt."
 
 #: src/Abilities/GlueAbilities.php:231
 #: src/Api/SnippetsController.php:176
@@ -2352,11 +2832,15 @@ msgstr "Maken van webhook mislukt."
 msgid "Failed to delete API token."
 msgstr "Verwijderen van API-token mislukt."
 
-#: src/Api/CredentialsController.php:396
+#: src/Api/NotificationChannelsController.php:248
+msgid "Failed to delete channel."
+msgstr "Kanaal verwijderen mislukt."
+
+#: src/Api/CredentialsController.php:409
 msgid "Failed to delete credential."
 msgstr "Verwijderen van referentie mislukt."
 
-#: src/Api/LogsController.php:270
+#: src/Api/LogsController.php:278
 msgid "Failed to delete log."
 msgstr "Verwijderen van logboek mislukt."
 
@@ -2364,11 +2848,15 @@ msgstr "Verwijderen van logboek mislukt."
 msgid "Failed to delete queue job."
 msgstr "Verwijderen van wachtrijtaak mislukt."
 
+#: src/Api/NotificationRulesController.php:175
+msgid "Failed to delete rule."
+msgstr "Regel verwijderen mislukt."
+
 #: src/Api/SchemasController.php:371
 msgid "Failed to delete schema."
 msgstr "Verwijderen van schema mislukt."
 
-#: src/Abilities/WriteAbilities.php:260
+#: src/Abilities/WriteAbilities.php:361
 #: src/Api/WebhooksController.php:470
 msgid "Failed to delete webhook."
 msgstr "Verwijderen van webhook mislukt."
@@ -2409,7 +2897,7 @@ msgstr "Hernoemen van keten mislukt."
 msgid "Failed to reset capture."
 msgstr "Resetten van vastlegging mislukt."
 
-#: src/Api/LogsController.php:344
+#: src/Api/LogsController.php:352
 msgid "Failed to retry job."
 msgstr "Opnieuw proberen van taak mislukt."
 
@@ -2444,6 +2932,14 @@ msgstr "Opslaan van providersleutel mislukt."
 #: src/Api/WebhooksController.php:512
 msgid "Failed to toggle webhook status."
 msgstr "Wijzigen van webhookstatus mislukt."
+
+#: src/Api/NotificationChannelsController.php:217
+msgid "Failed to update channel."
+msgstr "Kanaal bijwerken mislukt."
+
+#: src/Api/NotificationRulesController.php:159
+msgid "Failed to update rule."
+msgstr "Regel bijwerken mislukt."
 
 #: src/Api/SchemasController.php:323
 msgid "Failed to update schema."
@@ -2482,7 +2978,7 @@ msgstr "Filteren op X-Webhook-ID…"
 msgid "Filter by action prefix (e.g. \"webhook\")."
 msgstr "Filteren op actievoorvoegsel (bijv. \"webhook\")."
 
-#: src/Api/LogsController.php:563
+#: src/Api/LogsController.php:571
 msgid "Filter by event UUID (exact match)."
 msgstr "Filteren op gebeurtenis-UUID (exacte overeenkomst)."
 
@@ -2494,11 +2990,11 @@ msgstr "Filteren op gebeurtenis-UUID…"
 msgid "Filter by exact action string."
 msgstr "Filteren op exacte actie-tekenreeks."
 
-#: src/Api/LogsController.php:546
+#: src/Api/LogsController.php:554
 msgid "Filter by status."
 msgstr "Filteren op status."
 
-#: src/Api/LogsController.php:567
+#: src/Api/LogsController.php:575
 msgid "Filter by target URL (partial match)."
 msgstr "Filteren op doel-URL (gedeeltelijke overeenkomst)."
 
@@ -2506,16 +3002,16 @@ msgstr "Filteren op doel-URL (gedeeltelijke overeenkomst)."
 msgid "Filter by target URL…"
 msgstr "Filteren op doel-URL…"
 
-#: src/Api/LogsController.php:551
+#: src/Api/LogsController.php:559
 msgid "Filter by trigger name."
 msgstr "Filteren op triggernaam."
 
 #: src/Api/LogsController.php:134
-#: src/Api/LogsController.php:542
+#: src/Api/LogsController.php:550
 msgid "Filter by webhook ID."
 msgstr "Filteren op webhook-ID."
 
-#: src/Api/LogsController.php:571
+#: src/Api/LogsController.php:579
 msgid "Filter by webhook UUID (X-Webhook-Id header value)."
 msgstr "Filteren op webhook-UUID (waarde van X-Webhook-Id-header)."
 
@@ -2523,11 +3019,11 @@ msgstr "Filteren op webhook-UUID (waarde van X-Webhook-Id-header)."
 msgid "Filter from UTC datetime (Y-m-d H:i:s)."
 msgstr "Filteren vanaf UTC-datum/tijd (Y-m-d H:i:s)."
 
-#: src/Api/LogsController.php:555
+#: src/Api/LogsController.php:563
 msgid "Filter logs from this date."
 msgstr "Logboeken filteren vanaf deze datum."
 
-#: src/Api/LogsController.php:559
+#: src/Api/LogsController.php:567
 msgid "Filter logs until this date."
 msgstr "Logboeken filteren tot deze datum."
 
@@ -2538,6 +3034,12 @@ msgstr "Filteren tot UTC-datum/tijd (Y-m-d H:i:s)."
 #: admin/src/views/VaultView.vue
 msgid "Finish moving the key into wp-config.php"
 msgstr "Verplaatsing van de sleutel naar wp-config.php voltooien"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Fire only for this webhook, on top of whatever site-wide rules it inherits."
+msgstr ""
+"Vuur alleen voor deze webhook, bovenop de sitebrede regels die hij "
+"overneemt."
 
 #: admin/src/components/AiStepControls.vue
 msgid ""
@@ -2583,6 +3085,10 @@ msgstr ""
 msgid "Force delete & detach"
 msgstr "Geforceerd verwijderen en loskoppelen"
 
+#: src/Services/Notifications/Channels/TelegramDriver.php:32
+msgid "Forum topic (message_thread_id), optional."
+msgstr "Forumonderwerp (message_thread_id), optioneel."
+
 #: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "Free trial"
 msgstr "Gratis proefperiode"
@@ -2591,6 +3097,11 @@ msgstr "Gratis proefperiode"
 msgid "Free trial — starts with your first prompt"
 msgstr "Gratis proefperiode — begint bij je eerste prompt"
 
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:31
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:66
+msgid "From"
+msgstr "Van"
+
 #: admin/src/views/ActivityView.vue
 msgid "From date"
 msgstr "Vanaf datum"
@@ -2598,6 +3109,10 @@ msgstr "Vanaf datum"
 #: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
 msgid "From date & time"
 msgstr "Vanaf datum en tijd"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:30
+msgid "From name"
+msgstr "Afzendernaam"
 
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Full"
@@ -2636,6 +3151,10 @@ msgstr "GET webhooks, logboeken, wachtrij, status, triggers, schema's"
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Generate a new API token for programmatic access."
 msgstr "Genereer een nieuw API-token voor programmatische toegang."
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:22
+msgid "Generic webhook"
+msgstr "Generieke webhook"
 
 #: admin/src/views/ProView.vue
 msgid "Get Pro"
@@ -2681,6 +3200,19 @@ msgstr "Haal vastgelegde payload + mapping op voor een trigger"
 msgid "Get delivery logs"
 msgstr "Haal bezorglogboeken op"
 
+#: admin/src/views/NotificationsView.vue
+msgid ""
+"Get told when a delivery fails, retries, gives up or comes back — by email, "
+"Slack, Discord, Telegram, Teams, SMS, PagerDuty and more. Rules decide when "
+"and where; channels are the destinations; every message is a template you "
+"can edit or let the AI draft."
+msgstr ""
+"Krijg bericht wanneer een bezorging mislukt, opnieuw probeert, opgeeft of "
+"terugkomt — via e-mail, Slack, Discord, Telegram, Teams, sms, PagerDuty en "
+"meer. Regels bepalen wanneer en waar; kanalen zijn de bestemmingen; elk "
+"bericht is een template die je kunt bewerken of door de AI kunt laten "
+"opstellen."
+
 #: src/Api/PublishBuildController.php:103
 msgid "Give the build a title."
 msgstr "Geef de build een titel."
@@ -2705,6 +3237,10 @@ msgstr "Naar Pro"
 msgid "Go to Queue"
 msgstr "Naar wachtrij"
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:18
+msgid "Google Chat"
+msgstr "Google Chat"
+
 #: admin/src/views/SettingsView.vue
 msgid "Greyed out because this site sets DISALLOW_FILE_EDIT — see the notice above."
 msgstr "Grijs omdat deze site DISALLOW_FILE_EDIT instelt — zie de melding hierboven."
@@ -2723,6 +3259,10 @@ msgid_plural "Group matches example payload: %1$s (based on %2$d rules)"
 msgstr[0] "Groep komt overeen met voorbeeldpayload: %1$s (op basis van %2$d regel)"
 msgstr[1] "Groep komt overeen met voorbeeldpayload: %1$s (op basis van %2$d regels)"
 
+#: src/Services/Notifications/MessageBuilder.php:129
+msgid "HTTP"
+msgstr "HTTP"
+
 #: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue
 msgid "HTTP %s"
 msgstr "HTTP %s"
@@ -2738,6 +3278,10 @@ msgstr "HTTP-methode"
 #: src/Api/WebhookSchema.php:61
 msgid "HTTP method used for delivery."
 msgstr "HTTP-methode gebruikt voor bezorging."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "HTTP response is"
+msgstr "HTTP-respons is"
 
 #: admin/src/components/ui/UpgradeBadge.vue
 msgid "Head to the Pro tab?"
@@ -2774,6 +3318,10 @@ msgstr "Wachtwoord verbergen"
 #: admin/src/views/VaultView.vue
 msgid "Hide secret"
 msgstr "Geheim verbergen"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:35
+msgid "High"
+msgstr "Hoog"
 
 #: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Hint"
@@ -2815,6 +3363,14 @@ msgid ""
 "auth_header."
 msgstr "ID van een kluisreferentie voor autorisatie. Heeft voorrang op auth_header."
 
+#: src/Api/WebhookSchema.php:138
+msgid ""
+"IDs of site-wide notification rules muted for this webhook (inherit mode "
+"only)."
+msgstr ""
+"ID's van sitebrede meldingsregels die voor deze webhook zijn gedempt "
+"(alleen in overnemen-modus)."
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "IF"
 msgstr "ALS"
@@ -2822,6 +3378,10 @@ msgstr "ALS"
 #: admin/src/views/ActivityView.vue
 msgid "IP"
 msgstr "IP"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Ignore site-wide rules entirely."
+msgstr "Negeer sitebrede regels volledig."
 
 #: admin/src/components/ImportDialog.vue admin/src/views/WebhooksList.vue
 msgid "Import"
@@ -2871,6 +3431,33 @@ msgstr "Niet-gemapte velden opnemen"
 msgid "Included"
 msgstr "Inbegrepen"
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:28
+#: src/Services/Notifications/Channels/MattermostDriver.php:35
+#: src/Services/Notifications/Channels/SlackDriver.php:28
+#: src/Services/Notifications/Channels/SlackDriver.php:33
+msgid "Incoming webhook URL"
+msgstr "Inkomende webhook-URL"
+
+#: src/Services/Notifications/Channels/SlackDriver.php:23
+msgid "Incoming webhook URL from a Slack app. Posts a Block Kit card."
+msgstr "Inkomende webhook-URL van een Slack-app. Post een Block Kit-kaart."
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:23
+msgid ""
+"Incoming webhook in the Slack-compatible format. Works with Mattermost, "
+"Rocket.Chat and similar."
+msgstr ""
+"Inkomende webhook in het Slack-compatibele formaat. Werkt met Mattermost, "
+"Rocket.Chat en vergelijkbare diensten."
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Inherit site-wide rules"
+msgstr "Sitebrede regels overnemen"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Insert field"
+msgstr "Veld invoegen"
+
 #: src/Api/AuthHelper.php:52
 #. translators: %s: required scope name
 #, php-format
@@ -2880,6 +3467,11 @@ msgstr "Onvoldoende tokenbereik. Dit eindpunt vereist het bereik “%s” of hog
 #: admin/src/components/BuildPublishFields.vue
 msgid "Integration"
 msgstr "Integratie"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:31
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:44
+msgid "Integration (routing) key"
+msgstr "Integratie- (routing-) sleutel"
 
 #: admin/src/views/ExternalCronView.vue
 msgid "Interval"
@@ -2893,8 +3485,8 @@ msgstr "Ongeldige JSON"
 msgid "Invalid URL format"
 msgstr "Ongeldig URL-formaat"
 
-#: src/Api/CredentialsController.php:261
-#: src/Api/CredentialsController.php:322
+#: src/Api/CredentialsController.php:274
+#: src/Api/CredentialsController.php:335
 msgid "Invalid credential type."
 msgstr "Ongeldig referentietype."
 
@@ -2907,7 +3499,7 @@ msgstr "Ongeldig cron-token."
 msgid "Invalid endpoint URL."
 msgstr "Ongeldige eindpunt-URL."
 
-#: src/Services/Export/BuildSchemaValidator.php:409
+#: src/Services/Export/BuildSchemaValidator.php:420
 #. translators: 1: JSON path, 2: reason
 #, php-format
 msgid "Invalid import file — %1$s %2$s"
@@ -3011,6 +3603,14 @@ msgstr "Laatste uur"
 msgid "Last ping failed:"
 msgstr "Laatste ping mislukt:"
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Last send failed: %s"
+msgstr "Laatste verzending mislukt: %s"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Last sent"
+msgstr "Laatst verzonden"
+
 #: admin/src/views/ExternalCronView.vue
 msgid "Last stats pull: %s"
 msgstr "Laatste statistiekenophaling: %s"
@@ -3019,7 +3619,7 @@ msgstr "Laatste statistiekenophaling: %s"
 msgid "Last successful response (used as preview context)"
 msgstr "Laatste geslaagde respons (gebruikt als voorbeeldcontext)"
 
-#: src/Api/WebhookSchema.php:144
+#: src/Api/WebhookSchema.php:157
 msgid "Last update date."
 msgstr "Datum laatste update."
 
@@ -3034,6 +3634,10 @@ msgstr "Laat een beoordeling achter op WordPress.org"
 #: admin/src/views/VaultView.vue
 msgid "Leave blank to keep current"
 msgstr "Laat leeg om de huidige te behouden"
+
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Leave empty to keep the saved value"
+msgstr "Laat leeg om de opgeslagen waarde te behouden"
 
 #: admin/src/views/SettingsView.vue
 msgid "Let API tokens write Code Glue"
@@ -3090,7 +3694,25 @@ msgstr "Toon beschikbare triggers"
 msgid "List credentials"
 msgstr "Toon referenties"
 
-#: src/Api/WebhookSchema.php:131
+#: src/Abilities/AbilityCatalog.php:227
+msgid "List notification channels"
+msgstr "Meldingskanalen weergeven"
+
+#: src/Abilities/AbilityCatalog.php:235
+msgid "List notification rules"
+msgstr "Meldingsregels weergeven"
+
+#: src/Abilities/AbilityCatalog.php:236
+msgid ""
+"List notification rules: site-wide ones (webhook_id null) or a webhook's "
+"own (pass webhook_id). Each rule = event + filters + channel_ids + optional "
+"template."
+msgstr ""
+"Geef meldingsregels weer: sitebrede (webhook_id null) of die van één "
+"webhook (geef webhook_id mee). Elke regel = event + filters + channel_ids + "
+"optionele template."
+
+#: src/Api/WebhookSchema.php:144
 msgid "List of trigger actions."
 msgstr "Lijst van triggeracties."
 
@@ -3104,6 +3726,21 @@ msgstr ""
 "get_snippet voor de code). Snippets transformeren de payload vóór "
 "verzending (pre) of voeren neveneffecten uit na het antwoord (post) zodra "
 "ze aan een webhook+trigger zijn gekoppeld."
+
+#: src/Abilities/AbilityCatalog.php:228
+msgid ""
+"List the notification channels configured on this site (email, Slack, "
+"Discord, Telegram, Teams, SMS, PagerDuty, …) by id, name and type. Rules "
+"reference channels by id. Channels hold secrets and are created only in the "
+"admin UI (Notifications → Channels) — if none fits, tell the user to add "
+"one there rather than inventing an id."
+msgstr ""
+"Geef de meldingskanalen weer die op deze site zijn geconfigureerd (e-mail, "
+"Slack, Discord, Telegram, Teams, sms, PagerDuty, …) op id, naam en type. "
+"Regels verwijzen naar kanalen op id. Kanalen bevatten geheimen en worden "
+"alleen in de beheerinterface aangemaakt (Meldingen → Kanalen) — past er "
+"geen, zeg de gebruiker dan daar een toe te voegen in plaats van een id te "
+"verzinnen."
 
 #: src/Abilities/AbilityCatalog.php:108
 msgid ""
@@ -3145,7 +3782,7 @@ msgstr "Webhooks laden…"
 msgid "Loading..."
 msgstr "Laden…"
 
-#: admin/src/components/PayloadGlueDrawer.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/NotificationLogTable.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
 msgid "Loading…"
 msgstr "Laden…"
 
@@ -3169,10 +3806,10 @@ msgstr "Logboekdetails"
 msgid "Log Retention"
 msgstr "Logboekbewaring"
 
-#: src/Api/LogsController.php:242
-#: src/Api/LogsController.php:260
-#: src/Api/LogsController.php:316
-#: src/Api/LogsController.php:369
+#: src/Api/LogsController.php:250
+#: src/Api/LogsController.php:268
+#: src/Api/LogsController.php:324
+#: src/Api/LogsController.php:377
 msgid "Log not found."
 msgstr "Logboek niet gevonden."
 
@@ -3188,7 +3825,15 @@ msgstr "Logboeken: %s"
 msgid "Love the plugin?"
 msgstr "Vind je de plug-in goed?"
 
-#: src/Abilities/AbilityCatalog.php:290
+#: src/Services/Notifications/Channels/PushoverDriver.php:33
+msgid "Low"
+msgstr "Laag"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:32
+msgid "Lowest"
+msgstr "Laagst"
+
+#: src/Abilities/AbilityCatalog.php:385
 msgid ""
 "Make a guarded test HTTP call to validate an endpoint before going live. To "
 "probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its "
@@ -3251,6 +3896,10 @@ msgstr "Komt overeen met voorbeeldpayload"
 msgid "Mateusz Skorupa"
 msgstr ""
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:19
+msgid "Mattermost / Rocket.Chat"
+msgstr "Mattermost / Rocket.Chat"
+
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "Max Attempts"
 msgstr "Max. pogingen"
@@ -3279,15 +3928,27 @@ msgstr "Maximale bescherming"
 msgid "Media"
 msgstr "Media"
 
+#: src/Services/Notifications/Channels/DiscordDriver.php:29
+msgid "Mention"
+msgstr "Vermelding"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Message"
+msgstr "Bericht"
+
 #: admin/src/components/LogsTable.vue
 msgid "Method"
 msgstr "Methode"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:20
+msgid "Microsoft Teams"
+msgstr "Microsoft Teams"
 
 #: admin/src/views/VaultView.vue
 msgid "Migrated %1$s · failed %2$s"
 msgstr "Gemigreerd %1$s · mislukt %2$s"
 
-#: src/Abilities/AbilityCatalog.php:243
+#: src/Abilities/AbilityCatalog.php:338
 msgid ""
 "Mint a WordPress Application Password for the CURRENT signed-in admin and "
 "store it as a \"basic\" vault credential named \"WP REST API (internal) — "
@@ -3347,6 +4008,10 @@ msgstr ""
 "Moet %1$sreturn $payload;%2$s — de geretourneerde array vervangt de payload "
 "vóór verzending."
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Muted for this webhook — click to unmute"
+msgstr "Gedempt voor deze webhook — klik om dempen op te heffen"
+
 #: admin/src/components/WebhookForm.vue
 msgid "My Webhook"
 msgstr "Mijn webhook"
@@ -3363,15 +4028,19 @@ msgstr "Mijn eigen sleutels"
 msgid "N/A"
 msgstr "N.v.t."
 
-#: admin/src/components/WebhookForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+#: admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Name"
 msgstr "Naam"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Name (optional)"
+msgstr "Naam (optioneel)"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Name is required"
 msgstr "Naam is verplicht"
 
-#: admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Name is required."
 msgstr "Naam is verplicht."
 
@@ -3382,6 +4051,18 @@ msgstr "Naam van de webhook."
 #: admin/src/views/ProView.vue
 msgid "Need help?"
 msgstr "Hulp nodig?"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:32
+msgid ""
+"Needs a rule on the \"recovered\" or \"success\" event pointing at this "
+"channel."
+msgstr ""
+"Vereist een regel op de gebeurtenis \"recovered\" of \"success\" die naar "
+"dit kanaal wijst."
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Never notify for this webhook."
+msgstr "Nooit melden voor deze webhook."
 
 #: admin/src/components/AiBuildsBar.vue
 msgid "New build"
@@ -3395,9 +4076,25 @@ msgstr "Nieuwe ketennaam"
 msgid "New chain…"
 msgstr "Nieuwe keten…"
 
+#: admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/ChannelsPanel.vue
+msgid "New channel"
+msgstr "Nieuw kanaal"
+
 #: admin/src/views/VaultView.vue
 msgid "New credential"
 msgstr "Nieuwe referentie"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "New rule"
+msgstr "Nieuwe regel"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "New rule for this webhook"
+msgstr "Nieuwe regel voor deze webhook"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "New site-wide rule"
+msgstr "Nieuwe sitebrede regel"
 
 #: admin/src/views/ApiTokensView.vue
 msgid "New token"
@@ -3410,6 +4107,10 @@ msgstr "Nieuwste"
 #: admin/src/views/ActivityView.vue
 msgid "Next"
 msgstr "Volgende"
+
+#: src/Services/Notifications/MessageBuilder.php:138
+msgid "Next attempt"
+msgstr "Volgende poging"
 
 #: admin/src/components/LogsTable.vue
 msgid "Next attempt scheduled for %s"
@@ -3424,6 +4125,14 @@ msgid "No AI provider is configured yet. Set one up to use the AI Builder."
 msgstr ""
 "Er is nog geen AI-provider geconfigureerd. Stel er een in om de AI Builder "
 "te gebruiken."
+
+#: src/Services/Notifications/TemplateDrafter.php:34
+msgid ""
+"No AI provider is connected. Set one up under Build with AI to draft "
+"templates."
+msgstr ""
+"Er is geen AI-provider gekoppeld. Stel er een in onder Bouwen met AI om "
+"templates te laten opstellen."
 
 #: admin/src/views/AiBuilderView.vue
 msgid "No API key needed — %1$s free credits, about %2$s builds."
@@ -3503,6 +4212,12 @@ msgstr ""
 "Geen vastgelegde payload gevonden voor deze trigger. Activeer de trigger "
 "eerst minstens één keer."
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "No captured payload yet — trigger the webhook once to see its fields here."
+msgstr ""
+"Nog geen vastgelegde payload — trigger de webhook één keer om hier de "
+"velden te zien."
+
 #: admin/src/components/WebhookForm.vue
 msgid "No captured payload — trigger the webhook once to preview the resolved URL."
 msgstr ""
@@ -3512,6 +4227,18 @@ msgstr ""
 #: admin/src/components/ExportDialog.vue
 msgid "No chains match your search."
 msgstr "Geen ketens komen overeen met je zoekopdracht."
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "No channels exist yet."
+msgstr "Er bestaan nog geen kanalen."
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "No channels yet"
+msgstr "Nog geen kanalen"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "No channels yet. Add one under Notifications → Channels first."
+msgstr "Nog geen kanalen. Voeg er eerst een toe onder Meldingen → Kanalen."
 
 #: src/Services/Ai/FallbackTransport.php:73
 #: src/Services/Ai/WpAiClientTransport.php:101
@@ -3571,6 +4298,14 @@ msgstr "Geen logboeken gevonden"
 msgid "No matches"
 msgstr "Geen resultaten"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "No matching field."
+msgstr "Geen overeenkomend veld."
+
+#: src/Services/Notifications/NotificationSender.php:65
+msgid "No message stored for this notification."
+msgstr "Geen bericht opgeslagen voor deze melding."
+
 #: admin/src/components/ChainPicker.vue
 msgid ""
 "No other webhooks exist yet — create at least one webhook to use it as a "
@@ -3599,19 +4334,29 @@ msgstr ""
 "welke gebeurtenis af te vuren (bijv. \"publiceer een testbericht\") zodat "
 "de payload wordt vastgelegd — en lees dit dan opnieuw."
 
-#: src/Abilities/TestAbilities.php:192
+#: src/Abilities/TestAbilities.php:229
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr ""
 "Geen payload opgegeven en er bestaat nog geen vastgelegd voorbeeld voor "
 "deze trigger."
 
-#: src/Api/LogsController.php:326
+#: src/Api/LogsController.php:334
 msgid "No queue job found for this log entry."
 msgstr "Geen wachtrijtaak gevonden voor deze logboekvermelding."
 
 #: admin/src/views/QueueView.vue
 msgid "No queued jobs"
 msgstr "Geen taken in wachtrij"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:72
+msgid "No recipient number on this channel."
+msgstr "Geen ontvangernummer op dit kanaal."
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "No rules yet. A rule says when to send, where, and what."
+msgstr ""
+"Nog geen regels. Een regel bepaalt wanneer er wordt verzonden, waarheen en "
+"wat."
 
 #: admin/src/views/VaultView.vue
 msgid "No saved credentials"
@@ -3628,6 +4373,10 @@ msgid ""
 msgstr ""
 "Geen ingelogde gebruiker om een applicatiewachtwoord voor aan te maken — "
 "open de AI Builder terwijl je bent ingelogd als beheerder."
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "No site-wide rules are defined."
+msgstr "Er zijn geen sitebrede regels gedefinieerd."
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "No snippet assigned"
@@ -3655,6 +4404,10 @@ msgstr "Geen triggers geconfigureerd voor deze webhook."
 msgid "No triggers found"
 msgstr "Geen triggers gevonden"
 
+#: src/Services/Notifications/Channels/EmailDriver.php:38
+msgid "No valid recipient address on this channel."
+msgstr "Geen geldig ontvangeradres op dit kanaal."
+
 #: admin/src/views/WebhooksList.vue
 msgid "No webhooks configured yet"
 msgstr "Nog geen webhooks geconfigureerd"
@@ -3671,6 +4424,14 @@ msgstr "Geen webhooks komen overeen met “%s”."
 msgid "No-op"
 msgstr "Geen actie"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "None"
+msgstr "Geen"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:34
+msgid "Normal"
+msgstr "Normaal"
+
 #: admin/src/views/ExternalCronView.vue
 msgid "Not configured"
 msgstr "Niet geconfigureerd"
@@ -3678,6 +4439,10 @@ msgstr "Niet geconfigureerd"
 #: src/Abilities/AbilityErrors.php:17
 msgid "Not found."
 msgstr "Niet gevonden."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Not retryable (4xx, 3xx, config error)"
+msgstr "Niet opnieuw te proberen (4xx, 3xx, configuratiefout)"
 
 #: admin/src/components/LogsTable.vue
 msgid ""
@@ -3687,6 +4452,18 @@ msgstr ""
 "Wordt niet als verzoekbody verzonden voor GET / DELETE. Zonder "
 "geconfigureerde URL-parameters wordt de volledige payload toegevoegd als "
 "%1$s?payload=&lt;json&gt;%2$s."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"Nothing selected = any failure. \"No response\" covers DNS, TLS and "
+"timeouts."
+msgstr ""
+"Niets geselecteerd = elke mislukking. \"Geen respons\" dekt DNS, TLS en "
+"time-outs."
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Nothing sent yet."
+msgstr "Nog niets verzonden."
 
 #: admin/src/components/MarkdownField.vue
 msgid "Nothing to preview yet — switch to Write to add a description."
@@ -3706,11 +4483,31 @@ msgstr ""
 msgid "Nothing was queued"
 msgstr "Er is niets in de wachtrij gezet"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid ""
+"Nothing will be sent for this rule any more. Past notifications stay in the "
+"log."
+msgstr ""
+"Voor deze regel wordt niets meer verzonden. Eerdere meldingen blijven in "
+"het logboek."
+
+#: src/Services/Notifications/DigestFlusher.php:112
+msgid "Notification digest"
+msgstr "Meldingssamenvatting"
+
+#: src/Api/NotificationRulesController.php:332
+msgid "Notification not found."
+msgstr "Melding niet gevonden."
+
+#: admin/src/App.vue admin/src/components/WebhookNotificationsCard.vue admin/src/views/NotificationsView.vue
+msgid "Notifications"
+msgstr "Meldingen"
+
 #: src/Api/LogsController.php:127
 msgid "Number of days to look back."
 msgstr "Aantal dagen om terug te kijken."
 
-#: src/Api/LogsController.php:535
+#: src/Api/LogsController.php:543
 msgid "Number of results per page."
 msgstr "Aantal resultaten per pagina."
 
@@ -3725,6 +4522,10 @@ msgstr "OR"
 #: admin/src/views/ActivityView.vue
 msgid "Object"
 msgstr "Object"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Off"
+msgstr "Uit"
 
 #: admin/src/views/SettingsView.vue
 msgid "Oldest"
@@ -3745,6 +4546,18 @@ msgstr ""
 "de oorspronkelijke payload vóór mapping beschikbaar zijn als "
 "%1$sargs[0]%2$s."
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
+msgid "One \"Name: value\" per line."
+msgstr "Eén \"Naam: waarde\" per regel."
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:32
+msgid "One or more E.164 numbers, separated by commas."
+msgstr "Een of meer E.164-nummers, gescheiden door komma's."
+
+#: src/Services/Notifications/Channels/EmailDriver.php:28
+msgid "One or more addresses, separated by commas."
+msgstr "Een of meer adressen, gescheiden door komma's."
+
 #: admin/src/components/BuildPublishFields.vue
 msgid ""
 "One or two sentences — this is what people read on the listing before they "
@@ -3753,9 +4566,30 @@ msgstr ""
 "Een of twee zinnen — dit lezen mensen in de lijst voordat ze de build "
 "openen."
 
-#: src/Api/LogsController.php:334
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:35
+msgid ""
+"One per line: number=source. Sources: title, short, body, webhook_name, "
+"trigger, event_label, error, site_name, link — or literal text in quotes."
+msgstr ""
+"Eén per regel: nummer=bron. Bronnen: title, short, body, webhook_name, "
+"trigger, event_label, error, site_name, link — of letterlijke tekst tussen "
+"aanhalingstekens."
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "One summary per channel listing everything that happened in the period."
+msgstr "Eén overzicht per kanaal met alles wat er in de periode is gebeurd."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "One-liner (SMS, push)"
+msgstr "Eénregelig (sms, push)"
+
+#: src/Api/LogsController.php:342
 msgid "Only failed log entries can be retried."
 msgstr "Alleen mislukte logboekvermeldingen kunnen opnieuw worden geprobeerd."
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:30
+msgid "Only for protected topics."
+msgstr "Alleen voor beschermde topics."
 
 #: src/Api/QueueController.php:377
 msgid "Only pending or permanently failed jobs can be retried."
@@ -3767,15 +4601,35 @@ msgstr ""
 msgid "Only return enabled webhooks."
 msgstr "Alleen ingeschakelde webhooks retourneren."
 
-#: src/Api/LogsController.php:377
+#: src/Api/LogsController.php:385
 msgid "Only successful or skipped log entries can be replayed."
 msgstr ""
 "Alleen geslaagde of overgeslagen logboekvermeldingen kunnen opnieuw worden "
 "afgespeeld."
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Only this webhook's rules"
+msgstr "Alleen de regels van deze webhook"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Only when"
+msgstr "Alleen wanneer"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Only when it took more than one attempt"
+msgstr "Alleen wanneer er meer dan één poging nodig was"
+
 #: admin/src/App.vue
 msgid "Open Settings"
 msgstr "Instellingen openen"
+
+#: src/Services/Notifications/MessageBuilder.php:56
+msgid "Open delivery log"
+msgstr "Bezorglogboek openen"
+
+#: src/Services/Notifications/DigestFlusher.php:157
+msgid "Open delivery logs"
+msgstr "Bezorglogboeken openen"
 
 #: admin/src/components/BuiltWebhookActions.vue
 msgid "Open webhook"
@@ -3797,13 +4651,55 @@ msgstr ""
 "Operationeel + webhooks, schema's en wachtrijtaken "
 "maken/bijwerken/verwijderen"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Ops Slack, On-call SMS…"
+msgstr "Ops-Slack, oproep-sms…"
+
 #: src/Api/WebhookSchema.php:39
 msgid "Optional markdown description documenting what this webhook does."
 msgstr "Optionele omschrijving in Markdown die vastlegt wat deze webhook doet."
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:29
+msgid "Optional override, e.g. town-square."
+msgstr "Optionele overschrijving, bijv. town-square."
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:29
+msgid "Optional, e.g. @here or <@&roleId>, prepended to the message."
+msgstr "Optioneel, bijv. @here of <@&roleId>, vóór het bericht geplaatst."
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:32
+msgid ""
+"Optional. Pick a Credentials Vault entry; its header is added to every "
+"request."
+msgstr ""
+"Optioneel. Kies een item uit de Referentiekluis; de header ervan wordt aan "
+"elk verzoek toegevoegd."
+
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:28
+msgid ""
+"Optional. Same key = same thread; use {{ webhook.id }} to thread per "
+"webhook."
+msgstr ""
+"Optioneel. Dezelfde sleutel = dezelfde thread; gebruik {{ webhook.id }} om "
+"per webhook een thread te maken."
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
+msgid ""
+"Optional. When set, the body is signed as HMAC-SHA256 in the "
+"X-FSWA-Signature header."
+msgstr ""
+"Optioneel. Indien ingesteld wordt de body ondertekend als HMAC-SHA256 in de "
+"header X-FSWA-Signature."
+
 #: admin/src/views/VaultView.vue
 msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
 msgstr "Optioneel: versterken met %1$sFSWA_SECRET_KEY%2$s"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Optional: mention the order number and customer email, keep it short…"
+msgstr ""
+"Optioneel: noem het ordernummer en het e-mailadres van de klant, houd het "
+"kort…"
 
 #: src/Api/TriggersController.php:148
 msgid "Options"
@@ -3828,6 +4724,10 @@ msgstr "Originele payload"
 #: src/Api/TriggersController.php:150
 msgid "Other"
 msgstr "Overig"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Out of attempts (retries used up)"
+msgstr "Pogingen op (nieuwe pogingen verbruikt)"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Output (stdout)"
@@ -3861,6 +4761,20 @@ msgstr ""
 "PHP draait na geslaagde verzending; %1$s$responseBody%2$s en "
 "%1$s$originalPayload%2$s beschikbaar"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:26
+msgid ""
+"POSTs the notification as JSON to any URL — Zapier, Make, n8n, your own "
+"service."
+msgstr "POST de melding als JSON naar elke URL — Zapier, Make, n8n, je eigen dienst."
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Page %1$d of %2$d"
+msgstr "Pagina %1$d van %2$d"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Page on-call when HubSpot dies"
+msgstr "Oproep naar de dienstdoende als HubSpot uitvalt"
+
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Page reload is disabled on WordPress Playground — the menu will update on "
@@ -3868,6 +4782,10 @@ msgid ""
 msgstr ""
 "Pagina opnieuw laden is uitgeschakeld op WordPress Playground — het menu "
 "wordt bijgewerkt bij de volgende klik op een WP-menu-item."
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:22
+msgid "PagerDuty"
+msgstr "PagerDuty"
 
 #: src/Api/TriggersController.php:143
 msgid "Pages"
@@ -3877,7 +4795,7 @@ msgstr "Pagina's"
 msgid "Param name"
 msgstr "Parameternaam"
 
-#: src/Api/LogsController.php:289
+#: src/Api/LogsController.php:297
 msgid "Parameter older_than_days is required."
 msgstr "Parameter older_than_days is verplicht."
 
@@ -3937,7 +4855,7 @@ msgstr "Payload-mapping"
 msgid "Payload mapping"
 msgstr "Payload-mapping"
 
-#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+#: admin/src/components/HealthStatusBar.vue admin/src/components/notifications/NotificationLogTable.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
 msgid "Pending"
 msgstr "In behandeling"
 
@@ -3961,7 +4879,7 @@ msgstr ""
 "Verwijder een Code Glue-snippet permanent. Vereist bevestiging. Webhooks "
 "die ernaar verwijzen vallen terug op geen snippet."
 
-#: src/Abilities/AbilityCatalog.php:347
+#: src/Abilities/AbilityCatalog.php:442
 msgid ""
 "Permanently delete a webhook and its triggers / mapping. Requires "
 "confirmation."
@@ -3969,13 +4887,47 @@ msgstr ""
 "Verwijder een webhook en zijn triggers/mapping permanent. Vereist "
 "bevestiging."
 
+#: src/Services/Notifications/TemplateContext.php:119
+msgid "Permanently failed"
+msgstr "Permanent mislukt"
+
+#: src/Services/Notifications/TemplateContext.php:156
+msgid "Permanently failed (not retryable)"
+msgstr "Permanent mislukt (niet opnieuw te proberen)"
+
+#: src/Services/Notifications/TemplateContext.php:157
+msgid "Permanently failed (out of attempts)"
+msgstr "Permanent mislukt (pogingen op)"
+
+#: src/Services/Notifications/RuleInput.php:59 admin/src/components/notifications/RuleEditor.vue
+msgid "Pick at least one channel."
+msgstr "Kies minstens één kanaal."
+
 #: admin/src/components/ui/DateTimePicker.vue
 msgid "Pick date & time"
 msgstr "Kies datum en tijd"
 
+#: src/Services/Notifications/Channels/NtfyDriver.php:29
+msgid "Pick something hard to guess; anyone who knows the topic can subscribe."
+msgstr ""
+"Kies iets dat moeilijk te raden is; iedereen die het topic kent kan zich "
+"abonneren."
+
 #: admin/src/components/BuildPublishFields.vue
 msgid "Pick the one that fits best — a build is listed in a single collection."
 msgstr "Kies wat het beste past — een build staat in één collectie."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid ""
+"Placeholders: {{ webhook.name }}, {{ delivery.error_message | truncate:120 "
+"}}, {{ payload.order.id }}, {{ args.1.email }}. Modifiers: upper, lower, "
+"truncate:N, json, default:'…', date:'Y-m-d H:i', number:N, money, count, "
+"join:', '."
+msgstr ""
+"Placeholders: {{ webhook.name }}, {{ delivery.error_message | truncate:120 "
+"}}, {{ payload.order.id }}, {{ args.1.email }}. Modifiers: upper, lower, "
+"truncate:N, json, default:'…', date:'Y-m-d H:i', number:N, money, count, "
+"join:', '."
 
 #: admin/src/views/SettingsView.vue
 msgid "Plugin Info"
@@ -3997,9 +4949,19 @@ msgstr "Plug-in-wachtrijeindpunt"
 msgid "Plugins"
 msgstr "Plug-ins"
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Plus any rules added below. Mute individual site-wide rules here."
+msgstr ""
+"Plus alle regels die hieronder zijn toegevoegd. Demp hier afzonderlijke "
+"sitebrede regels."
+
 #: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
 msgid "Post Glue"
 msgstr "Glue na verzending"
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:30
+msgid "Post as"
+msgstr "Posten als"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Post-dispatch"
@@ -4041,7 +5003,7 @@ msgstr ""
 "Voorbeeld van Code Glue vóór verzending is actief. Sla het op of verwerp "
 "het voordat je Mapping en voorwaarden opslaat."
 
-#: admin/src/components/MarkdownField.vue
+#: admin/src/components/MarkdownField.vue admin/src/components/notifications/TemplateEditor.vue
 msgid "Preview"
 msgstr "Voorbeeld"
 
@@ -4060,6 +5022,10 @@ msgstr "Voorbeeld mislukt"
 #: admin/src/views/ActivityView.vue
 msgid "Previous"
 msgstr "Vorige"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:30
+msgid "Priority"
+msgstr "Prioriteit"
 
 #: admin/src/views/ProView.vue
 msgid "Priority support"
@@ -4081,7 +5047,7 @@ msgstr "Pro-plug-in geïnstalleerd"
 msgid "Pro plugin not found."
 msgstr "Pro-plug-in niet gevonden."
 
-#: src/Abilities/AbilityCatalog.php:289
+#: src/Abilities/AbilityCatalog.php:384
 msgid "Probe a target endpoint"
 msgstr "Test een doeleindpunt"
 
@@ -4166,6 +5132,26 @@ msgstr "Publiceren mislukt."
 msgid "Publishing…"
 msgstr "Bezig met publiceren…"
 
+#: src/Services/Notifications/Channels/PushoverDriver.php:22
+msgid ""
+"Push notifications to your phone. Needs an application token and your user "
+"key."
+msgstr ""
+"Pushmeldingen naar je telefoon. Vereist een applicatietoken en je "
+"gebruikerssleutel."
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:23
+msgid ""
+"Push to a topic on ntfy.sh or your own ntfy server. No account needed for "
+"public topics."
+msgstr ""
+"Push naar een topic op ntfy.sh of je eigen ntfy-server. Voor openbare "
+"topics is geen account nodig."
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:18
+msgid "Pushover"
+msgstr "Pushover"
+
 #: admin/src/components/LogsTable.vue
 msgid "Query Parameters"
 msgstr "Queryparameters"
@@ -4215,6 +5201,10 @@ msgstr ""
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Queuing…"
 msgstr "In wachtrij plaatsen…"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Quiet time per webhook"
+msgstr "Stiltetijd per webhook"
 
 #: admin/src/views/VaultView.vue
 msgid "Raw value for any header — escape hatch"
@@ -4282,6 +5272,14 @@ msgstr "Bezig met lezen…"
 msgid "Ready to send some data?"
 msgstr "Klaar om gegevens te verzenden?"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Reason"
+msgstr "Reden"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:28
+msgid "Recipients"
+msgstr "Ontvangers"
+
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Records the exact prompts and raw responses exchanged with the AI model to "
@@ -4295,11 +5293,15 @@ msgstr ""
 "ouder dan 30 dagen worden automatisch opgeruimd. Zet dit uit als je het log "
 "liever niet bewaart."
 
+#: src/Services/Notifications/TemplateContext.php:116
+msgid "Recovered"
+msgstr "Hersteld"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Redirect"
 msgstr "Omleiding"
 
-#: src/Abilities/AbilityCatalog.php:228
+#: src/Abilities/AbilityCatalog.php:323
 msgid ""
 "Reference a stored vault credential from a webhook by id (the secret is "
 "injected at dispatch time and never exposed)."
@@ -4347,6 +5349,16 @@ msgstr "Deze provider verwijderen en de opgeslagen sleutel wissen?"
 msgid "Rename chain"
 msgstr "Keten hernoemen"
 
+#: src/Abilities/AbilityCatalog.php:305
+msgid ""
+"Render a rule against the webhook's captured example (or a real delivery "
+"log via log_id) and SEND it to every channel of the rule right now. "
+"Requires confirmation because a real message goes out."
+msgstr ""
+"Render een regel op basis van het vastgelegde voorbeeld van de webhook (of "
+"een echt bezorglogboek via log_id) en VERZEND hem nu naar elk kanaal van de "
+"regel. Vereist bevestiging omdat er een echt bericht uitgaat."
+
 #: admin/src/views/ProView.vue
 msgid "Renews / expires"
 msgstr "Verlengt / verloopt"
@@ -4384,6 +5396,10 @@ msgstr "Verzoekpayload"
 #: admin/src/views/QueueView.vue
 msgid "Reset and retry"
 msgstr "Resetten en opnieuw proberen"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:32
+msgid "Resolve the incident when the webhook succeeds again"
+msgstr "Los het incident op wanneer de webhook weer slaagt"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Response"
@@ -4432,6 +5448,10 @@ msgstr "Probe opnieuw"
 #: admin/src/views/LogsList.vue
 msgid "Retry queued"
 msgstr "Nieuwe poging in de wachtrij gezet"
+
+#: src/Services/Notifications/TemplateContext.php:118
+msgid "Retry scheduled"
+msgstr "Nieuwe poging gepland"
 
 #: admin/src/views/SettingsView.vue
 msgid "Retry settings saved"
@@ -4519,6 +5539,26 @@ msgstr "Token roteren: %s"
 msgid "Rotating…"
 msgstr "Roteren…"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Rule"
+msgstr "Regel"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Rule enabled"
+msgstr "Regel ingeschakeld"
+
+#: src/Api/NotificationRulesController.php:424
+msgid "Rule not found."
+msgstr "Regel niet gevonden."
+
+#: admin/src/views/NotificationsView.vue
+msgid "Rules"
+msgstr "Regels"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Rules for this webhook"
+msgstr "Regels voor deze webhook"
+
 #: admin/src/views/LogsList.vue
 msgid "Run %d now"
 msgstr "%d nu uitvoeren"
@@ -4561,9 +5601,21 @@ msgstr ""
 msgid "Runs through the WP Webhooks AI service — no API keys needed."
 msgstr "Loopt via de WP Webhooks AI-dienst — geen API-sleutels nodig."
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "SMS"
+msgstr "Sms"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:20
+msgid "SMS (Twilio)"
+msgstr "Sms (Twilio)"
+
 #: admin/src/views/SettingsView.vue
 msgid "Same delay every retry: base seconds"
 msgstr "Zelfde vertraging bij elke poging: basis seconden"
+
+#: src/Services/Notifications/TemplateContext.php:89
+msgid "Sample webhook"
+msgstr "Voorbeeldwebhook"
 
 #: admin/src/components/ExternalCronChart.vue
 msgid "Samples"
@@ -4601,7 +5653,7 @@ msgstr "Instellingen voor opnieuw proberen opslaan"
 msgid "Save Settings"
 msgstr "Instellingen opslaan"
 
-#: admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue
 msgid "Save changes"
 msgstr "Wijzigingen opslaan"
 
@@ -4612,6 +5664,14 @@ msgstr "Referentie opslaan in kluis"
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Save failed"
 msgstr "Opslaan mislukt"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Save rule"
+msgstr "Regel opslaan"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Save the webhook first to add rules that apply to it alone."
+msgstr "Sla de webhook eerst op om regels toe te voegen die alleen voor deze gelden."
 
 #: admin/src/components/WebhookForm.vue
 msgid "Save to vault"
@@ -4625,7 +5685,7 @@ msgstr "Sla de webhook eerst op"
 msgid "Saved credential"
 msgstr "Opgeslagen referentie"
 
-#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/RuleEditor.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Saving…"
 msgstr "Opslaan…"
 
@@ -4653,7 +5713,7 @@ msgstr "Ketens zoeken…"
 msgid "Search credentials…"
 msgstr "Referenties zoeken…"
 
-#: admin/src/components/FieldSelector.vue
+#: admin/src/components/FieldSelector.vue admin/src/components/notifications/TemplateEditor.vue
 msgid "Search fields…"
 msgstr "Velden zoeken…"
 
@@ -4733,7 +5793,7 @@ msgstr "Dit veld selecteren"
 msgid "Select trigger"
 msgstr "Trigger selecteren"
 
-#: src/Abilities/AbilityCatalog.php:311
+#: src/Abilities/AbilityCatalog.php:406
 msgid ""
 "Send a synchronous test delivery for a webhook using a provided or captured "
 "payload, and return the HTTP result so the agent can verify the integration "
@@ -4759,9 +5819,49 @@ msgstr ""
 "enable_webhook komt, en beschouw een stap nooit als klaar alleen omdat je "
 "hem hebt voorgesteld."
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Send a test message"
+msgstr "Een testbericht verzenden"
+
+#: src/Abilities/AbilityCatalog.php:304
+msgid "Send a test notification"
+msgstr "Een testmelding verzenden"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Send a test now"
+msgstr "Nu een test verzenden"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Send again"
+msgstr "Opnieuw verzenden"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:31
+msgid "Send as HTML"
+msgstr "Als HTML verzenden"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Send each message right away"
+msgstr "Elk bericht meteen verzenden"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:33
+msgid "Send silently"
+msgstr "Stil verzenden"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Send to"
+msgstr "Verzenden naar"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Sending…"
 msgstr "Verzenden…"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:23
+msgid "Sends through wp_mail(), so your SMTP plugin applies."
+msgstr "Verzendt via wp_mail(), dus je SMTP-plugin is van toepassing."
+
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/views/NotificationsView.vue
+msgid "Sent"
+msgstr "Verzonden"
 
 #: admin/src/views/VaultView.vue
 msgid "Sent as Authorization: Bearer <token>"
@@ -4782,6 +5882,10 @@ msgstr "Namens jou verzonden — de run is hervat"
 #: admin/src/components/HealthStatusBar.vue
 msgid "Sent today"
 msgstr "Vandaag verzonden"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:28
+msgid "Server"
+msgstr "Server"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Server Error"
@@ -4897,6 +6001,10 @@ msgstr "Instellingen"
 msgid "Settings saved successfully"
 msgstr "Instellingen succesvol opgeslagen"
 
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:33
+msgid "Severity"
+msgstr "Ernst"
+
 #: admin/src/components/BuiltWebhookActions.vue admin/src/components/ShareBuildDialog.vue
 msgid "Share this build"
 msgstr "Deze build delen"
@@ -4957,6 +6065,14 @@ msgstr "“%s” in de lijst tonen"
 msgid "Showing %1$d to %2$d of %3$d"
 msgstr "%1$d tot %2$d van %3$d weergegeven"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
+msgid "Signing secret"
+msgstr "Ondertekeningsgeheim"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Site-wide rules"
+msgstr "Sitebrede regels"
+
 #: admin/src/views/ProView.vue
 msgid "Sites allowed"
 msgstr "Toegestane sites"
@@ -4977,13 +6093,17 @@ msgstr "Overslaan"
 msgid "Skip the duplicates"
 msgstr "Duplicaten overslaan"
 
-#: admin/src/components/AiStepPanel.vue admin/src/views/LogsList.vue
+#: src/Services/Notifications/TemplateContext.php:120 admin/src/components/AiStepPanel.vue admin/src/views/LogsList.vue
 msgid "Skipped"
 msgstr "Overgeslagen"
 
 #: admin/src/components/LogsTable.vue
 msgid "Skipped:"
 msgstr "Overgeslagen:"
+
+#: src/Services/Notifications/Channels/SlackDriver.php:19
+msgid "Slack"
+msgstr "Slack"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Snippet Name"
@@ -5059,9 +6179,19 @@ msgstr "Bronpad (bijv. args.0.user_id)"
 msgid "Source webhook does not exist."
 msgstr "Bron-webhook bestaat niet."
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:22
+msgid "Space webhook URL (Space → Apps & integrations → Webhooks)."
+msgstr "Webhook-URL van de ruimte (Ruimte → Apps en integraties → Webhooks)."
+
 #: admin/src/views/AiBuilderView.vue
 msgid "Start a new build, then describe what you want to integrate."
 msgstr "Start een nieuwe build en beschrijf vervolgens wat je wilt integreren."
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"Start with your email address, or paste a Slack, Discord or Teams webhook "
+"URL."
+msgstr "Begin met je e-mailadres, of plak een Slack-, Discord- of Teams-webhook-URL."
 
 #: admin/src/views/ProView.vue
 msgid "Starter"
@@ -5071,7 +6201,7 @@ msgstr "Starter"
 msgid "Stats unavailable"
 msgstr "Statistieken niet beschikbaar"
 
-#: admin/src/components/LogsTable.vue
+#: admin/src/components/LogsTable.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Status"
 msgstr "Status"
 
@@ -5092,6 +6222,14 @@ msgstr ""
 "Sla herbruikbare authenticatiegeheimen één keer op en verwijs er vervolgens "
 "naar vanuit je webhooks. Geheimen worden versleuteld opgeslagen en worden "
 "na het opslaan nooit meer getoond — zelfs niet aan jou."
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Subject"
+msgstr "Onderwerp"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Subject (email)"
+msgstr "Onderwerp (e-mail)"
 
 #: admin/src/components/ExternalCronChart.vue admin/src/components/HealthStatusBar.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
 msgid "Success"
@@ -5165,7 +6303,27 @@ msgstr "Doel-webhook bestaat niet."
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
+#: src/Services/Notifications/Channels/TelegramDriver.php:21
+msgid "Telegram"
+msgstr "Telegram"
+
+#: src/Abilities/WriteAbilities.php:283
+#. translators: %s: lint problems
+#, php-format
+msgid ""
+"Template rejected — %s. Use only roots "
+"webhook/event/delivery/site/payload/original/args and paths from "
+"get_trigger_schema."
+msgstr ""
+"Template geweigerd — %s. Gebruik alleen de roots "
+"webhook/event/delivery/site/payload/original/args en paden uit "
+"get_trigger_schema."
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:35
+msgid "Template variables"
+msgstr "Templatevariabelen"
+
+#: src/Services/Notifications/MessageBuilder.php:90 admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
 msgid "Test"
 msgstr "Testen"
 
@@ -5177,15 +6335,23 @@ msgstr "Webhook testen"
 msgid "Test failed."
 msgstr "Test mislukt."
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Test message sent."
+msgstr "Testbericht verzonden."
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Test queued — it will run on the next cron cycle."
 msgstr "Test in wachtrij geplaatst — deze draait bij de volgende cron-cyclus."
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Test sent to every channel."
+msgstr "Test naar elk kanaal verzonden."
 
 #: admin/src/views/ProView.vue
 msgid "Test webhook delivery on demand"
 msgstr "Test webhook-bezorging op aanvraag"
 
-#: src/Abilities/AbilityCatalog.php:310
+#: src/Abilities/AbilityCatalog.php:405
 msgid "Test-dispatch a webhook"
 msgstr "Webhook testverzenden"
 
@@ -5212,7 +6378,15 @@ msgstr ""
 "heeft je code niets gematcht en niets gedaan — repareer dat vóór het "
 "koppelen. Vertoon altijd eerst voor, dan koppelen."
 
-#: src/Abilities/TestAbilities.php:79
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:24
+msgid ""
+"Text messages through your Twilio account. Sends the one-line \"short\" "
+"text of the template."
+msgstr ""
+"Sms-berichten via je Twilio-account. Verzendt de éénregelige "
+"\"short\"-tekst van de template."
+
+#: src/Abilities/TestAbilities.php:116
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "Die URL is niet toegestaan (privé, gereserveerde of ongeldige host)."
 
@@ -5229,7 +6403,7 @@ msgstr ""
 "meeste integraties hebben er twee of drie nodig om te plannen, bouwen en "
 "testen."
 
-#: src/Abilities/WriteAbilities.php:229
+#: src/Abilities/WriteAbilities.php:330
 msgid "That link would create a cycle across an existing chain."
 msgstr "Die schakel zou een cyclus in een bestaande keten veroorzaken."
 
@@ -5297,6 +6471,14 @@ msgstr ""
 "hieronder komt uit de documentatie van de leverancier, niet uit het "
 "geheugen."
 
+#: src/Services/Notifications/TemplateDrafter.php:52
+msgid ""
+"The AI reply was not a usable template. Try again or adjust the "
+"instructions."
+msgstr ""
+"Het AI-antwoord was geen bruikbare template. Probeer het opnieuw of pas de "
+"instructies aan."
+
 #: src/Services/Ai/HostedTrialTransport.php:123
 msgid "The AI returned no text."
 msgstr "De AI gaf geen tekst terug."
@@ -5343,7 +6525,7 @@ msgstr ""
 "berekenen. De exacte rol hangt af van de strategie: vermenigvuldiger voor "
 "exponentieel, interval voor lineair, constante voor vast."
 
-#: src/Services/Export/BuildImporter.php:254
+#: src/Services/Export/BuildImporter.php:319
 #. translators: %s: chain name.
 #, php-format
 msgid "The chain \"%s\" could not be created."
@@ -5357,7 +6539,15 @@ msgstr ""
 "De keten en al haar koppelingen worden verwijderd. Lid-webhooks blijven "
 "behouden, maar verliezen hun ketenkoppelingstriggers."
 
-#: src/Abilities/WriteAbilities.php:350
+#: src/Services/Notifications/NotificationSender.php:127
+msgid ""
+"The channel secrets could not be decrypted. Re-enter them in Notifications "
+"→ Channels."
+msgstr ""
+"De kanaalgeheimen konden niet worden ontsleuteld. Voer ze opnieuw in onder "
+"Meldingen → Kanalen."
+
+#: src/Abilities/WriteAbilities.php:451
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -5372,6 +6562,14 @@ msgstr ""
 #: src/Services/Ai/OpenAiTransport.php:129
 msgid "The configured AI provider key was not found in the vault."
 msgstr "De geconfigureerde AI-providersleutel is niet gevonden in de kluis."
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"The delivery gave up: out of attempts, or a non-retryable error such as a "
+"4xx."
+msgstr ""
+"De bezorging heeft opgegeven: pogingen op, of een niet opnieuw te proberen "
+"fout zoals een 4xx."
 
 #: admin/src/views/LogsList.vue
 msgid ""
@@ -5492,6 +6690,18 @@ msgstr ""
 msgid "The library already has a build like this one."
 msgstr "De bibliotheek heeft al een build zoals deze."
 
+#: src/Services/Export/BuildImporter.php:242
+#. translators: 1: rule name or event, 2: webhook name
+#, php-format
+msgid ""
+"The notification rule \"%1$s\" on \"%2$s\" was imported switched off: none "
+"of its channels exist on this site. Pick a channel in the webhook's "
+"Notifications section and enable it."
+msgstr ""
+"De meldingsregel \"%1$s\" op \"%2$s\" is uitgeschakeld geïmporteerd: geen "
+"van de kanalen bestaat op deze site. Kies een kanaal in de sectie Meldingen "
+"van de webhook en schakel de regel in."
+
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
 "The page appears at this address once the website finishes rebuilding — it "
@@ -5528,6 +6738,10 @@ msgstr "De publicatiedienst heeft deze build geweigerd."
 msgid "The publishing service returned an unexpected error (HTTP %d)."
 msgstr "De publicatiedienst gaf een onverwachte fout terug (HTTP %d)."
 
+#: src/Abilities/WriteAbilities.php:211
+msgid "The rule could not be saved."
+msgstr "De regel kon niet worden opgeslagen."
+
 #: admin/src/components/WebhookForm.vue
 msgid ""
 "The secret is resolved securely at delivery time and never exposed. Manage "
@@ -5552,11 +6766,23 @@ msgstr ""
 "De proefperiodedienst reageert op dit moment niet. Probeer het over een "
 "paar minuten opnieuw."
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:60
+msgid "The vault credential could not be decrypted."
+msgstr "De kluisreferentie kon niet worden ontsleuteld."
+
 #: admin/src/views/AiBuilderView.vue
 msgid "The verification challenge could not be completed. Please try again."
 msgstr "De verificatie-uitdaging kon niet worden voltooid. Probeer het opnieuw."
 
-#: src/Abilities/TestAbilities.php:167
+#: src/Services/Notifications/Channels/WebhookDriver.php:44
+msgid "The webhook URL is not valid."
+msgstr "De webhook-URL is ongeldig."
+
+#: admin/src/composables/useNotifications.js
+msgid "The webhook did not run because its conditions were not met."
+msgstr "De webhook is niet uitgevoerd omdat aan de voorwaarden niet was voldaan."
+
+#: src/Abilities/TestAbilities.php:204
 msgid "The webhook has no triggers; provide one."
 msgstr "De webhook heeft geen triggers; geef er een op."
 
@@ -5653,7 +6879,31 @@ msgstr ""
 msgid "This build needs authorization credentials"
 msgstr "Deze build heeft autorisatiereferenties nodig"
 
-#: src/Api/CredentialsController.php:379
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"This channel is used by %d rule. Deleting it removes the channel from that "
+"rule."
+msgid_plural ""
+"This channel is used by %d rules. Deleting it removes the channel from "
+"those rules."
+msgstr[0] ""
+"Dit kanaal wordt gebruikt door %d regel(s). Verwijderen haalt het kanaal "
+"uit die regel(s)."
+
+#: src/Api/NotificationChannelsController.php:239
+#. translators: %d: number of rules
+#, php-format
+msgid ""
+"This channel is used by %d rule. Remove it from the rule first, or pass "
+"force=true."
+msgid_plural ""
+"This channel is used by %d rules. Remove it from the rules first, or pass "
+"force=true."
+msgstr[0] ""
+"Dit kanaal wordt gebruikt door %d regel(s). Haal het eerst uit de regel, of "
+"geef force=true mee."
+
+#: src/Api/CredentialsController.php:392
 #. translators: %d: number of webhooks using this credential
 #, php-format
 msgid "This credential is used by %d webhook. Detach it or delete with force."
@@ -5664,6 +6914,10 @@ msgstr[0] ""
 msgstr[1] ""
 "Deze referentie wordt gebruikt door %d webhooks. Koppel deze los of "
 "verwijder geforceerd."
+
+#: src/Api/NotificationRulesController.php:335
+msgid "This entry has no stored message to resend."
+msgstr "Deze vermelding heeft geen opgeslagen bericht om opnieuw te verzenden."
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid ""
@@ -5741,7 +6995,7 @@ msgstr ""
 "Dit verwijdert het gesprek en de buildgeschiedenis. Het verwijdert geen "
 "webhooks die erdoor zijn gemaakt."
 
-#: src/Abilities/AbilityCatalog.php:315
+#: src/Abilities/AbilityCatalog.php:410
 msgid ""
 "This sends a REAL delivery to the endpoint right now — it is not a dry run. "
 "If the webhook targets this site’s own REST API (e.g. wp-json/wp/v2/users) "
@@ -5753,6 +7007,14 @@ msgstr ""
 "(bijv. wp-json/wp/v2/users), kan het daadwerkelijk gegevens aanmaken of "
 "wijzigen, zoals het aanmaken van een WordPress-gebruiker. Bevestig om echt "
 "te versturen."
+
+#: src/Abilities/AbilityCatalog.php:309
+msgid ""
+"This sends a REAL message to every channel on the rule (email, Slack, SMS, "
+"…). Confirm to send it."
+msgstr ""
+"Dit verzendt een ECHT bericht naar elk kanaal van de regel (e-mail, Slack, "
+"sms, …). Bevestig om te verzenden."
 
 #: src/Services/GluePermissions.php:189
 msgid ""
@@ -5809,7 +7071,7 @@ msgstr ""
 "kluis of maak een nieuwe — het geheim blijft in de kluis en wordt pas bij "
 "verzending geïnjecteerd."
 
-#: src/Abilities/TestAbilities.php:275
+#: src/Abilities/TestAbilities.php:312
 #. translators: %s: plugin slug and version the reference payload was captured on, e.g. "contact-form-7 6.1.7".
 #, php-format
 msgid ""
@@ -5832,7 +7094,7 @@ msgstr ""
 "Deze test stuurde onze referentiepayload, geen gegevens van deze site — hij "
 "bewijst dat het endpoint de vorm accepteert, niet de waarden."
 
-#: src/Abilities/TestAbilities.php:272
+#: src/Abilities/TestAbilities.php:309
 msgid ""
 "This test sent our reference payload, not data from this site: a 2xx proves "
 "the endpoint accepts the shape the mapping produces, not that the field "
@@ -5945,6 +7207,14 @@ msgstr ""
 "Hiermee wordt de licentie van deze site verwijderd en komt een plek vrij. "
 "Je kunt op elk moment opnieuw activeren."
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:28
+msgid "Thread key"
+msgstr "Threadsleutel"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Throttled"
+msgstr "Beperkt"
+
 #: admin/src/components/ui/DateTimePicker.vue
 msgid "Time"
 msgstr "Tijd"
@@ -5952,6 +7222,14 @@ msgstr "Tijd"
 #: admin/src/views/ActivityView.vue
 msgid "Timestamp"
 msgstr "Tijdstempel"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Title (chat cards, push)"
+msgstr "Titel (chatkaarten, push)"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:32 admin/src/components/notifications/ChannelsPanel.vue
+msgid "To"
+msgstr "Aan"
 
 #: admin/src/views/ActivityView.vue
 msgid "To date"
@@ -6004,7 +7282,7 @@ msgstr ""
 "Te veel builds gepubliceerd vanaf deze licentie — wacht even en probeer het "
 "opnieuw."
 
-#: src/Abilities/TestAbilities.php:93
+#: src/Abilities/TestAbilities.php:130
 msgid "Too many probe calls — try again in a minute."
 msgstr "Te veel testaanroepen — probeer het over een minuut opnieuw."
 
@@ -6013,6 +7291,14 @@ msgid "Too many trial requests from this network. Please try again in an hour."
 msgstr ""
 "Te veel proefperiodeverzoeken vanaf dit netwerk. Probeer het over een uur "
 "opnieuw."
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:29 src/Services/Notifications/Channels/NtfyDriver.php:35 admin/src/components/notifications/ChannelsPanel.vue
+msgid "Topic"
+msgstr "Topic"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:32
+msgid "Topic ID"
+msgstr "Topic-ID"
 
 #: admin/src/views/QueueView.vue
 msgid "Total"
@@ -6067,9 +7353,13 @@ msgstr "Getransformeerd"
 msgid "Transformed Payload (Sent)"
 msgstr "Getransformeerde payload (verzonden)"
 
-#: admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
+#: src/Services/Notifications/MessageBuilder.php:119 admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
 msgid "Trigger"
 msgstr "Trigger"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Trigger matches"
+msgstr "Trigger komt overeen met"
 
 #: src/Api/WebhooksController.php:120
 msgid "Trigger name to use for the test."
@@ -6104,9 +7394,13 @@ msgstr "Trigger:"
 msgid "Triggers"
 msgstr "Triggers"
 
-#: admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue
 msgid "Type"
 msgstr "Type"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:31 src/Services/Notifications/Channels/WebhookDriver.php:39 admin/src/components/notifications/ChannelsPanel.vue
+msgid "URL"
+msgstr "URL"
 
 #: admin/src/components/WebhookForm.vue
 msgid "URL Query Parameters"
@@ -6154,7 +7448,34 @@ msgstr "Onbekende webhook"
 msgid "Unknown ability: %s"
 msgstr "Onbekende vaardigheid: %s"
 
-#: src/Abilities/WriteAbilities.php:340
+#: src/Api/NotificationRulesController.php:353
+#. translators: %s: comma-separated channel IDs
+#, php-format
+msgid "Unknown channel id(s): %s"
+msgstr "Onbekend(e) kanaal-id('s): %s"
+
+#: src/Abilities/WriteAbilities.php:252
+#. translators: %s: comma-separated ids
+#, php-format
+msgid ""
+"Unknown channel id(s): %s. Call list_notification_channels for the real "
+"ids; channels are created in the admin UI."
+msgstr ""
+"Onbekend(e) kanaal-id('s): %s. Roep list_notification_channels aan voor de "
+"echte id's; kanalen worden in de beheerinterface aangemaakt."
+
+#: src/Services/Notifications/NotificationSender.php:98
+#. translators: %s: channel type
+#, php-format
+msgid "Unknown channel type \"%s\"."
+msgstr "Onbekend kanaaltype \"%s\"."
+
+#: src/Api/NotificationChannelsController.php:130
+#: src/Api/NotificationChannelsController.php:183
+msgid "Unknown channel type."
+msgstr "Onbekend kanaaltype."
+
+#: src/Abilities/WriteAbilities.php:441
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -6163,6 +7484,23 @@ msgstr "Onbekende voorwaarde-operator \"%1$s\". Geldige operators: %2$s."
 #: admin/src/views/ExternalCronView.vue
 msgid "Unknown error"
 msgstr "Onbekende fout"
+
+#: src/Api/NotificationRulesController.php:239
+#: src/Api/NotificationRulesController.php:263
+msgid "Unknown event."
+msgstr "Onbekende gebeurtenis."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Unknown modifier \"%s\"."
+msgstr "Onbekende modifier \"%s\"."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid ""
+"Unknown root \"%s\" — use webhook, event, delivery, payload, original, args "
+"or site."
+msgstr ""
+"Onbekende root \"%s\" — gebruik webhook, event, delivery, payload, "
+"original, args of site."
 
 #: admin/src/views/ProView.vue
 msgid "Unlimited conditions and AND / OR groups"
@@ -6206,6 +7544,10 @@ msgstr ""
 #: src/Abilities/GlueAbilities.php:89
 msgid "Update a Code Glue snippet"
 msgstr "Een Code Glue-snippet bijwerken"
+
+#: src/Abilities/AbilityCatalog.php:281
+msgid "Update a notification rule"
+msgstr "Een meldingsregel bijwerken"
 
 #: src/Abilities/AbilityCatalog.php:142
 msgid "Update a webhook"
@@ -6298,6 +7640,11 @@ msgstr "Gebruiker #%s"
 #: admin/src/views/ActivityView.vue
 msgid "User ID"
 msgstr "Gebruikers-ID"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:28
+#: src/Services/Notifications/Channels/PushoverDriver.php:45
+msgid "User or group key"
+msgstr "Gebruikers- of groepssleutel"
 
 #: admin/src/views/ActivityView.vue
 msgid "User prompt"
@@ -6405,6 +7752,10 @@ msgstr ""
 "Wachten op een voorbeeldpayload. Niets heeft deze trigger nog afgevuurd, "
 "dus er zijn geen echte veldnamen om tegen te mappen."
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Waiting for digest"
+msgstr "Wacht op samenvatting"
+
 #: admin/src/components/AiStepPanel.vue
 msgid "Waiting for earlier steps…"
 msgstr "Wachten op eerdere stappen…"
@@ -6413,7 +7764,7 @@ msgstr "Wachten op eerdere stappen…"
 msgid "Waiting for trigger to capture example payload..."
 msgstr "Wachten op trigger om voorbeeldpayload vast te leggen…"
 
-#: admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue
+#: src/Services/Notifications/MessageBuilder.php:118 admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Webhook"
 msgstr "Webhook"
 
@@ -6422,10 +7773,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:42
-#: src/Controllers/AdminController.php:43
-#: src/Controllers/AdminController.php:50
-#: src/Controllers/AdminController.php:51
+#: src/Controllers/AdminController.php:44
+#: src/Controllers/AdminController.php:45
+#: src/Controllers/AdminController.php:52
+#: src/Controllers/AdminController.php:53
 msgid "Webhook Actions"
 msgstr ""
 
@@ -6434,7 +7785,7 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — bouw automatiseringen en integraties met AI-hulp"
 
-#: src/Controllers/AdminController.php:250
+#: src/Controllers/AdminController.php:254
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -6449,6 +7800,13 @@ msgstr ""
 #: src/Api/SchemasController.php:130
 msgid "Webhook ID."
 msgstr "Webhook-ID."
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:27
+#: src/Services/Notifications/Channels/DiscordDriver.php:34
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:27
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:33
+msgid "Webhook URL"
+msgstr "Webhook-URL"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Webhook auth"
@@ -6471,7 +7829,7 @@ msgid "Webhook name is required."
 msgstr "Webhook-naam is verplicht."
 
 #: src/Abilities/GlueAbilities.php:350
-#: src/Api/LogsController.php:387
+#: src/Api/LogsController.php:395
 #: src/Api/SchemasController.php:172
 #: src/Api/SchemasController.php:233
 #: src/Api/SchemasController.php:279
@@ -6508,6 +7866,22 @@ msgstr "Wat doet deze webhook? Markdown wordt ondersteund."
 #: admin/src/components/ShareBuildDialog.vue
 msgid "What this build contains"
 msgstr "Wat deze build bevat"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:25
+msgid "WhatsApp (Twilio)"
+msgstr "WhatsApp (Twilio)"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:29
+msgid ""
+"WhatsApp messages through Twilio. Business-initiated alerts need an "
+"approved Content Template."
+msgstr ""
+"WhatsApp-berichten via Twilio. Door het bedrijf gestarte waarschuwingen "
+"vereisen een goedgekeurde Content Template."
+
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/components/notifications/RuleEditor.vue
+msgid "When"
+msgstr "Wanneer"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"
@@ -6567,6 +7941,24 @@ msgstr "Of de webhook is ingeschakeld."
 msgid "Whether to include user data."
 msgstr "Of gebruikersgegevens moeten worden opgenomen."
 
+#: src/Api/WebhookSchema.php:131
+msgid ""
+"Which notification rules apply: inherit the site-wide rules, custom rules "
+"for this webhook only, or off."
+msgstr ""
+"Welke meldingsregels gelden: de sitebrede regels overnemen, aangepaste "
+"regels alleen voor deze webhook, of uit."
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid ""
+"Who gets told when this webhook fails, retries, gives up or recovers. "
+"Site-wide rules live under Notifications; here you can inherit them, mute "
+"some, or define rules just for this webhook."
+msgstr ""
+"Wie bericht krijgt wanneer deze webhook mislukt, opnieuw probeert, opgeeft "
+"of herstelt. Sitebrede regels staan onder Meldingen; hier kun je ze "
+"overnemen, sommige dempen of regels alleen voor deze webhook definiëren."
+
 #: admin/src/components/LogsTable.vue
 msgid "Will Retry"
 msgstr "Probeert opnieuw"
@@ -6590,6 +7982,19 @@ msgstr "WordPress-connectors"
 #: admin/src/views/VaultView.vue
 msgid "WordPress username or API user"
 msgstr "WordPress-gebruikersnaam of API-gebruiker"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:29
+#: src/Services/Notifications/Channels/TeamsDriver.php:34
+msgid "Workflow URL"
+msgstr "Workflow-URL"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:24
+msgid ""
+"Workflows webhook URL (Teams → Workflows → \"Post to a channel when a "
+"webhook request is received\")."
+msgstr ""
+"Workflows-webhook-URL (Teams → Workflows → \"Post to a channel when a "
+"webhook request is received\")."
 
 #: admin/src/components/AiStepPanel.vue
 msgid "Working…"
@@ -6712,9 +8117,21 @@ msgstr ""
 "Je gekozen model %1$s kon niet antwoorden, dus dit antwoord kwam van %2$s. "
 "(%3$s) Kies een ander model via 'Model wijzigen'."
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "any — or e.g. 1, 3"
+msgstr "elke — of bijv. 1, 3"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "any — or e.g. woocommerce_*, wpcf7_mail_sent"
+msgstr "elke — of bijv. woocommerce_*, wpcf7_mail_sent"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "array contains"
 msgstr "array bevat"
+
+#: admin/src/composables/useNotifications.js
+msgid "attempt"
+msgstr "poging"
 
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "auto"
@@ -6740,19 +8157,27 @@ msgstr "backoff_strategy moet exponential, linear of fixed zijn."
 msgid "be skipped"
 msgstr "worden overgeslagen"
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "before creating rules."
+msgstr "voordat je regels aanmaakt."
+
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "bool"
 msgstr "bool"
 
-#: src/Abilities/WriteAbilities.php:225
+#: src/Abilities/WriteAbilities.php:326
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id, source_webhook_id en target_webhook_id zijn verplicht."
 
-#: src/Abilities/WriteAbilities.php:283
+#: src/Services/Notifications/RuleInput.php:55
+msgid "channel_ids must be a list of channel IDs."
+msgstr "channel_ids moet een lijst van kanaal-ID's zijn."
+
+#: src/Abilities/WriteAbilities.php:384
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions moet een object {enabled, type, rules: [...]} zijn."
 
-#: src/Abilities/WriteAbilities.php:292
+#: src/Abilities/WriteAbilities.php:393
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules moet een array van regelobjecten zijn."
 
@@ -6763,6 +8188,22 @@ msgstr "bevat"
 #: src/Services/Export/BuildSchemaValidator.php:98
 msgid "contains no webhooks."
 msgstr "bevat geen webhooks."
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "custom message"
+msgstr "aangepast bericht"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "daily digest"
+msgstr "dagelijkse samenvatting"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "days"
+msgstr "dagen"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "disabled"
+msgstr "uitgeschakeld"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "dispatch"
@@ -6800,7 +8241,13 @@ msgstr "leeg"
 msgid "equals"
 msgstr "is gelijk aan"
 
-#: src/Services/Export/BuildSchemaValidator.php:387
+#: src/Services/Notifications/RuleInput.php:31
+#. translators: %s: comma-separated list of valid events
+#, php-format
+msgid "event must be one of: %s"
+msgstr "event moet een van deze zijn: %s"
+
+#: src/Services/Export/BuildSchemaValidator.php:398
 #. translators: %d: max length
 #, php-format
 msgid "exceeds the maximum length of %d bytes."
@@ -6814,6 +8261,36 @@ msgstr "uitgesloten via bovenliggend element"
 msgid "excludes"
 msgstr "sluit uit"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "failed"
+msgstr "mislukt"
+
+#: src/Services/Notifications/RuleInput.php:117
+msgid "filters.attempts must be a list of attempt numbers."
+msgstr "filters.attempts moet een lijst van pogingsnummers zijn."
+
+#: src/Services/Notifications/RuleInput.php:132
+msgid "filters.http_codes must be a list."
+msgstr "filters.http_codes moet een lijst zijn."
+
+#: src/Services/Notifications/RuleInput.php:146
+#. translators: %s: the rejected value
+#, php-format
+msgid ""
+"filters.http_codes: \"%s\" is not a code (503), a class (5xx), a range "
+"(500-504) or \"transport\"."
+msgstr ""
+"filters.http_codes: \"%s\" is geen code (503), klasse (5xx), bereik "
+"(500-504) of \"transport\"."
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "from a real delivery"
+msgstr "uit een echte bezorging"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "from the captured payload"
+msgstr "uit de vastgelegde payload"
+
 #: src/Api/RetrySettingsController.php:80
 msgid "global_max_attempts must be between 1 and 100."
 msgstr "global_max_attempts moet tussen 1 en 100 liggen."
@@ -6826,7 +8303,7 @@ msgstr "groter dan"
 msgid "has item"
 msgstr "heeft item"
 
-#: src/Services/Export/BuildSchemaValidator.php:377
+#: src/Services/Export/BuildSchemaValidator.php:388
 #. translators: %s: comma-separated key names
 #, php-format
 msgid "has unexpected key(s): %s."
@@ -6835,6 +8312,14 @@ msgstr "bevat onverwachte sleutel(s): %s."
 #: admin/src/components/ConditionsEditor.vue
 msgid "has value"
 msgstr "heeft waarde"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "hourly digest"
+msgstr "uurlijkse samenvatting"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "hours"
+msgstr "uur"
 
 #: flowsystems-webhook-actions.php
 #. Author URI of the plugin
@@ -6849,6 +8334,18 @@ msgstr ""
 #: admin/src/components/AiStepControls.vue
 msgid "https://your-endpoint.example/webhook"
 msgstr "https://jouw-eindpunt.example/webhook"
+
+#: src/Api/NotificationRulesController.php:188
+msgid "ids must be a list."
+msgstr "ids moet een lijst zijn."
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "in digest"
+msgstr "in samenvatting"
+
+#: admin/src/composables/useNotifications.js
+msgid "incl. tests"
+msgstr "incl. tests"
 
 #: admin/src/components/WebhookForm.vue
 msgid "instead."
@@ -6868,7 +8365,7 @@ msgstr "is leeg"
 msgid "is false"
 msgstr "is onwaar"
 
-#: src/Services/Export/BuildSchemaValidator.php:367
+#: src/Services/Export/BuildSchemaValidator.php:378
 #. translators: %s: key name
 #, php-format
 msgid "is missing required key \"%s\"."
@@ -6882,7 +8379,7 @@ msgstr "is niet leeg"
 msgid "is required and must be an integer."
 msgstr "is vereist en moet een geheel getal zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:228
+#: src/Services/Export/BuildSchemaValidator.php:239
 msgid "is required when mode is \"vault\"."
 msgstr "is vereist wanneer de modus “vault” is."
 
@@ -6902,36 +8399,40 @@ msgstr "bibliotheek"
 msgid "mapped"
 msgstr "gemapt"
 
-#: src/Services/Export/BuildSchemaValidator.php:351
+#: src/Services/Export/BuildSchemaValidator.php:362
 msgid "may only contain letters, numbers, hyphens and underscores."
 msgstr "mag alleen letters, cijfers, koppeltekens en underscores bevatten."
 
-#: src/Services/Export/BuildSchemaValidator.php:394
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "minutes"
+msgstr "minuten"
+
+#: src/Services/Export/BuildSchemaValidator.php:405
 msgid "must be a boolean."
 msgstr "moet een boolean zijn."
 
 #: src/Services/Export/BuildSchemaValidator.php:81
-#: src/Services/Export/BuildSchemaValidator.php:231
+#: src/Services/Export/BuildSchemaValidator.php:242
 msgid "must be a string or null."
 msgstr "moet een string of null zijn."
 
 #: src/Services/Export/BuildSchemaValidator.php:78
 #: src/Services/Export/BuildSchemaValidator.php:132
 #: src/Services/Export/BuildSchemaValidator.php:149
-#: src/Services/Export/BuildSchemaValidator.php:302
-#: src/Services/Export/BuildSchemaValidator.php:384
+#: src/Services/Export/BuildSchemaValidator.php:313
+#: src/Services/Export/BuildSchemaValidator.php:395
 msgid "must be a string."
 msgstr "moet een string zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:346
+#: src/Services/Export/BuildSchemaValidator.php:357
 msgid "must be a {key, value} object."
 msgstr "moet een {key, value}-object zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:300
+#: src/Services/Export/BuildSchemaValidator.php:311
 msgid "must be an array of strings."
 msgstr "moet een array van strings zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:343
+#: src/Services/Export/BuildSchemaValidator.php:354
 msgid "must be an array of {key, value} pairs."
 msgstr "moet een array van {key, value}-paren zijn."
 
@@ -6939,8 +8440,9 @@ msgstr "moet een array van {key, value}-paren zijn."
 #: src/Services/Export/BuildSchemaValidator.php:96
 #: src/Services/Export/BuildSchemaValidator.php:109
 #: src/Services/Export/BuildSchemaValidator.php:141
-#: src/Services/Export/BuildSchemaValidator.php:207
-#: src/Services/Export/BuildSchemaValidator.php:319
+#: src/Services/Export/BuildSchemaValidator.php:208
+#: src/Services/Export/BuildSchemaValidator.php:218
+#: src/Services/Export/BuildSchemaValidator.php:330
 msgid "must be an array."
 msgstr "moet een array zijn."
 
@@ -6953,27 +8455,28 @@ msgstr "moet een http:// of https://-URL zijn."
 #: src/Services/Export/BuildSchemaValidator.php:145
 #: src/Services/Export/BuildSchemaValidator.php:162
 #: src/Services/Export/BuildSchemaValidator.php:179
-#: src/Services/Export/BuildSchemaValidator.php:220
-#: src/Services/Export/BuildSchemaValidator.php:240
-#: src/Services/Export/BuildSchemaValidator.php:264
-#: src/Services/Export/BuildSchemaValidator.php:278
-#: src/Services/Export/BuildSchemaValidator.php:293
-#: src/Services/Export/BuildSchemaValidator.php:313
-#: src/Services/Export/BuildSchemaValidator.php:322
+#: src/Services/Export/BuildSchemaValidator.php:210
+#: src/Services/Export/BuildSchemaValidator.php:231
+#: src/Services/Export/BuildSchemaValidator.php:251
+#: src/Services/Export/BuildSchemaValidator.php:275
+#: src/Services/Export/BuildSchemaValidator.php:289
+#: src/Services/Export/BuildSchemaValidator.php:304
+#: src/Services/Export/BuildSchemaValidator.php:324
+#: src/Services/Export/BuildSchemaValidator.php:333
 msgid "must be an object."
 msgstr "moet een object zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:400
+#: src/Services/Export/BuildSchemaValidator.php:411
 #. translators: %s: comma-separated allowed values
 #, php-format
 msgid "must be one of: %s."
 msgstr "moet een van de volgende zijn: %s."
 
-#: src/Services/Export/BuildSchemaValidator.php:385
+#: src/Services/Export/BuildSchemaValidator.php:396
 msgid "must not be empty."
 msgstr "mag niet leeg zijn."
 
-#: src/Services/Export/BuildSchemaValidator.php:355
+#: src/Services/Export/BuildSchemaValidator.php:366
 msgid "must not contain line breaks."
 msgstr "mag geen regeleinden bevatten."
 
@@ -6989,9 +8492,25 @@ msgstr "name en endpoint_url zijn verplicht."
 msgid "no"
 msgstr "nee"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "no channel"
+msgstr "geen kanaal"
+
 #: admin/src/views/WebhooksList.vue
 msgid "no remaining triggers"
 msgstr "geen resterende triggers"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "no response"
+msgstr "geen respons"
+
+#: admin/src/composables/useNotifications.js
+msgid "non-retryable"
+msgstr "niet opnieuw te proberen"
+
+#: admin/src/components/notifications/RuleEditor.vue admin/src/composables/useNotifications.js
+msgid "none"
+msgstr "geen"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "not empty"
@@ -7000,6 +8519,10 @@ msgstr "niet leeg"
 #: admin/src/components/ConditionsEditor.vue
 msgid "not equals"
 msgstr "niet gelijk aan"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:19
+msgid "ntfy"
+msgstr "ntfy"
 
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "number"
@@ -7013,6 +8536,22 @@ msgstr "object bevat"
 msgid "of"
 msgstr "van"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "off"
+msgstr "uit"
+
+#: admin/src/composables/useNotifications.js
+msgid "only after a retry"
+msgstr "alleen na een nieuwe poging"
+
+#: admin/src/composables/useNotifications.js
+msgid "out of attempts"
+msgstr "pogingen op"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "pending"
+msgstr "in behandeling"
+
 #: admin/src/components/LogsTable.vue
 msgid "perm. failed"
 msgstr "perm. mislukt"
@@ -7025,11 +8564,15 @@ msgstr "eigenschapsnaam (optioneel)"
 msgid "provider unavailable"
 msgstr "provider niet beschikbaar"
 
-#: src/Services/Export/BuildSchemaValidator.php:229
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "quiet %s"
+msgstr "stilte %s"
+
+#: src/Services/Export/BuildSchemaValidator.php:240
 msgid "references a credential that is not listed in credentials[]."
 msgstr "verwijst naar een referentie die niet in credentials[] staat."
 
-#: src/Services/Export/BuildSchemaValidator.php:328
+#: src/Services/Export/BuildSchemaValidator.php:339
 msgid "references a webhook UUID not present in webhooks[]."
 msgstr "verwijst naar een webhook-UUID die niet in webhooks[] voorkomt."
 
@@ -7053,6 +8596,22 @@ msgstr "hergebruikt"
 msgid "route is required, e.g. \"/wp/v2/users\"."
 msgstr "route is vereist, bijv. \"/wp/v2/users\"."
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "sample data"
+msgstr "voorbeeldgegevens"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "seconds"
+msgstr "seconden"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "sending"
+msgstr "verzenden"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "sent"
+msgstr "verzonden"
+
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "string"
 msgstr "tekenreeks"
@@ -7060,6 +8619,10 @@ msgstr "tekenreeks"
 #: admin/src/components/ConditionsEditor.vue
 msgid "stringify"
 msgstr "stringify"
+
+#: src/Services/Notifications/RuleInput.php:193
+msgid "template must be an object with subject, title, body and short."
+msgstr "template moet een object zijn met subject, title, body en short."
 
 #: admin/src/views/AiBuilderView.vue
 msgid "the step failed."
@@ -7069,6 +8632,10 @@ msgstr "de stap is mislukt."
 msgid "then select it here."
 msgstr "selecteer het hier."
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "throttled"
+msgstr "beperkt"
+
 #: src/Abilities/ReadAbilities.php:125
 msgid "trigger is required."
 msgstr "trigger is vereist."
@@ -7077,6 +8644,10 @@ msgstr "trigger is vereist."
 msgid "unknown"
 msgstr "onbekend"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "using the default for this event"
+msgstr "gebruikt de standaard voor deze gebeurtenis"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "value"
 msgstr "waarde"
@@ -7084,6 +8655,10 @@ msgstr "waarde"
 #: admin/src/views/AiBuilderView.vue
 msgid "verified %s"
 msgstr "geverifieerd %s"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "waiting for digest"
+msgstr "wacht op samenvatting"
 
 #: src/Abilities/WriteAbilities.php:157
 msgid "webhook_id, trigger and conditions are required."
@@ -7096,6 +8671,10 @@ msgstr "webhook_id, trigger en field_mapping zijn verplicht."
 #: src/Abilities/GlueAbilities.php:347
 msgid "webhook_id, trigger, stage (pre|post) and snippet_id are required."
 msgstr "webhook_id, trigger, stage (pre|post) en snippet_id zijn verplicht."
+
+#: src/Services/Notifications/Channels/EmailDriver.php:63
+msgid "wp_mail() returned false. Check the site's mail configuration."
+msgstr "wp_mail() gaf false terug. Controleer de mailconfiguratie van de site."
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
@@ -7116,6 +8695,12 @@ msgstr "· databasesleutel verwijderd"
 #: admin/src/main.js
 msgid "…"
 msgstr "…"
+
+#: src/Services/Notifications/DigestFlusher.php:135
+#. translators: %d: number of further notifications
+#, php-format
+msgid "… and %d more"
+msgstr "… en %d meer"
 
 #: src/Services/Ai/PlanExecutor.php:519
 #. translators: %s: what was undone.

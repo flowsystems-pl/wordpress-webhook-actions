@@ -8,6 +8,7 @@ const ROUTES = [
   'queue',
   'tokens',
   'vault',
+  'notifications',
   'external-cron',
   'activity',
   'settings',

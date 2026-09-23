@@ -63,6 +63,13 @@
   }
 }
 
+/* Overlays (Select lists, dialogs) set body { overflow: hidden } while open.
+   Without a reserved gutter the scrollbar disappears, the viewport widens by
+   its width, and the fixed WP admin bar visibly jumps. Keep the gutter. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Apply theme to #fswa-app container */
 #fswa-app {
   @apply bg-background text-foreground;

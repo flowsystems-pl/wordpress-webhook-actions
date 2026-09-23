@@ -4,7 +4,7 @@ namespace FlowSystems\WebhookActions\Database;
 
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '2.4.0';
+  private const CURRENT_VERSION = '2.5.0';
 
   /**
    * Run pending migrations
@@ -50,6 +50,9 @@ class Migrator {
       $wpdb->prefix . 'fswa_activity_logs',
       $wpdb->prefix . 'fswa_credentials',
       $wpdb->prefix . 'fswa_agent_conversations',
+      $wpdb->prefix . 'fswa_notification_channels',
+      $wpdb->prefix . 'fswa_notification_rules',
+      $wpdb->prefix . 'fswa_notification_log',
     ];
 
     foreach ($requiredTables as $table) {
@@ -92,6 +95,7 @@ class Migrator {
       '2.2.0'  => [self::class, 'migration_2_2_0'],
       '2.3.0'  => [self::class, 'migration_2_3_0'],
       '2.4.0'  => [self::class, 'migration_2_4_0'],
+      '2.5.0'  => [self::class, 'migration_2_5_0'],
     ];
   }
 
@@ -822,6 +826,93 @@ class Migrator {
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
     dbDelta($snippets);
     dbDelta($triggerSnippets);
+  }
+
+  /**
+   * Migration 2.5.0 - Notifications: channels (encrypted secrets), rules
+   * (global when webhook_id is NULL, else per webhook), a sent log, and the
+   * per-webhook inherit/custom/off switch.
+   */
+  public static function migration_2_5_0(): void {
+    global $wpdb;
+    $charset = $wpdb->get_charset_collate();
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $channels = "CREATE TABLE {$wpdb->prefix}fswa_notification_channels (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      name VARCHAR(255) NOT NULL,
+      type VARCHAR(32) NOT NULL DEFAULT 'email',
+      config_json TEXT NULL,
+      secret_ciphertext TEXT NULL,
+      hint VARCHAR(64) NOT NULL DEFAULT '',
+      is_enabled TINYINT(1) NOT NULL DEFAULT 1,
+      last_error TEXT NULL,
+      last_error_at DATETIME NULL,
+      last_sent_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      UNIQUE KEY idx_name (name),
+      KEY idx_type (type)
+    ) $charset;";
+
+    $rules = "CREATE TABLE {$wpdb->prefix}fswa_notification_rules (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      webhook_id BIGINT UNSIGNED NULL DEFAULT NULL,
+      name VARCHAR(255) NOT NULL DEFAULT '',
+      event VARCHAR(32) NOT NULL,
+      is_enabled TINYINT(1) NOT NULL DEFAULT 1,
+      filters_json TEXT NULL,
+      channel_ids TEXT NULL,
+      template_json LONGTEXT NULL,
+      throttle_seconds INT UNSIGNED NULL DEFAULT NULL,
+      digest VARCHAR(10) NULL DEFAULT NULL,
+      sort_order SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_webhook (webhook_id),
+      KEY idx_event (event)
+    ) $charset;";
+
+    $log = "CREATE TABLE {$wpdb->prefix}fswa_notification_log (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+      rule_id BIGINT UNSIGNED NULL DEFAULT NULL,
+      channel_id BIGINT UNSIGNED NULL DEFAULT NULL,
+      webhook_id BIGINT UNSIGNED NULL DEFAULT NULL,
+      log_id BIGINT UNSIGNED NULL DEFAULT NULL,
+      event VARCHAR(32) NOT NULL DEFAULT '',
+      status VARCHAR(16) NOT NULL DEFAULT 'pending',
+      attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+      error TEXT NULL,
+      subject VARCHAR(255) NOT NULL DEFAULT '',
+      message_json LONGTEXT NULL,
+      sent_at DATETIME NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id),
+      KEY idx_rule_webhook (rule_id, webhook_id, created_at),
+      KEY idx_status (status),
+      KEY idx_log (log_id),
+      KEY idx_created (created_at)
+    ) $charset;";
+
+    dbDelta($channels);
+    dbDelta($rules);
+    dbDelta($log);
+
+    $webhooksTable = $wpdb->prefix . 'fswa_webhooks';
+
+    // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
+    $exists = $wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM {$webhooksTable} LIKE %s", 'notifications_mode'));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN notifications_mode VARCHAR(10) NOT NULL DEFAULT 'inherit'");
+    }
+    $exists = $wpdb->get_var($wpdb->prepare("SHOW COLUMNS FROM {$webhooksTable} LIKE %s", 'muted_rule_ids'));
+    if (!$exists) {
+      $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN muted_rule_ids TEXT NULL DEFAULT NULL");
+    }
+    // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
   }
 
   /**

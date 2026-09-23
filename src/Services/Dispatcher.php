@@ -2,6 +2,8 @@
 
 namespace FlowSystems\WebhookActions\Services;
 
+use FlowSystems\WebhookActions\Services\Notifications\DeliveryEvents;
+
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Support\UrlTemplate;
@@ -129,6 +131,15 @@ class Dispatcher {
             $eventTimestamp
           );
           do_action('fswa_skipped', $trigger, $webhookId, $evalResult['failed_rule']);
+          DeliveryEvents::fire(DeliveryEvents::SKIPPED, [
+            'webhook'          => $webhook,
+            'trigger'          => $trigger,
+            'event_uuid'       => $eventUuid,
+            'event_timestamp'  => $eventTimestamp,
+            'error_message'    => $this->buildSkipMessage($evalResult['failed_rule'], $payload),
+            'payload'          => $transformedPayload,
+            'original_payload' => $originalPayload ?: $payload,
+          ]);
           continue;
         }
       }
@@ -173,6 +184,16 @@ class Dispatcher {
               ]);
             }
             do_action('fswa_skipped', $trigger, $webhookId, $evalResult['failed_rule']);
+            DeliveryEvents::fire(DeliveryEvents::SKIPPED, [
+              'webhook'          => $webhook,
+              'trigger'          => $trigger,
+              'log_id'           => $logId ?: null,
+              'event_uuid'       => $eventUuid,
+              'event_timestamp'  => $eventTimestamp,
+              'error_message'    => $this->buildSkipMessage($evalResult['failed_rule'], $syncPayload),
+              'payload'          => $syncPayload,
+              'original_payload' => $originalPayload ?: $transformedPayload,
+            ]);
             continue;
           }
         }
@@ -219,6 +240,17 @@ class Dispatcher {
               'next_attempt_at' => $retryAt->format('Y-m-d H:i:s'),
             ]);
           }
+
+          DeliveryEvents::fire(DeliveryEvents::RETRY_SCHEDULED, $result + [
+            'webhook'          => $webhook,
+            'trigger'          => $trigger,
+            'log_id'           => $logId ?: null,
+            'attempt'          => 1,
+            'max_attempts'     => (int) apply_filters('fswa_max_attempts', (new RetryPolicy())->maxAttempts($webhookId, 5), $webhookId),
+            'next_attempt_at'  => $retryAt->format('Y-m-d H:i:s'),
+            'payload'          => $syncPayload,
+            'original_payload' => $originalPayload ?: null,
+          ]);
         } elseif (!$result['success']) {
           // Non-retryable failure (4xx, config error) — mark permanently failed
           if ($logId) {
@@ -227,6 +259,17 @@ class Dispatcher {
               'next_attempt_at' => null,
             ]);
           }
+
+          DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, $result + [
+            'webhook'          => $webhook,
+            'trigger'          => $trigger,
+            'log_id'           => $logId ?: null,
+            'attempt'          => 1,
+            'max_attempts'     => (int) apply_filters('fswa_max_attempts', (new RetryPolicy())->maxAttempts($webhookId, 5), $webhookId),
+            'reason'           => DeliveryEvents::REASON_NON_RETRYABLE,
+            'payload'          => $syncPayload,
+            'original_payload' => $originalPayload ?: null,
+          ]);
         }
         // Success: log already updated to 'success' by sendToWebhook()
       } else {
@@ -288,6 +331,7 @@ class Dispatcher {
     $jobs = $this->queueService->getNextBatch($batchSize);
 
     if (empty($jobs)) {
+      do_action('fswa_queue_processed', $result);
       return $result;
     }
 
@@ -321,6 +365,11 @@ class Dispatcher {
             ]);
           }
           $result['rescheduled']++;
+
+          DeliveryEvents::fire(DeliveryEvents::RETRY_SCHEDULED, ($resultData['ctx'] ?? []) + $resultData + [
+            'max_attempts'    => (int) ($job['max_attempts'] ?? 0),
+            'next_attempt_at' => $rescheduleResult['scheduled_at'],
+          ]);
         } else {
           // Max attempts reached
           $this->queueService->markPermanentlyFailed($jobId);
@@ -332,6 +381,11 @@ class Dispatcher {
             ]);
           }
           $result['failed']++;
+
+          DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
+            'max_attempts' => (int) ($job['max_attempts'] ?? 0),
+            'reason'       => DeliveryEvents::REASON_EXHAUSTED,
+          ]);
         }
       } else {
         // Non-retryable failure (4xx, 3xx, config error)
@@ -344,8 +398,25 @@ class Dispatcher {
           ]);
         }
         $result['failed']++;
+
+        // A skipped job (conditions failed at run time) already fired its own
+        // event and is not a delivery failure.
+        if (empty($resultData['skipped'])) {
+          DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
+            'max_attempts' => (int) ($job['max_attempts'] ?? 0),
+            'reason'       => DeliveryEvents::REASON_NON_RETRYABLE,
+          ]);
+        }
       }
     }
+
+    /**
+     * Fires after a queue batch was processed. The notification sender uses it
+     * to flush pending notifications on every tick, external cron included.
+     *
+     * @param array $result processed / succeeded / failed / rescheduled counts
+     */
+    do_action('fswa_queue_processed', $result);
 
     return $result;
   }
@@ -430,13 +501,36 @@ class Dispatcher {
                 'mapping_applied'  => 1,
               ]);
             }
-            return ['success' => false, 'shouldRetry' => false];
+            DeliveryEvents::fire(DeliveryEvents::SKIPPED, [
+              'webhook'          => $webhook,
+              'trigger'          => $trigger,
+              'log_id'           => $logId,
+              'attempt'          => $attemptNumber + 1,
+              'error_message'    => $this->buildSkipMessage($evalResult['failed_rule'], $conditionsPayload),
+              'payload'          => $payload,
+              'original_payload' => $originalPayload ?: $preGluePayload,
+            ]);
+            return ['success' => false, 'shouldRetry' => false, 'skipped' => true];
           }
         }
       }
     }
 
-    return $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest, $originalPayload ?: null);
+    $sendResult = $this->sendToWebhook($webhook, $payload, $trigger, $logId, $attemptNumber, $isTest, $originalPayload ?: null);
+
+    // Carried back to process() so the retry / permanently-failed events it
+    // fires have the same context the attempt itself had.
+    $sendResult['ctx'] = [
+      'webhook'          => $webhook,
+      'trigger'          => $trigger,
+      'log_id'           => $logId,
+      'attempt'          => $attemptNumber + 1,
+      'is_test'          => $isTest,
+      'payload'          => $payload,
+      'original_payload' => $originalPayload ?: null,
+    ];
+
+    return $sendResult;
   }
 
   /**
@@ -499,7 +593,7 @@ class Dispatcher {
 
     if (!$this->isValidUrl($url)) {
       $this->logError($trigger, $url, 'Invalid URL format', $webhookId, $payload, null, null, null, $logId);
-      return ['success' => false, 'shouldRetry' => false];
+      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => 'Invalid URL format', 'request_url' => $url];
     }
 
     $headers = [
@@ -526,7 +620,7 @@ class Dispatcher {
         $isTest
       );
       do_action('fswa_error', $trigger, $url, 'Credential could not be decrypted.');
-      return ['success' => false, 'shouldRetry' => false];
+      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => 'Credential could not be decrypted (check FSWA_SECRET_KEY / WordPress salts).', 'request_url' => $url];
     }
 
     // Add event identity headers before fswa_headers filter.
@@ -607,6 +701,10 @@ class Dispatcher {
     $result = $this->transport->send($url, $payload, $headers, $method);
     $durationMs = (int) ((microtime(true) - $startTime) * 1000);
 
+    // For the delivery event: how many tries this webhook gets in total, the
+    // way enqueue() resolves it (per-webhook → site-wide → 5; a test gets 1).
+    $maxAttempts = $isTest ? 1 : (int) apply_filters('fswa_max_attempts', (new RetryPolicy())->maxAttempts($webhookId, 5), $webhookId);
+
     if (is_wp_error($result)) {
       $errorMessage = $result->get_error_message();
       $this->logError($trigger, $url, (string) $errorMessage, $webhookId, $payload, null, null, $durationMs, $logId, $isTest, $this->redactHeadersForLog($headers, $sensitiveHeaderKeys));
@@ -633,7 +731,28 @@ class Dispatcher {
        */
       do_action('fswa_error', $trigger, $url, (string) $errorMessage);
 
-      return ['success' => false, 'shouldRetry' => !$isTest];
+      $outcome = [
+        'success'       => false,
+        'shouldRetry'   => !$isTest,
+        'http_code'     => null,
+        'error_message' => (string) $errorMessage,
+        'response_body' => null,
+        'duration_ms'   => $durationMs,
+        'request_url'   => $url,
+      ];
+
+      DeliveryEvents::fire(DeliveryEvents::FAILED_ATTEMPT, $outcome + [
+        'webhook'          => $webhook,
+        'trigger'          => $trigger,
+        'log_id'           => $logId,
+        'attempt'          => $attemptNumber + 1,
+        'max_attempts'     => $maxAttempts,
+        'is_test'          => $isTest,
+        'payload'          => $payload,
+        'original_payload' => $originalPayload,
+      ]);
+
+      return $outcome;
     }
 
     $responseCode = (int) wp_remote_retrieve_response_code($result);
@@ -714,7 +833,29 @@ class Dispatcher {
       do_action('fswa_error', $trigger, $url, sprintf("HTTP %d", $responseCode));
     }
 
-    return ['success' => $success, 'shouldRetry' => $shouldRetry];
+    $outcome = [
+      'success'       => $success,
+      'shouldRetry'   => $shouldRetry,
+      'http_code'     => $responseCode,
+      'error_message' => $success ? null : sprintf("HTTP %d", $responseCode),
+      'response_body' => (string) $responseBody,
+      'duration_ms'   => $durationMs,
+      'request_url'   => $url,
+    ];
+
+    DeliveryEvents::fire($success ? DeliveryEvents::SUCCESS : DeliveryEvents::FAILED_ATTEMPT, $outcome + [
+      'webhook'          => $webhook,
+      'trigger'          => $trigger,
+      'log_id'           => $logId,
+      'attempt'          => $attemptNumber + 1,
+      'max_attempts'     => $maxAttempts,
+      'is_test'          => $isTest,
+      'payload'          => $payload,
+      'original_payload' => $originalPayload,
+      'had_failures'     => $attemptNumber > 0,
+    ]);
+
+    return $outcome;
   }
 
   /**

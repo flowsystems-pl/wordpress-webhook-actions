@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, RouterLink } from 'vue-router';
 import { useHealthStats } from '../composables/useHealthStats';
 import {
   Activity,
@@ -70,6 +70,16 @@ const formatDuration = (ms) => {
     >
       <AlertTriangle class="w-3.5 h-3.5 shrink-0" />
       <span>{{ __('Queue appears stuck — there are pending deliveries older than 10 minutes. Check your cron setup.') }}</span>
+    </div>
+    <div
+      v-if="stats?.notifications?.failing?.length"
+      class="flex items-center gap-2 px-3 py-2 rounded-md bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400"
+    >
+      <AlertTriangle class="w-3.5 h-3.5 shrink-0" />
+      <span>
+        {{ __('A notification channel is failing:') }}
+        <template v-for="(c, i) in stats.notifications.failing" :key="c.id">{{ i ? ', ' : ' ' }}<RouterLink to="/notifications?tab=channels" class="underline font-medium">{{ c.name }}</RouterLink> ({{ c.error }})</template>
+      </span>
     </div>
     <div
       v-if="observability.wp_cron_only"

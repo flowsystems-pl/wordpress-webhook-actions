@@ -221,6 +221,14 @@ class LogsController extends WP_REST_Controller {
 
     $result = $this->repository->getPaginated($filters, $page, $perPage);
 
+    // Bell on the row: how many notifications this delivery produced.
+    $summary = (new \FlowSystems\WebhookActions\Repositories\NotificationLogRepository())
+      ->summaryForLogs(array_map(static fn(array $row): int => (int) $row['id'], $result['items']));
+    foreach ($result['items'] as &$item) {
+      $item['notifications'] = $summary[(int) $item['id']] ?? null;
+    }
+    unset($item);
+
     $response = rest_ensure_response($result['items']);
 
     $response->header('X-WP-Total', $result['total']);

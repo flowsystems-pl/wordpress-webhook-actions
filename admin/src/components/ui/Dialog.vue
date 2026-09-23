@@ -7,6 +7,8 @@ defineProps({
   open: Boolean,
   title: String,
   description: String,
+  // Tailwind max-width class for the content box (default max-w-lg).
+  contentClass: { type: String, default: '' },
 })
 
 const emit = defineEmits(['close'])
@@ -36,7 +38,7 @@ const handleOverlayClick = (e) => {
 
       <!-- Content -->
       <div
-        class="fixed z-[100001] flex flex-col w-full max-w-lg max-h-[90vh] gap-4 border border-border bg-background p-6 shadow-lg rounded-lg"
+        :class="cn('fixed z-[100001] flex flex-col w-full max-w-lg max-h-[90vh] gap-4 border border-border bg-background p-6 shadow-lg rounded-lg', contentClass)"
       >
         <!-- Header -->
         <div class="shrink-0 flex flex-col space-y-1.5 text-center sm:text-left">

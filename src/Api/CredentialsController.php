@@ -214,6 +214,19 @@ class CredentialsController extends WP_REST_Controller {
       $migrated++;
     }
 
+    // Notification channel secrets live under the same key.
+    $channels = new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository();
+    foreach ($channels->allWithSecrets() as $row) {
+      $rewrapped = $this->cipher->reencrypt((string) ($row['secret_ciphertext'] ?? ''));
+      if ($rewrapped === null) {
+        $failed++;
+        $failedIds[] = 'channel:' . (int) $row['id'];
+        continue;
+      }
+      $channels->updateCiphertext((int) $row['id'], $rewrapped);
+      $migrated++;
+    }
+
     // Only drop the DB key once everything is sealed with the constant.
     $dbKeyRemoved = false;
     if ($this->cipher->usingConstant() && $failed === 0 && $this->cipher->dbKeyPresent()) {

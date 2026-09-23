@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.2.0\n"
+"with AI help 3.3.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-12T18:16:49+00:00\n"
+"POT-Creation-Date: 2026-09-23T10:11:24+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -25,6 +25,17 @@ msgid ""
 "\"%s\" changes or deletes live data. Re-send the same call with "
 "\"confirmed\": true once a human has approved it."
 msgstr "“%s” 会更改或删除线上数据。请在人工批准后，带上 \"confirmed\": true 重新发送同一调用。"
+
+#: src/Services/Notifications/DigestFlusher.php:146
+#. translators: 1: number of notifications, 2: rule name
+#, php-format
+msgid "%1$d notification — %2$s"
+msgid_plural "%1$d notifications — %2$s"
+msgstr[0] "%1$d 条通知 — %2$s"
+
+#: admin/src/components/LogsTable.vue
+msgid "%1$d notification(s) sent, %2$d failed"
+msgstr "已发送 %1$d 条通知，%2$d 条失败"
 
 #: admin/src/components/ImportDialog.vue
 msgid "%1$d webhook(s) and %2$d chain(s) to import."
@@ -66,6 +77,14 @@ msgid ""
 "%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — processes only the webhook "
 "queue. Min interval: 20s."
 msgstr "%1$s/wp-json/fswa/v1/cron/process?token=…%2$s — 仅处理 Webhook 队列。最小间隔：20 秒。"
+
+#: src/Services/Notifications/TemplateLinter.php:78
+#. translators: 1: channel type, 2: rendered length, 3: limit
+#, php-format
+msgid ""
+"%1$s: the body renders to about %2$d characters, over the %3$d limit; it "
+"will be truncated."
+msgstr "%1$s：正文渲染后约 %2$d 个字符，超过 %3$d 的上限；将被截断。"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid ""
@@ -193,6 +212,10 @@ msgstr "已将 %d 次投递加入队列"
 msgid "%d duplicate(s) skipped."
 msgstr "已跳过 %d 个重复项。"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "%d entries"
+msgstr "%d 个条目"
+
 #: admin/src/views/ActivityView.vue
 msgid "%d entry"
 msgid_plural "%d entries"
@@ -217,11 +240,19 @@ msgid "%d minute"
 msgid_plural "%d minutes"
 msgstr[0] "%d 分钟"
 
+#: admin/src/components/LogsTable.vue
+msgid "%d notification(s) sent"
+msgstr "已发送 %d 条通知"
+
 #: admin/src/views/LogsList.vue
 msgid ""
 "%d of the selected entries could not be queued: no queue job is left for "
 "them."
 msgstr "所选条目中有 %d 条无法加入队列：它们已没有对应的队列任务。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "%d pending"
+msgstr "%d 条待处理"
 
 #: admin/src/views/LogsList.vue
 msgid "%d retries queued"
@@ -286,6 +317,23 @@ msgstr "你的免费试用还剩 %s 个积分。"
 msgid "%s free credits"
 msgstr "%s 个免费积分"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "%s is not in the captured payload and will render empty."
+msgstr "%s 不在已捕获的数据中，将渲染为空。"
+
+#: src/Services/Notifications/Channels/AbstractHttpDriver.php:148
+#: src/Services/Notifications/Channels/AbstractHttpDriver.php:161
+#. translators: %s: field label
+#, php-format
+msgid "%s is not set on this channel."
+msgstr "此渠道未设置 %s。"
+
+#: src/Api/NotificationChannelsController.php:357
+#. translators: %s: field label
+#, php-format
+msgid "%s is required."
+msgstr "%s 为必填项。"
+
 #: admin/src/views/ApiTokensView.vue
 msgid "%s…"
 msgstr "%s…"
@@ -310,6 +358,10 @@ msgstr "（本站点尚无）"
 msgid "(param name)"
 msgstr "（参数名称）"
 
+#: src/Services/Notifications/TemplateDrafter.php:102
+msgid "(site-wide rule, any webhook)"
+msgstr "（站点级规则，任意 Webhook）"
+
 #: admin/src/components/MappingEditor.vue
 msgid "(value)"
 msgstr "（值）"
@@ -322,7 +374,19 @@ msgstr "+ 新建凭据"
 msgid "5 (plugin default)"
 msgstr "5（插件默认）"
 
-#: src/Services/Export/BuildImporter.php:242
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "503, 500-504"
+msgstr "503, 500-504"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:31
+msgid "A Twilio number in E.164 (+15551234567) or a Messaging Service SID (MG…)."
+msgstr "E.164 格式的 Twilio 号码（+15551234567）或 Messaging Service SID（MG…）。"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:25
+msgid "A bot token from @BotFather and the chat or group ID to post to."
+msgstr "来自 @BotFather 的机器人令牌，以及要发送到的聊天或群组 ID。"
+
+#: src/Services/Export/BuildImporter.php:307
 msgid "A chain in this file has no name and was not imported."
 msgstr "此文件中有一条链没有名称，未被导入。"
 
@@ -331,22 +395,50 @@ msgstr "此文件中有一条链没有名称，未被导入。"
 msgid "A chain with that name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:211
+#: src/Abilities/WriteAbilities.php:312
 msgid "A chain with this name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:335
+#: admin/src/components/notifications/ChannelForm.vue
+msgid ""
+"A channel is a destination rules send to. Secrets are encrypted and never "
+"shown again after saving."
+msgstr "渠道是规则发送消息的目的地。密钥经过加密，保存后不会再次显示。"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"A channel is somewhere a message can go: an inbox, a Slack or Discord "
+"channel, a Telegram chat, a phone number, PagerDuty. Add one, then "
+"reference it from rules."
+msgstr ""
+"渠道是消息可以送达的地方：邮箱、Slack 或 Discord 频道、Telegram "
+"聊天、电话号码、PagerDuty。先添加一个，然后在规则中引用它。"
+
+#: src/Api/NotificationChannelsController.php:133
+#: src/Api/NotificationChannelsController.php:176
+msgid "A channel with this name already exists."
+msgstr "已存在同名渠道。"
+
+#: src/Abilities/WriteAbilities.php:436
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
 msgstr "条件规则缺少 \"field\"——指向触发器数据的点路径（使用 get_trigger_schema 查看可用字段）。"
 
-#: src/Api/CredentialsController.php:265
-#: src/Api/CredentialsController.php:314
+#: src/Api/CredentialsController.php:278
+#: src/Api/CredentialsController.php:327
 msgid "A credential with this name already exists."
 msgstr "已存在同名的凭据。"
 
-#: src/Services/Export/BuildImporter.php:269
+#: admin/src/composables/useNotifications.js
+msgid "A delivery that succeeded after at least one failed attempt."
+msgstr "在至少一次失败尝试后成功的投递。"
+
+#: admin/src/composables/useNotifications.js
+msgid "A failed attempt that will be retried, with the time of the next try."
+msgstr "将被重试的失败尝试，附带下次尝试的时间。"
+
+#: src/Services/Export/BuildImporter.php:334
 #. translators: %s: chain name.
 #, php-format
 msgid ""
@@ -354,7 +446,7 @@ msgid ""
 "out."
 msgstr "“%s”中的一跳指向了不在此文件中的 Webhook，已被略过。"
 
-#: src/Services/Export/BuildImporter.php:274
+#: src/Services/Export/BuildImporter.php:339
 #. translators: %s: chain name.
 #, php-format
 msgid ""
@@ -382,6 +474,16 @@ msgid ""
 "invalidated%2$s and all existing integrations using it will stop working."
 msgstr "将生成一个新令牌。当前令牌将%1$s立即失效%2$s，所有使用它的现有集成都将停止工作。"
 
+#: admin/src/components/HealthStatusBar.vue
+msgid "A notification channel is failing:"
+msgstr "某个通知渠道持续失败："
+
+#: src/Services/Export/BuildImporter.php:261
+#. translators: 1: webhook name, 2: error
+#, php-format
+msgid "A notification rule on \"%1$s\" was left out: %2$s"
+msgstr "“%1$s”上的一条通知规则被略过：%2$s"
+
 #: src/Api/WebhooksController.php:570
 msgid "A payload object is required for custom source."
 msgstr "自定义源需要一个数据对象。"
@@ -390,9 +492,16 @@ msgstr "自定义源需要一个数据对象。"
 msgid "A provider and model are required."
 msgstr "必须提供提供商和模型。"
 
-#: src/Api/CredentialsController.php:428
+#: src/Api/CredentialsController.php:441
 msgid "A secret value is required."
 msgstr "密钥值为必填项。"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"A site-wide rule on every success fires for every delivery of every "
+"webhook. A quiet time of one hour per webhook is pre-filled below; consider "
+"a daily digest instead."
+msgstr "针对每次成功的站点级规则会在每个 Webhook 的每次投递时触发。下方已预填每个 Webhook 一小时的静默时间；也可考虑改用每日摘要。"
 
 #: src/Services/GluePermissions.php:193
 msgid ""
@@ -401,9 +510,15 @@ msgid ""
 "to allow it."
 msgstr "能做到这一点的令牌就能在本站点运行任意 PHP，因此默认关闭。要允许，请在“设置”中开启“允许 API 令牌写入 Code Glue”。"
 
-#: src/Abilities/TestAbilities.php:73
+#: src/Abilities/TestAbilities.php:110
 msgid "A url or webhook_id is required."
 msgstr "必须提供 url 或 webhook_id。"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:31
+msgid ""
+"A user, group (-100…) or channel (@name) ID. Send the bot a message first "
+"so it can reach you."
+msgstr "用户、群组（-100…）或频道（@名称）ID。请先给机器人发一条消息，它才能联系到你。"
 
 #: src/Api/ChainsController.php:257
 msgid "A webhook cannot trigger itself."
@@ -461,6 +576,15 @@ msgstr "API 密钥（标头）"
 msgid "API token not found."
 msgstr "未找到 API 令牌。"
 
+#: src/Services/Notifications/Channels/NtfyDriver.php:30
+msgid "Access token"
+msgstr "访问令牌"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:29
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:58
+msgid "Account SID"
+msgstr "Account SID"
+
 #: admin/src/views/ActivityView.vue
 msgid "Action"
 msgstr "操作"
@@ -498,6 +622,10 @@ msgstr "正在启用…"
 #: admin/src/components/AiProviderSettings.vue admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/views/ExternalCronView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue
 msgid "Active"
 msgstr "已激活"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Active for this webhook — click to mute"
+msgstr "对此 Webhook 生效 — 点击静音"
 
 #: admin/src/components/HealthStatusBar.vue
 msgid "Active/Total"
@@ -540,7 +668,7 @@ msgstr "添加映射"
 msgid "Add Webhook"
 msgstr "添加 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:271
+#: src/Abilities/AbilityCatalog.php:366
 msgid "Add a chain link"
 msgstr "添加链环节"
 
@@ -548,7 +676,7 @@ msgstr "添加链环节"
 msgid "Add a credential to securely reuse it across webhooks."
 msgstr "添加凭据，以便在各个 Webhook 中安全地重复使用。"
 
-#: src/Abilities/AbilityCatalog.php:272
+#: src/Abilities/AbilityCatalog.php:367
 msgid ""
 "Add a source→target edge to a chain. Rejected if it would create a cycle "
 "across any chain."
@@ -561,6 +689,10 @@ msgid ""
 "to another connected provider."
 msgstr "为一个或多个提供商添加 API 密钥。优先使用当前启用的提供商；如果其被限流或失败，代理会自动切换到另一个已连接的提供商。"
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Add an email, Slack, Telegram or SMS channel"
+msgstr "添加邮件、Slack、Telegram 或短信渠道"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "Add condition"
 msgstr "添加条件"
@@ -568,6 +700,10 @@ msgstr "添加条件"
 #: admin/src/components/AiStepControls.vue
 msgid "Add credential & retry"
 msgstr "添加凭据并重试"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Add first channel"
+msgstr "添加第一个渠道"
 
 #: admin/src/views/VaultView.vue
 msgid "Add first credential"
@@ -643,6 +779,33 @@ msgstr "代理版"
 msgid "Agent (AI)"
 msgstr "Agent（AI）"
 
+#: src/Abilities/AbilityCatalog.php:247
+msgid ""
+"Alert someone when a delivery reaches a state. event: success | recovered | "
+"failed_attempt | retry_scheduled | permanently_failed | skipped. webhook_id "
+"scopes the rule to one webhook (use {{step_N.id}} for a webhook created "
+"earlier in the plan); omit it for a site-wide rule. channel_ids come from "
+"list_notification_channels. filters (all optional): attempts [1,3] (which "
+"attempt numbers), http_codes [\"5xx\",\"429\",\"transport\"], reason "
+"exhausted|non_retryable (permanently_failed only), triggers "
+"[\"woocommerce_*\"], only_after_retry, include_tests. template (optional) = "
+"{subject, title, body, short} using {{ path | modifier }} placeholders — "
+"see the NOTIFICATION TEMPLATES section; unknown paths are rejected with the "
+"list of what is available, so read get_trigger_schema first. "
+"throttle_seconds quiets repeats per webhook; digest hourly|daily batches "
+"them."
+msgstr ""
+"当投递进入某个状态时提醒某人。event：success | recovered | failed_attempt | retry_scheduled "
+"| permanently_failed | skipped。webhook_id 将规则限定到一个 Webhook（对计划中先前创建的 "
+"Webhook 使用 {{step_N.id}}）；站点级规则则省略它。channel_ids 来自 "
+"list_notification_channels。filters（均可选）：attempts [1,3]（哪些尝试次数）、http_codes "
+"[\"5xx\",\"429\",\"transport\"]、reason exhausted|non_retryable（仅限 "
+"permanently_failed）、triggers "
+"[\"woocommerce_*\"]、only_after_retry、include_tests。template（可选）= {subject, "
+"title, body, short}，使用 {{ path | modifier }} 占位符 — 见 NOTIFICATION TEMPLATES "
+"一节；未知路径会被拒绝并返回可用路径列表，因此请先读取 get_trigger_schema。throttle_seconds 按 Webhook "
+"抑制重复；digest hourly|daily 将其批量汇总。"
+
 #: admin/src/views/ActivityView.vue
 msgid "All actions"
 msgstr "所有操作"
@@ -659,9 +822,13 @@ msgstr "所有日志已清除"
 msgid "All logs have been cleared."
 msgstr "所有日志已清除。"
 
-#: admin/src/views/LogsList.vue
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/views/LogsList.vue
 msgid "All statuses"
 msgstr "所有状态"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Also for test dispatches"
+msgstr "测试发送时同样适用"
 
 #: admin/src/components/RotateTokenDialog.vue
 msgid "Also update expiry"
@@ -685,13 +852,33 @@ msgstr "%1$sagent%2$s API 令牌可以将凭据分配给 Webhook，但绝不能�
 msgid "An API key is required to connect this provider."
 msgstr "连接此提供商需要 API 密钥。"
 
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:34
+msgid ""
+"An approved template from Twilio → Content Template Builder. Required "
+"outside the 24-hour window."
+msgstr "来自 Twilio → Content Template Builder 的已审核模板。24 小时窗口之外必须提供。"
+
 #: admin/src/components/ShareBuildDialog.vue
 msgid "Anonymize my site address"
 msgstr "匿名化我的站点地址"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Any"
+msgstr "任意"
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"Any single failed attempt, before retries are exhausted. Filter by attempt "
+"number or HTTP code."
+msgstr "重试用尽之前的任意一次失败尝试。可按尝试次数或 HTTP 状态码筛选。"
+
 #: admin/src/components/ui/UpgradeBadge.vue
 msgid "Any unsaved changes on this form will be lost."
 msgstr "此表单上任何未保存的更改都将丢失。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Append the standard facts (webhook, trigger, attempt, HTTP, error, log link)"
+msgstr "附加标准信息（Webhook、触发器、尝试、HTTP、错误、日志链接）"
 
 #: admin/src/components/WebhookForm.vue
 msgid ""
@@ -713,6 +900,25 @@ msgstr "此站点不支持应用程序密码。需要 HTTPS（或本地开发环
 msgid "Application Passwords require WordPress 5.6 or newer."
 msgstr "应用程序密码需要 WordPress 5.6 或更高版本。"
 
+#: src/Services/Notifications/Channels/PushoverDriver.php:27
+#: src/Services/Notifications/Channels/PushoverDriver.php:41
+msgid "Application token"
+msgstr "应用令牌"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Applies to every webhook that inherits site-wide rules."
+msgstr "适用于所有继承站点级规则的 Webhook。"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Applies to this webhook only."
+msgstr "仅适用于此 Webhook。"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid ""
+"Apply to every webhook set to inherit. A webhook can mute any of them "
+"individually."
+msgstr "适用于所有设为继承的 Webhook。每个 Webhook 可以单独静音其中任一条。"
+
 #: admin/src/views/SettingsView.vue
 msgid "Archive logs before deletion"
 msgstr "删除前归档日志"
@@ -733,11 +939,15 @@ msgid ""
 "on a delivery that failed."
 msgstr "让智能体修复载荷——它现在能看到这个响应——然后重试。跳过会让计划的其余部分（包括上线）在一次失败的投递上继续执行。"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Ask the site's AI provider to write this message from the captured payload"
+msgstr "让站点的 AI 服务商根据已捕获的数据撰写此消息"
+
 #: src/Abilities/GlueAbilities.php:126
 msgid "Assign a Code Glue snippet to a webhook"
 msgstr "将 Code Glue 代码片段分配给 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:227
+#: src/Abilities/AbilityCatalog.php:322
 msgid "Assign a vault credential to a webhook"
 msgstr "将保险库凭据分配给 Webhook"
 
@@ -756,6 +966,12 @@ msgstr ""
 "异步：进入队列并在下次 cron 运行时在后台投递，自动重试 — 不会拖慢触发请求，但在 cron "
 "正常运行之前不会发送任何内容。同步：立即投递，在触发请求内完成 — 无需 cron 即可工作，代价是略微增加延迟。切换开关即可更换。"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"At most one message per webhook in this window; the rest are recorded as "
+"throttled."
+msgstr "此时间窗内每个 Webhook 最多一条消息；其余记录为已限流。"
+
 #: src/Abilities/GlueAbilities.php:127
 msgid ""
 "Attach a snippet to a webhook+trigger and enable it: stage \"pre\" "
@@ -771,6 +987,10 @@ msgstr ""
 "需要确认；附加到仍处于禁用、正在构建的 Webhook 则无需确认。传 snippet_id 0 可取消分配，传 enabled false "
 "可保持分配但暂停。"
 
+#: src/Services/Notifications/MessageBuilder.php:126
+msgid "Attempt"
+msgstr "尝试"
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempt #%d"
 msgstr "第 #%d 次尝试"
@@ -779,13 +999,30 @@ msgstr "第 #%d 次尝试"
 msgid "Attempt %1$d/%2$d"
 msgstr "第 %1$d/%2$d 次尝试"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Attempt 1 is the first try. Leave empty to fire on every failed attempt."
+msgstr "尝试 1 是第一次尝试。留空则每次失败尝试都触发。"
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempt History"
 msgstr "尝试历史"
 
+#: src/Services/Notifications/TemplateContext.php:117
+msgid "Attempt failed"
+msgstr "尝试失败"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Attempt number is"
+msgstr "尝试次数为"
+
 #: admin/src/components/LogsTable.vue
 msgid "Attempted At"
 msgstr "尝试时间"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:30
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:62
+msgid "Auth token"
+msgstr "Auth Token"
 
 #: src/Api/AuthHelper.php:42
 msgid ""
@@ -798,6 +1035,10 @@ msgstr ""
 #: admin/src/components/WebhookForm.vue
 msgid "Authorization (optional)"
 msgstr "授权（可选）"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:32
+msgid "Authorization (vault credential)"
+msgstr "Authorization（保险库凭据）"
 
 #: src/Api/WebhookSchema.php:51
 msgid "Authorization header value."
@@ -845,6 +1086,10 @@ msgstr "平均 ping"
 msgid "Avg response"
 msgstr "平均响应"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Back to the default message"
+msgstr "恢复默认消息"
+
 #: admin/src/views/WebhookEdit.vue admin/src/views/WebhookLogs.vue
 msgid "Back to webhooks"
 msgstr "返回 Webhook 列表"
@@ -881,7 +1126,7 @@ msgstr "Basic 认证"
 msgid "Basic auth (user + password)"
 msgstr "Basic 认证（用户名 + 密码）"
 
-#: src/Api/CredentialsController.php:417
+#: src/Api/CredentialsController.php:430
 msgid "Basic auth requires a username and password."
 msgstr "Basic 认证需要用户名和密码。"
 
@@ -892,6 +1137,19 @@ msgstr "Bearer 令牌"
 #: admin/src/views/VaultView.vue
 msgid "Bearer token (PAT)"
 msgstr "Bearer 令牌（PAT）"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Body"
+msgstr "正文"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:28
+msgid "Bot name"
+msgstr "机器人名称"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:30
+#: src/Services/Notifications/Channels/TelegramDriver.php:38
+msgid "Bot token"
+msgstr "机器人令牌"
 
 #: src/Api/ChainsController.php:254
 msgid "Both source_webhook_id and target_webhook_id are required."
@@ -935,6 +1193,14 @@ msgid ""
 "The test step checks it against your endpoint."
 msgstr "基于参考载荷构建——结构是真实的，数值是我们的。测试步骤会用你的端点检查它。"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Bundle into a daily digest"
+msgstr "汇总为每日摘要"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Bundle into an hourly digest"
+msgstr "汇总为每小时摘要"
+
 #: admin/src/views/ProView.vue
 msgid "Business"
 msgstr "商业版"
@@ -952,7 +1218,19 @@ msgstr ""
 "默认情况下，加密密钥会生成并存储在数据库中。为获得更强的保护 — 使仅有数据库转储无法解密密钥 — 请将密钥移入 "
 "%1$swp-config.php%2$s："
 
-#: admin/src/components/AiProviderSettings.vue admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/ExportDialog.vue admin/src/components/ImportDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/ShareBuildDialog.vue admin/src/components/WebhookForm.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:34
+msgid "By event (permanent failure = critical, attempt = warning)"
+msgstr "按事件（永久失败 = 严重，尝试 = 警告）"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:31
+msgid "By severity (failures high, success low)"
+msgstr "按严重程度（失败为高，成功为低）"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:29
+msgid "CC"
+msgstr "抄送"
+
+#: admin/src/components/AiProviderSettings.vue admin/src/components/ChangeExpiryDialog.vue admin/src/components/CreateTokenDialog.vue admin/src/components/ExportDialog.vue admin/src/components/ImportDialog.vue admin/src/components/LogsTable.vue admin/src/components/RotateTokenDialog.vue admin/src/components/ShareBuildDialog.vue admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RuleEditor.vue admin/src/components/notifications/RulesPanel.vue admin/src/components/ui/UpgradeBadge.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/SettingsView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Cancel"
 msgstr "取消"
 
@@ -1070,7 +1348,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "链名称"
 
-#: src/Abilities/WriteAbilities.php:207
+#: src/Abilities/WriteAbilities.php:308
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -1083,6 +1361,12 @@ msgstr "链名称为必填项。"
 msgid "Chain not found."
 msgstr "未找到链。"
 
+#: src/Services/Notifications/TemplateContext.php:142
+#. translators: 1: chain name, 2: source webhook name, 3: target webhook name
+#, php-format
+msgid "Chain: %1$s (%2$s → %3$s)"
+msgstr "链：%1$s（%2$s → %3$s）"
+
 #: admin/src/views/ActivityView.vue
 msgid "Chains"
 msgstr "链"
@@ -1090,6 +1374,13 @@ msgstr "链"
 #: admin/src/components/ExportDialog.vue
 msgid "Chains (member webhooks included automatically)"
 msgstr "链（自动包含其中的 Webhook）"
+
+#: src/Abilities/AbilityCatalog.php:282
+msgid ""
+"Change a notification rule: its event, channels, filters, template, "
+"throttle, digest or enabled state. Same fields as create_notification_rule "
+"plus id."
+msgstr "修改通知规则：其事件、渠道、筛选条件、模板、限流、摘要或启用状态。字段与 create_notification_rule 相同，外加 id。"
 
 #: admin/src/views/ApiTokensView.vue
 msgid "Change expiry"
@@ -1112,6 +1403,44 @@ msgstr "更改此配置的内容（添加或移除 webhook），即可将其作�
 #: admin/src/views/ActivityView.vue
 msgid "Changes"
 msgstr "更改"
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:29 admin/src/components/notifications/NotificationLogTable.vue
+msgid "Channel"
+msgstr "渠道"
+
+#: src/Services/Notifications/NotificationSender.php:60
+msgid "Channel is disabled."
+msgstr "渠道已禁用。"
+
+#: src/Api/NotificationChannelsController.php:126
+#: src/Api/NotificationChannelsController.php:173
+msgid "Channel name is required."
+msgstr "渠道名称为必填项。"
+
+#: src/Services/Notifications/NotificationSender.php:55
+msgid "Channel no longer exists."
+msgstr "渠道已不存在。"
+
+#: src/Api/NotificationChannelsController.php:390
+msgid "Channel not found."
+msgstr "未找到渠道。"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:22
+msgid "Channel webhook URL from Discord → Integrations. Posts an embed."
+msgstr "来自 Discord → 整合 的频道 Webhook URL。以嵌入消息（embed）形式发布。"
+
+#: admin/src/views/NotificationsView.vue
+msgid "Channels"
+msgstr "渠道"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Chat"
+msgstr "聊天"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:31
+#: src/Services/Notifications/Channels/TelegramDriver.php:42
+msgid "Chat ID"
+msgstr "聊天 ID"
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid "Checking whether the page is live…"
@@ -1195,6 +1524,10 @@ msgstr ""
 msgid "Code Glue — PHP snippets before and after dispatch"
 msgstr "Code Glue——发送前后运行的 PHP 代码片段"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Comma-separated hook names; * matches anything."
+msgstr "以逗号分隔的钩子名称；* 匹配任意内容。"
+
 #: src/Api/TriggersController.php:144
 msgid "Comments"
 msgstr "评论"
@@ -1213,7 +1546,7 @@ msgid ""
 "against' toggle above to choose original or transformed."
 msgstr "条件根据数据进行评估 — 使用上方的“评估条件依据”开关选择原始或转换后。"
 
-#: src/Api/LogsController.php:405
+#: src/Api/LogsController.php:413
 msgid "Conditions are not met with current settings — event would be skipped."
 msgstr "当前设置不满足条件 — 事件将被跳过。"
 
@@ -1233,6 +1566,10 @@ msgstr "连接"
 msgid "Connect an AI provider"
 msgstr "连接 AI 提供商"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Connect an AI provider under Build with AI to draft messages"
+msgstr "在“用 AI 构建”中连接 AI 服务商以起草消息"
+
 #: admin/src/views/AiBuilderView.vue
 msgid "Connect your own key"
 msgstr "连接你自己的密钥"
@@ -1244,6 +1581,10 @@ msgstr "连接你自己的服务商，或添加 Pro 积分，以继续构建。"
 #: admin/src/components/BuildPublishFields.vue
 msgid "Connects WordPress to a named service — a CRM, a spreadsheet, a chat app."
 msgstr "把 WordPress 连接到某个具体服务——CRM、电子表格或聊天工具。"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:34
+msgid "Content Template SID"
+msgstr "Content Template SID"
 
 #: admin/src/components/AiStepControls.vue
 msgid "Continue"
@@ -1419,11 +1760,11 @@ msgstr "创建 WP 应用程序密码"
 msgid "Create a WP Application Password for me"
 msgstr "为我创建 WP 应用程序密码"
 
-#: src/Abilities/AbilityCatalog.php:242
+#: src/Abilities/AbilityCatalog.php:337
 msgid "Create a WordPress Application Password credential"
 msgstr "创建 WordPress 应用程序密码凭据"
 
-#: src/Abilities/AbilityCatalog.php:257
+#: src/Abilities/AbilityCatalog.php:352
 msgid ""
 "Create a named chain that wires 2xx completions of one webhook to "
 "downstream webhooks."
@@ -1441,6 +1782,10 @@ msgstr ""
 "创建新的 Webhook（始终以“已禁用”状态创建，直到用户启用）。请提供 name、endpoint_url、http_method 和 "
 "triggers。"
 
+#: src/Abilities/AbilityCatalog.php:246
+msgid "Create a notification rule"
+msgstr "创建通知规则"
+
 #: admin/src/views/ApiTokensView.vue
 msgid "Create a token to enable programmatic API access."
 msgstr "创建令牌以启用程序化 API 访问。"
@@ -1449,7 +1794,7 @@ msgstr "创建令牌以启用程序化 API 访问。"
 msgid "Create a webhook"
 msgstr "创建 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:256
+#: src/Abilities/AbilityCatalog.php:351
 msgid "Create a webhook chain"
 msgstr "创建 Webhook 链"
 
@@ -1459,6 +1804,10 @@ msgid ""
 "chains, credentials and delivery logs."
 msgstr "创建和管理出站 Webhook：触发器、字段映射、条件、链、凭据和投递日志。"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Create channel"
+msgstr "创建渠道"
+
 #: admin/src/views/VaultView.vue
 msgid "Create credential"
 msgstr "创建凭据"
@@ -1466,6 +1815,10 @@ msgstr "创建凭据"
 #: admin/src/views/ApiTokensView.vue
 msgid "Create first token"
 msgstr "创建第一个令牌"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Create rule"
+msgstr "创建规则"
 
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Create token"
@@ -1487,11 +1840,11 @@ msgstr "已创建“%s”"
 msgid "Creating…"
 msgstr "正在创建…"
 
-#: src/Api/WebhookSchema.php:137
+#: src/Api/WebhookSchema.php:150
 msgid "Creation date."
 msgstr "创建日期。"
 
-#: src/Abilities/TestAbilities.php:292
+#: src/Abilities/TestAbilities.php:329
 msgid "Credential could not be decrypted."
 msgstr "无法解密凭据。"
 
@@ -1507,14 +1860,14 @@ msgstr "凭据名称（例如 WP REST admin）"
 msgid "Credential name (e.g. n8n auth)"
 msgstr "凭据名称（例如 n8n auth）"
 
-#: src/Api/CredentialsController.php:257
-#: src/Api/CredentialsController.php:311
+#: src/Api/CredentialsController.php:270
+#: src/Api/CredentialsController.php:324
 msgid "Credential name is required."
 msgstr "凭据名称为必填项。"
 
-#: src/Abilities/TestAbilities.php:288
+#: src/Abilities/TestAbilities.php:325
 #: src/Abilities/WriteAbilities.php:188
-#: src/Api/CredentialsController.php:459
+#: src/Api/CredentialsController.php:472
 msgid "Credential not found."
 msgstr "未找到凭据。"
 
@@ -1554,7 +1907,7 @@ msgstr "Cron 令牌已重新生成。请使用新命令更新你的 crontab。"
 msgid "Crontab Command"
 msgstr "Crontab 命令"
 
-#: src/Api/LogsController.php:529
+#: src/Api/LogsController.php:537
 msgid "Current page of results."
 msgstr "结果的当前页。"
 
@@ -1626,9 +1979,13 @@ msgstr "延迟均匀增长：n × 基础秒数"
 msgid "Delay preview"
 msgstr "延迟预览"
 
-#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/LogsTable.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
 msgid "Delete"
 msgstr "删除"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete \"%s\"? Its secret is erased and cannot be recovered."
+msgstr "删除“%s”？其密钥将被抹除且无法恢复。"
 
 #: admin/src/views/SettingsView.vue
 msgid "Delete All Logs"
@@ -1642,9 +1999,13 @@ msgstr "删除旧活动"
 msgid "Delete a Code Glue snippet"
 msgstr "删除 Code Glue 代码片段"
 
-#: src/Abilities/AbilityCatalog.php:346
+#: src/Abilities/AbilityCatalog.php:441
 msgid "Delete a webhook"
 msgstr "删除 Webhook"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete anyway"
+msgstr "仍然删除"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Delete build"
@@ -1657,6 +2018,10 @@ msgstr "删除链"
 #: admin/src/views/WebhooksList.vue
 msgid "Delete chain “%s”?"
 msgstr "删除链“%s”？"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Delete channel?"
+msgstr "删除渠道？"
 
 #: admin/src/views/VaultView.vue
 msgid "Delete credential"
@@ -1685,6 +2050,10 @@ msgstr "删除早于指定天数的日志。"
 #: admin/src/views/ActivityView.vue
 msgid "Delete old"
 msgstr "删除旧记录"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Delete rule?"
+msgstr "删除规则？"
 
 #: admin/src/components/AiBuildsBar.vue
 msgid "Delete this build"
@@ -1715,9 +2084,13 @@ msgid_plural ""
 "send no Authorization header until reconfigured."
 msgstr[0] "强制删除会将其从 %d 个 Webhook 分离；在重新配置之前，这些 Webhook 将不发送 Authorization 标头。"
 
-#: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Deleting…"
 msgstr "正在删除…"
+
+#: src/Services/Notifications/TemplateContext.php:115
+msgid "Delivered"
+msgstr "已送达"
 
 #: admin/src/views/ProView.vue
 msgid "Delivery logs & replay"
@@ -1784,9 +2157,17 @@ msgid ""
 "makes a shared build understandable to someone else."
 msgstr "说明会随配置一同传递，也会保存在这里——正是它让别人能看懂你分享的配置。"
 
-#: src/Abilities/TestAbilities.php:89
+#: src/Abilities/TestAbilities.php:126
 msgid "Destructive probe methods (PUT, PATCH, DELETE) require confirmation."
 msgstr "破坏性探测方法（PUT、PATCH、DELETE）需要确认。"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:29
+msgid "Device"
+msgstr "设备"
+
+#: src/Services/Notifications/DigestFlusher.php:150 admin/src/components/notifications/RuleEditor.vue
+msgid "Digest"
+msgstr "摘要"
 
 #: admin/src/components/WebhookCardContent.vue admin/src/views/SettingsView.vue
 msgid "Disabled"
@@ -1801,6 +2182,10 @@ msgstr "已禁用的 Webhook 仍会捕获数据示例，以供映射和条件配
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Discard"
 msgstr "放弃"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:18
+msgid "Discord"
+msgstr "Discord"
 
 #: admin/src/App.vue
 msgid "Dismiss"
@@ -1852,6 +2237,18 @@ msgid ""
 "(no trigger assigned)."
 msgstr "失去唯一触发器的下游 Webhook 将被标记为孤立（未分配触发器）。"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Draft"
+msgstr "草稿"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Draft with AI"
+msgstr "用 AI 起草"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Drafting…"
+msgstr "正在起草…"
+
 #: admin/src/components/ImportDialog.vue
 msgid "Drop a build JSON here, or click to browse"
 msgstr "将配置 JSON 拖到此处，或点击浏览"
@@ -1868,7 +2265,7 @@ msgstr "到期"
 msgid "Due Now"
 msgstr "现在到期"
 
-#: admin/src/components/LogsTable.vue
+#: src/Services/Notifications/MessageBuilder.php:132 admin/src/components/LogsTable.vue
 msgid "Duration"
 msgstr "耗时"
 
@@ -1876,11 +2273,11 @@ msgstr "耗时"
 msgid "Dynamic URL templates resolved from the payload"
 msgstr "从载荷解析的动态 URL 模板"
 
-#: src/Abilities/WriteAbilities.php:327
+#: src/Abilities/WriteAbilities.php:428
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "每条条件规则必须是 {field, operator, value} 对象。"
 
-#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue
+#: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue
 msgid "Edit"
 msgstr "编辑"
 
@@ -1892,19 +2289,31 @@ msgstr "编辑 Webhook"
 msgid "Edit chain"
 msgstr "编辑链"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Edit channel"
+msgstr "编辑渠道"
+
 #: admin/src/views/VaultView.vue
 msgid "Edit credential"
 msgstr "编辑凭据"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Edit rule"
+msgstr "编辑规则"
 
 #: admin/src/components/ImportDialog.vue
 msgid "Edit “%s”"
 msgstr "编辑“%s”"
 
-#: src/Abilities/AbilityCatalog.php:331
+#: src/Services/Notifications/Channels/EmailDriver.php:19
+msgid "Email"
+msgstr "邮件"
+
+#: src/Abilities/AbilityCatalog.php:426
 msgid "Enable (go live) or disable a webhook. Enabling requires confirmation."
 msgstr "启用（上线）或禁用 Webhook。启用需要确认。"
 
-#: src/Abilities/AbilityCatalog.php:330
+#: src/Abilities/AbilityCatalog.php:425
 msgid "Enable / disable a webhook"
 msgstr "启用 / 禁用 Webhook"
 
@@ -1927,6 +2336,10 @@ msgstr "启用条件投递"
 #: admin/src/components/BuiltWebhookActions.vue
 msgid "Enable webhook"
 msgstr "启用 Webhook"
+
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Enabled"
+msgstr "已启用"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Enabled Webhook"
@@ -1960,7 +2373,7 @@ msgstr "按 Enter 开始构建，Shift+Enter 换行。"
 msgid "Enter your license key to unlock Pro features on this site."
 msgstr "输入你的许可证密钥以在本站点解锁 Pro 功能。"
 
-#: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:94 src/Services/Notifications/MessageBuilder.php:135 admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue
 msgid "Error"
 msgstr "错误"
 
@@ -1975,6 +2388,10 @@ msgstr "错误"
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Evaluate conditions against"
 msgstr "评估条件依据"
+
+#: src/Services/Notifications/MessageBuilder.php:141 admin/src/components/notifications/NotificationLogTable.vue
+msgid "Event"
+msgstr "事件"
 
 #: admin/src/views/WebhookLogs.vue
 msgid "Event Replayed"
@@ -1992,9 +2409,21 @@ msgstr "事件 UUID："
 msgid "Event replayed"
 msgstr "事件已重放"
 
-#: src/App.php:133
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:26
+msgid ""
+"Events API v2 integration key. Failures open an incident; a later success "
+"resolves it."
+msgstr "Events API v2 集成密钥。失败会创建事件（incident）；之后的成功会将其解决。"
+
+#: src/App.php:137
 msgid "Every Minute"
 msgstr "每分钟"
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"Every successful delivery. Noisy on a busy site — combine with a throttle "
+"or a digest."
+msgstr "每次成功的投递。在繁忙站点上会很嘈杂 — 请搭配限流或摘要使用。"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "Every time a WooCommerce order is completed, post the line items to Airtable"
@@ -2117,6 +2546,10 @@ msgstr "外部 Cron 历史"
 msgid "Extra credits (never expire)"
 msgstr "额外积分（永不过期）"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
+msgid "Extra headers"
+msgstr "额外标头"
+
 #: src/Api/WebhookSchema.php:68
 msgid "Extra request headers as key-value pairs."
 msgstr "作为键值对的额外请求标头。"
@@ -2125,7 +2558,7 @@ msgstr "作为键值对的额外请求标头。"
 msgid "Fail"
 msgstr "失败"
 
-#: admin/src/components/TestWebhookDrawer.vue
+#: admin/src/components/TestWebhookDrawer.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Failed"
 msgstr "失败"
 
@@ -2137,18 +2570,26 @@ msgstr "创建 API 令牌失败。"
 msgid "Failed to create chain link (it may already exist)."
 msgstr "创建链接失败（它可能已存在）。"
 
-#: src/Abilities/WriteAbilities.php:233
+#: src/Abilities/WriteAbilities.php:334
 msgid "Failed to create chain link."
 msgstr "创建链环节失败。"
 
-#: src/Abilities/WriteAbilities.php:215
+#: src/Abilities/WriteAbilities.php:316
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "创建链失败。"
 
-#: src/Api/CredentialsController.php:284
+#: src/Api/NotificationChannelsController.php:150
+msgid "Failed to create channel."
+msgstr "创建渠道失败。"
+
+#: src/Api/CredentialsController.php:297
 msgid "Failed to create credential."
 msgstr "创建凭据失败。"
+
+#: src/Api/NotificationRulesController.php:129
+msgid "Failed to create rule."
+msgstr "创建规则失败。"
 
 #: src/Abilities/GlueAbilities.php:231
 #: src/Api/SnippetsController.php:176
@@ -2164,11 +2605,15 @@ msgstr "创建 Webhook 失败。"
 msgid "Failed to delete API token."
 msgstr "删除 API 令牌失败。"
 
-#: src/Api/CredentialsController.php:396
+#: src/Api/NotificationChannelsController.php:248
+msgid "Failed to delete channel."
+msgstr "删除渠道失败。"
+
+#: src/Api/CredentialsController.php:409
 msgid "Failed to delete credential."
 msgstr "删除凭据失败。"
 
-#: src/Api/LogsController.php:270
+#: src/Api/LogsController.php:278
 msgid "Failed to delete log."
 msgstr "删除日志失败。"
 
@@ -2176,11 +2621,15 @@ msgstr "删除日志失败。"
 msgid "Failed to delete queue job."
 msgstr "删除队列任务失败。"
 
+#: src/Api/NotificationRulesController.php:175
+msgid "Failed to delete rule."
+msgstr "删除规则失败。"
+
 #: src/Api/SchemasController.php:371
 msgid "Failed to delete schema."
 msgstr "删除架构失败。"
 
-#: src/Abilities/WriteAbilities.php:260
+#: src/Abilities/WriteAbilities.php:361
 #: src/Api/WebhooksController.php:470
 msgid "Failed to delete webhook."
 msgstr "删除 Webhook 失败。"
@@ -2221,7 +2670,7 @@ msgstr "重命名链失败。"
 msgid "Failed to reset capture."
 msgstr "重置捕获失败。"
 
-#: src/Api/LogsController.php:344
+#: src/Api/LogsController.php:352
 msgid "Failed to retry job."
 msgstr "重试任务失败。"
 
@@ -2256,6 +2705,14 @@ msgstr "存储提供商密钥失败。"
 #: src/Api/WebhooksController.php:512
 msgid "Failed to toggle webhook status."
 msgstr "切换 Webhook 状态失败。"
+
+#: src/Api/NotificationChannelsController.php:217
+msgid "Failed to update channel."
+msgstr "更新渠道失败。"
+
+#: src/Api/NotificationRulesController.php:159
+msgid "Failed to update rule."
+msgstr "更新规则失败。"
 
 #: src/Api/SchemasController.php:323
 msgid "Failed to update schema."
@@ -2292,7 +2749,7 @@ msgstr "按 X-Webhook-ID 筛选…"
 msgid "Filter by action prefix (e.g. \"webhook\")."
 msgstr "按操作前缀筛选（例如“webhook”）。"
 
-#: src/Api/LogsController.php:563
+#: src/Api/LogsController.php:571
 msgid "Filter by event UUID (exact match)."
 msgstr "按事件 UUID 筛选（精确匹配）。"
 
@@ -2304,11 +2761,11 @@ msgstr "按事件 UUID 筛选…"
 msgid "Filter by exact action string."
 msgstr "按精确的操作字符串筛选。"
 
-#: src/Api/LogsController.php:546
+#: src/Api/LogsController.php:554
 msgid "Filter by status."
 msgstr "按状态筛选。"
 
-#: src/Api/LogsController.php:567
+#: src/Api/LogsController.php:575
 msgid "Filter by target URL (partial match)."
 msgstr "按目标 URL 筛选（部分匹配）。"
 
@@ -2316,16 +2773,16 @@ msgstr "按目标 URL 筛选（部分匹配）。"
 msgid "Filter by target URL…"
 msgstr "按目标 URL 筛选…"
 
-#: src/Api/LogsController.php:551
+#: src/Api/LogsController.php:559
 msgid "Filter by trigger name."
 msgstr "按触发器名称筛选。"
 
 #: src/Api/LogsController.php:134
-#: src/Api/LogsController.php:542
+#: src/Api/LogsController.php:550
 msgid "Filter by webhook ID."
 msgstr "按 Webhook ID 筛选。"
 
-#: src/Api/LogsController.php:571
+#: src/Api/LogsController.php:579
 msgid "Filter by webhook UUID (X-Webhook-Id header value)."
 msgstr "按 Webhook UUID（X-Webhook-Id 标头值）筛选。"
 
@@ -2333,11 +2790,11 @@ msgstr "按 Webhook UUID（X-Webhook-Id 标头值）筛选。"
 msgid "Filter from UTC datetime (Y-m-d H:i:s)."
 msgstr "从 UTC 日期时间筛选（Y-m-d H:i:s）。"
 
-#: src/Api/LogsController.php:555
+#: src/Api/LogsController.php:563
 msgid "Filter logs from this date."
 msgstr "从该日期筛选日志。"
 
-#: src/Api/LogsController.php:559
+#: src/Api/LogsController.php:567
 msgid "Filter logs until this date."
 msgstr "筛选日志至该日期。"
 
@@ -2348,6 +2805,10 @@ msgstr "筛选至 UTC 日期时间（Y-m-d H:i:s）。"
 #: admin/src/views/VaultView.vue
 msgid "Finish moving the key into wp-config.php"
 msgstr "完成将密钥移入 wp-config.php"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Fire only for this webhook, on top of whatever site-wide rules it inherits."
+msgstr "仅对此 Webhook 触发，在其继承的站点级规则之外。"
 
 #: admin/src/components/AiStepControls.vue
 msgid ""
@@ -2385,6 +2846,10 @@ msgstr "为确保 Webhook 可靠投递，请设置系统 cron 任务每分钟处
 msgid "Force delete & detach"
 msgstr "强制删除并分离"
 
+#: src/Services/Notifications/Channels/TelegramDriver.php:32
+msgid "Forum topic (message_thread_id), optional."
+msgstr "论坛话题（message_thread_id），可选。"
+
 #: admin/src/components/AiProviderSettings.vue admin/src/views/AiBuilderView.vue
 msgid "Free trial"
 msgstr "免费试用"
@@ -2393,6 +2858,11 @@ msgstr "免费试用"
 msgid "Free trial — starts with your first prompt"
 msgstr "免费试用——从你的第一条提示开始"
 
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:31
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:66
+msgid "From"
+msgstr "发件人"
+
 #: admin/src/views/ActivityView.vue
 msgid "From date"
 msgstr "起始日期"
@@ -2400,6 +2870,10 @@ msgstr "起始日期"
 #: admin/src/views/LogsList.vue admin/src/views/QueueView.vue
 msgid "From date & time"
 msgstr "起始日期和时间"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:30
+msgid "From name"
+msgstr "发件人名称"
 
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Full"
@@ -2432,6 +2906,10 @@ msgstr "GET Webhook、日志、队列、健康状况、触发器、架构"
 #: admin/src/components/CreateTokenDialog.vue
 msgid "Generate a new API token for programmatic access."
 msgstr "生成新的 API 令牌以进行程序化访问。"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:22
+msgid "Generic webhook"
+msgstr "通用 Webhook"
 
 #: admin/src/views/ProView.vue
 msgid "Get Pro"
@@ -2475,6 +2953,16 @@ msgstr "获取触发器的已捕获数据 + 映射"
 msgid "Get delivery logs"
 msgstr "获取投递日志"
 
+#: admin/src/views/NotificationsView.vue
+msgid ""
+"Get told when a delivery fails, retries, gives up or comes back — by email, "
+"Slack, Discord, Telegram, Teams, SMS, PagerDuty and more. Rules decide when "
+"and where; channels are the destinations; every message is a template you "
+"can edit or let the AI draft."
+msgstr ""
+"当投递失败、重试、放弃或恢复时收到通知 — 通过邮件、Slack、Discord、Telegram、Teams、短信、PagerDuty "
+"等。规则决定何时与何处；渠道是目的地；每条消息都是一个可编辑或由 AI 起草的模板。"
+
 #: src/Api/PublishBuildController.php:103
 msgid "Give the build a title."
 msgstr "给这个构建起个标题。"
@@ -2497,6 +2985,10 @@ msgstr "前往 Pro"
 msgid "Go to Queue"
 msgstr "前往队列"
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:18
+msgid "Google Chat"
+msgstr "Google Chat"
+
 #: admin/src/views/SettingsView.vue
 msgid "Greyed out because this site sets DISALLOW_FILE_EDIT — see the notice above."
 msgstr "已置灰，因为本站点设置了 DISALLOW_FILE_EDIT——见上方通知。"
@@ -2514,6 +3006,10 @@ msgid "Group matches example payload: %1$s (based on %2$d rule)"
 msgid_plural "Group matches example payload: %1$s (based on %2$d rules)"
 msgstr[0] "组与示例数据匹配：%1$s（基于 %2$d 条规则）"
 
+#: src/Services/Notifications/MessageBuilder.php:129
+msgid "HTTP"
+msgstr "HTTP"
+
 #: admin/src/components/LogsTable.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/TestWebhookDrawer.vue
 msgid "HTTP %s"
 msgstr "HTTP %s"
@@ -2529,6 +3025,10 @@ msgstr "HTTP 方法"
 #: src/Api/WebhookSchema.php:61
 msgid "HTTP method used for delivery."
 msgstr "用于投递的 HTTP 方法。"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "HTTP response is"
+msgstr "HTTP 响应为"
 
 #: admin/src/components/ui/UpgradeBadge.vue
 msgid "Head to the Pro tab?"
@@ -2566,6 +3066,10 @@ msgstr "隐藏密码"
 msgid "Hide secret"
 msgstr "隐藏密钥"
 
+#: src/Services/Notifications/Channels/PushoverDriver.php:35
+msgid "High"
+msgstr "高"
+
 #: admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Hint"
 msgstr "提示"
@@ -2602,6 +3106,12 @@ msgid ""
 "auth_header."
 msgstr "用于授权的保险库凭据 ID。优先于 auth_header。"
 
+#: src/Api/WebhookSchema.php:138
+msgid ""
+"IDs of site-wide notification rules muted for this webhook (inherit mode "
+"only)."
+msgstr "对此 Webhook 静音的站点级通知规则 ID（仅继承模式）。"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "IF"
 msgstr "如果"
@@ -2609,6 +3119,10 @@ msgstr "如果"
 #: admin/src/views/ActivityView.vue
 msgid "IP"
 msgstr "IP"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Ignore site-wide rules entirely."
+msgstr "完全忽略站点级规则。"
 
 #: admin/src/components/ImportDialog.vue admin/src/views/WebhooksList.vue
 msgid "Import"
@@ -2658,6 +3172,31 @@ msgstr "包含未映射的字段"
 msgid "Included"
 msgstr "已包含"
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:28
+#: src/Services/Notifications/Channels/MattermostDriver.php:35
+#: src/Services/Notifications/Channels/SlackDriver.php:28
+#: src/Services/Notifications/Channels/SlackDriver.php:33
+msgid "Incoming webhook URL"
+msgstr "传入 Webhook URL"
+
+#: src/Services/Notifications/Channels/SlackDriver.php:23
+msgid "Incoming webhook URL from a Slack app. Posts a Block Kit card."
+msgstr "来自 Slack 应用的传入 Webhook URL。以 Block Kit 卡片形式发布。"
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:23
+msgid ""
+"Incoming webhook in the Slack-compatible format. Works with Mattermost, "
+"Rocket.Chat and similar."
+msgstr "Slack 兼容格式的传入 Webhook。适用于 Mattermost、Rocket.Chat 及类似平台。"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Inherit site-wide rules"
+msgstr "继承站点级规则"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Insert field"
+msgstr "插入字段"
+
 #: src/Api/AuthHelper.php:52
 #. translators: %s: required scope name
 #, php-format
@@ -2667,6 +3206,11 @@ msgstr "令牌作用域不足。此端点需要“%s”作用域或更高。"
 #: admin/src/components/BuildPublishFields.vue
 msgid "Integration"
 msgstr "集成"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:31
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:44
+msgid "Integration (routing) key"
+msgstr "集成（路由）密钥"
 
 #: admin/src/views/ExternalCronView.vue
 msgid "Interval"
@@ -2680,8 +3224,8 @@ msgstr "无效的 JSON"
 msgid "Invalid URL format"
 msgstr "无效的 URL 格式"
 
-#: src/Api/CredentialsController.php:261
-#: src/Api/CredentialsController.php:322
+#: src/Api/CredentialsController.php:274
+#: src/Api/CredentialsController.php:335
 msgid "Invalid credential type."
 msgstr "无效的凭据类型。"
 
@@ -2694,7 +3238,7 @@ msgstr "无效的 cron 令牌。"
 msgid "Invalid endpoint URL."
 msgstr "无效的端点 URL。"
 
-#: src/Services/Export/BuildSchemaValidator.php:409
+#: src/Services/Export/BuildSchemaValidator.php:420
 #. translators: 1: JSON path, 2: reason
 #, php-format
 msgid "Invalid import file — %1$s %2$s"
@@ -2795,6 +3339,14 @@ msgstr "上一小时"
 msgid "Last ping failed:"
 msgstr "上次 ping 失败："
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Last send failed: %s"
+msgstr "上次发送失败：%s"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Last sent"
+msgstr "上次发送"
+
 #: admin/src/views/ExternalCronView.vue
 msgid "Last stats pull: %s"
 msgstr "上次拉取统计：%s"
@@ -2803,7 +3355,7 @@ msgstr "上次拉取统计：%s"
 msgid "Last successful response (used as preview context)"
 msgstr "上次成功的响应（用作预览上下文）"
 
-#: src/Api/WebhookSchema.php:144
+#: src/Api/WebhookSchema.php:157
 msgid "Last update date."
 msgstr "上次更新日期。"
 
@@ -2818,6 +3370,10 @@ msgstr "在 WordPress.org 上发表评价"
 #: admin/src/views/VaultView.vue
 msgid "Leave blank to keep current"
 msgstr "留空以保留当前值"
+
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Leave empty to keep the saved value"
+msgstr "留空以保留已保存的值"
 
 #: admin/src/views/SettingsView.vue
 msgid "Let API tokens write Code Glue"
@@ -2871,7 +3427,24 @@ msgstr "列出可用触发器"
 msgid "List credentials"
 msgstr "列出凭据"
 
-#: src/Api/WebhookSchema.php:131
+#: src/Abilities/AbilityCatalog.php:227
+msgid "List notification channels"
+msgstr "列出通知渠道"
+
+#: src/Abilities/AbilityCatalog.php:235
+msgid "List notification rules"
+msgstr "列出通知规则"
+
+#: src/Abilities/AbilityCatalog.php:236
+msgid ""
+"List notification rules: site-wide ones (webhook_id null) or a webhook's "
+"own (pass webhook_id). Each rule = event + filters + channel_ids + optional "
+"template."
+msgstr ""
+"列出通知规则：站点级（webhook_id 为 null）或某个 Webhook 自己的（传入 webhook_id）。每条规则 = event + "
+"filters + channel_ids + 可选的 template。"
+
+#: src/Api/WebhookSchema.php:144
 msgid "List of trigger actions."
 msgstr "触发器操作列表。"
 
@@ -2883,6 +3456,17 @@ msgid ""
 msgstr ""
 "列出已保存的 Code Glue PHP 代码片段（id、名称、标签——代码请用 get_snippet 获取）。代码片段一旦分配给 "
 "Webhook+触发器，就会在发送前转换载荷（pre）或在响应后执行副作用（post）。"
+
+#: src/Abilities/AbilityCatalog.php:228
+msgid ""
+"List the notification channels configured on this site (email, Slack, "
+"Discord, Telegram, Teams, SMS, PagerDuty, …) by id, name and type. Rules "
+"reference channels by id. Channels hold secrets and are created only in the "
+"admin UI (Notifications → Channels) — if none fits, tell the user to add "
+"one there rather than inventing an id."
+msgstr ""
+"按 id、名称和类型列出此站点上配置的通知渠道（邮件、Slack、Discord、Telegram、Teams、短信、PagerDuty "
+"等）。规则通过 id 引用渠道。渠道持有密钥，只能在后台界面（通知 → 渠道）中创建 — 如果没有合适的，请让用户在那里添加，而不要臆造 id。"
 
 #: src/Abilities/AbilityCatalog.php:108
 msgid ""
@@ -2922,7 +3506,7 @@ msgstr "正在加载 Webhook…"
 msgid "Loading..."
 msgstr "正在加载…"
 
-#: admin/src/components/PayloadGlueDrawer.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
+#: admin/src/components/PayloadGlueDrawer.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/NotificationLogTable.vue admin/src/components/notifications/RulesPanel.vue admin/src/views/ActivityView.vue admin/src/views/AiBuilderView.vue admin/src/views/ApiTokensView.vue admin/src/views/ProView.vue admin/src/views/VaultView.vue admin/src/views/WebhookEdit.vue
 msgid "Loading…"
 msgstr "正在加载…"
 
@@ -2946,10 +3530,10 @@ msgstr "日志详情"
 msgid "Log Retention"
 msgstr "日志保留"
 
-#: src/Api/LogsController.php:242
-#: src/Api/LogsController.php:260
-#: src/Api/LogsController.php:316
-#: src/Api/LogsController.php:369
+#: src/Api/LogsController.php:250
+#: src/Api/LogsController.php:268
+#: src/Api/LogsController.php:324
+#: src/Api/LogsController.php:377
 msgid "Log not found."
 msgstr "未找到日志。"
 
@@ -2965,7 +3549,15 @@ msgstr "日志：%s"
 msgid "Love the plugin?"
 msgstr "喜欢这个插件吗？"
 
-#: src/Abilities/AbilityCatalog.php:290
+#: src/Services/Notifications/Channels/PushoverDriver.php:33
+msgid "Low"
+msgstr "低"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:32
+msgid "Lowest"
+msgstr "最低"
+
+#: src/Abilities/AbilityCatalog.php:385
 msgid ""
 "Make a guarded test HTTP call to validate an endpoint before going live. To "
 "probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its "
@@ -3022,6 +3614,10 @@ msgstr "与示例数据匹配"
 msgid "Mateusz Skorupa"
 msgstr ""
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:19
+msgid "Mattermost / Rocket.Chat"
+msgstr "Mattermost / Rocket.Chat"
+
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "Max Attempts"
 msgstr "最大尝试次数"
@@ -3048,15 +3644,27 @@ msgstr "最高保护"
 msgid "Media"
 msgstr "媒体"
 
+#: src/Services/Notifications/Channels/DiscordDriver.php:29
+msgid "Mention"
+msgstr "提及"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Message"
+msgstr "消息"
+
 #: admin/src/components/LogsTable.vue
 msgid "Method"
 msgstr "方法"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:20
+msgid "Microsoft Teams"
+msgstr "Microsoft Teams"
 
 #: admin/src/views/VaultView.vue
 msgid "Migrated %1$s · failed %2$s"
 msgstr "已迁移 %1$s · 失败 %2$s"
 
-#: src/Abilities/AbilityCatalog.php:243
+#: src/Abilities/AbilityCatalog.php:338
 msgid ""
 "Mint a WordPress Application Password for the CURRENT signed-in admin and "
 "store it as a \"basic\" vault credential named \"WP REST API (internal) — "
@@ -3107,6 +3715,10 @@ msgid ""
 "before dispatch."
 msgstr "必须 %1$sreturn $payload;%2$s — 返回的数组会在投递前替换数据。"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Muted for this webhook — click to unmute"
+msgstr "已对此 Webhook 静音 — 点击取消静音"
+
 #: admin/src/components/WebhookForm.vue
 msgid "My Webhook"
 msgstr "我的 Webhook"
@@ -3123,15 +3735,19 @@ msgstr "我自己的密钥"
 msgid "N/A"
 msgstr "不适用"
 
-#: admin/src/components/WebhookForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+#: admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Name"
 msgstr "名称"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Name (optional)"
+msgstr "名称（可选）"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Name is required"
 msgstr "名称为必填项"
 
-#: admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Name is required."
 msgstr "名称为必填项。"
 
@@ -3142,6 +3758,16 @@ msgstr "Webhook 的名称。"
 #: admin/src/views/ProView.vue
 msgid "Need help?"
 msgstr "需要帮助？"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:32
+msgid ""
+"Needs a rule on the \"recovered\" or \"success\" event pointing at this "
+"channel."
+msgstr "需要一条指向此渠道的“recovered”或“success”事件规则。"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Never notify for this webhook."
+msgstr "此 Webhook 永不通知。"
 
 #: admin/src/components/AiBuildsBar.vue
 msgid "New build"
@@ -3155,9 +3781,25 @@ msgstr "新链名称"
 msgid "New chain…"
 msgstr "新建链…"
 
+#: admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/ChannelsPanel.vue
+msgid "New channel"
+msgstr "新建渠道"
+
 #: admin/src/views/VaultView.vue
 msgid "New credential"
 msgstr "新建凭据"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "New rule"
+msgstr "新建规则"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "New rule for this webhook"
+msgstr "为此 Webhook 新建规则"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "New site-wide rule"
+msgstr "新建站点级规则"
 
 #: admin/src/views/ApiTokensView.vue
 msgid "New token"
@@ -3171,6 +3813,10 @@ msgstr "最新"
 msgid "Next"
 msgstr "下一页"
 
+#: src/Services/Notifications/MessageBuilder.php:138
+msgid "Next attempt"
+msgstr "下次尝试"
+
 #: admin/src/components/LogsTable.vue
 msgid "Next attempt scheduled for %s"
 msgstr "下次尝试计划于 %s"
@@ -3182,6 +3828,12 @@ msgstr "否"
 #: src/Services/Ai/AgentOrchestrator.php:117
 msgid "No AI provider is configured yet. Set one up to use the AI Builder."
 msgstr "尚未配置任何 AI 提供商。请先设置一个以使用 AI 构建器。"
+
+#: src/Services/Notifications/TemplateDrafter.php:34
+msgid ""
+"No AI provider is connected. Set one up under Build with AI to draft "
+"templates."
+msgstr "未连接 AI 服务商。请在“用 AI 构建”中设置一个以起草模板。"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "No API key needed — %1$s free credits, about %2$s builds."
@@ -3254,6 +3906,10 @@ msgid ""
 "first."
 msgstr "未找到该触发器的已捕获数据。请先至少触发一次。"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "No captured payload yet — trigger the webhook once to see its fields here."
+msgstr "尚未捕获数据 — 触发一次该 Webhook 即可在此看到它的字段。"
+
 #: admin/src/components/WebhookForm.vue
 msgid "No captured payload — trigger the webhook once to preview the resolved URL."
 msgstr "未捕获数据 — 触发一次 Webhook 以预览解析后的 URL。"
@@ -3261,6 +3917,18 @@ msgstr "未捕获数据 — 触发一次 Webhook 以预览解析后的 URL。"
 #: admin/src/components/ExportDialog.vue
 msgid "No chains match your search."
 msgstr "没有匹配的链。"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "No channels exist yet."
+msgstr "尚无任何渠道。"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "No channels yet"
+msgstr "尚无渠道"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "No channels yet. Add one under Notifications → Channels first."
+msgstr "尚无渠道。请先在“通知 → 渠道”中添加一个。"
 
 #: src/Services/Ai/FallbackTransport.php:73
 #: src/Services/Ai/WpAiClientTransport.php:101
@@ -3316,6 +3984,14 @@ msgstr "未找到日志"
 msgid "No matches"
 msgstr "无匹配项"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "No matching field."
+msgstr "没有匹配的字段。"
+
+#: src/Services/Notifications/NotificationSender.php:65
+msgid "No message stored for this notification."
+msgstr "此通知没有存储消息内容。"
+
 #: admin/src/components/ChainPicker.vue
 msgid ""
 "No other webhooks exist yet — create at least one webhook to use it as a "
@@ -3339,17 +4015,25 @@ msgstr ""
 "set_"
 "conditions。要么从该列表中选一个触发器，要么停下来用平实的语言告诉用户该触发哪个事件（例如“发布一篇测试文章”）以捕获载荷——然后再读取一次。"
 
-#: src/Abilities/TestAbilities.php:192
+#: src/Abilities/TestAbilities.php:229
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr "未提供数据，且此触发器尚无已捕获的示例。"
 
-#: src/Api/LogsController.php:326
+#: src/Api/LogsController.php:334
 msgid "No queue job found for this log entry."
 msgstr "未找到该日志条目对应的队列任务。"
 
 #: admin/src/views/QueueView.vue
 msgid "No queued jobs"
 msgstr "没有排队的任务"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:72
+msgid "No recipient number on this channel."
+msgstr "此渠道没有收件人号码。"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "No rules yet. A rule says when to send, where, and what."
+msgstr "尚无规则。规则定义何时发送、发往何处以及发送什么。"
 
 #: admin/src/views/VaultView.vue
 msgid "No saved credentials"
@@ -3364,6 +4048,10 @@ msgid ""
 "No signed-in user to provision an Application Password for — open the AI "
 "Builder while logged in as an administrator."
 msgstr "没有已登录的用户可供创建应用程序密码 — 请以管理员身份登录后再打开 AI Builder。"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "No site-wide rules are defined."
+msgstr "未定义站点级规则。"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "No snippet assigned"
@@ -3389,6 +4077,10 @@ msgstr "该 Webhook 未配置触发器。"
 msgid "No triggers found"
 msgstr "未找到触发器"
 
+#: src/Services/Notifications/Channels/EmailDriver.php:38
+msgid "No valid recipient address on this channel."
+msgstr "此渠道没有有效的收件人地址。"
+
 #: admin/src/views/WebhooksList.vue
 msgid "No webhooks configured yet"
 msgstr "尚未配置任何 Webhook"
@@ -3405,6 +4097,14 @@ msgstr "没有 Webhook 匹配“%s”。"
 msgid "No-op"
 msgstr "无操作"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "None"
+msgstr "无"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:34
+msgid "Normal"
+msgstr "普通"
+
 #: admin/src/views/ExternalCronView.vue
 msgid "Not configured"
 msgstr "未配置"
@@ -3413,6 +4113,10 @@ msgstr "未配置"
 msgid "Not found."
 msgstr "未找到。"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Not retryable (4xx, 3xx, config error)"
+msgstr "不可重试（4xx、3xx、配置错误）"
+
 #: admin/src/components/LogsTable.vue
 msgid ""
 "Not sent as request body for GET / DELETE. Without URL parameters "
@@ -3420,6 +4124,16 @@ msgid ""
 msgstr ""
 "对于 GET / DELETE 不作为请求主体发送。在未配置 URL 参数的情况下，完整数据会以 "
 "%1$s?payload=&lt;json&gt;%2$s 形式附加。"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid ""
+"Nothing selected = any failure. \"No response\" covers DNS, TLS and "
+"timeouts."
+msgstr "不选 = 任意失败。“无响应”涵盖 DNS、TLS 和超时。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Nothing sent yet."
+msgstr "尚未发送任何内容。"
 
 #: admin/src/components/MarkdownField.vue
 msgid "Nothing to preview yet — switch to Write to add a description."
@@ -3436,11 +4150,29 @@ msgstr "无需设置：你的前几次构建免费，从你发送提示的那一
 msgid "Nothing was queued"
 msgstr "没有任何内容加入队列"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid ""
+"Nothing will be sent for this rule any more. Past notifications stay in the "
+"log."
+msgstr "此规则将不再发送任何内容。过往通知仍保留在日志中。"
+
+#: src/Services/Notifications/DigestFlusher.php:112
+msgid "Notification digest"
+msgstr "通知摘要"
+
+#: src/Api/NotificationRulesController.php:332
+msgid "Notification not found."
+msgstr "未找到通知。"
+
+#: admin/src/App.vue admin/src/components/WebhookNotificationsCard.vue admin/src/views/NotificationsView.vue
+msgid "Notifications"
+msgstr "通知"
+
 #: src/Api/LogsController.php:127
 msgid "Number of days to look back."
 msgstr "回溯的天数。"
 
-#: src/Api/LogsController.php:535
+#: src/Api/LogsController.php:543
 msgid "Number of results per page."
 msgstr "每页结果数。"
 
@@ -3455,6 +4187,10 @@ msgstr "OR"
 #: admin/src/views/ActivityView.vue
 msgid "Object"
 msgstr "对象"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Off"
+msgstr "关闭"
 
 #: admin/src/views/SettingsView.vue
 msgid "Oldest"
@@ -3473,15 +4209,47 @@ msgstr ""
 "当这些 Webhook 中任意一个返回成功（2xx）响应时，该 Webhook 将被触发，上游响应、已发送数据和原始映射前数据均可通过 "
 "%1$sargs[0]%2$s 获得。"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
+msgid "One \"Name: value\" per line."
+msgstr "每行一个“名称: 值”。"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:32
+msgid "One or more E.164 numbers, separated by commas."
+msgstr "一个或多个 E.164 号码，以逗号分隔。"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:28
+msgid "One or more addresses, separated by commas."
+msgstr "一个或多个地址，以逗号分隔。"
+
 #: admin/src/components/BuildPublishFields.vue
 msgid ""
 "One or two sentences — this is what people read on the listing before they "
 "open the build."
 msgstr "一两句话——别人在打开配置前会在列表中看到它。"
 
-#: src/Api/LogsController.php:334
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:35
+msgid ""
+"One per line: number=source. Sources: title, short, body, webhook_name, "
+"trigger, event_label, error, site_name, link — or literal text in quotes."
+msgstr ""
+"每行一个：编号=来源。来源：title、short、body、webhook_name、trigger、event_label、error、site_"
+"name、link — 或带引号的字面文本。"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "One summary per channel listing everything that happened in the period."
+msgstr "每个渠道一份汇总，列出该时段内发生的所有事情。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "One-liner (SMS, push)"
+msgstr "单行文本（短信、推送）"
+
+#: src/Api/LogsController.php:342
 msgid "Only failed log entries can be retried."
 msgstr "只有失败的日志条目才能重试。"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:30
+msgid "Only for protected topics."
+msgstr "仅用于受保护的主题。"
 
 #: src/Api/QueueController.php:377
 msgid "Only pending or permanently failed jobs can be retried."
@@ -3491,13 +4259,33 @@ msgstr "只有待处理或永久失败的任务才能重试。"
 msgid "Only return enabled webhooks."
 msgstr "仅返回已启用的 Webhook。"
 
-#: src/Api/LogsController.php:377
+#: src/Api/LogsController.php:385
 msgid "Only successful or skipped log entries can be replayed."
 msgstr "只有成功或已跳过的日志条目才能重放。"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Only this webhook's rules"
+msgstr "仅此 Webhook 的规则"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Only when"
+msgstr "仅当"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Only when it took more than one attempt"
+msgstr "仅当用了不止一次尝试时"
 
 #: admin/src/App.vue
 msgid "Open Settings"
 msgstr "打开设置"
+
+#: src/Services/Notifications/MessageBuilder.php:56
+msgid "Open delivery log"
+msgstr "打开投递日志"
+
+#: src/Services/Notifications/DigestFlusher.php:157
+msgid "Open delivery logs"
+msgstr "打开投递日志"
 
 #: admin/src/components/BuiltWebhookActions.vue
 msgid "Open webhook"
@@ -3515,13 +4303,47 @@ msgstr "操作 + 创建/更新/删除 Webhook、架构和队列任务"
 msgid "Operational + create/update/delete webhooks, schemas, queue jobs"
 msgstr "操作 + 创建/更新/删除 Webhook、架构、队列任务"
 
+#: admin/src/components/notifications/ChannelForm.vue
+msgid "Ops Slack, On-call SMS…"
+msgstr "运维 Slack、值班短信…"
+
 #: src/Api/WebhookSchema.php:39
 msgid "Optional markdown description documenting what this webhook does."
 msgstr "可选的 Markdown 说明，用于记录此 Webhook 的作用。"
 
+#: src/Services/Notifications/Channels/MattermostDriver.php:29
+msgid "Optional override, e.g. town-square."
+msgstr "可选覆盖，例如 town-square。"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:29
+msgid "Optional, e.g. @here or <@&roleId>, prepended to the message."
+msgstr "可选，例如 @here 或 <@&roleId>，加在消息开头。"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:32
+msgid ""
+"Optional. Pick a Credentials Vault entry; its header is added to every "
+"request."
+msgstr "可选。选择一个凭据保险库条目；其标头会添加到每个请求中。"
+
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:28
+msgid ""
+"Optional. Same key = same thread; use {{ webhook.id }} to thread per "
+"webhook."
+msgstr "可选。相同的键 = 同一会话串；使用 {{ webhook.id }} 可按 Webhook 分串。"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
+msgid ""
+"Optional. When set, the body is signed as HMAC-SHA256 in the "
+"X-FSWA-Signature header."
+msgstr "可选。设置后，正文将以 HMAC-SHA256 签名并放入 X-FSWA-Signature 标头。"
+
 #: admin/src/views/VaultView.vue
 msgid "Optional: harden with %1$sFSWA_SECRET_KEY%2$s"
 msgstr "可选：使用 %1$sFSWA_SECRET_KEY%2$s 加固"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Optional: mention the order number and customer email, keep it short…"
+msgstr "可选：提及订单号和客户邮箱，保持简短…"
 
 #: src/Api/TriggersController.php:148
 msgid "Options"
@@ -3546,6 +4368,10 @@ msgstr "原始数据"
 #: src/Api/TriggersController.php:150
 msgid "Other"
 msgstr "其他"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Out of attempts (retries used up)"
+msgstr "尝试用尽（重试已耗尽）"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Output (stdout)"
@@ -3573,11 +4399,29 @@ msgid ""
 "%1$s$originalPayload%2$s available"
 msgstr "PHP 在成功投递后运行；可使用 %1$s$responseBody%2$s 和 %1$s$originalPayload%2$s"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:26
+msgid ""
+"POSTs the notification as JSON to any URL — Zapier, Make, n8n, your own "
+"service."
+msgstr "将通知以 JSON 形式 POST 到任意 URL — Zapier、Make、n8n 或你自己的服务。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Page %1$d of %2$d"
+msgstr "第 %1$d 页，共 %2$d 页"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Page on-call when HubSpot dies"
+msgstr "HubSpot 挂掉时呼叫值班人员"
+
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Page reload is disabled on WordPress Playground — the menu will update on "
 "next WP menu item click."
 msgstr "在 WordPress Playground 上页面重新加载已禁用 — 菜单将在下次点击 WP 菜单项时更新。"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:22
+msgid "PagerDuty"
+msgstr "PagerDuty"
 
 #: src/Api/TriggersController.php:143
 msgid "Pages"
@@ -3587,7 +4431,7 @@ msgstr "页面"
 msgid "Param name"
 msgstr "参数名称"
 
-#: src/Api/LogsController.php:289
+#: src/Api/LogsController.php:297
 msgid "Parameter older_than_days is required."
 msgstr "参数 older_than_days 为必填项。"
 
@@ -3644,7 +4488,7 @@ msgstr "数据映射"
 msgid "Payload mapping"
 msgstr "数据映射"
 
-#: admin/src/components/HealthStatusBar.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
+#: admin/src/components/HealthStatusBar.vue admin/src/components/notifications/NotificationLogTable.vue admin/src/views/LogsList.vue admin/src/views/QueueView.vue
 msgid "Pending"
 msgstr "待处理"
 
@@ -3666,19 +4510,51 @@ msgid ""
 "referencing it fall back to no snippet."
 msgstr "永久删除一个 Code Glue 代码片段。需要确认。引用它的 Webhook 将回退为无代码片段。"
 
-#: src/Abilities/AbilityCatalog.php:347
+#: src/Abilities/AbilityCatalog.php:442
 msgid ""
 "Permanently delete a webhook and its triggers / mapping. Requires "
 "confirmation."
 msgstr "永久删除 Webhook 及其触发器/映射。需要确认。"
 
+#: src/Services/Notifications/TemplateContext.php:119
+msgid "Permanently failed"
+msgstr "永久失败"
+
+#: src/Services/Notifications/TemplateContext.php:156
+msgid "Permanently failed (not retryable)"
+msgstr "永久失败（不可重试）"
+
+#: src/Services/Notifications/TemplateContext.php:157
+msgid "Permanently failed (out of attempts)"
+msgstr "永久失败（尝试用尽）"
+
+#: src/Services/Notifications/RuleInput.php:59 admin/src/components/notifications/RuleEditor.vue
+msgid "Pick at least one channel."
+msgstr "至少选择一个渠道。"
+
 #: admin/src/components/ui/DateTimePicker.vue
 msgid "Pick date & time"
 msgstr "选择日期和时间"
 
+#: src/Services/Notifications/Channels/NtfyDriver.php:29
+msgid "Pick something hard to guess; anyone who knows the topic can subscribe."
+msgstr "选一个难以猜到的名字；任何知道主题的人都可以订阅。"
+
 #: admin/src/components/BuildPublishFields.vue
 msgid "Pick the one that fits best — a build is listed in a single collection."
 msgstr "选择最合适的一个——每个配置只会出现在一个合集中。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid ""
+"Placeholders: {{ webhook.name }}, {{ delivery.error_message | truncate:120 "
+"}}, {{ payload.order.id }}, {{ args.1.email }}. Modifiers: upper, lower, "
+"truncate:N, json, default:'…', date:'Y-m-d H:i', number:N, money, count, "
+"join:', '."
+msgstr ""
+"占位符：{{ webhook.name }}、{{ delivery.error_message | truncate:120 }}、{{ "
+"payload.order.id }}、{{ args.1.email "
+"}}。修饰符：upper、lower、truncate:N、json、default:'…'、date:'Y-m-d "
+"H:i'、number:N、money、count、join:', '。"
 
 #: admin/src/views/SettingsView.vue
 msgid "Plugin Info"
@@ -3700,9 +4576,17 @@ msgstr "插件队列端点"
 msgid "Plugins"
 msgstr "插件"
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Plus any rules added below. Mute individual site-wide rules here."
+msgstr "加上下方添加的任何规则。可在此单独静音站点级规则。"
+
 #: admin/src/components/TestWebhookDrawer.vue admin/src/components/TriggerSchemaPanel.vue
 msgid "Post Glue"
 msgstr "投递后 Glue"
+
+#: src/Services/Notifications/Channels/MattermostDriver.php:30
+msgid "Post as"
+msgstr "发布身份"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Post-dispatch"
@@ -3740,7 +4624,7 @@ msgid ""
 "Mapping & Conditions."
 msgstr "投递前 Code Glue 预览处于活动状态。请在保存映射与条件前保存或放弃它。"
 
-#: admin/src/components/MarkdownField.vue
+#: admin/src/components/MarkdownField.vue admin/src/components/notifications/TemplateEditor.vue
 msgid "Preview"
 msgstr "预览"
 
@@ -3759,6 +4643,10 @@ msgstr "预览失败"
 #: admin/src/views/ActivityView.vue
 msgid "Previous"
 msgstr "上一页"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:30
+msgid "Priority"
+msgstr "优先级"
 
 #: admin/src/views/ProView.vue
 msgid "Priority support"
@@ -3780,7 +4668,7 @@ msgstr "已安装 Pro 插件"
 msgid "Pro plugin not found."
 msgstr "未找到 Pro 插件。"
 
-#: src/Abilities/AbilityCatalog.php:289
+#: src/Abilities/AbilityCatalog.php:384
 msgid "Probe a target endpoint"
 msgstr "探测目标端点"
 
@@ -3857,6 +4745,22 @@ msgstr "发布失败。"
 msgid "Publishing…"
 msgstr "正在发布…"
 
+#: src/Services/Notifications/Channels/PushoverDriver.php:22
+msgid ""
+"Push notifications to your phone. Needs an application token and your user "
+"key."
+msgstr "推送通知到你的手机。需要应用令牌和你的用户密钥。"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:23
+msgid ""
+"Push to a topic on ntfy.sh or your own ntfy server. No account needed for "
+"public topics."
+msgstr "推送到 ntfy.sh 或你自己的 ntfy 服务器上的主题。公开主题无需账户。"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:18
+msgid "Pushover"
+msgstr "Pushover"
+
 #: admin/src/components/LogsTable.vue
 msgid "Query Parameters"
 msgstr "查询参数"
@@ -3902,6 +4806,10 @@ msgstr "队列处理器从未运行。请确保 WP-Cron 处于活动状态，或
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Queuing…"
 msgstr "正在加入队列…"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Quiet time per webhook"
+msgstr "每个 Webhook 的静默时间"
 
 #: admin/src/views/VaultView.vue
 msgid "Raw value for any header — escape hatch"
@@ -3960,6 +4868,14 @@ msgstr "正在读取…"
 msgid "Ready to send some data?"
 msgstr "准备好发送一些数据了吗？"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Reason"
+msgstr "原因"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:28
+msgid "Recipients"
+msgstr "收件人"
+
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Records the exact prompts and raw responses exchanged with the AI model to "
@@ -3970,11 +4886,15 @@ msgstr ""
 "把与 AI 模型往来的完整提示词和原始响应记录到受保护的日志文件，便于支持人员诊断你反馈的问题。默认开启；API 密钥始终会被遮蔽，超过 30 "
 "天的记录会自动清理。若不希望保留日志，可关闭此项。"
 
+#: src/Services/Notifications/TemplateContext.php:116
+msgid "Recovered"
+msgstr "已恢复"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Redirect"
 msgstr "重定向"
 
-#: src/Abilities/AbilityCatalog.php:228
+#: src/Abilities/AbilityCatalog.php:323
 msgid ""
 "Reference a stored vault credential from a webhook by id (the secret is "
 "injected at dispatch time and never exposed)."
@@ -4018,6 +4938,13 @@ msgstr "移除此提供商并删除其存储的密钥？"
 msgid "Rename chain"
 msgstr "重命名链"
 
+#: src/Abilities/AbilityCatalog.php:305
+msgid ""
+"Render a rule against the webhook's captured example (or a real delivery "
+"log via log_id) and SEND it to every channel of the rule right now. "
+"Requires confirmation because a real message goes out."
+msgstr "基于该 Webhook 已捕获的示例（或通过 log_id 指定的真实投递日志）渲染规则，并立即发送到该规则的每个渠道。由于会发出真实消息，需要确认。"
+
 #: admin/src/views/ProView.vue
 msgid "Renews / expires"
 msgstr "续订 / 到期"
@@ -4054,6 +4981,10 @@ msgstr "请求数据"
 #: admin/src/views/QueueView.vue
 msgid "Reset and retry"
 msgstr "重置并重试"
+
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:32
+msgid "Resolve the incident when the webhook succeeds again"
+msgstr "当 Webhook 再次成功时解决该事件"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Response"
@@ -4102,6 +5033,10 @@ msgstr "重试探测"
 #: admin/src/views/LogsList.vue
 msgid "Retry queued"
 msgstr "重试已加入队列"
+
+#: src/Services/Notifications/TemplateContext.php:118
+msgid "Retry scheduled"
+msgstr "已计划重试"
 
 #: admin/src/views/SettingsView.vue
 msgid "Retry settings saved"
@@ -4181,6 +5116,26 @@ msgstr "轮换令牌：%s"
 msgid "Rotating…"
 msgstr "正在轮换…"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Rule"
+msgstr "规则"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Rule enabled"
+msgstr "规则已启用"
+
+#: src/Api/NotificationRulesController.php:424
+msgid "Rule not found."
+msgstr "未找到规则。"
+
+#: admin/src/views/NotificationsView.vue
+msgid "Rules"
+msgstr "规则"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Rules for this webhook"
+msgstr "此 Webhook 的规则"
+
 #: admin/src/views/LogsList.vue
 msgid "Run %d now"
 msgstr "立即运行 %d 项"
@@ -4219,9 +5174,21 @@ msgstr "在上方映射之后、于映射后的载荷上运行——除非 %1$sa
 msgid "Runs through the WP Webhooks AI service — no API keys needed."
 msgstr "通过 WP Webhooks AI 服务运行 — 无需 API 密钥。"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "SMS"
+msgstr "短信"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:20
+msgid "SMS (Twilio)"
+msgstr "短信（Twilio）"
+
 #: admin/src/views/SettingsView.vue
 msgid "Same delay every retry: base seconds"
 msgstr "每次重试延迟相同：基础秒数"
+
+#: src/Services/Notifications/TemplateContext.php:89
+msgid "Sample webhook"
+msgstr "示例 Webhook"
 
 #: admin/src/components/ExternalCronChart.vue
 msgid "Samples"
@@ -4259,7 +5226,7 @@ msgstr "保存重试设置"
 msgid "Save Settings"
 msgstr "保存设置"
 
-#: admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue
 msgid "Save changes"
 msgstr "保存更改"
 
@@ -4270,6 +5237,14 @@ msgstr "将凭据保存到保险库"
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Save failed"
 msgstr "保存失败"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Save rule"
+msgstr "保存规则"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "Save the webhook first to add rules that apply to it alone."
+msgstr "请先保存 Webhook，再添加仅适用于它的规则。"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Save to vault"
@@ -4283,7 +5258,7 @@ msgstr "请先保存 Webhook"
 msgid "Saved credential"
 msgstr "已保存的凭据"
 
-#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
+#: admin/src/components/ChangeExpiryDialog.vue admin/src/components/PayloadGlueDrawer.vue admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/components/notifications/RuleEditor.vue admin/src/views/ExternalCronView.vue admin/src/views/VaultView.vue admin/src/views/WebhooksList.vue
 msgid "Saving…"
 msgstr "正在保存…"
 
@@ -4311,7 +5286,7 @@ msgstr "搜索链…"
 msgid "Search credentials…"
 msgstr "搜索凭据…"
 
-#: admin/src/components/FieldSelector.vue
+#: admin/src/components/FieldSelector.vue admin/src/components/notifications/TemplateEditor.vue
 msgid "Search fields…"
 msgstr "搜索字段…"
 
@@ -4389,7 +5364,7 @@ msgstr "选择此字段"
 msgid "Select trigger"
 msgstr "选择触发器"
 
-#: src/Abilities/AbilityCatalog.php:311
+#: src/Abilities/AbilityCatalog.php:406
 msgid ""
 "Send a synchronous test delivery for a webhook using a provided or captured "
 "payload, and return the HTTP result so the agent can verify the integration "
@@ -4408,9 +5383,49 @@ msgstr ""
 "端点的响应体）会返回给你，请根据该响应修复映射或预发送代码片段并重新测试。安排每个计划时让 test_dispatch 在 "
 "enable_webhook 之前，并且绝不要因为提出了某个步骤就把它当作已完成。"
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Send a test message"
+msgstr "发送测试消息"
+
+#: src/Abilities/AbilityCatalog.php:304
+msgid "Send a test notification"
+msgstr "发送测试通知"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Send a test now"
+msgstr "立即发送测试"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Send again"
+msgstr "再次发送"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:31
+msgid "Send as HTML"
+msgstr "以 HTML 发送"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Send each message right away"
+msgstr "每条消息立即发送"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:33
+msgid "Send silently"
+msgstr "静默发送"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Send to"
+msgstr "发送至"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Sending…"
 msgstr "正在发送…"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:23
+msgid "Sends through wp_mail(), so your SMTP plugin applies."
+msgstr "通过 wp_mail() 发送，因此你的 SMTP 插件同样生效。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/views/NotificationsView.vue
+msgid "Sent"
+msgstr "已发送"
 
 #: admin/src/views/VaultView.vue
 msgid "Sent as Authorization: Bearer <token>"
@@ -4431,6 +5446,10 @@ msgstr "代你发送——运行已恢复"
 #: admin/src/components/HealthStatusBar.vue
 msgid "Sent today"
 msgstr "今日已发送"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:28
+msgid "Server"
+msgstr "服务器"
 
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Server Error"
@@ -4528,6 +5547,10 @@ msgstr "设置"
 msgid "Settings saved successfully"
 msgstr "设置已成功保存"
 
+#: src/Services/Notifications/Channels/PagerDutyDriver.php:33
+msgid "Severity"
+msgstr "严重程度"
+
 #: admin/src/components/BuiltWebhookActions.vue admin/src/components/ShareBuildDialog.vue
 msgid "Share this build"
 msgstr "分享此配置"
@@ -4588,6 +5611,14 @@ msgstr "在列表中显示“%s”"
 msgid "Showing %1$d to %2$d of %3$d"
 msgstr "显示第 %1$d 至 %2$d 项，共 %3$d 项"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
+msgid "Signing secret"
+msgstr "签名密钥"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Site-wide rules"
+msgstr "站点级规则"
+
 #: admin/src/views/ProView.vue
 msgid "Sites allowed"
 msgstr "允许的站点"
@@ -4608,13 +5639,17 @@ msgstr "跳过"
 msgid "Skip the duplicates"
 msgstr "跳过重复项"
 
-#: admin/src/components/AiStepPanel.vue admin/src/views/LogsList.vue
+#: src/Services/Notifications/TemplateContext.php:120 admin/src/components/AiStepPanel.vue admin/src/views/LogsList.vue
 msgid "Skipped"
 msgstr "已跳过"
 
 #: admin/src/components/LogsTable.vue
 msgid "Skipped:"
 msgstr "已跳过："
+
+#: src/Services/Notifications/Channels/SlackDriver.php:19
+msgid "Slack"
+msgstr "Slack"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Snippet Name"
@@ -4683,9 +5718,19 @@ msgstr "源路径（例如 args.0.user_id）"
 msgid "Source webhook does not exist."
 msgstr "源 Webhook 不存在。"
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:22
+msgid "Space webhook URL (Space → Apps & integrations → Webhooks)."
+msgstr "聊天室 Webhook URL（聊天室 → 应用与集成 → Webhook）。"
+
 #: admin/src/views/AiBuilderView.vue
 msgid "Start a new build, then describe what you want to integrate."
 msgstr "开始新的构建，然后描述您想集成的内容。"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"Start with your email address, or paste a Slack, Discord or Teams webhook "
+"URL."
+msgstr "从你的邮箱地址开始，或粘贴 Slack、Discord 或 Teams 的 Webhook URL。"
 
 #: admin/src/views/ProView.vue
 msgid "Starter"
@@ -4695,7 +5740,7 @@ msgstr "入门版"
 msgid "Stats unavailable"
 msgstr "统计数据不可用"
 
-#: admin/src/components/LogsTable.vue
+#: admin/src/components/LogsTable.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Status"
 msgstr "状态"
 
@@ -4713,6 +5758,14 @@ msgid ""
 "webhooks. Secrets are encrypted at rest and are never shown again after "
 "saving — not even to you."
 msgstr "一次性存储可重用的认证密钥，然后在你的 Webhook 中引用它们。密钥静态加密，保存后绝不会再次显示 — 即使对你也是如此。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Subject"
+msgstr "主题"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Subject (email)"
+msgstr "主题（邮件）"
 
 #: admin/src/components/ExternalCronChart.vue admin/src/components/HealthStatusBar.vue admin/src/components/TestWebhookDrawer.vue admin/src/views/LogsList.vue admin/src/views/WebhookLogs.vue
 msgid "Success"
@@ -4786,7 +5839,26 @@ msgstr "目标 Webhook 不存在。"
 msgid "Taxonomy"
 msgstr "分类法"
 
-#: admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
+#: src/Services/Notifications/Channels/TelegramDriver.php:21
+msgid "Telegram"
+msgstr "Telegram"
+
+#: src/Abilities/WriteAbilities.php:283
+#. translators: %s: lint problems
+#, php-format
+msgid ""
+"Template rejected — %s. Use only roots "
+"webhook/event/delivery/site/payload/original/args and paths from "
+"get_trigger_schema."
+msgstr ""
+"模板被拒绝 — %s。只能使用根 webhook/event/delivery/site/payload/original/args 以及来自 "
+"get_trigger_schema 的路径。"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:35
+msgid "Template variables"
+msgstr "模板变量"
+
+#: src/Services/Notifications/MessageBuilder.php:90 admin/src/components/WebhookCardContent.vue admin/src/views/LogsList.vue admin/src/views/WebhookEdit.vue
 msgid "Test"
 msgstr "测试"
 
@@ -4798,15 +5870,23 @@ msgstr "测试 Webhook"
 msgid "Test failed."
 msgstr "测试失败。"
 
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "Test message sent."
+msgstr "测试消息已发送。"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid "Test queued — it will run on the next cron cycle."
 msgstr "测试已加入队列 — 它将在下个 cron 周期运行。"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "Test sent to every channel."
+msgstr "测试已发送到每个渠道。"
 
 #: admin/src/views/ProView.vue
 msgid "Test webhook delivery on demand"
 msgstr "按需测试 Webhook 投递"
 
-#: src/Abilities/AbilityCatalog.php:310
+#: src/Abilities/AbilityCatalog.php:405
 msgid "Test-dispatch a webhook"
 msgstr "测试发送 Webhook"
 
@@ -4827,7 +5907,13 @@ msgstr ""
 "input_payload（代码片段收到的内容；检查你的代码读取的键确实存在）、结果载荷、任何 PHP 错误和打印输出。如果结果与 "
 "input_payload 完全相同，说明你的代码没有匹配到任何内容、什么也没做——请在分配前修复。分配前务必先预览。"
 
-#: src/Abilities/TestAbilities.php:79
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:24
+msgid ""
+"Text messages through your Twilio account. Sends the one-line \"short\" "
+"text of the template."
+msgstr "通过你的 Twilio 账户发送短信。发送模板的单行“short”文本。"
+
+#: src/Abilities/TestAbilities.php:116
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "不允许该 URL（私有、保留或无效的主机）。"
 
@@ -4841,7 +5927,7 @@ msgid ""
 "integrations take two or three to plan, build and test."
 msgstr "这大约相当于 %s 次智能体运行。一次运行就是你发送的一条消息；大多数集成需要两到三次来规划、构建和测试。"
 
-#: src/Abilities/WriteAbilities.php:229
+#: src/Abilities/WriteAbilities.php:330
 msgid "That link would create a cycle across an existing chain."
 msgstr "该环节会在现有链中产生循环。"
 
@@ -4898,6 +5984,12 @@ msgid ""
 "from the vendor's documentation, not from memory."
 msgstr "AI 已在我们的服务器上读取了这份参考文档——下方的请求结构来自供应商的文档，而不是凭记忆。"
 
+#: src/Services/Notifications/TemplateDrafter.php:52
+msgid ""
+"The AI reply was not a usable template. Try again or adjust the "
+"instructions."
+msgstr "AI 的回复不是可用的模板。请重试或调整说明。"
+
 #: src/Services/Ai/HostedTrialTransport.php:123
 msgid "The AI returned no text."
 msgstr "AI 没有返回任何文本。"
@@ -4937,7 +6029,7 @@ msgid ""
 "constant for fixed."
 msgstr "用于计算每次重试延迟的基础秒数。具体作用取决于策略：指数策略为倍数，线性策略为间隔，固定策略为常量。"
 
-#: src/Services/Export/BuildImporter.php:254
+#: src/Services/Export/BuildImporter.php:319
 #. translators: %s: chain name.
 #, php-format
 msgid "The chain \"%s\" could not be created."
@@ -4949,7 +6041,13 @@ msgid ""
 "their chain-link triggers."
 msgstr "该链及其所有连接将被移除。成员 Webhook 会保留，但会失去其链接触发器。"
 
-#: src/Abilities/WriteAbilities.php:350
+#: src/Services/Notifications/NotificationSender.php:127
+msgid ""
+"The channel secrets could not be decrypted. Re-enter them in Notifications "
+"→ Channels."
+msgstr "无法解密渠道密钥。请在“通知 → 渠道”中重新输入。"
+
+#: src/Abilities/WriteAbilities.php:451
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -4962,6 +6060,12 @@ msgstr "\"%1$s\"（%2$s）上的条件规则值为空——请在设置此条件
 #: src/Services/Ai/OpenAiTransport.php:129
 msgid "The configured AI provider key was not found in the vault."
 msgstr "在保险库中找不到已配置的 AI 提供商密钥。"
+
+#: admin/src/composables/useNotifications.js
+msgid ""
+"The delivery gave up: out of attempts, or a non-retryable error such as a "
+"4xx."
+msgstr "投递已放弃：尝试用尽，或遇到不可重试的错误（如 4xx）。"
 
 #: admin/src/views/LogsList.vue
 msgid ""
@@ -5060,6 +6164,15 @@ msgstr ""
 msgid "The library already has a build like this one."
 msgstr "库中已经有一个类似的构建。"
 
+#: src/Services/Export/BuildImporter.php:242
+#. translators: 1: rule name or event, 2: webhook name
+#, php-format
+msgid ""
+"The notification rule \"%1$s\" on \"%2$s\" was imported switched off: none "
+"of its channels exist on this site. Pick a channel in the webhook's "
+"Notifications section and enable it."
+msgstr "“%2$s”上的通知规则“%1$s”已以关闭状态导入：它的渠道在此站点上都不存在。请在该 Webhook 的“通知”部分选择一个渠道并启用它。"
+
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
 "The page appears at this address once the website finishes rebuilding — it "
@@ -5089,6 +6202,10 @@ msgstr "发布服务拒绝了这个构建。"
 msgid "The publishing service returned an unexpected error (HTTP %d)."
 msgstr "发布服务返回了意外错误（HTTP %d）。"
 
+#: src/Abilities/WriteAbilities.php:211
+msgid "The rule could not be saved."
+msgstr "无法保存规则。"
+
 #: admin/src/components/WebhookForm.vue
 msgid ""
 "The secret is resolved securely at delivery time and never exposed. Manage "
@@ -5107,11 +6224,23 @@ msgid ""
 "minutes."
 msgstr "试用服务目前没有响应。请几分钟后重试。"
 
+#: src/Services/Notifications/Channels/WebhookDriver.php:60
+msgid "The vault credential could not be decrypted."
+msgstr "无法解密保险库凭据。"
+
 #: admin/src/views/AiBuilderView.vue
 msgid "The verification challenge could not be completed. Please try again."
 msgstr "无法完成验证挑战。请重试。"
 
-#: src/Abilities/TestAbilities.php:167
+#: src/Services/Notifications/Channels/WebhookDriver.php:44
+msgid "The webhook URL is not valid."
+msgstr "Webhook URL 无效。"
+
+#: admin/src/composables/useNotifications.js
+msgid "The webhook did not run because its conditions were not met."
+msgstr "由于条件未满足，Webhook 未运行。"
+
+#: src/Abilities/TestAbilities.php:204
 msgid "The webhook has no triggers; provide one."
 msgstr "该 Webhook 没有触发器；请提供一个。"
 
@@ -5193,12 +6322,36 @@ msgstr "此配置附有“用 AI 构建”的对话记录，仅在来源处供�
 msgid "This build needs authorization credentials"
 msgstr "此配置需要授权凭据"
 
-#: src/Api/CredentialsController.php:379
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid ""
+"This channel is used by %d rule. Deleting it removes the channel from that "
+"rule."
+msgid_plural ""
+"This channel is used by %d rules. Deleting it removes the channel from "
+"those rules."
+msgstr[0] "此渠道被 %d 条规则使用。删除后会将该渠道从这些规则中移除。"
+
+#: src/Api/NotificationChannelsController.php:239
+#. translators: %d: number of rules
+#, php-format
+msgid ""
+"This channel is used by %d rule. Remove it from the rule first, or pass "
+"force=true."
+msgid_plural ""
+"This channel is used by %d rules. Remove it from the rules first, or pass "
+"force=true."
+msgstr[0] "此渠道被 %d 条规则使用。请先将其从规则中移除，或传入 force=true。"
+
+#: src/Api/CredentialsController.php:392
 #. translators: %d: number of webhooks using this credential
 #, php-format
 msgid "This credential is used by %d webhook. Detach it or delete with force."
 msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
 msgstr[0] "该凭据被 %d 个 Webhook 使用。请将其分离或强制删除。"
+
+#: src/Api/NotificationRulesController.php:335
+msgid "This entry has no stored message to resend."
+msgstr "此条目没有可重新发送的存储消息。"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid ""
@@ -5261,7 +6414,7 @@ msgid ""
 "webhooks it created."
 msgstr "这将删除该对话及其构建历史。不会删除其创建的任何 Webhook。"
 
-#: src/Abilities/AbilityCatalog.php:315
+#: src/Abilities/AbilityCatalog.php:410
 msgid ""
 "This sends a REAL delivery to the endpoint right now — it is not a dry run. "
 "If the webhook targets this site’s own REST API (e.g. wp-json/wp/v2/users) "
@@ -5270,6 +6423,12 @@ msgid ""
 msgstr ""
 "这会立即向端点发送一次真实投递 — 不是演练。如果 Webhook 指向本站点自身的 REST API（例如 "
 "wp-json/wp/v2/users），它可能真的创建或修改数据，例如创建 WordPress 用户。确认后将真实发送。"
+
+#: src/Abilities/AbilityCatalog.php:309
+msgid ""
+"This sends a REAL message to every channel on the rule (email, Slack, SMS, "
+"…). Confirm to send it."
+msgstr "这会向该规则的每个渠道发送一条真实消息（邮件、Slack、短信…）。确认后发送。"
 
 #: src/Services/GluePermissions.php:189
 msgid ""
@@ -5314,7 +6473,7 @@ msgid ""
 "a new one — the secret stays in the vault and is injected only at dispatch."
 msgstr "此步骤需要已存储的身份验证凭据。从保险库中选择一个或新建一个 — 密钥保留在保险库中，仅在投递时注入。"
 
-#: src/Abilities/TestAbilities.php:275
+#: src/Abilities/TestAbilities.php:312
 #. translators: %s: plugin slug and version the reference payload was captured on, e.g. "contact-form-7 6.1.7".
 #, php-format
 msgid ""
@@ -5332,7 +6491,7 @@ msgid ""
 "the endpoint accepts the shape, not the values."
 msgstr "此测试发送的是我们的参考载荷，而不是本站点的数据——它证明端点接受该结构，而不是这些值。"
 
-#: src/Abilities/TestAbilities.php:272
+#: src/Abilities/TestAbilities.php:309
 msgid ""
 "This test sent our reference payload, not data from this site: a 2xx proves "
 "the endpoint accepts the shape the mapping produces, not that the field "
@@ -5422,6 +6581,14 @@ msgid ""
 "reactivate at any time."
 msgstr "这将从本站点移除许可证并释放一个名额。你可以随时重新激活。"
 
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:28
+msgid "Thread key"
+msgstr "会话键"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Throttled"
+msgstr "已限流"
+
 #: admin/src/components/ui/DateTimePicker.vue
 msgid "Time"
 msgstr "时间"
@@ -5429,6 +6596,14 @@ msgstr "时间"
 #: admin/src/views/ActivityView.vue
 msgid "Timestamp"
 msgstr "时间戳"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Title (chat cards, push)"
+msgstr "标题（聊天卡片、推送）"
+
+#: src/Services/Notifications/Channels/TwilioSmsDriver.php:32 admin/src/components/notifications/ChannelsPanel.vue
+msgid "To"
+msgstr "收件人"
 
 #: admin/src/views/ActivityView.vue
 msgid "To date"
@@ -5476,13 +6651,21 @@ msgstr "令牌允许外部系统无需浏览器会话即可访问 REST API。无
 msgid "Too many builds published from this license — wait a moment and try again."
 msgstr "此许可证发布的构建过多——请稍等片刻再试。"
 
-#: src/Abilities/TestAbilities.php:93
+#: src/Abilities/TestAbilities.php:130
 msgid "Too many probe calls — try again in a minute."
 msgstr "探测调用过多——请一分钟后重试。"
 
 #: src/Services/Ai/TrialClient.php:188
 msgid "Too many trial requests from this network. Please try again in an hour."
 msgstr "来自此网络的试用请求过多。请一小时后重试。"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:29 src/Services/Notifications/Channels/NtfyDriver.php:35 admin/src/components/notifications/ChannelsPanel.vue
+msgid "Topic"
+msgstr "主题"
+
+#: src/Services/Notifications/Channels/TelegramDriver.php:32
+msgid "Topic ID"
+msgstr "话题 ID"
 
 #: admin/src/views/QueueView.vue
 msgid "Total"
@@ -5530,9 +6713,13 @@ msgstr "转换后"
 msgid "Transformed Payload (Sent)"
 msgstr "转换后数据（已发送）"
 
-#: admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
+#: src/Services/Notifications/MessageBuilder.php:119 admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
 msgid "Trigger"
 msgstr "触发器"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "Trigger matches"
+msgstr "触发器匹配"
 
 #: src/Api/WebhooksController.php:120
 msgid "Trigger name to use for the test."
@@ -5565,9 +6752,13 @@ msgstr "触发器："
 msgid "Triggers"
 msgstr "触发器"
 
-#: admin/src/views/VaultView.vue
+#: admin/src/components/notifications/ChannelForm.vue admin/src/views/VaultView.vue
 msgid "Type"
 msgstr "类型"
+
+#: src/Services/Notifications/Channels/WebhookDriver.php:31 src/Services/Notifications/Channels/WebhookDriver.php:39 admin/src/components/notifications/ChannelsPanel.vue
+msgid "URL"
+msgstr "URL"
 
 #: admin/src/components/WebhookForm.vue
 msgid "URL Query Parameters"
@@ -5615,7 +6806,32 @@ msgstr "未知 Webhook"
 msgid "Unknown ability: %s"
 msgstr "未知能力：%s"
 
-#: src/Abilities/WriteAbilities.php:340
+#: src/Api/NotificationRulesController.php:353
+#. translators: %s: comma-separated channel IDs
+#, php-format
+msgid "Unknown channel id(s): %s"
+msgstr "未知的渠道 id：%s"
+
+#: src/Abilities/WriteAbilities.php:252
+#. translators: %s: comma-separated ids
+#, php-format
+msgid ""
+"Unknown channel id(s): %s. Call list_notification_channels for the real "
+"ids; channels are created in the admin UI."
+msgstr "未知的渠道 id：%s。请调用 list_notification_channels 获取真实 id；渠道在后台界面中创建。"
+
+#: src/Services/Notifications/NotificationSender.php:98
+#. translators: %s: channel type
+#, php-format
+msgid "Unknown channel type \"%s\"."
+msgstr "未知的渠道类型“%s”。"
+
+#: src/Api/NotificationChannelsController.php:130
+#: src/Api/NotificationChannelsController.php:183
+msgid "Unknown channel type."
+msgstr "未知的渠道类型。"
+
+#: src/Abilities/WriteAbilities.php:441
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -5624,6 +6840,21 @@ msgstr "未知的条件运算符 \"%1$s\"。有效的运算符：%2$s。"
 #: admin/src/views/ExternalCronView.vue
 msgid "Unknown error"
 msgstr "未知错误"
+
+#: src/Api/NotificationRulesController.php:239
+#: src/Api/NotificationRulesController.php:263
+msgid "Unknown event."
+msgstr "未知事件。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "Unknown modifier \"%s\"."
+msgstr "未知的修饰符“%s”。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid ""
+"Unknown root \"%s\" — use webhook, event, delivery, payload, original, args "
+"or site."
+msgstr "未知的根“%s” — 请使用 webhook、event、delivery、payload、original、args 或 site。"
 
 #: admin/src/views/ProView.vue
 msgid "Unlimited conditions and AND / OR groups"
@@ -5664,6 +6895,10 @@ msgstr ""
 #: src/Abilities/GlueAbilities.php:89
 msgid "Update a Code Glue snippet"
 msgstr "更新 Code Glue 代码片段"
+
+#: src/Abilities/AbilityCatalog.php:281
+msgid "Update a notification rule"
+msgstr "更新通知规则"
 
 #: src/Abilities/AbilityCatalog.php:142
 msgid "Update a webhook"
@@ -5745,6 +6980,11 @@ msgstr "用户 #%s"
 #: admin/src/views/ActivityView.vue
 msgid "User ID"
 msgstr "用户 ID"
+
+#: src/Services/Notifications/Channels/PushoverDriver.php:28
+#: src/Services/Notifications/Channels/PushoverDriver.php:45
+msgid "User or group key"
+msgstr "用户或群组密钥"
 
 #: admin/src/views/ActivityView.vue
 msgid "User prompt"
@@ -5845,6 +7085,10 @@ msgid ""
 "there are no real field names to map against."
 msgstr "正在等待示例载荷。此触发器尚未被触发过，因此没有真实的字段名可供映射。"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "Waiting for digest"
+msgstr "等待摘要"
+
 #: admin/src/components/AiStepPanel.vue
 msgid "Waiting for earlier steps…"
 msgstr "等待前面的步骤…"
@@ -5853,7 +7097,7 @@ msgstr "等待前面的步骤…"
 msgid "Waiting for trigger to capture example payload..."
 msgstr "正在等待触发器以捕获示例数据…"
 
-#: admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue
+#: src/Services/Notifications/MessageBuilder.php:118 admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Webhook"
 msgstr "Webhook"
 
@@ -5862,10 +7106,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:42
-#: src/Controllers/AdminController.php:43
-#: src/Controllers/AdminController.php:50
-#: src/Controllers/AdminController.php:51
+#: src/Controllers/AdminController.php:44
+#: src/Controllers/AdminController.php:45
+#: src/Controllers/AdminController.php:52
+#: src/Controllers/AdminController.php:53
 msgid "Webhook Actions"
 msgstr ""
 
@@ -5874,7 +7118,7 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — 借助 AI 构建自动化与集成"
 
-#: src/Controllers/AdminController.php:250
+#: src/Controllers/AdminController.php:254
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -5887,6 +7131,13 @@ msgstr "Webhook Actions by Flow Systems：你的 Webhook 已迁移到新的数�
 #: src/Api/SchemasController.php:130
 msgid "Webhook ID."
 msgstr "Webhook ID。"
+
+#: src/Services/Notifications/Channels/DiscordDriver.php:27
+#: src/Services/Notifications/Channels/DiscordDriver.php:34
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:27
+#: src/Services/Notifications/Channels/GoogleChatDriver.php:33
+msgid "Webhook URL"
+msgstr "Webhook URL"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Webhook auth"
@@ -5909,7 +7160,7 @@ msgid "Webhook name is required."
 msgstr "Webhook 名称为必填项。"
 
 #: src/Abilities/GlueAbilities.php:350
-#: src/Api/LogsController.php:387
+#: src/Api/LogsController.php:395
 #: src/Api/SchemasController.php:172
 #: src/Api/SchemasController.php:233
 #: src/Api/SchemasController.php:279
@@ -5946,6 +7197,20 @@ msgstr "这个 Webhook 有什么作用？支持 Markdown。"
 #: admin/src/components/ShareBuildDialog.vue
 msgid "What this build contains"
 msgstr "此配置包含的内容"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:25
+msgid "WhatsApp (Twilio)"
+msgstr "WhatsApp（Twilio）"
+
+#: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:29
+msgid ""
+"WhatsApp messages through Twilio. Business-initiated alerts need an "
+"approved Content Template."
+msgstr "通过 Twilio 发送 WhatsApp 消息。由企业发起的提醒需要已审核的 Content Template。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue admin/src/components/notifications/RuleEditor.vue
+msgid "When"
+msgstr "何时"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"
@@ -5994,6 +7259,21 @@ msgstr "Webhook 是否已启用。"
 msgid "Whether to include user data."
 msgstr "是否包含用户数据。"
 
+#: src/Api/WebhookSchema.php:131
+msgid ""
+"Which notification rules apply: inherit the site-wide rules, custom rules "
+"for this webhook only, or off."
+msgstr "适用哪些通知规则：继承站点级规则、仅此 Webhook 的自定义规则，或关闭。"
+
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid ""
+"Who gets told when this webhook fails, retries, gives up or recovers. "
+"Site-wide rules live under Notifications; here you can inherit them, mute "
+"some, or define rules just for this webhook."
+msgstr ""
+"当此 Webhook 失败、重试、放弃或恢复时通知谁。站点级规则位于“通知”中；在这里你可以继承它们、静音其中一部分，或仅为此 Webhook "
+"定义规则。"
+
 #: admin/src/components/LogsTable.vue
 msgid "Will Retry"
 msgstr "将重试"
@@ -6017,6 +7297,19 @@ msgstr "WordPress 连接器"
 #: admin/src/views/VaultView.vue
 msgid "WordPress username or API user"
 msgstr "WordPress 用户名或 API 用户"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:29
+#: src/Services/Notifications/Channels/TeamsDriver.php:34
+msgid "Workflow URL"
+msgstr "Workflow URL"
+
+#: src/Services/Notifications/Channels/TeamsDriver.php:24
+msgid ""
+"Workflows webhook URL (Teams → Workflows → \"Post to a channel when a "
+"webhook request is received\")."
+msgstr ""
+"Workflows Webhook URL（Teams → Workflows → “Post to a channel when a webhook "
+"request is received”）。"
 
 #: admin/src/components/AiStepPanel.vue
 msgid "Working…"
@@ -6128,9 +7421,21 @@ msgid ""
 "instead. (%3$s) Pick a different model with Change model."
 msgstr "您选择的模型 %1$s 无法响应，因此本条回复来自 %2$s。（%3$s）可通过“更换模型”选择其他模型。"
 
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "any — or e.g. 1, 3"
+msgstr "任意 — 或例如 1, 3"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "any — or e.g. woocommerce_*, wpcf7_mail_sent"
+msgstr "任意 — 或例如 woocommerce_*, wpcf7_mail_sent"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "array contains"
 msgstr "数组包含"
+
+#: admin/src/composables/useNotifications.js
+msgid "attempt"
+msgstr "尝试"
 
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "auto"
@@ -6156,19 +7461,27 @@ msgstr "backoff_strategy 必须是 exponential、linear 或 fixed。"
 msgid "be skipped"
 msgstr "被跳过"
 
+#: admin/src/components/WebhookNotificationsCard.vue
+msgid "before creating rules."
+msgstr "然后再创建规则。"
+
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "bool"
 msgstr "布尔"
 
-#: src/Abilities/WriteAbilities.php:225
+#: src/Abilities/WriteAbilities.php:326
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 
-#: src/Abilities/WriteAbilities.php:283
+#: src/Services/Notifications/RuleInput.php:55
+msgid "channel_ids must be a list of channel IDs."
+msgstr "channel_ids 必须是渠道 ID 列表。"
+
+#: src/Abilities/WriteAbilities.php:384
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions 必须是 {enabled, type, rules: [...]} 对象。"
 
-#: src/Abilities/WriteAbilities.php:292
+#: src/Abilities/WriteAbilities.php:393
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules 必须是规则对象数组。"
 
@@ -6179,6 +7492,22 @@ msgstr "包含"
 #: src/Services/Export/BuildSchemaValidator.php:98
 msgid "contains no webhooks."
 msgstr "不包含任何 Webhook。"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "custom message"
+msgstr "自定义消息"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "daily digest"
+msgstr "每日摘要"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "days"
+msgstr "天"
+
+#: admin/src/components/notifications/ChannelsPanel.vue
+msgid "disabled"
+msgstr "已禁用"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "dispatch"
@@ -6216,7 +7545,13 @@ msgstr "为空"
 msgid "equals"
 msgstr "等于"
 
-#: src/Services/Export/BuildSchemaValidator.php:387
+#: src/Services/Notifications/RuleInput.php:31
+#. translators: %s: comma-separated list of valid events
+#, php-format
+msgid "event must be one of: %s"
+msgstr "event 必须是以下之一：%s"
+
+#: src/Services/Export/BuildSchemaValidator.php:398
 #. translators: %d: max length
 #, php-format
 msgid "exceeds the maximum length of %d bytes."
@@ -6230,6 +7565,34 @@ msgstr "通过父级排除"
 msgid "excludes"
 msgstr "排除"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "failed"
+msgstr "失败"
+
+#: src/Services/Notifications/RuleInput.php:117
+msgid "filters.attempts must be a list of attempt numbers."
+msgstr "filters.attempts 必须是尝试次数列表。"
+
+#: src/Services/Notifications/RuleInput.php:132
+msgid "filters.http_codes must be a list."
+msgstr "filters.http_codes 必须是列表。"
+
+#: src/Services/Notifications/RuleInput.php:146
+#. translators: %s: the rejected value
+#, php-format
+msgid ""
+"filters.http_codes: \"%s\" is not a code (503), a class (5xx), a range "
+"(500-504) or \"transport\"."
+msgstr "filters.http_codes：“%s”不是状态码（503）、类别（5xx）、范围（500-504）或“transport”。"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "from a real delivery"
+msgstr "来自真实投递"
+
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "from the captured payload"
+msgstr "来自已捕获的数据"
+
 #: src/Api/RetrySettingsController.php:80
 msgid "global_max_attempts must be between 1 and 100."
 msgstr "global_max_attempts 必须介于 1 到 100 之间。"
@@ -6242,7 +7605,7 @@ msgstr "大于"
 msgid "has item"
 msgstr "含项"
 
-#: src/Services/Export/BuildSchemaValidator.php:377
+#: src/Services/Export/BuildSchemaValidator.php:388
 #. translators: %s: comma-separated key names
 #, php-format
 msgid "has unexpected key(s): %s."
@@ -6251,6 +7614,14 @@ msgstr "包含意外的键：%s。"
 #: admin/src/components/ConditionsEditor.vue
 msgid "has value"
 msgstr "含值"
+
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "hourly digest"
+msgstr "每小时摘要"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "hours"
+msgstr "小时"
 
 #: flowsystems-webhook-actions.php
 #. Author URI of the plugin
@@ -6265,6 +7636,18 @@ msgstr ""
 #: admin/src/components/AiStepControls.vue
 msgid "https://your-endpoint.example/webhook"
 msgstr "https://your-endpoint.example/webhook"
+
+#: src/Api/NotificationRulesController.php:188
+msgid "ids must be a list."
+msgstr "ids 必须是列表。"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "in digest"
+msgstr "已进入摘要"
+
+#: admin/src/composables/useNotifications.js
+msgid "incl. tests"
+msgstr "含测试"
 
 #: admin/src/components/WebhookForm.vue
 msgid "instead."
@@ -6284,7 +7667,7 @@ msgstr "为空"
 msgid "is false"
 msgstr "为假"
 
-#: src/Services/Export/BuildSchemaValidator.php:367
+#: src/Services/Export/BuildSchemaValidator.php:378
 #. translators: %s: key name
 #, php-format
 msgid "is missing required key \"%s\"."
@@ -6298,7 +7681,7 @@ msgstr "不为空"
 msgid "is required and must be an integer."
 msgstr "为必填项，且必须是整数。"
 
-#: src/Services/Export/BuildSchemaValidator.php:228
+#: src/Services/Export/BuildSchemaValidator.php:239
 msgid "is required when mode is \"vault\"."
 msgstr "当模式为“vault”时为必填项。"
 
@@ -6318,36 +7701,40 @@ msgstr "库"
 msgid "mapped"
 msgstr "已映射"
 
-#: src/Services/Export/BuildSchemaValidator.php:351
+#: src/Services/Export/BuildSchemaValidator.php:362
 msgid "may only contain letters, numbers, hyphens and underscores."
 msgstr "只能包含字母、数字、连字符和下划线。"
 
-#: src/Services/Export/BuildSchemaValidator.php:394
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "minutes"
+msgstr "分钟"
+
+#: src/Services/Export/BuildSchemaValidator.php:405
 msgid "must be a boolean."
 msgstr "必须是布尔值。"
 
 #: src/Services/Export/BuildSchemaValidator.php:81
-#: src/Services/Export/BuildSchemaValidator.php:231
+#: src/Services/Export/BuildSchemaValidator.php:242
 msgid "must be a string or null."
 msgstr "必须是字符串或 null。"
 
 #: src/Services/Export/BuildSchemaValidator.php:78
 #: src/Services/Export/BuildSchemaValidator.php:132
 #: src/Services/Export/BuildSchemaValidator.php:149
-#: src/Services/Export/BuildSchemaValidator.php:302
-#: src/Services/Export/BuildSchemaValidator.php:384
+#: src/Services/Export/BuildSchemaValidator.php:313
+#: src/Services/Export/BuildSchemaValidator.php:395
 msgid "must be a string."
 msgstr "必须是字符串。"
 
-#: src/Services/Export/BuildSchemaValidator.php:346
+#: src/Services/Export/BuildSchemaValidator.php:357
 msgid "must be a {key, value} object."
 msgstr "必须是 {key, value} 对象。"
 
-#: src/Services/Export/BuildSchemaValidator.php:300
+#: src/Services/Export/BuildSchemaValidator.php:311
 msgid "must be an array of strings."
 msgstr "必须是字符串数组。"
 
-#: src/Services/Export/BuildSchemaValidator.php:343
+#: src/Services/Export/BuildSchemaValidator.php:354
 msgid "must be an array of {key, value} pairs."
 msgstr "必须是 {key, value} 键值对数组。"
 
@@ -6355,8 +7742,9 @@ msgstr "必须是 {key, value} 键值对数组。"
 #: src/Services/Export/BuildSchemaValidator.php:96
 #: src/Services/Export/BuildSchemaValidator.php:109
 #: src/Services/Export/BuildSchemaValidator.php:141
-#: src/Services/Export/BuildSchemaValidator.php:207
-#: src/Services/Export/BuildSchemaValidator.php:319
+#: src/Services/Export/BuildSchemaValidator.php:208
+#: src/Services/Export/BuildSchemaValidator.php:218
+#: src/Services/Export/BuildSchemaValidator.php:330
 msgid "must be an array."
 msgstr "必须是数组。"
 
@@ -6369,27 +7757,28 @@ msgstr "必须是 http:// 或 https:// 网址。"
 #: src/Services/Export/BuildSchemaValidator.php:145
 #: src/Services/Export/BuildSchemaValidator.php:162
 #: src/Services/Export/BuildSchemaValidator.php:179
-#: src/Services/Export/BuildSchemaValidator.php:220
-#: src/Services/Export/BuildSchemaValidator.php:240
-#: src/Services/Export/BuildSchemaValidator.php:264
-#: src/Services/Export/BuildSchemaValidator.php:278
-#: src/Services/Export/BuildSchemaValidator.php:293
-#: src/Services/Export/BuildSchemaValidator.php:313
-#: src/Services/Export/BuildSchemaValidator.php:322
+#: src/Services/Export/BuildSchemaValidator.php:210
+#: src/Services/Export/BuildSchemaValidator.php:231
+#: src/Services/Export/BuildSchemaValidator.php:251
+#: src/Services/Export/BuildSchemaValidator.php:275
+#: src/Services/Export/BuildSchemaValidator.php:289
+#: src/Services/Export/BuildSchemaValidator.php:304
+#: src/Services/Export/BuildSchemaValidator.php:324
+#: src/Services/Export/BuildSchemaValidator.php:333
 msgid "must be an object."
 msgstr "必须是对象。"
 
-#: src/Services/Export/BuildSchemaValidator.php:400
+#: src/Services/Export/BuildSchemaValidator.php:411
 #. translators: %s: comma-separated allowed values
 #, php-format
 msgid "must be one of: %s."
 msgstr "必须是以下之一：%s。"
 
-#: src/Services/Export/BuildSchemaValidator.php:385
+#: src/Services/Export/BuildSchemaValidator.php:396
 msgid "must not be empty."
 msgstr "不能为空。"
 
-#: src/Services/Export/BuildSchemaValidator.php:355
+#: src/Services/Export/BuildSchemaValidator.php:366
 msgid "must not contain line breaks."
 msgstr "不能包含换行符。"
 
@@ -6405,9 +7794,25 @@ msgstr "name 和 endpoint_url 为必填项。"
 msgid "no"
 msgstr "否"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "no channel"
+msgstr "无渠道"
+
 #: admin/src/views/WebhooksList.vue
 msgid "no remaining triggers"
 msgstr "没有剩余触发器"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "no response"
+msgstr "无响应"
+
+#: admin/src/composables/useNotifications.js
+msgid "non-retryable"
+msgstr "不可重试"
+
+#: admin/src/components/notifications/RuleEditor.vue admin/src/composables/useNotifications.js
+msgid "none"
+msgstr "无"
 
 #: admin/src/components/ConditionsEditor.vue
 msgid "not empty"
@@ -6416,6 +7821,10 @@ msgstr "非空"
 #: admin/src/components/ConditionsEditor.vue
 msgid "not equals"
 msgstr "不等于"
+
+#: src/Services/Notifications/Channels/NtfyDriver.php:19
+msgid "ntfy"
+msgstr "ntfy"
 
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "number"
@@ -6429,6 +7838,22 @@ msgstr "对象包含"
 msgid "of"
 msgstr "/"
 
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "off"
+msgstr "关闭"
+
+#: admin/src/composables/useNotifications.js
+msgid "only after a retry"
+msgstr "仅在重试之后"
+
+#: admin/src/composables/useNotifications.js
+msgid "out of attempts"
+msgstr "尝试用尽"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "pending"
+msgstr "待处理"
+
 #: admin/src/components/LogsTable.vue
 msgid "perm. failed"
 msgstr "永久失败"
@@ -6441,11 +7866,15 @@ msgstr "属性名称（可选）"
 msgid "provider unavailable"
 msgstr "提供商不可用"
 
-#: src/Services/Export/BuildSchemaValidator.php:229
+#: admin/src/components/notifications/RulesPanel.vue
+msgid "quiet %s"
+msgstr "静默 %s"
+
+#: src/Services/Export/BuildSchemaValidator.php:240
 msgid "references a credential that is not listed in credentials[]."
 msgstr "引用了未列在 credentials[] 中的凭据。"
 
-#: src/Services/Export/BuildSchemaValidator.php:328
+#: src/Services/Export/BuildSchemaValidator.php:339
 msgid "references a webhook UUID not present in webhooks[]."
 msgstr "引用了 webhooks[] 中不存在的 Webhook UUID。"
 
@@ -6469,6 +7898,22 @@ msgstr "已复用"
 msgid "route is required, e.g. \"/wp/v2/users\"."
 msgstr "route 为必填项，例如 \"/wp/v2/users\"。"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "sample data"
+msgstr "示例数据"
+
+#: admin/src/components/notifications/RuleEditor.vue
+msgid "seconds"
+msgstr "秒"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "sending"
+msgstr "发送中"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "sent"
+msgstr "已发送"
+
 #: admin/src/components/ConditionsEditor.vue admin/src/components/MappingEditor.vue
 msgid "string"
 msgstr "字符串"
@@ -6476,6 +7921,10 @@ msgstr "字符串"
 #: admin/src/components/ConditionsEditor.vue
 msgid "stringify"
 msgstr "字符串化"
+
+#: src/Services/Notifications/RuleInput.php:193
+msgid "template must be an object with subject, title, body and short."
+msgstr "template 必须是包含 subject、title、body 和 short 的对象。"
 
 #: admin/src/views/AiBuilderView.vue
 msgid "the step failed."
@@ -6485,6 +7934,10 @@ msgstr "该步骤失败。"
 msgid "then select it here."
 msgstr "然后在此处选择它。"
 
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "throttled"
+msgstr "已限流"
+
 #: src/Abilities/ReadAbilities.php:125
 msgid "trigger is required."
 msgstr "trigger 为必填项。"
@@ -6493,6 +7946,10 @@ msgstr "trigger 为必填项。"
 msgid "unknown"
 msgstr "未知"
 
+#: admin/src/components/notifications/TemplateEditor.vue
+msgid "using the default for this event"
+msgstr "使用此事件的默认模板"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "value"
 msgstr "值"
@@ -6500,6 +7957,10 @@ msgstr "值"
 #: admin/src/views/AiBuilderView.vue
 msgid "verified %s"
 msgstr "已验证 %s"
+
+#: admin/src/components/notifications/NotificationLogTable.vue
+msgid "waiting for digest"
+msgstr "等待摘要"
 
 #: src/Abilities/WriteAbilities.php:157
 msgid "webhook_id, trigger and conditions are required."
@@ -6512,6 +7973,10 @@ msgstr "webhook_id、trigger 和 field_mapping 为必填项。"
 #: src/Abilities/GlueAbilities.php:347
 msgid "webhook_id, trigger, stage (pre|post) and snippet_id are required."
 msgstr "webhook_id、trigger、stage（pre|post）和 snippet_id 为必填。"
+
+#: src/Services/Notifications/Channels/EmailDriver.php:63
+msgid "wp_mail() returned false. Check the site's mail configuration."
+msgstr "wp_mail() 返回 false。请检查站点的邮件配置。"
 
 #: admin/src/components/BuildPublishProgress.vue
 msgid ""
@@ -6530,6 +7995,12 @@ msgstr "· 数据库密钥已移除"
 #: admin/src/main.js
 msgid "…"
 msgstr "…"
+
+#: src/Services/Notifications/DigestFlusher.php:135
+#. translators: %d: number of further notifications
+#, php-format
+msgid "… and %d more"
+msgstr "… 还有 %d 条"
 
 #: src/Services/Ai/PlanExecutor.php:519
 #. translators: %s: what was undone.

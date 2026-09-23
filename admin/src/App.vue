@@ -1,5 +1,6 @@
 <script setup>
 import { RouterView, RouterLink, useRoute } from 'vue-router';
+import { ConfigProvider } from 'radix-vue';
 import {
   Webhook,
   ScrollText,
@@ -15,6 +16,7 @@ import {
   BrainCircuit,
   X,
   ChevronDown,
+  BellRing,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { useTheme } from './composables/useTheme';
@@ -41,6 +43,7 @@ const navItems = [
   { path: '/queue', label: __('Queue'), icon: Clock },
   { path: '/tokens', label: __('API Tokens'), icon: KeyRound },
   { path: '/vault', label: __('Credentials Vault'), icon: ShieldCheck },
+  { path: '/notifications', label: __('Notifications'), icon: BellRing },
   { path: '/external-cron', label: __('External Cron'), icon: Timer },
   { path: '/activity', label: __('Activity'), icon: History },
   { path: '/settings', label: __('Settings'), icon: Settings },
@@ -64,6 +67,10 @@ const closeMobileNav = () => {
 </script>
 
 <template>
+  <!-- scroll-body=false: radix would pad <body> by the scrollbar width when a Select opens;
+       the page keeps its gutter instead (html { scrollbar-gutter: stable } in style.css),
+       so nothing — not even the fixed WP admin bar — moves. -->
+  <ConfigProvider :scroll-body="false">
   <div class="min-h-[500px] flex flex-col">
     <!-- Header -->
     <div
@@ -195,4 +202,5 @@ const closeMobileNav = () => {
       </div>
     </footer>
   </div>
+  </ConfigProvider>
 </template>

@@ -7,6 +7,7 @@ import TriggerSelect from '@/components/TriggerSelect.vue';
 import ChainPicker from '@/components/ChainPicker.vue';
 import KeyValueEditor from '@/components/KeyValueEditor.vue';
 import MarkdownField from '@/components/MarkdownField.vue';
+import WebhookNotificationsCard from '@/components/WebhookNotificationsCard.vue';
 import api from '@/lib/api';
 import { useSyncWarning } from '@/composables/useSyncWarning';
 import { useChains, useWebhookChainInvolvement } from '@/composables/useChains';
@@ -65,6 +66,8 @@ const form = ref({
   backoff_base_delay: '',
   backoff_max_delay: '',
   is_synchronous: false,
+  notifications_mode: 'inherit',
+  muted_rule_ids: [],
 });
 
 // Authorization mode: a saved vault credential (preferred) or a manual header.
@@ -199,6 +202,8 @@ watch(() => props.webhook, async (webhook) => {
       url_params:         webhook.url_params || [],
       is_enabled:         webhook.is_enabled ?? true,
       triggers:           wpTriggers,
+      notifications_mode: webhook.notifications_mode || 'inherit',
+      muted_rule_ids:     Array.isArray(webhook.muted_rule_ids) ? [...webhook.muted_rule_ids] : [],
       retry_limit:        webhook.retry_limit != null ? String(webhook.retry_limit) : '',
       backoff_strategy:   webhook.backoff_strategy ?? 'default',
       backoff_base_delay: webhook.backoff_base_delay != null ? String(webhook.backoff_base_delay) : '',
@@ -810,6 +815,13 @@ const handleSubmit = () => {
         </div>
       </div>
     </div>
+
+    <!-- Notifications -->
+    <WebhookNotificationsCard
+      :webhook-id="props.webhook?.id ?? null"
+      v-model:mode="form.notifications_mode"
+      v-model:muted-rule-ids="form.muted_rule_ids"
+    />
 
     <!-- Enabled -->
     <div class="space-y-2 border-t pt-5">
