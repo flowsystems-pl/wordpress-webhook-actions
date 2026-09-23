@@ -81,7 +81,7 @@ Retries handle the flaky minute; Notifications handle the endpoint that stays do
 - Action Scheduler auto-detection — more reliable delivery on high-traffic sites
 - Fully translatable — the entire admin interface and all server-side strings are internationalized; ships with Polish, Simplified Chinese, and Dutch, and is compatible with WPML and Polylang String Translation
 - Full REST API with scoped API token authentication (`read` / `operational` / `full` / `agent`) — the `agent` scope grants full write access for AI assistants while never exposing stored secrets
-- Developer extensibility — 25 filters and 11 action hooks ([reference](https://wpwebhooks.org/docs/))
+- Developer extensibility — 26 filters and 11 action hooks ([reference](https://wpwebhooks.org/docs/))
 
 = Pro features =
 
@@ -185,6 +185,6 @@ For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.
 - Added: every message is a template. Subject, title, body and a one-liner for SMS use the same `{{ path }}` placeholders as dynamic URLs, over the webhook, the event, the delivery (attempt, HTTP code, error, next try, log link), the mapped payload, the raw payload (`{{ args.0.email }}`) and the site, with modifiers such as `| truncate:120`, `| default:"—"`, `| date:"Y-m-d H:i"` and `| json`. A live preview renders against the captured payload or a real delivery, a field picker inserts paths, and a linter flags paths that are not in the payload
 - Added: Draft with AI. The rule editor asks the site's AI provider to write the message from the captured payload, and Build with AI can add a notification rule to a plan ("and ping me on Slack if it fails") — the same linter feeds unknown paths back to the model. New abilities: list_notification_channels, list_notification_rules, create_notification_rule, update_notification_rule, test_notification_rule — also reachable over MCP
 - Added: a Sent tab with every notification, its status and a resend button; a bell on delivery-log rows that produced notifications; a health-bar warning when a channel keeps failing
-- Added: the `fswa_delivery_event` action fires at every delivery state change with the full context (webhook, trigger, attempt, HTTP code, error, payloads), so your own code can react too; `fswa_notification_message` filters a rendered message before it is sent; `fswa_notification_channel_drivers` adds a channel type; `fswa_notification_http_args` tunes the outgoing request
+- Added: the `fswa_delivery_event` action fires at every delivery state change with the full context (webhook, trigger, attempt, HTTP code, error, payloads), so your own code can react too; `fswa_notification_message` filters a rendered message before it is sent; `fswa_notification_channel_drivers` adds a channel type; `fswa_notification_http_args` tunes the outgoing request; `fswa_notification_inline_send` decides whether a synchronous webhook's notifications go out at the end of the same request (the default, so they never wait for a cron that may not run) or through cron like a queued delivery's
 - Changed: builds export a webhook's notification rules (channels never travel); on import a rule whose channels do not exist here is created switched off and listed in the import problems
 - Changed: database schema 2.5.0 adds the notification tables and two webhook columns

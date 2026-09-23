@@ -22,6 +22,7 @@ use FlowSystems\WebhookActions\Services\Notifications\TemplateRenderer;
 use FlowSystems\WebhookActions\Services\Notifications\TemplateLinter;
 use FlowSystems\WebhookActions\Services\Notifications\RuleMatcher;
 use FlowSystems\WebhookActions\Services\Notifications\DeliveryEvents;
+use FlowSystems\WebhookActions\Services\Notifications\NotificationDispatcher;
 
 global $wpdb;
 $pass = 0;
@@ -306,6 +307,38 @@ $check('digest: flush folds one message per channel', $queued === count($allChan
 $check('digest: email digest sent', count($mails) === 1 && str_contains($mails[0]['subject'], 'notification'), wp_json_encode(array_map(static fn($m) => $m['subject'] ?? '', $mails)));
 
 // ---------------------------------------------------------------------------
+// Scenario 7: a synchronous webhook's notifications go out in the same request
+// ---------------------------------------------------------------------------
+$syncId = (int) $webhooks->create([
+  'name'           => 'Smoke sync webhook',
+  'endpoint_url'   => 'https://example.com/smoke-endpoint',
+  'http_method'    => 'POST',
+  'is_enabled'     => 1,
+  'is_synchronous' => 1,
+  'triggers'       => ['fswa_smoke_sync_trigger'],
+  'retry_limit'    => 2,
+]);
+$created['webhooks'][] = $syncId;
+$ruleSync = (int) $rules->create(['name' => 'smoke sync', 'event' => 'failed_attempt', 'webhook_id' => $syncId, 'channel_ids' => [$chSlack], 'filters' => []]);
+$created['rules'][] = $ruleSync;
+$endpointCode = 500;
+$http = [];
+$dispatcher->dispatch('fswa_smoke_sync_trigger', [['order_id' => 'A-107']]);
+$s = $countByStatus($ruleSync);
+$check('sync: row queued and a shutdown flush armed instead of a cron spawn', ($s['pending'] ?? 0) === 1 && has_action('shutdown', [NotificationDispatcher::class, 'flushInline']) !== false, wp_json_encode($s));
+NotificationDispatcher::flushInline();
+$s = $countByStatus($ruleSync);
+$check('sync: shutdown flush sent it in the same request', ($s['sent'] ?? 0) === 1 && ($s['pending'] ?? 0) === 0, wp_json_encode($s));
+$check('sync: slack received the message', count($sentTo('hooks.slack.com')) === 1, (string) count($sentTo('hooks.slack.com')));
+$http = [];
+add_filter('fswa_notification_inline_send', '__return_false');
+$dispatcher->dispatch('fswa_smoke_sync_trigger', [['order_id' => 'A-108']]);
+remove_filter('fswa_notification_inline_send', '__return_false');
+$s = $countByStatus($ruleSync);
+$check('sync: filter off leaves the row for cron', ($s['pending'] ?? 0) === 1 && count($sentTo('hooks.slack.com')) === 0, wp_json_encode($s));
+$sender->flushPending(100);
+
+// ---------------------------------------------------------------------------
 // Cleanup
 // ---------------------------------------------------------------------------
 foreach ($created['rules'] as $id) {
@@ -314,13 +347,15 @@ foreach ($created['rules'] as $id) {
 foreach ($created['channels'] as $id) {
   $channels->delete((int) $id);
 }
-$wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_notification_log WHERE webhook_id = %d", $webhookId));
 // Digest rows of a site-wide rule carry no webhook_id; drop them by rule.
 $wpdb->query("DELETE FROM {$wpdb->prefix}fswa_notification_log WHERE rule_id IN (" . implode(',', array_map('intval', $created['rules'])) . ")");
-$wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_queue WHERE webhook_id = %d", $webhookId));
-$wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_logs WHERE webhook_id = %d", $webhookId));
-$wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_trigger_schemas WHERE webhook_id = %d", $webhookId));
-$webhooks->delete($webhookId);
+foreach ($created['webhooks'] as $wid) {
+  $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_notification_log WHERE webhook_id = %d", $wid));
+  $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_queue WHERE webhook_id = %d", $wid));
+  $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_logs WHERE webhook_id = %d", $wid));
+  $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_trigger_schemas WHERE webhook_id = %d", $wid));
+  $webhooks->delete((int) $wid);
+}
 if (!empty($parkedRules)) {
   $wpdb->query("UPDATE {$wpdb->prefix}fswa_notification_rules SET is_enabled = 1 WHERE id IN (" . implode(',', $parkedRules) . ")");
 }

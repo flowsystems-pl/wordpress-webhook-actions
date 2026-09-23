@@ -137,19 +137,63 @@ class NotificationDispatcher {
     }
 
     if ($queued > 0) {
-      $this->scheduleSend();
+      $this->scheduleSend($ctx);
     }
   }
 
   /**
-   * Book an immediate send. On WP-Cron the spawn happens at request end; with
-   * Action Scheduler or a system cron the next tick picks it up anyway.
+   * Book the send. An asynchronous delivery is already running under some cron
+   * (WP-Cron, Action Scheduler, an external tick), so its notifications go out
+   * on the next tick — on WP-Cron the spawn happens at request end. A
+   * SYNCHRONOUS delivery ran inline with no cron involved, and its
+   * notifications would otherwise wait for a cron that may never come
+   * (DISABLE_WP_CRON on a sync-only site), so they are flushed on `shutdown`
+   * of the same request, after the response is produced. The one-shot cron
+   * event stays booked as the fallback should that flush not run.
+   *
+   * @param array<string, mixed> $ctx The delivery context
    */
-  private function scheduleSend(): void {
+  private function scheduleSend(array $ctx): void {
     if (!wp_next_scheduled(self::SEND_HOOK)) {
       wp_schedule_single_event(time(), self::SEND_HOOK);
     }
+
+    /**
+     * Filter whether this delivery's notifications are sent at the end of the
+     * current request instead of waiting for cron. Defaults to true for a
+     * synchronous webhook (the site already accepted inline latency for it)
+     * and false for a queued one.
+     *
+     * @param bool  $inline
+     * @param array $ctx The delivery context (`webhook`, `event`, `attempt`, …)
+     */
+    $inline = (bool) apply_filters('fswa_notification_inline_send', !empty($ctx['webhook']['is_synchronous']), $ctx);
+    if ($inline) {
+      self::flushOnShutdown();
+      return;
+    }
     (new QueueService())->nudge();
+  }
+
+  private static bool $shutdownArmed = false;
+
+  /**
+   * Arm one `shutdown` flush for this request, however many deliveries ask.
+   */
+  public static function flushOnShutdown(): void {
+    if (self::$shutdownArmed) {
+      return;
+    }
+    self::$shutdownArmed = true;
+    add_action('shutdown', [self::class, 'flushInline'], 5);
+  }
+
+  /**
+   * The `shutdown` callback: the same flush the cron event runs.
+   */
+  public static function flushInline(): void {
+    self::$shutdownArmed = false;
+    do_action(self::SEND_HOOK);
   }
 
   private function throttled(array $rule, int $webhookId): bool {

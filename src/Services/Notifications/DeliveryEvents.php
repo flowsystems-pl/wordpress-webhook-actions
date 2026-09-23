@@ -95,6 +95,7 @@ class DeliveryEvents {
         'name'         => (string) ($webhook['name'] ?? ''),
         'endpoint_url' => (string) ($webhook['endpoint_url'] ?? ''),
         'is_enabled'   => (bool) ($webhook['is_enabled'] ?? true),
+        'is_synchronous' => (bool) ($webhook['is_synchronous'] ?? false),
       ],
       'trigger'          => (string) ($ctx['trigger'] ?? ''),
       'log_id'           => isset($ctx['log_id']) ? (int) $ctx['log_id'] : null,
