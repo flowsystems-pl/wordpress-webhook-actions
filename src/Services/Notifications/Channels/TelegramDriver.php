@@ -80,7 +80,10 @@ class TelegramDriver extends AbstractHttpDriver {
       $body['message_thread_id'] = (int) $thread;
     }
 
-    $result = $this->post('https://api.telegram.org/bot' . rawurlencode($token) . '/sendMessage', $body);
+    // A token is digits:base64url — every character is path-safe, and a
+    // percent-encoded colon is not something the Bot API promises to accept.
+    $token  = (string) preg_replace('/[^A-Za-z0-9:_\-]/', '', $token);
+    $result = $this->post('https://api.telegram.org/bot' . $token . '/sendMessage', $body);
     if (is_wp_error($result)) {
       return $result;
     }

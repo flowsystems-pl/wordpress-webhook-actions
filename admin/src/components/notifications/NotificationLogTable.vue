@@ -12,7 +12,9 @@ const props = defineProps({
   logId: { type: Number, default: null },
 })
 
-const { eventLabel, typeLabel } = useNotifications()
+// The catalog gives event + channel-type labels; the Sent tab can be the first
+// thing opened, so load it here rather than rely on another panel having done so.
+const { eventLabel, typeLabel, loadCatalog } = useNotifications()
 
 const items = ref([])
 const total = ref(0)
@@ -46,7 +48,7 @@ const fetch = async () => {
     loading.value = false
   }
 }
-onMounted(fetch)
+onMounted(() => { loadCatalog().catch(() => {}); fetch() })
 watch([page, status], fetch)
 watch(() => [props.webhookId, props.logId], () => { page.value = 1; fetch() })
 

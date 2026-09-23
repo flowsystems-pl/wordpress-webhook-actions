@@ -49,8 +49,9 @@ class TestAbilities {
       $rule['webhook_id'] ? (int) $rule['webhook_id'] : null,
       (int) ($input['log_id'] ?? 0) ?: null
     );
-    $message = (new \FlowSystems\WebhookActions\Services\Notifications\MessageBuilder())->buildFromRoots($rule['event'], $rule['template'], $preview['roots'], $preview['ctx']);
-    $message['title'] = '[' . __('Test', 'flowsystems-webhook-actions') . '] ' . $message['title'];
+    $message = \FlowSystems\WebhookActions\Services\Notifications\MessageBuilder::asTest(
+      (new \FlowSystems\WebhookActions\Services\Notifications\MessageBuilder())->buildFromRoots($rule['event'], $rule['template'], $preview['roots'], $preview['ctx'], $rule)
+    );
 
     $channels = new \FlowSystems\WebhookActions\Repositories\NotificationChannelRepository();
     $sender   = new \FlowSystems\WebhookActions\Services\Notifications\NotificationSender();

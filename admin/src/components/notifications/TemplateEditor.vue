@@ -3,12 +3,17 @@ import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { Sparkles, RefreshCw, ChevronDown, Search, AlertTriangle, Info } from 'lucide-vue-next'
 import { Button, Input, Label, Switch, Popover, Tooltip } from '@/components/ui'
 import api from '@/lib/api'
-import { SEVERITY_CLASS } from '@/composables/useNotifications'
+import { SEVERITY_CLASS, useNotifications } from '@/composables/useNotifications'
 import { __, sprintf } from '@/i18n'
 
 // Subject / title / body / short with a live preview, a field picker that
-// inserts {{ path }} at the caret, and "Draft with AI". Emits the template
-// object (or null when every field is blank = use the default).
+// inserts {{ path }} at the caret, and "Draft with AI".
+//
+// The fields are pre-filled with the event's default template, so editing
+// means changing a message, not writing one from memory. Only fields that
+// differ from that default are emitted; a template where nothing differs is
+// emitted as null (= use the default), exactly as an untouched rule was
+// before. A partial saved template shows the default in its other fields.
 const props = defineProps({
   modelValue: { type: Object, default: null },
   event: { type: String, required: true },
@@ -17,6 +22,11 @@ const props = defineProps({
   aiAvailable: { type: Boolean, default: true },
 })
 const emit = defineEmits(['update:modelValue'])
+
+const { defaults, loadCatalog } = useNotifications()
+loadCatalog().catch(() => {})
+const EMPTY = { subject: '', title: '', body: '', short: '' }
+const defaultsFor = (event) => ({ ...EMPTY, ...(defaults.value?.[event] || {}) })
 
 const local = ref({ subject: '', title: '', body: '', short: '', include_fields: true })
 const preview = ref(null)
@@ -30,11 +40,12 @@ const editors = {}
 
 const fromModel = (value) => {
   const v = value || {}
+  const d = defaultsFor(props.event)
   local.value = {
-    subject: v.subject || '',
-    title: v.title || '',
-    body: v.body || '',
-    short: v.short || '',
+    subject: v.subject || d.subject,
+    title: v.title || d.title,
+    body: v.body || d.body,
+    short: v.short || d.short,
     include_fields: v.include_fields !== false,
   }
 }
@@ -46,8 +57,10 @@ watch(() => props.modelValue, (v) => {
 
 const toModel = () => {
   const out = {}
+  const d = defaultsFor(props.event)
   for (const k of ['subject', 'title', 'body', 'short']) {
-    if (local.value[k].trim() !== '') out[k] = local.value[k]
+    const v = local.value[k]
+    if (v.trim() !== '' && v !== d[k]) out[k] = v
   }
   if (!local.value.include_fields) out.include_fields = false
   return Object.keys(out).length ? out : null
@@ -55,13 +68,29 @@ const toModel = () => {
 
 const isCustom = computed(() => toModel() !== null)
 
+// The catalog loads asynchronously and the event can change: a field that
+// still holds the previous default (or nothing) follows the new default; a
+// field the user changed keeps its text.
+let shownDefaults = defaultsFor(props.event)
+watch([() => defaults.value, () => props.event], () => {
+  const next = defaultsFor(props.event)
+  for (const k of ['subject', 'title', 'body', 'short']) {
+    if (local.value[k] === '' || local.value[k] === shownDefaults[k]) local.value[k] = next[k]
+  }
+  shownDefaults = next
+}, { deep: true })
+
 let previewTimer = null
+let previewSeq = 0
 const schedulePreview = () => {
   clearTimeout(previewTimer)
   previewTimer = setTimeout(runPreview, 400)
 }
 
+// Previews overlap while someone types; only the newest response may land,
+// or a slow older one would put stale lint warnings back on a fixed template.
 const runPreview = async () => {
+  const seq = ++previewSeq
   previewing.value = true
   previewError.value = null
   try {
@@ -71,14 +100,16 @@ const runPreview = async () => {
       webhook_id: props.webhookId || undefined,
       channel_types: props.channelTypes,
     })
+    if (seq !== previewSeq) return
     preview.value = data.message
     lint.value = data.lint
     paths.value = data.paths || []
     source.value = data.source
   } catch (e) {
+    if (seq !== previewSeq) return
     previewError.value = e.message
   } finally {
-    previewing.value = false
+    if (seq === previewSeq) previewing.value = false
   }
 }
 
@@ -145,7 +176,7 @@ const draft = async () => {
 }
 
 const resetToDefault = () => {
-  local.value = { subject: '', title: '', body: '', short: '', include_fields: true }
+  local.value = { ...defaultsFor(props.event), include_fields: true }
 }
 
 const severityClass = computed(() => SEVERITY_CLASS[preview.value?.severity] || SEVERITY_CLASS.neutral)

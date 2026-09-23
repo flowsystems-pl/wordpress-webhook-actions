@@ -28,7 +28,7 @@ class MessageBuilder {
   public function build(array $rule, array $ctx): array {
     $roots = TemplateContext::fromDeliveryContext($ctx);
 
-    return $this->buildFromRoots((string) ($ctx['event'] ?? ''), $rule['template'] ?? null, $roots, $ctx);
+    return $this->buildFromRoots((string) ($ctx['event'] ?? ''), $rule['template'] ?? null, $roots, $ctx, $rule);
   }
 
   /**
@@ -37,9 +37,10 @@ class MessageBuilder {
    * @param array<string, mixed>|null $template
    * @param array<string, mixed>      $roots
    * @param array<string, mixed>      $ctx
+   * @param array<string, mixed>|null $rule  The matching rule row, when there is one
    * @return array<string, mixed>
    */
-  public function buildFromRoots(string $event, ?array $template, array $roots, array $ctx = []): array {
+  public function buildFromRoots(string $event, ?array $template, array $roots, array $ctx = [], ?array $rule = null): array {
     $tpl = DefaultTemplates::resolve($event, $template);
 
     $message = [
@@ -70,10 +71,30 @@ class MessageBuilder {
      * Filter the rendered notification before any channel formats it.
      *
      * @param array $message  subject, title, body, short, severity, fields, link, …
-     * @param array $rule     The matching rule (may be empty for previews)
+     * @param array $rule     The matching rule row; for previews and tests
+     *                        without a saved rule, just ['template' => …] or []
      * @param array $ctx      The delivery context
      */
-    return (array) apply_filters('fswa_notification_message', $message, $template !== null ? ['template' => $template] : [], $ctx);
+    return (array) apply_filters('fswa_notification_message', $message, $rule ?? ($template !== null ? ['template' => $template] : []), $ctx);
+  }
+
+  /**
+   * Mark a message as a test on every line a channel may show as the headline
+   * — email uses the subject, chat cards the title, SMS the one-liner — so a
+   * test can never be mistaken for a real alert in any inbox.
+   *
+   * @param array<string, mixed> $message
+   * @return array<string, mixed>
+   */
+  public static function asTest(array $message): array {
+    $prefix = '[' . __('Test', 'flowsystems-webhook-actions') . '] ';
+    foreach (['subject', 'title', 'short'] as $key) {
+      if (isset($message[$key]) && is_string($message[$key]) && $message[$key] !== '') {
+        $message[$key] = $prefix . $message[$key];
+      }
+    }
+
+    return $message;
   }
 
   public static function severity(string $event): string {

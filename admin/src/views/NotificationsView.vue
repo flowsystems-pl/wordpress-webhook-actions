@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { BellRing } from 'lucide-vue-next'
 import ChannelsPanel from '@/components/notifications/ChannelsPanel.vue'
@@ -16,11 +16,17 @@ const tabs = [
   { key: 'channels', label: __('Channels') },
   { key: 'sent', label: __('Sent') },
 ]
-const tab = ref(['rules', 'channels', 'sent'].includes(route.query.tab) ? route.query.tab : 'rules')
+const TABS = ['rules', 'channels', 'sent']
+const tab = ref(TABS.includes(route.query.tab) ? route.query.tab : 'rules')
 const setTab = (key) => {
   tab.value = key
   router.replace({ query: { ...route.query, tab: key } })
 }
+// Links elsewhere in the app point at ?tab=channels / ?tab=sent; when the
+// view is already mounted only the query changes, so follow it.
+watch(() => route.query.tab, (next) => {
+  if (TABS.includes(next) && next !== tab.value) tab.value = next
+})
 
 // "Draft with AI" is only offered when some provider is reachable.
 const aiAvailable = ref(true)

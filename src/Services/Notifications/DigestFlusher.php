@@ -9,8 +9,11 @@ use FlowSystems\WebhookActions\Repositories\NotificationRuleRepository;
 
 /**
  * Folds the rows a digest rule collected into one message per channel.
- * Hourly rules flush on every run; daily rules flush once a day at the
- * configured hour (site time, option fswa_notification_digest_hour, default 8).
+ * Hourly rules flush on every run; daily rules flush once a day, on the first
+ * run at or after the configured hour (site time, option
+ * fswa_notification_digest_hour, default 8). WP-Cron only runs when the site
+ * gets traffic, so "the 08:00 tick" may land at 09:40 — the last-flush date
+ * in fswa_notification_digest_last_daily is what stops a second run that day.
  */
 class DigestFlusher {
   public const HOOK = 'fswa_notification_digest';
@@ -27,7 +30,14 @@ class DigestFlusher {
    * @return int Digest messages queued
    */
   public function flush(bool $force = false): int {
-    $dailyDue = $force || (int) wp_date('G') === (int) get_option('fswa_notification_digest_hour', 8);
+    $today    = (string) wp_date('Y-m-d');
+    $dailyDue = $force || (
+      (int) wp_date('G') >= (int) get_option('fswa_notification_digest_hour', 8)
+      && (string) get_option('fswa_notification_digest_last_daily', '') !== $today
+    );
+    if ($dailyDue && !$force) {
+      update_option('fswa_notification_digest_last_daily', $today, false);
+    }
 
     $due = [];
     foreach ($this->rules->getGlobal() as $rule) {

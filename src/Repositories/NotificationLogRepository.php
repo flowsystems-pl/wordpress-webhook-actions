@@ -116,7 +116,7 @@ class NotificationLogRepository {
               LEFT JOIN {$this->channelsTable} c ON c.id = n.channel_id
               LEFT JOIN {$this->webhooksTable} w ON w.id = n.webhook_id
              WHERE {$whereSql}
-             ORDER BY n.id DESC
+             ORDER BY n.created_at DESC, n.id DESC
              LIMIT %d OFFSET %d";
     $rows = $wpdb->get_results($wpdb->prepare($sql, ...array_merge($params, [$perPage, $offset])), ARRAY_A) ?: [];
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, PluginCheck.Security.DirectDB.UnescapedDBParameter

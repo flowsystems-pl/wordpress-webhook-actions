@@ -255,5 +255,7 @@ class Activation {
     delete_option('fswa_archived_stats');
     delete_option('fswa_vault_key');
     delete_option('fswa_glue_token_writes');
+    delete_option('fswa_notification_digest_hour');
+    delete_option('fswa_notification_digest_last_daily');
   }
 }

@@ -203,8 +203,7 @@ class NotificationRulesController extends WP_REST_Controller {
     }
     $webhookId = (int) ($request->get_param('webhook_id') ?: $rule['webhook_id'] ?: 0) ?: null;
     $preview   = (new PreviewContext())->build($rule['event'], $webhookId, (int) $request->get_param('log_id') ?: null);
-    $message   = (new MessageBuilder())->buildFromRoots($rule['event'], $rule['template'], $preview['roots'], $preview['ctx']);
-    $message['title'] = '[' . __('Test', 'flowsystems-webhook-actions') . '] ' . $message['title'];
+    $message   = MessageBuilder::asTest((new MessageBuilder())->buildFromRoots($rule['event'], $rule['template'], $preview['roots'], $preview['ctx'], $rule));
 
     $sender  = new NotificationSender();
     $results = [];

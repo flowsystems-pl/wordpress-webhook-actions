@@ -90,6 +90,14 @@ $webhooks = new WebhookRepository();
 $sender   = new NotificationSender();
 $created  = ['channels' => [], 'rules' => [], 'webhooks' => []];
 
+// The smoke webhook inherits site-wide rules, so any real rule on this install
+// would add its own sends to the counts below. Park them for the run.
+$parkedRules = array_map('intval', $wpdb->get_col("SELECT id FROM {$wpdb->prefix}fswa_notification_rules WHERE is_enabled = 1"));
+if (!empty($parkedRules)) {
+  $wpdb->query("UPDATE {$wpdb->prefix}fswa_notification_rules SET is_enabled = 0 WHERE id IN (" . implode(',', $parkedRules) . ")");
+  echo 'INFO  parked ' . count($parkedRules) . " pre-existing enabled rule(s) for the run\n";
+}
+
 $mk = static function (string $name, string $type, array $config, array $secrets) use ($channels, $sender, &$created): int {
   $id = $channels->create(['name' => $name, 'type' => $type, 'config' => $config, 'secret_ciphertext' => $sender->encryptSecrets($secrets), 'hint' => '…test']);
   $created['channels'][] = $id;
@@ -307,10 +315,15 @@ foreach ($created['channels'] as $id) {
   $channels->delete((int) $id);
 }
 $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_notification_log WHERE webhook_id = %d", $webhookId));
+// Digest rows of a site-wide rule carry no webhook_id; drop them by rule.
+$wpdb->query("DELETE FROM {$wpdb->prefix}fswa_notification_log WHERE rule_id IN (" . implode(',', array_map('intval', $created['rules'])) . ")");
 $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_queue WHERE webhook_id = %d", $webhookId));
 $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_logs WHERE webhook_id = %d", $webhookId));
 $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}fswa_trigger_schemas WHERE webhook_id = %d", $webhookId));
 $webhooks->delete($webhookId);
+if (!empty($parkedRules)) {
+  $wpdb->query("UPDATE {$wpdb->prefix}fswa_notification_rules SET is_enabled = 1 WHERE id IN (" . implode(',', $parkedRules) . ")");
+}
 
 echo "\n{$pass} passed, {$fail} failed\n";
 if ($fail > 0) {

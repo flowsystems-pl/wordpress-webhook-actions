@@ -272,8 +272,7 @@ class NotificationChannelsController extends WP_REST_Controller {
     }
     $preview  = (new PreviewContext())->build($event, (int) $request->get_param('webhook_id') ?: null, (int) $request->get_param('log_id') ?: null);
     $template = $request->get_param('template');
-    $message  = (new MessageBuilder())->buildFromRoots($event, is_array($template) ? $template : null, $preview['roots'], $preview['ctx']);
-    $message['title'] = '[' . __('Test', 'flowsystems-webhook-actions') . '] ' . $message['title'];
+    $message  = MessageBuilder::asTest((new MessageBuilder())->buildFromRoots($event, is_array($template) ? $template : null, $preview['roots'], $preview['ctx']));
 
     $outcome = $this->sender->deliver($message, $channel);
     if ($outcome === true) {
