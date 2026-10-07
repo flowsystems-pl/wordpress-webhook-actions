@@ -15,6 +15,9 @@ use WP_Error;
  * the credentials vault (decrypted at call time only) and never leaves the server
  * or appears in a response. This is the free-tier fallback; Pro routes through our
  * hosted backend instead and needs no key.
+ *
+ * Note: no temperature. Current Claude models reject non-default sampling
+ * parameters, so the API's defaults are the only setting that works on all of them.
  */
 class AnthropicTransport implements LlmTransportInterface {
   private const ENDPOINT        = 'https://api.anthropic.com/v1/messages';
@@ -50,9 +53,6 @@ class AnthropicTransport implements LlmTransportInterface {
     ];
     if ($system !== '') {
       $body['system'] = $system;
-    }
-    if (isset($options['temperature'])) {
-      $body['temperature'] = (float) $options['temperature'];
     }
 
     $this->lastRequest = [

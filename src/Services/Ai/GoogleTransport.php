@@ -14,6 +14,10 @@ use WP_Error;
  * Used when the WordPress AI Client is not configured. The API key is read from
  * the credentials vault (decrypted at call time only) and never leaves the
  * server or appears in a response.
+ *
+ * Note: no temperature (or top_p/top_k/thinking_budget). Sampling has been pinned
+ * to defaults since Gemini 3.6 Flash, and newer models reject those fields with
+ * 400 INVALID_ARGUMENT, so leaving them out keeps every model the user picks working.
  */
 class GoogleTransport implements LlmTransportInterface {
   private const ENDPOINT_TEMPLATE = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
@@ -50,9 +54,6 @@ class GoogleTransport implements LlmTransportInterface {
       $body['systemInstruction'] = ['parts' => [['text' => $system]]];
     }
     $generation = [];
-    if (isset($options['temperature'])) {
-      $generation['temperature'] = (float) $options['temperature'];
-    }
     if (!empty($options['json'])) {
       // Force raw JSON output — without this Gemini tends to wrap the envelope
       // in prose and a ```json fence, which breaks strict parsing downstream.

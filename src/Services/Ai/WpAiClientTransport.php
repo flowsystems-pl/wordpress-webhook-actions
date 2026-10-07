@@ -118,7 +118,6 @@ class WpAiClientTransport implements LlmTransportInterface {
       'body'     => [
         'prompt'             => $prompt,
         'system_instruction' => $system,
-        'temperature'        => (float) ($options['temperature'] ?? 0.2),
         'model_preference'   => $modelId,
       ],
     ];
@@ -133,7 +132,9 @@ class WpAiClientTransport implements LlmTransportInterface {
         $builder = $builder->using_system_instruction($system);
       }
 
-      $builder = $builder->using_temperature((float) ($options['temperature'] ?? 0.2));
+      // No using_temperature(): Gemini and current Claude models reject custom
+      // sampling parameters, and the AI Client forwards it to whichever provider
+      // serves the model. The provider default is the only value that works on all.
 
       // A single-entry preference pins this exact model (and thus its provider).
       $builder = $builder->using_model_preference($modelId);

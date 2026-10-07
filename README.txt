@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.0
+Stable tag: 3.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -179,12 +179,5 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.3.0 — 2026-09-23 =
-- Added: Notifications. Get told when a delivery fails, retries, gives up, is skipped, succeeds or recovers — by email, Slack, Discord, Telegram, Microsoft Teams (Workflows), Google Chat, Mattermost/Rocket.Chat, Pushover, ntfy, SMS and WhatsApp through Twilio, PagerDuty (an incident that opens on failure and resolves on recovery), or any URL as JSON. Channels keep their secrets encrypted in the vault's envelope and never return them; each has a "Send test" button
-- Added: rules decide when and where. Site-wide rules apply to every webhook; a webhook can inherit them, mute single ones, keep only its own, or switch notifications off. Filters: which attempt number, which HTTP codes (503, 5xx, 500-504, or no response), out-of-attempts vs not-retryable, trigger name patterns. A per-webhook quiet time and hourly or daily digests keep a noisy site quiet; a site-wide "every success" rule starts with a one-hour quiet time
-- Added: every message is a template. Subject, title, body and a one-liner for SMS use the same `{{ path }}` placeholders as dynamic URLs, over the webhook, the event, the delivery (attempt, HTTP code, error, next try, log link), the mapped payload, the raw payload (`{{ args.0.email }}`) and the site, with modifiers such as `| truncate:120`, `| default:"—"`, `| date:"Y-m-d H:i"` and `| json`. A live preview renders against the captured payload or a real delivery, a field picker inserts paths, and a linter flags paths that are not in the payload
-- Added: Draft with AI. The rule editor asks the site's AI provider to write the message from the captured payload, and Build with AI can add a notification rule to a plan ("and ping me on Slack if it fails") — the same linter feeds unknown paths back to the model. New abilities: list_notification_channels, list_notification_rules, create_notification_rule, update_notification_rule, test_notification_rule — also reachable over MCP
-- Added: a Sent tab with every notification, its status and a resend button; a bell on delivery-log rows that produced notifications; a health-bar warning when a channel keeps failing
-- Added: the `fswa_delivery_event` action fires at every delivery state change with the full context (webhook, trigger, attempt, HTTP code, error, payloads), so your own code can react too; `fswa_notification_message` filters a rendered message before it is sent; `fswa_notification_channel_drivers` adds a channel type; `fswa_notification_http_args` tunes the outgoing request; `fswa_notification_inline_send` decides whether a synchronous webhook's notifications go out at the end of the same request (the default, so they never wait for a cron that may not run) or through cron like a queued delivery's
-- Changed: builds export a webhook's notification rules (channels never travel); on import a rule whose channels do not exist here is created switched off and listed in the import problems
-- Changed: database schema 2.5.0 adds the notification tables and two webhook columns
+= 3.3.1 — 2026-10-07 =
+- Fixed: Build with AI and AI-drafted notification messages no longer send a `temperature` to the AI provider. Google is retiring custom sampling settings: newer Gemini models answer a request that sets `temperature`, `top_p`, `top_k` or `thinking_budget` with "400 INVALID_ARGUMENT", and current Claude models already reject a non-default temperature. Your own Google Gemini or Anthropic key, and the WordPress AI Client, now use each model's default settings, so any model you pick keeps working. The plugin never sent `top_p`, `top_k` or `thinking_budget`
