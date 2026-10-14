@@ -70,10 +70,13 @@ class CF7Integration {
       ],
     ];
 
+    // CF7 keys uploaded_files() by field name; since CF7 5.4 each value is a
+    // list of temporary paths (one per file), older versions use a single path.
+    // Only the file names are sent: CF7 deletes the files after the request.
     $uploadedFiles = $submission->uploaded_files();
     if (!empty($uploadedFiles)) {
       $data['uploaded_files'] = array_map(
-        fn($path) => is_string($path) ? basename($path) : null,
+        fn($paths) => array_values(array_map('basename', array_filter((array) $paths, 'is_string'))),
         $uploadedFiles
       );
     }

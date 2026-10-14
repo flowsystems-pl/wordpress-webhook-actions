@@ -47,10 +47,17 @@ class Scheduler {
 
   /**
    * Return next scheduled timestamp, or false if not scheduled.
+   *
+   * as_next_scheduled_action() returns true (not a timestamp) while the action
+   * is running or is an async action; report that as due now rather than
+   * casting it to 1 (1970-01-01).
    */
   public static function nextScheduled(string $hook): int|false {
     if (self::hasActionScheduler()) {
       $next = as_next_scheduled_action($hook, [], self::GROUP);
+      if ($next === true) {
+        return time();
+      }
       return $next !== false ? (int) $next : false;
     }
     return wp_next_scheduled($hook);
