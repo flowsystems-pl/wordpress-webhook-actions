@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.1
+Stable tag: 3.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -179,5 +179,9 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.3.1 — 2026-10-07 =
-- Fixed: Build with AI and AI-drafted notification messages no longer send a `temperature` to the AI provider. Google is retiring custom sampling settings: newer Gemini models answer a request that sets `temperature`, `top_p`, `top_k` or `thinking_budget` with "400 INVALID_ARGUMENT", and current Claude models already reject a non-default temperature. Your own Google Gemini or Anthropic key, and the WordPress AI Client, now use each model's default settings, so any model you pick keeps working. The plugin never sent `top_p`, `top_k` or `thinking_budget`
+= 3.3.2 — 2026-10-14 =
+- Fixed: Contact Form 7 uploads arrived as `null` in the webhook payload. CF7 lists each upload field's files as an array, and the plugin read it as a single path. `uploaded_files` now gives each field a list of file names, for example `{"your-file": ["cv.pdf", "photo.jpg"]}`. The files themselves are not included: CF7 deletes them at the end of the request
+- Fixed: the cron status screen showed 1 January 1970 as the next Action Scheduler run while the queue runner was in progress. It now shows the run as due now
+- Changed: the default Google Gemini model for your own key is now `gemini-3.8-flash`. Google answers `gemini-2.5-flash` with "404 — no longer available to new users", so a new AI Studio key could not use the old default. This applies when you connect a key; a site that already saved a model, including the old default, keeps it — choose another in the Build with AI model picker if yours stops working
+- Changed: the default OpenAI model for your own key is now `gpt-6-luna`. OpenAI deprecated `gpt-4o-mini` on 14 October 2026 and removes it from the API on 14 January 2027. This applies when you connect a key; a site that already saved `gpt-4o-mini` keeps it until you choose another model in the Build with AI model picker
+- Docs: the readme counts 30 documented filters
