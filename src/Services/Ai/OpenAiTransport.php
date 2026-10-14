@@ -22,7 +22,9 @@ use WP_Error;
  */
 class OpenAiTransport implements LlmTransportInterface {
   private const ENDPOINT      = 'https://api.openai.com/v1/chat/completions';
-  public  const DEFAULT_MODEL = 'gpt-4o-mini';
+  // gpt-4o-mini is deprecated (announced 2026-10-14, removed from the API on
+  // 2027-01-14); OpenAI names gpt-6-luna as its replacement.
+  public  const DEFAULT_MODEL = 'gpt-6-luna';
 
   private int    $credentialId;
   private string $model;
