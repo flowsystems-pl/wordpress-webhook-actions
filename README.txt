@@ -81,7 +81,7 @@ Retries handle the flaky minute; Notifications handle the endpoint that stays do
 - Action Scheduler auto-detection — more reliable delivery on high-traffic sites
 - Fully translatable — the entire admin interface and all server-side strings are internationalized; ships with Polish, Simplified Chinese, and Dutch, and is compatible with WPML and Polylang String Translation
 - Full REST API with scoped API token authentication (`read` / `operational` / `full` / `agent`) — the `agent` scope grants full write access for AI assistants while never exposing stored secrets
-- Developer extensibility — 38 filters and 11 action hooks ([reference](https://wpwebhooks.org/docs/))
+- Developer extensibility — 30 filters and 11 action hooks ([reference](https://wpwebhooks.org/docs/))
 
 = Pro features =
 
