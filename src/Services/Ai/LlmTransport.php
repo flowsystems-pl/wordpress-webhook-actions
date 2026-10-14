@@ -34,9 +34,9 @@ use FlowSystems\WebhookActions\Repositories\CredentialRepository;
  *
  * Option shapes:
  *   fswa_ai_source     : 'auto' | 'wp_ai_client' | 'byok' | 'hosted' | 'hosted_trial'
- *   fswa_ai_client_pref: [ 'provider' => 'google', 'model' => 'gemini-2.5-pro' ]
+ *   fswa_ai_client_pref: [ 'provider' => 'google', 'model' => 'gemini-3.8-flash' ]
  *   fswa_ai_byok       : [ 'active' => 'openai', 'providers' => [
- *                            'openai' => [ 'credential_id' => 13, 'model' => 'gpt-4o-mini' ], … ] ]
+ *                            'openai' => [ 'credential_id' => 13, 'model' => 'gpt-6-luna' ], … ] ]
  *
  * Pro overrides resolution via the `fswa_ai_transport` filter (needs no keys).
  */

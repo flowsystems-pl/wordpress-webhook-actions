@@ -21,7 +21,9 @@ use WP_Error;
  */
 class GoogleTransport implements LlmTransportInterface {
   private const ENDPOINT_TEMPLATE = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
-  public  const DEFAULT_MODEL     = 'gemini-2.5-flash';
+  // Pinned, never a -latest alias. gemini-2.5-flash returns 404 "no longer available
+  // to new users" for keys created after its retirement.
+  public  const DEFAULT_MODEL     = 'gemini-3.8-flash';
 
   private int    $credentialId;
   private string $model;
