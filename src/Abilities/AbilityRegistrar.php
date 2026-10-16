@@ -5,6 +5,7 @@ namespace FlowSystems\WebhookActions\Abilities;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Api\AuthHelper;
+use FlowSystems\WebhookActions\Services\Ai\PayloadRedactor;
 use WP_Error;
 use WP_REST_Request;
 
@@ -132,8 +133,13 @@ class AbilityRegistrar {
             );
           }
 
-          // wp_register_ability expects the value or a WP_Error — pass either through.
-          return $this->registry->execute($name, $input);
+          // Everything returned here leaves the site: to an MCP client, or through
+          // a hosted bridge like WPVibe to someone else's server first. Delivery
+          // logs carry the raw hook arguments — `user_pass` hashes on
+          // profile_update, tokens in form posts — so results get the same scrub
+          // the AI Builder applies before its own model sees a read result.
+          $result = $this->registry->execute($name, $input);
+          return is_array($result) ? PayloadRedactor::redact($result) : $result;
         },
         'permission_callback' => static function () use ($scope) {
           return self::permitted($scope);
