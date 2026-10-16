@@ -28,15 +28,77 @@ class PayloadRedactor {
    * @return array<mixed>
    */
   public static function redact(array $data): array {
+    if (self::isHeaderPair($data)) {
+      return self::redactHeaderPair($data);
+    }
+
     $out = [];
     foreach ($data as $key => $value) {
       if (is_array($value)) {
         $out[$key] = self::redact($value);
         continue;
       }
-      $out[$key] = (is_string($key) && preg_match(self::SECRET_LEAF, $key)) ? self::PLACEHOLDER : $value;
+      if (is_string($key) && self::isSecretLeaf($key)) {
+        $out[$key] = self::PLACEHOLDER;
+        continue;
+      }
+      $out[$key] = is_string($value) ? self::redactJsonString($value) : $value;
     }
     return $out;
+  }
+
+  /**
+   * Scrub secrets inside a value that is itself encoded JSON.
+   *
+   * Response bodies are stored as strings, and an endpoint that echoes the
+   * request (n8n's "respond with input", webhook.site, most test catchers) hands
+   * the whole payload back inside one — `user_pass` included, out of reach of a
+   * key-based walk. Non-JSON strings and JSON with nothing to scrub come back
+   * untouched.
+   */
+  private static function redactJsonString(string $value): string {
+    $trimmed = ltrim($value);
+    if ($trimmed === '' || ($trimmed[0] !== '{' && $trimmed[0] !== '[')) {
+      return $value;
+    }
+    $decoded = json_decode($value, true);
+    if (!is_array($decoded)) {
+      return $value;
+    }
+    $redacted = self::redact($decoded);
+    if ($redacted === $decoded) {
+      return $value;
+    }
+    $json = wp_json_encode($redacted, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    return $json === false ? self::PLACEHOLDER : $json;
+  }
+
+  /**
+   * Custom headers and URL params are stored as `{key, value}` rows, which the
+   * leaf rule gets backwards: it blanks the harmless NAME (the leaf is called
+   * "key") and passes an `Authorization` header's VALUE straight through. For
+   * those rows, judge the value by what the row's key says it is.
+   *
+   * @param array<mixed> $data
+   */
+  private static function isHeaderPair(array $data): bool {
+    return count($data) === 2
+      && isset($data['key'], $data['value'])
+      && is_string($data['key'])
+      && !is_array($data['value']);
+  }
+
+  /**
+   * @param array<string, mixed> $pair
+   * @return array<string, mixed>
+   */
+  private static function redactHeaderPair(array $pair): array {
+    // `X-Api-Key` → `x_api_key`, so header spellings hit the same leaf rule.
+    $name = strtolower(str_replace('-', '_', $pair['key']));
+    if (self::isSecretLeaf($name) || $name === 'cookie') {
+      $pair['value'] = self::PLACEHOLDER;
+    }
+    return $pair;
   }
 
   /**
@@ -44,6 +106,11 @@ class PayloadRedactor {
    * flattened-path rendering, where only the LAST path segment is checked).
    */
   public static function isSecretLeaf(string $key): bool {
+    // `auth_credential_id`, `token_id`: a reference to a stored secret, not the
+    // secret. Callers need the id to point at the credential again.
+    if (preg_match('/_ids?$/i', $key)) {
+      return false;
+    }
     return (bool) preg_match(self::SECRET_LEAF, $key);
   }
 

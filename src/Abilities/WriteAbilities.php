@@ -103,9 +103,10 @@ class WriteAbilities {
   }
 
   public function updateWebhook(array $input): array|WP_Error {
-    $id   = (int) ($input['id'] ?? 0);
-    $repo = new WebhookRepository();
-    if (!$repo->find($id)) {
+    $id       = (int) ($input['id'] ?? 0);
+    $repo     = new WebhookRepository();
+    $existing = $repo->find($id);
+    if (!$existing) {
       return $this->notFound();
     }
 
@@ -123,7 +124,10 @@ class WriteAbilities {
     }
     foreach (['custom_headers', 'url_params'] as $pairs) {
       if (array_key_exists($pairs, $data)) {
-        $data[$pairs] = UrlTemplate::normalizePairs($data[$pairs]);
+        $data[$pairs] = $this->keepRedactedValues(
+          UrlTemplate::normalizePairs($data[$pairs]),
+          (array) ($existing[$pairs] ?? [])
+        );
       }
     }
     if (isset($data['triggers'])) {
@@ -135,6 +139,36 @@ class WriteAbilities {
     }
 
     return ['webhook' => $repo->find($id)];
+  }
+
+  /**
+   * Put the stored secret back wherever a caller echoed the placeholder.
+   *
+   * Ability results are redacted on the way out, so a client that reads a
+   * webhook and sends its headers back unchanged would otherwise overwrite a
+   * real `Authorization` value with the literal "[redacted]".
+   *
+   * @param array<int, array{key: string, value: string}>|null $incoming
+   * @param array<int, mixed> $stored
+   * @return array<int, array{key: string, value: string}>|null
+   */
+  private function keepRedactedValues(?array $incoming, array $stored): ?array {
+    if ($incoming === null) {
+      return null;
+    }
+
+    $byKey = [];
+    foreach ($stored as $pair) {
+      if (is_array($pair) && isset($pair['key'])) {
+        $byKey[(string) $pair['key']] = (string) ($pair['value'] ?? '');
+      }
+    }
+    foreach ($incoming as $i => $pair) {
+      if ($pair['value'] === '[redacted]' && array_key_exists($pair['key'], $byKey)) {
+        $incoming[$i]['value'] = $byKey[$pair['key']];
+      }
+    }
+    return $incoming;
   }
 
   public function setMapping(array $input): array|WP_Error {
