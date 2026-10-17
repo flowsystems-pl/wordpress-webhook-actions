@@ -1,0 +1,39 @@
+name: Live Preview check
+
+# Opens the Live Preview every week, the way a visitor does, and fails if the
+# blueprint breaks. A failed scheduled run makes GitHub email the repo owner.
+# Why: see scripts/check-live-preview.mjs (Contact Form 7 6.2 vs PHP 8.2, Oct 2026).
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/live-preview-check.yml
+      - scripts/check-live-preview.mjs
+
+jobs:
+  preview:
+    # GitHub-hosted, NOT the self-hosted staging runner: this needs a browser and
+    # touches nothing of ours, and the staging runner group is pinned to deploy-staging.yml.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright (Chromium)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Check both Live Preview blueprints
+        run: node scripts/check-live-preview.mjs preview-check
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-preview-screenshots
+          path: preview-check/
+          retention-days: 30
