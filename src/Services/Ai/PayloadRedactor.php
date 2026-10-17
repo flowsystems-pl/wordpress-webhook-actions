@@ -38,7 +38,9 @@ class PayloadRedactor {
         $out[$key] = self::redact($value);
         continue;
       }
-      if (is_string($key) && self::isSecretLeaf($key)) {
+      // An empty secret field stays empty: "[redacted]" on a null auth_header
+      // tells the reader a header exists when there is none.
+      if (is_string($key) && self::isSecretLeaf($key) && $value !== null && $value !== '') {
         $out[$key] = self::PLACEHOLDER;
         continue;
       }
