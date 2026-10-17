@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.3
+Stable tag: 3.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -179,6 +179,6 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.3.3 — 2026-10-16 =
-- Security: AI tools connected through the Abilities API or MCP (Claude Code, Cursor, WPVibe) could read secrets from delivery logs, including WordPress password hashes from `profile_update` payloads and secrets an endpoint echoed back in its response. Ability results are now redacted before they leave the site, as Build with AI already did for its own model. In custom headers and URL parameters the value of a secret such as `Authorization` is redacted and the name stays visible
-- Fixed: an AI tool that reads a webhook and saves its headers back unchanged no longer replaces a stored secret with the text `[redacted]`
+= 3.3.4 — 2026-10-17 =
+- Fixed: AI tools reading the trigger list through the Abilities API or MCP saw `[redacted]` in place of the plugin name for hooks whose names look like secrets, such as `after_password_reset` or `wpforms_process_format_password`. The trigger list holds hook names only, so it is no longer redacted
+- Fixed: an empty secret field, such as a webhook with no `auth_header`, showed as `[redacted]` in ability results, which suggested a value was stored. Empty fields now stay empty
