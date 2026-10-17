@@ -38,6 +38,9 @@ class AbilityCatalog {
           'properties' => ['search' => ['type' => 'string', 'description' => 'Case-insensitive substring filter on hook name or source plugin slug.']],
         ],
         'callback'     => [$reads, 'listTriggers'],
+        // hook name => plugin slug; no payload data, and hook names like
+        // `after_password_reset` would trip the secret-leaf rule.
+        'redact_result' => false,
       ],
       'list_webhooks' => [
         'label'        => __('List webhooks', 'flowsystems-webhook-actions'),

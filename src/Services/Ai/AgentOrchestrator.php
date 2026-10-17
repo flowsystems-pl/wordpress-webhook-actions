@@ -649,7 +649,7 @@ TXT;
       if (is_wp_error($result)) {
         $results[] = ['ability' => $ability, 'input' => $input, 'error' => $result->get_error_message()];
       } else {
-        $results[] = ['ability' => $ability, 'input' => $input, 'result' => PayloadRedactor::redact($result)];
+        $results[] = ['ability' => $ability, 'input' => $input, 'result' => $this->registry->redactResult($ability, $result)];
       }
       $activity[] = ['ability' => $ability, 'input' => $input];
     }

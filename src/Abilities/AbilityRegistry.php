@@ -6,6 +6,7 @@ defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Api\AuthHelper;
 use FlowSystems\WebhookActions\Repositories\WebhookRepository;
+use FlowSystems\WebhookActions\Services\Ai\PayloadRedactor;
 use WP_Error;
 
 /**
@@ -135,6 +136,24 @@ class AbilityRegistry {
     }
 
     return call_user_func($definitions[$name]['callback'], $input);
+  }
+
+  /**
+   * Scrub an ability result before it is shown to any model, local or remote.
+   *
+   * A definition opts out with `'redact_result' => false` when its result holds
+   * no payload data and the leaf rule only misfires on it: list_triggers maps
+   * hook NAME → plugin slug, so `after_password_reset` would lose its slug.
+   *
+   * @param array<string, mixed> $result
+   * @return array<string, mixed>
+   */
+  public function redactResult(string $name, array $result): array {
+    $definition = $this->definitions()[$name] ?? [];
+    if (($definition['redact_result'] ?? true) === false) {
+      return $result;
+    }
+    return PayloadRedactor::redact($result);
   }
 
   // ===================================================================
