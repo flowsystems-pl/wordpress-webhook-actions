@@ -180,7 +180,7 @@ class SystemPromptBuilder {
     return "\n\nTRIGGERS WITH CAPTURED PAYLOADS: " . implode(', ', array_keys($examples))
       . "\nBefore proposing set_mapping or set_conditions for one of these, run a get_trigger_schema read and use the EXACT field paths from its example_payload (e.g. \"args.0.form_id\") — never invent field names."
       . $this->libraryPromptBlock()
-      . ($library ? "" : "\nThat list is COMPLETE. A trigger not on it has no capture, and get_trigger_schema will return {\"schema\":null} for it — so do not spend read rounds trying sibling hooks (transition_post_status, wp_after_insert_post, save_post and the like all answer null too). The moment the trigger you want is absent from that list, STOP gathering and give your final answer: name the trigger you intend to use, tell the user in plain words which event to fire so its payload is captured (e.g. \"publish a test post, then say go\"), and either send NO plan or a plan limited to steps that do not need the payload (create_webhook disabled + assign_credential). NEVER propose set_mapping or set_conditions for a trigger with no capture — the plugin refuses to run those steps and pauses the whole build until a payload exists, so guessing paths only wastes the user's time. When your plan builds a webhook on an uncaptured trigger the plugin APPENDS a final \"capture the payload\" step by itself, which waits on that amber pause until the event has fired — so do not add one, and in assistant_message just say what the plan sets up and that the last step waits for them to fire the event once.")
+      . ($library ? "" : "\nThat list is COMPLETE. A trigger not on it has no capture, and get_trigger_schema will return {\"schema\":null} for it — so do not spend read rounds trying sibling hooks (they answer null too). The moment the trigger you want is absent from that list, STOP gathering and give your final answer: name the trigger you intend to use, tell the user in plain words which event to fire so its payload is captured (e.g. \"publish a test post, then say go\"), and either send NO plan or a plan limited to steps that do not need the payload (create_webhook disabled + assign_credential). NEVER propose set_mapping or set_conditions for a trigger with no capture — the plugin refuses to run those steps and pauses the whole build until a payload exists, so guessing paths only wastes the user's time. When your plan builds a webhook on an uncaptured trigger the plugin APPENDS a final \"capture the payload\" step by itself, which waits on that amber pause until the event has fired — so do not add one, and in assistant_message just say what the plan sets up and that the last step waits for them to fire the event once.")
       . "\nA capture can also be STALE: when get_trigger_schema returns a capture_warning, or an example's args hold only {\"__type\":\"...\"} placeholders with no data fields, there is NOTHING to map or filter on — no amount of further reads will surface fields. Stop gathering, show the user what the capture contains, explain it holds no usable fields, and ask them to fire the event once more so a fresh payload is captured. Never invent field paths or propose set_mapping/set_conditions around a stale capture.";
   }
 
@@ -338,6 +338,17 @@ guess which fields this site's own REST API requires — read them), get_webhook
 for existing configs, get_logs to check deliveries, list_credentials for stored auth. You
 have a budget of a few read rounds per turn — batch
 related reads into one array instead of one at a time.
+
+CHOOSING THE TRIGGER: pick the hook for what the user's event MEANS and for when its data
+is complete — never because it already has a capture on this site. A capture only saves a
+read; read the hook you actually want with get_trigger_schema. For WordPress posts (submitted
+for review, published, updated) use wp_after_insert_post: args.0 post ID, args.1 the post as
+saved, args.2 true on an update, args.3 the post as it was before (null for a new post).
+transition_post_status and save_post fire BEFORE the block editor stores the featured image,
+terms and meta, so anything that reads the post back sees it incomplete. Catch a status change
+with conditions args.1.post_status equals X AND args.3.post_status not_equals X (null passes,
+so a brand-new post counts), plus args.1.post_type equals the type — which also drops
+revisions and autosaves.
 
 2. PLAN. You never change anything yourself — you PROPOSE an ordered plan of typed [write]
 steps that the plugin executes locally after the user reviews (and may edit) it. New

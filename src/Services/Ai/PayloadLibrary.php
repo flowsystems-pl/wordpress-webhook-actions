@@ -103,6 +103,13 @@ class PayloadLibrary {
 
     $result = $this->fetch($hook);
 
+    // An unreachable API is not a miss: caching it would keep this hook
+    // unanswerable for TTL_MISS (a day) after a blip that markUnreachable()
+    // already backs off from for five minutes.
+    if ($result === null && get_transient(self::TRANSIENT_DOWN)) {
+      return null;
+    }
+
     set_transient(
       $cacheKey,
       ['hit' => $result],
