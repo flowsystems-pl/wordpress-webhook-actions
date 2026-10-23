@@ -4,14 +4,15 @@ import { CheckCircle2, XCircle, AlertCircle, Circle, Loader2, ShieldAlert, Undo2
 import { Button, Badge } from '@/components/ui';
 import AiStepControls from '@/components/AiStepControls.vue';
 import ChatMarkdown from '@/components/ChatMarkdown.vue';
+import AiStepDetails from '@/components/AiStepDetails.vue';
 import BuiltWebhookActions from '@/components/BuiltWebhookActions.vue';
 import { abilityTitle } from '@/lib/aiLabels';
 import { __ } from '@/i18n';
 
 // The single focused plan step, extracted from AiBuilderView (the view stays
 // the coordinator): animated status header, the step's PHP when it carries a
-// Code Glue snippet, the active controls while it is the step being run, and
-// the run / continue / finished bar.
+// Code Glue snippet, what any other step sets up (AiStepDetails), the active
+// controls while it is the step being run, and the run / continue / finished bar.
 const props = defineProps({
   step: { type: Object, required: true },
   stepNumber: { type: Number, default: 1 },
@@ -100,6 +101,10 @@ const emit = defineEmits([
     <ChatMarkdown v-if="typeof step.input?.code === 'string' && step.input.code.trim()"
       :text="'```php\n' + step.input.code + '\n```'" />
 
+    <!-- What the step sets up / set up. Not on the step under review: its
+         controls already show the same inputs as an editable form. -->
+    <AiStepDetails v-if="!isCurrent" :step="step" :credentials="credentials" />
+
     <!-- Active controls (only when this is the step being run) -->
     <AiStepControls
       v-if="isCurrent"
@@ -129,7 +134,7 @@ const emit = defineEmits([
 
     <!-- Run / continue / finished -->
     <div v-if="reviewPreRun || canContinue || finished || running"
-      class="flex items-center gap-2 pt-3 border-t border-border">
+      class="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
       <Button v-if="reviewPreRun" :disabled="running" @click="emit('advance')">
         <Play class="w-4 h-4 mr-1.5" /> {{ __('Run plan') }}
       </Button>
@@ -145,7 +150,7 @@ const emit = defineEmits([
         <Play class="w-4 h-4 mr-1.5" /> {{ __('Continue build') }}
       </Button>
       <template v-if="finished">
-        <span class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+        <span class="flex items-center gap-2 whitespace-nowrap text-sm text-emerald-600 dark:text-emerald-400">
           <CheckCircle2 class="w-4 h-4" /> {{ __('Build complete.') }}
         </span>
         <BuiltWebhookActions v-bind="built"

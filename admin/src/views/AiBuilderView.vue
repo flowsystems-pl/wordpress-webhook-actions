@@ -473,6 +473,13 @@ async function enableBuiltWebhook() {
 const currentStep = computed(() => execSteps.value[execCursor.value] || null);
 // Which step the user is viewing in the main panel. Null = follow the cursor.
 const focusedIndex = ref(null);
+
+// Opened from the Build progress list. The panel sits below the composer, and
+// on narrow screens the list stacks above everything, so bring it into view.
+function focusStep(i) {
+  focusedIndex.value = i;
+  nextTick(() => document.getElementById('fswa-step-panel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+}
 const focusedStep = computed(() => execSteps.value[focusedIndex.value ?? execCursor.value] || null);
 const focusedIsCurrent = computed(
   () => (focusedIndex.value ?? execCursor.value) === execCursor.value && !execFinished.value
@@ -1159,7 +1166,7 @@ async function scrollDown() {
       <aside v-if="hasStepper">
         <AiPlanStepper :steps="execSteps" :abilities="abilities"
           :cursor="execCursor" :finished="execFinished" :running="running"
-          :selected="focusedIndex ?? execCursor" @select="(i) => (focusedIndex = i)" />
+          :selected="focusedIndex ?? execCursor" @select="focusStep" />
       </aside>
 
       <!-- Main: chat + the single focused step. min-w-0 lets the column shrink
@@ -1322,7 +1329,7 @@ async function scrollDown() {
 
           <!-- Focused step detail (one step at a time). Its actions all call the
                agent, so it is hidden without a provider rather than shown inert. -->
-          <AiStepPanel v-if="configured && execution && focusedStep"
+          <AiStepPanel v-if="configured && execution && focusedStep" id="fswa-step-panel"
             :step="focusedStep"
             :step-number="(focusedIndex ?? execCursor) + 1"
             :step-count="execSteps.length"
