@@ -40,6 +40,30 @@ class PayloadTransformer {
   }
 
   /**
+   * Whether this firing is WordPress housekeeping rather than the event a user
+   * builds on: a revision, an autosave or the editor's auto-draft.
+   *
+   * Only the first capture is kept, and in the block editor these fire first:
+   * "Add new post" creates an auto-draft and every update saves a revision
+   * before the post itself, so "fire the event once" used to store one of them
+   * as the trigger's example. Only the first WP_Post argument is checked — it is
+   * the post the event is about; a later one (wp_after_insert_post's
+   * $post_before) may legitimately be an auto-draft.
+   *
+   * @param array $args Original trigger arguments
+   */
+  private function isNoiseEvent(array $args): bool {
+    foreach ($args as $arg) {
+      if ($arg instanceof \WP_Post) {
+        // Autosaves are stored as revisions too.
+        return $arg->post_type === 'revision' || $arg->post_status === 'auto-draft';
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Transform a payload based on webhook/trigger schema configuration
    *
    * @param int $webhookId
@@ -53,6 +77,16 @@ class PayloadTransformer {
 
     // If no schema exists, capture this as an example payload
     if (!$schema) {
+      if ($this->isNoiseEvent($args)) {
+        return [
+          'original'                => null,
+          'transformed'             => $payload,
+          'mapping_applied'         => false,
+          'conditions'              => null,
+          'conditions_evaluate_on'  => 'original',
+        ];
+      }
+
       /**
        * Filters the payload just before it is stored as the captured example.
        * Use this to add or modify properties in the example payload only —
@@ -74,7 +108,7 @@ class PayloadTransformer {
     }
 
     // If schema exists but no example captured yet, capture it
-    if (empty($schema['example_payload'])) {
+    if (empty($schema['example_payload']) && !$this->isNoiseEvent($args)) {
       /** This filter is documented above. */
       $examplePayload = apply_filters('fswa_capture_payload', $payload, $webhookId, $trigger);
       $this->schemaRepository->captureExamplePayload($webhookId, $trigger, $examplePayload);

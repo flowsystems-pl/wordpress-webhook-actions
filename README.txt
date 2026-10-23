@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.4
+Stable tag: 3.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -181,6 +181,8 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.3.4 — 2026-10-17 =
-- Fixed: AI tools reading the trigger list through the Abilities API or MCP saw `[redacted]` in place of the plugin name for hooks whose names look like secrets, such as `after_password_reset` or `wpforms_process_format_password`. The trigger list holds hook names only, so it is no longer redacted
-- Fixed: an empty secret field, such as a webhook with no `auth_header`, showed as `[redacted]` in ability results, which suggested a value was stored. Empty fields now stay empty
+= 3.4.0 — 2026-10-24 =
+- New: in Build with AI, clicking a step under Build progress shows what it set up: the endpoint and triggers, each mapped field, each condition, the credential, and the test delivery's HTTP status and response. A failed step shows its error, and "Raw data" holds the full input and result
+- Improved: Build with AI chooses a trigger by what it means rather than by which hook already has a captured payload. For posts it uses `wp_after_insert_post`, which fires after the featured image, terms and meta are saved, and conditions on the post before the save to fire once when a post moves to a status
+- Fixed: a payload captured on a trigger with no example yet could be a revision or an auto-draft instead of the real post event. Those are now skipped, so the first capture is the post itself
+- Fixed: when the payload library could not be reached, the plugin remembered the trigger as having no example for a day. It now tries again after the five-minute back-off

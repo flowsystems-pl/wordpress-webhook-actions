@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.3.0\n"
+"with AI help 3.3.4\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-23T10:11:24+00:00\n"
+"POT-Creation-Date: 2026-10-23T22:52:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -395,7 +395,7 @@ msgstr "此文件中有一条链没有名称，未被导入。"
 msgid "A chain with that name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:312
+#: src/Abilities/WriteAbilities.php:346
 msgid "A chain with this name already exists."
 msgstr "已存在同名的链。"
 
@@ -419,7 +419,7 @@ msgstr ""
 msgid "A channel with this name already exists."
 msgstr "已存在同名渠道。"
 
-#: src/Abilities/WriteAbilities.php:436
+#: src/Abilities/WriteAbilities.php:470
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -668,7 +668,7 @@ msgstr "添加映射"
 msgid "Add Webhook"
 msgstr "添加 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:366
+#: src/Abilities/AbilityCatalog.php:369
 msgid "Add a chain link"
 msgstr "添加链环节"
 
@@ -676,7 +676,7 @@ msgstr "添加链环节"
 msgid "Add a credential to securely reuse it across webhooks."
 msgstr "添加凭据，以便在各个 Webhook 中安全地重复使用。"
 
-#: src/Abilities/AbilityCatalog.php:367
+#: src/Abilities/AbilityCatalog.php:370
 msgid ""
 "Add a source→target edge to a chain. Rejected if it would create a cycle "
 "across any chain."
@@ -767,6 +767,10 @@ msgstr "映射后的载荷预览"
 msgid "After Pre-dispatch Code Glue Payload"
 msgstr "预发送 Code Glue 之后的载荷"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "After delivery"
+msgstr "投递后"
+
 #: admin/src/components/WebhookForm.vue
 msgid "After saving, the value is encrypted at rest and never shown again."
 msgstr "保存后，该值将被静态加密，且绝不会再次显示。"
@@ -779,7 +783,7 @@ msgstr "代理版"
 msgid "Agent (AI)"
 msgstr "Agent（AI）"
 
-#: src/Abilities/AbilityCatalog.php:247
+#: src/Abilities/AbilityCatalog.php:250
 msgid ""
 "Alert someone when a delivery reaches a state. event: success | recovered | "
 "failed_attempt | retry_scheduled | permanently_failed | skipped. webhook_id "
@@ -947,7 +951,7 @@ msgstr "让站点的 AI 服务商根据已捕获的数据撰写此消息"
 msgid "Assign a Code Glue snippet to a webhook"
 msgstr "将 Code Glue 代码片段分配给 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:322
+#: src/Abilities/AbilityCatalog.php:325
 msgid "Assign a vault credential to a webhook"
 msgstr "将保险库凭据分配给 Webhook"
 
@@ -1094,6 +1098,10 @@ msgstr "恢复默认消息"
 msgid "Back to webhooks"
 msgstr "返回 Webhook 列表"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Background (queued, retried)"
+msgstr "后台（排队，自动重试）"
+
 #: admin/src/components/WebhookForm.vue admin/src/views/SettingsView.vue
 msgid "Backoff Strategy"
 msgstr "退避策略"
@@ -1137,6 +1145,10 @@ msgstr "Bearer 令牌"
 #: admin/src/views/VaultView.vue
 msgid "Bearer token (PAT)"
 msgstr "Bearer 令牌（PAT）"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Before delivery"
+msgstr "投递前"
 
 #: admin/src/components/notifications/TemplateEditor.vue
 msgid "Body"
@@ -1348,7 +1360,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "链名称"
 
-#: src/Abilities/WriteAbilities.php:308
+#: src/Abilities/WriteAbilities.php:342
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -1375,7 +1387,7 @@ msgstr "链"
 msgid "Chains (member webhooks included automatically)"
 msgstr "链（自动包含其中的 Webhook）"
 
-#: src/Abilities/AbilityCatalog.php:282
+#: src/Abilities/AbilityCatalog.php:285
 msgid ""
 "Change a notification rule: its event, channels, filters, template, "
 "throttle, digest or enabled state. Same fields as create_notification_rule "
@@ -1496,6 +1508,10 @@ msgstr "关闭"
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Code Glue"
 msgstr "Code Glue"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Code Glue applied"
+msgstr "已应用 Code Glue"
 
 #: admin/src/components/ImportDialog.vue
 msgid ""
@@ -1760,11 +1776,11 @@ msgstr "创建 WP 应用程序密码"
 msgid "Create a WP Application Password for me"
 msgstr "为我创建 WP 应用程序密码"
 
-#: src/Abilities/AbilityCatalog.php:337
+#: src/Abilities/AbilityCatalog.php:340
 msgid "Create a WordPress Application Password credential"
 msgstr "创建 WordPress 应用程序密码凭据"
 
-#: src/Abilities/AbilityCatalog.php:352
+#: src/Abilities/AbilityCatalog.php:355
 msgid ""
 "Create a named chain that wires 2xx completions of one webhook to "
 "downstream webhooks."
@@ -1774,7 +1790,7 @@ msgstr "创建一个命名链，将一个 Webhook 的 2xx 完成结果接入下�
 msgid "Create a new vault credential"
 msgstr "在保险库中新建凭据"
 
-#: src/Abilities/AbilityCatalog.php:118
+#: src/Abilities/AbilityCatalog.php:121
 msgid ""
 "Create a new webhook (always created DISABLED until the user enables it). "
 "Provide name, endpoint_url, http_method and triggers."
@@ -1782,7 +1798,7 @@ msgstr ""
 "创建新的 Webhook（始终以“已禁用”状态创建，直到用户启用）。请提供 name、endpoint_url、http_method 和 "
 "triggers。"
 
-#: src/Abilities/AbilityCatalog.php:246
+#: src/Abilities/AbilityCatalog.php:249
 msgid "Create a notification rule"
 msgstr "创建通知规则"
 
@@ -1790,11 +1806,11 @@ msgstr "创建通知规则"
 msgid "Create a token to enable programmatic API access."
 msgstr "创建令牌以启用程序化 API 访问。"
 
-#: src/Abilities/AbilityCatalog.php:117
+#: src/Abilities/AbilityCatalog.php:120
 msgid "Create a webhook"
 msgstr "创建 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:351
+#: src/Abilities/AbilityCatalog.php:354
 msgid "Create a webhook chain"
 msgstr "创建 Webhook 链"
 
@@ -1844,6 +1860,10 @@ msgstr "正在创建…"
 msgid "Creation date."
 msgstr "创建日期。"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Credential"
+msgstr "凭据"
+
 #: src/Abilities/TestAbilities.php:329
 msgid "Credential could not be decrypted."
 msgstr "无法解密凭据。"
@@ -1866,7 +1886,7 @@ msgid "Credential name is required."
 msgstr "凭据名称为必填项。"
 
 #: src/Abilities/TestAbilities.php:325
-#: src/Abilities/WriteAbilities.php:188
+#: src/Abilities/WriteAbilities.php:222
 #: src/Api/CredentialsController.php:472
 msgid "Credential not found."
 msgstr "未找到凭据。"
@@ -1999,7 +2019,7 @@ msgstr "删除旧活动"
 msgid "Delete a Code Glue snippet"
 msgstr "删除 Code Glue 代码片段"
 
-#: src/Abilities/AbilityCatalog.php:441
+#: src/Abilities/AbilityCatalog.php:444
 msgid "Delete a webhook"
 msgstr "删除 Webhook"
 
@@ -2092,11 +2112,15 @@ msgstr "正在删除…"
 msgid "Delivered"
 msgstr "已送达"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Delivery"
+msgstr "投递"
+
 #: admin/src/views/ProView.vue
 msgid "Delivery logs & replay"
 msgstr "投递日志和重放"
 
-#: src/Abilities/AbilityCatalog.php:79
+#: src/Abilities/AbilityCatalog.php:82
 msgid ""
 "Describe a REST API route ON THIS SITE (core or any plugin) from its "
 "self-declared schema: every argument with its type, description and whether "
@@ -2169,7 +2193,7 @@ msgstr "设备"
 msgid "Digest"
 msgstr "摘要"
 
-#: admin/src/components/WebhookCardContent.vue admin/src/views/SettingsView.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/WebhookCardContent.vue admin/src/views/SettingsView.vue
 msgid "Disabled"
 msgstr "已禁用"
 
@@ -2273,7 +2297,7 @@ msgstr "耗时"
 msgid "Dynamic URL templates resolved from the payload"
 msgstr "从载荷解析的动态 URL 模板"
 
-#: src/Abilities/WriteAbilities.php:428
+#: src/Abilities/WriteAbilities.php:462
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "每条条件规则必须是 {field, operator, value} 对象。"
 
@@ -2309,11 +2333,11 @@ msgstr "编辑“%s”"
 msgid "Email"
 msgstr "邮件"
 
-#: src/Abilities/AbilityCatalog.php:426
+#: src/Abilities/AbilityCatalog.php:429
 msgid "Enable (go live) or disable a webhook. Enabling requires confirmation."
 msgstr "启用（上线）或禁用 Webhook。启用需要确认。"
 
-#: src/Abilities/AbilityCatalog.php:425
+#: src/Abilities/AbilityCatalog.php:428
 msgid "Enable / disable a webhook"
 msgstr "启用 / 禁用 Webhook"
 
@@ -2344,6 +2368,10 @@ msgstr "已启用"
 #: admin/src/components/WebhookForm.vue
 msgid "Enabled Webhook"
 msgstr "已启用 Webhook"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Endpoint"
+msgstr "端点"
 
 #: admin/src/components/WebhookForm.vue
 msgid "Endpoint URL"
@@ -2570,11 +2598,11 @@ msgstr "创建 API 令牌失败。"
 msgid "Failed to create chain link (it may already exist)."
 msgstr "创建链接失败（它可能已存在）。"
 
-#: src/Abilities/WriteAbilities.php:334
+#: src/Abilities/WriteAbilities.php:368
 msgid "Failed to create chain link."
 msgstr "创建链环节失败。"
 
-#: src/Abilities/WriteAbilities.php:316
+#: src/Abilities/WriteAbilities.php:350
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "创建链失败。"
@@ -2629,7 +2657,7 @@ msgstr "删除规则失败。"
 msgid "Failed to delete schema."
 msgstr "删除架构失败。"
 
-#: src/Abilities/WriteAbilities.php:361
+#: src/Abilities/WriteAbilities.php:395
 #: src/Api/WebhooksController.php:470
 msgid "Failed to delete webhook."
 msgstr "删除 Webhook 失败。"
@@ -2682,11 +2710,11 @@ msgstr "重试队列任务失败。"
 msgid "Failed to rotate API token."
 msgstr "轮换 API 令牌失败。"
 
-#: src/Abilities/WriteAbilities.php:172
+#: src/Abilities/WriteAbilities.php:206
 msgid "Failed to save conditions."
 msgstr "保存条件失败。"
 
-#: src/Abilities/WriteAbilities.php:148
+#: src/Abilities/WriteAbilities.php:182
 msgid "Failed to save mapping."
 msgstr "保存映射失败。"
 
@@ -2718,13 +2746,17 @@ msgstr "更新规则失败。"
 msgid "Failed to update schema."
 msgstr "更新架构失败。"
 
-#: src/Abilities/WriteAbilities.php:134
+#: src/Abilities/WriteAbilities.php:138
 #: src/Api/WebhooksController.php:412
 msgid "Failed to update webhook."
 msgstr "更新 Webhook 失败。"
 
 #: admin/src/components/MappingEditor.vue
 msgid "Field Mappings"
+msgstr "字段映射"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Field mapping"
 msgstr "字段映射"
 
 #: admin/src/components/TestWebhookDrawer.vue
@@ -2923,7 +2955,7 @@ msgstr "获取 Pro 积分"
 msgid "Get a Code Glue snippet"
 msgstr "获取 Code Glue 代码片段"
 
-#: src/Abilities/AbilityCatalog.php:78
+#: src/Abilities/AbilityCatalog.php:81
 msgid "Get a REST route's argument schema (this site)"
 msgstr "获取 REST 路由的参数 schema（本站点）"
 
@@ -2935,21 +2967,21 @@ msgstr "获取免费的 Gemini 密钥"
 msgid "Get a single Code Glue snippet by id, including its full PHP code."
 msgstr "按 id 获取单个 Code Glue 代码片段，包含完整 PHP 代码。"
 
-#: src/Abilities/AbilityCatalog.php:52
+#: src/Abilities/AbilityCatalog.php:55
 msgid ""
 "Get a single webhook by id, including triggers, mapping, conditions, "
 "headers and credential assignment."
 msgstr "按 id 获取单个 Webhook，包括触发器、映射、条件、标头和凭据分配。"
 
-#: src/Abilities/AbilityCatalog.php:51
+#: src/Abilities/AbilityCatalog.php:54
 msgid "Get a webhook"
 msgstr "获取 Webhook"
 
-#: src/Abilities/AbilityCatalog.php:63
+#: src/Abilities/AbilityCatalog.php:66
 msgid "Get captured payload + mapping for a trigger"
 msgstr "获取触发器的已捕获数据 + 映射"
 
-#: src/Abilities/AbilityCatalog.php:93
+#: src/Abilities/AbilityCatalog.php:96
 msgid "Get delivery logs"
 msgstr "获取投递日志"
 
@@ -3415,7 +3447,7 @@ msgstr ""
 "静态扫描）。完整目录很大（数百个钩子）：查找特定插件的钩子时，请始终传入 search（匹配钩子名称或插件 slug，例如 "
 "{\"search\":\"cf7\"}），而不是列出全部。结果上限为 200 条，并附总数。"
 
-#: src/Abilities/AbilityCatalog.php:44
+#: src/Abilities/AbilityCatalog.php:47
 msgid "List all configured webhooks with their triggers and status."
 msgstr "列出所有已配置的 Webhook 及其触发器和状态。"
 
@@ -3423,19 +3455,19 @@ msgstr "列出所有已配置的 Webhook 及其触发器和状态。"
 msgid "List available triggers"
 msgstr "列出可用触发器"
 
-#: src/Abilities/AbilityCatalog.php:107
+#: src/Abilities/AbilityCatalog.php:110
 msgid "List credentials"
 msgstr "列出凭据"
 
-#: src/Abilities/AbilityCatalog.php:227
+#: src/Abilities/AbilityCatalog.php:230
 msgid "List notification channels"
 msgstr "列出通知渠道"
 
-#: src/Abilities/AbilityCatalog.php:235
+#: src/Abilities/AbilityCatalog.php:238
 msgid "List notification rules"
 msgstr "列出通知规则"
 
-#: src/Abilities/AbilityCatalog.php:236
+#: src/Abilities/AbilityCatalog.php:239
 msgid ""
 "List notification rules: site-wide ones (webhook_id null) or a webhook's "
 "own (pass webhook_id). Each rule = event + filters + channel_ids + optional "
@@ -3457,7 +3489,7 @@ msgstr ""
 "列出已保存的 Code Glue PHP 代码片段（id、名称、标签——代码请用 get_snippet 获取）。代码片段一旦分配给 "
 "Webhook+触发器，就会在发送前转换载荷（pre）或在响应后执行副作用（post）。"
 
-#: src/Abilities/AbilityCatalog.php:228
+#: src/Abilities/AbilityCatalog.php:231
 msgid ""
 "List the notification channels configured on this site (email, Slack, "
 "Discord, Telegram, Teams, SMS, PagerDuty, …) by id, name and type. Rules "
@@ -3468,15 +3500,19 @@ msgstr ""
 "按 id、名称和类型列出此站点上配置的通知渠道（邮件、Slack、Discord、Telegram、Teams、短信、PagerDuty "
 "等）。规则通过 id 引用渠道。渠道持有密钥，只能在后台界面（通知 → 渠道）中创建 — 如果没有合适的，请让用户在那里添加，而不要臆造 id。"
 
-#: src/Abilities/AbilityCatalog.php:108
+#: src/Abilities/AbilityCatalog.php:111
 msgid ""
 "List vault credentials (names, types and masked hints only — secrets are "
 "never returned)."
 msgstr "列出保险库凭据（仅名称、类型和掩码提示——绝不返回机密）。"
 
-#: src/Abilities/AbilityCatalog.php:43
+#: src/Abilities/AbilityCatalog.php:46
 msgid "List webhooks"
 msgstr "列出 Webhook"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Live"
+msgstr "已启用"
 
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Load"
@@ -3557,7 +3593,7 @@ msgstr "低"
 msgid "Lowest"
 msgstr "最低"
 
-#: src/Abilities/AbilityCatalog.php:385
+#: src/Abilities/AbilityCatalog.php:388
 msgid ""
 "Make a guarded test HTTP call to validate an endpoint before going live. To "
 "probe a webhook you created, pass webhook_id (e.g. {{step_2.id}}) — its "
@@ -3664,7 +3700,7 @@ msgstr "Microsoft Teams"
 msgid "Migrated %1$s · failed %2$s"
 msgstr "已迁移 %1$s · 失败 %2$s"
 
-#: src/Abilities/AbilityCatalog.php:338
+#: src/Abilities/AbilityCatalog.php:341
 msgid ""
 "Mint a WordPress Application Password for the CURRENT signed-in admin and "
 "store it as a \"basic\" vault credential named \"WP REST API (internal) — "
@@ -3735,7 +3771,7 @@ msgstr "我自己的密钥"
 msgid "N/A"
 msgstr "不适用"
 
-#: admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/WebhookForm.vue admin/src/components/notifications/ChannelForm.vue admin/src/views/ApiTokensView.vue admin/src/views/VaultView.vue
 msgid "Name"
 msgstr "名称"
 
@@ -3821,7 +3857,7 @@ msgstr "下次尝试"
 msgid "Next attempt scheduled for %s"
 msgstr "下次尝试计划于 %s"
 
-#: admin/src/components/LogsTable.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/LogsTable.vue
 msgid "No"
 msgstr "否"
 
@@ -4263,6 +4299,10 @@ msgstr "仅返回已启用的 Webhook。"
 msgid "Only successful or skipped log entries can be replayed."
 msgstr "只有成功或已跳过的日志条目才能重放。"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Only these fields are sent."
+msgstr "仅发送这些字段。"
+
 #: admin/src/components/WebhookNotificationsCard.vue
 msgid "Only this webhook's rules"
 msgstr "仅此 Webhook 的规则"
@@ -4472,7 +4512,7 @@ msgstr "暂停"
 msgid "Paused"
 msgstr "已暂停"
 
-#: admin/src/components/TestWebhookDrawer.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/TestWebhookDrawer.vue
 msgid "Payload"
 msgstr "数据"
 
@@ -4510,7 +4550,7 @@ msgid ""
 "referencing it fall back to no snippet."
 msgstr "永久删除一个 Code Glue 代码片段。需要确认。引用它的 Webhook 将回退为无代码片段。"
 
-#: src/Abilities/AbilityCatalog.php:442
+#: src/Abilities/AbilityCatalog.php:445
 msgid ""
 "Permanently delete a webhook and its triggers / mapping. Requires "
 "confirmation."
@@ -4668,7 +4708,7 @@ msgstr "已安装 Pro 插件"
 msgid "Pro plugin not found."
 msgstr "未找到 Pro 插件。"
 
-#: src/Abilities/AbilityCatalog.php:384
+#: src/Abilities/AbilityCatalog.php:387
 msgid "Probe a target endpoint"
 msgstr "探测目标端点"
 
@@ -4811,6 +4851,10 @@ msgstr "正在加入队列…"
 msgid "Quiet time per webhook"
 msgstr "每个 Webhook 的静默时间"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Raw data"
+msgstr "原始数据"
+
 #: admin/src/views/VaultView.vue
 msgid "Raw value for any header — escape hatch"
 msgstr "任意标头的原始值 — 应急方案"
@@ -4839,7 +4883,7 @@ msgstr "读取 + 切换 Webhook、重试/重放日志、执行队列任务"
 msgid "Read + toggle webhooks, retry/replay logs, execute/retry queue jobs"
 msgstr "读取 + 切换 Webhook、重试/重放日志、执行/重试队列任务"
 
-#: src/Abilities/AbilityCatalog.php:94
+#: src/Abilities/AbilityCatalog.php:97
 msgid ""
 "Read recent delivery logs (optionally for one webhook) to verify what was "
 "sent and how the endpoint responded."
@@ -4894,7 +4938,7 @@ msgstr "已恢复"
 msgid "Redirect"
 msgstr "重定向"
 
-#: src/Abilities/AbilityCatalog.php:323
+#: src/Abilities/AbilityCatalog.php:326
 msgid ""
 "Reference a stored vault credential from a webhook by id (the secret is "
 "injected at dispatch time and never exposed)."
@@ -4938,7 +4982,7 @@ msgstr "移除此提供商并删除其存储的密钥？"
 msgid "Rename chain"
 msgstr "重命名链"
 
-#: src/Abilities/AbilityCatalog.php:305
+#: src/Abilities/AbilityCatalog.php:308
 msgid ""
 "Render a rule against the webhook's captured example (or a real delivery "
 "log via log_id) and SEND it to every channel of the rule right now. "
@@ -5042,7 +5086,7 @@ msgstr "已计划重试"
 msgid "Retry settings saved"
 msgstr "重试设置已保存"
 
-#: src/Abilities/AbilityCatalog.php:64
+#: src/Abilities/AbilityCatalog.php:67
 msgid ""
 "Return the last captured example payload, field mapping and conditions for "
 "a trigger so the agent can map against the real payload shape. Pass "
@@ -5364,7 +5408,7 @@ msgstr "选择此字段"
 msgid "Select trigger"
 msgstr "选择触发器"
 
-#: src/Abilities/AbilityCatalog.php:406
+#: src/Abilities/AbilityCatalog.php:409
 msgid ""
 "Send a synchronous test delivery for a webhook using a provided or captured "
 "payload, and return the HTTP result so the agent can verify the integration "
@@ -5387,7 +5431,7 @@ msgstr ""
 msgid "Send a test message"
 msgstr "发送测试消息"
 
-#: src/Abilities/AbilityCatalog.php:304
+#: src/Abilities/AbilityCatalog.php:307
 msgid "Send a test notification"
 msgstr "发送测试通知"
 
@@ -5419,9 +5463,17 @@ msgstr "发送至"
 msgid "Sending…"
 msgstr "正在发送…"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Sends only when ALL of these are true"
+msgstr "仅当以下全部条件成立时发送"
+
 #: src/Services/Notifications/Channels/EmailDriver.php:23
 msgid "Sends through wp_mail(), so your SMTP plugin applies."
 msgstr "通过 wp_mail() 发送，因此你的 SMTP 插件同样生效。"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Sends when ANY of these is true"
+msgstr "当以下任一条件成立时发送"
 
 #: admin/src/components/notifications/NotificationLogTable.vue admin/src/views/NotificationsView.vue
 msgid "Sent"
@@ -5455,7 +5507,7 @@ msgstr "服务器"
 msgid "Server Error"
 msgstr "服务器错误"
 
-#: src/Abilities/AbilityCatalog.php:186
+#: src/Abilities/AbilityCatalog.php:189
 msgid ""
 "Set conditional-dispatch rules for a webhook+trigger so only matching "
 "events leave the site. conditions MUST be an object "
@@ -5498,7 +5550,7 @@ msgstr ""
 "empty）随即通过，事件就会被发送而不是被过滤掉。对于字段缺失时必须安全失败的规则，优先用肯定运算符（is_internal equals "
 "\"false\" 而不是 is_internal not_equals \"true\"）。"
 
-#: src/Abilities/AbilityCatalog.php:185
+#: src/Abilities/AbilityCatalog.php:188
 msgid "Set conditions"
 msgstr "设置条件"
 
@@ -5506,11 +5558,11 @@ msgstr "设置条件"
 msgid "Set expiration date"
 msgstr "设置到期日期"
 
-#: src/Abilities/AbilityCatalog.php:169
+#: src/Abilities/AbilityCatalog.php:172
 msgid "Set field mapping"
 msgstr "设置字段映射"
 
-#: src/Abilities/AbilityCatalog.php:170
+#: src/Abilities/AbilityCatalog.php:173
 msgid ""
 "Set the payload field mapping for a webhook+trigger. field_mapping MUST be "
 "an object {\"mappings\":[{\"source\":\"<dot.path in the captured "
@@ -5651,6 +5703,10 @@ msgstr "已跳过："
 msgid "Slack"
 msgstr "Slack"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Snippet"
+msgstr "代码片段"
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Snippet Name"
 msgstr "代码片段名称"
@@ -5722,6 +5778,10 @@ msgstr "源 Webhook 不存在。"
 msgid "Space webhook URL (Space → Apps & integrations → Webhooks)."
 msgstr "聊天室 Webhook URL（聊天室 → 应用与集成 → Webhook）。"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Stage"
+msgstr "阶段"
+
 #: admin/src/views/AiBuilderView.vue
 msgid "Start a new build, then describe what you want to integrate."
 msgstr "开始新的构建，然后描述您想集成的内容。"
@@ -5740,7 +5800,7 @@ msgstr "入门版"
 msgid "Stats unavailable"
 msgstr "统计数据不可用"
 
-#: admin/src/components/LogsTable.vue admin/src/components/notifications/NotificationLogTable.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/LogsTable.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Status"
 msgstr "状态"
 
@@ -5799,6 +5859,10 @@ msgstr "切换到手动输入"
 msgid "Sync"
 msgstr "同步"
 
+#: admin/src/components/AiStepDetails.vue
+msgid "Synchronous (inline)"
+msgstr "同步（在请求中执行）"
+
 #: admin/src/components/WebhookForm.vue
 msgid "Synchronous Execution"
 msgstr "同步执行"
@@ -5843,7 +5907,7 @@ msgstr "分类法"
 msgid "Telegram"
 msgstr "Telegram"
 
-#: src/Abilities/WriteAbilities.php:283
+#: src/Abilities/WriteAbilities.php:317
 #. translators: %s: lint problems
 #, php-format
 msgid ""
@@ -5886,7 +5950,7 @@ msgstr "测试已发送到每个渠道。"
 msgid "Test webhook delivery on demand"
 msgstr "按需测试 Webhook 投递"
 
-#: src/Abilities/AbilityCatalog.php:405
+#: src/Abilities/AbilityCatalog.php:408
 msgid "Test-dispatch a webhook"
 msgstr "测试发送 Webhook"
 
@@ -5927,7 +5991,7 @@ msgid ""
 "integrations take two or three to plan, build and test."
 msgstr "这大约相当于 %s 次智能体运行。一次运行就是你发送的一条消息；大多数集成需要两到三次来规划、构建和测试。"
 
-#: src/Abilities/WriteAbilities.php:330
+#: src/Abilities/WriteAbilities.php:364
 msgid "That link would create a cycle across an existing chain."
 msgstr "该环节会在现有链中产生循环。"
 
@@ -5941,7 +6005,7 @@ msgid ""
 "system cron or an external cron job."
 msgstr "%1$s推荐的方式是异步投递%2$s，通过内置系统 cron 或外部 cron 任务。"
 
-#: src/Services/Ai/WpAiClientTransport.php:149
+#: src/Services/Ai/WpAiClientTransport.php:150
 msgid "The AI Client returned no text."
 msgstr "AI 客户端未返回文本。"
 
@@ -5953,8 +6017,8 @@ msgid ""
 msgstr "AI 用文字作答而不是给出可执行的计划，因此没有提出任何步骤，也没有应用任何更改。让它“以计划形式发送”再试一次。"
 
 #: src/Services/Ai/AnthropicTransport.php:134
-#: src/Services/Ai/GoogleTransport.php:139
-#: src/Services/Ai/OpenAiTransport.php:133
+#: src/Services/Ai/GoogleTransport.php:142
+#: src/Services/Ai/OpenAiTransport.php:135
 msgid "The AI provider key could not be decrypted."
 msgstr "无法解密 AI 提供商密钥。"
 
@@ -5967,14 +6031,14 @@ msgid ""
 msgstr "AI 提供商请求在回合中途失败（%s）。目前的进度已保存 — 重新发送消息即可从此处继续。"
 
 #: src/Services/Ai/AnthropicTransport.php:88
-#: src/Services/Ai/GoogleTransport.php:95
-#: src/Services/Ai/OpenAiTransport.php:93
+#: src/Services/Ai/GoogleTransport.php:98
+#: src/Services/Ai/OpenAiTransport.php:95
 msgid "The AI provider returned an error."
 msgstr "AI 提供商返回错误。"
 
 #: src/Services/Ai/AnthropicTransport.php:103
-#: src/Services/Ai/GoogleTransport.php:108
-#: src/Services/Ai/OpenAiTransport.php:102
+#: src/Services/Ai/GoogleTransport.php:111
+#: src/Services/Ai/OpenAiTransport.php:104
 msgid "The AI provider returned no text."
 msgstr "AI 提供商未返回文本。"
 
@@ -6047,7 +6111,7 @@ msgid ""
 "→ Channels."
 msgstr "无法解密渠道密钥。请在“通知 → 渠道”中重新输入。"
 
-#: src/Abilities/WriteAbilities.php:451
+#: src/Abilities/WriteAbilities.php:485
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -6056,8 +6120,8 @@ msgid ""
 msgstr "\"%1$s\"（%2$s）上的条件规则值为空——请在设置此条件前询问用户该值。"
 
 #: src/Services/Ai/AnthropicTransport.php:130
-#: src/Services/Ai/GoogleTransport.php:135
-#: src/Services/Ai/OpenAiTransport.php:129
+#: src/Services/Ai/GoogleTransport.php:138
+#: src/Services/Ai/OpenAiTransport.php:131
 msgid "The configured AI provider key was not found in the vault."
 msgstr "在保险库中找不到已配置的 AI 提供商密钥。"
 
@@ -6202,7 +6266,7 @@ msgstr "发布服务拒绝了这个构建。"
 msgid "The publishing service returned an unexpected error (HTTP %d)."
 msgstr "发布服务返回了意外错误（HTTP %d）。"
 
-#: src/Abilities/WriteAbilities.php:211
+#: src/Abilities/WriteAbilities.php:245
 msgid "The rule could not be saved."
 msgstr "无法保存规则。"
 
@@ -6414,7 +6478,7 @@ msgid ""
 "webhooks it created."
 msgstr "这将删除该对话及其构建历史。不会删除其创建的任何 Webhook。"
 
-#: src/Abilities/AbilityCatalog.php:410
+#: src/Abilities/AbilityCatalog.php:413
 msgid ""
 "This sends a REAL delivery to the endpoint right now — it is not a dry run. "
 "If the webhook targets this site’s own REST API (e.g. wp-json/wp/v2/users) "
@@ -6424,7 +6488,7 @@ msgstr ""
 "这会立即向端点发送一次真实投递 — 不是演练。如果 Webhook 指向本站点自身的 REST API（例如 "
 "wp-json/wp/v2/users），它可能真的创建或修改数据，例如创建 WordPress 用户。确认后将真实发送。"
 
-#: src/Abilities/AbilityCatalog.php:309
+#: src/Abilities/AbilityCatalog.php:312
 msgid ""
 "This sends a REAL message to every channel on the rule (email, Slack, SMS, "
 "…). Confirm to send it."
@@ -6713,7 +6777,7 @@ msgstr "转换后"
 msgid "Transformed Payload (Sent)"
 msgstr "转换后数据（已发送）"
 
-#: src/Services/Notifications/MessageBuilder.php:119 admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
+#: src/Services/Notifications/MessageBuilder.php:119 admin/src/components/AiStepDetails.vue admin/src/components/LogsTable.vue admin/src/components/TestWebhookDrawer.vue
 msgid "Trigger"
 msgstr "触发器"
 
@@ -6748,7 +6812,7 @@ msgstr "在 WordPress 事件上触发 Webhook"
 msgid "Trigger:"
 msgstr "触发器："
 
-#: admin/src/components/WebhookForm.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/WebhookForm.vue
 msgid "Triggers"
 msgstr "触发器"
 
@@ -6800,7 +6864,7 @@ msgstr "未知的 AI 提供商。"
 msgid "Unknown Webhook"
 msgstr "未知 Webhook"
 
-#: src/Abilities/AbilityRegistry.php:134
+#: src/Abilities/AbilityRegistry.php:135
 #. translators: %s: ability name
 #, php-format
 msgid "Unknown ability: %s"
@@ -6812,7 +6876,7 @@ msgstr "未知能力：%s"
 msgid "Unknown channel id(s): %s"
 msgstr "未知的渠道 id：%s"
 
-#: src/Abilities/WriteAbilities.php:252
+#: src/Abilities/WriteAbilities.php:286
 #. translators: %s: comma-separated ids
 #, php-format
 msgid ""
@@ -6831,7 +6895,7 @@ msgstr "未知的渠道类型“%s”。"
 msgid "Unknown channel type."
 msgstr "未知的渠道类型。"
 
-#: src/Abilities/WriteAbilities.php:441
+#: src/Abilities/WriteAbilities.php:475
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -6859,6 +6923,10 @@ msgstr "未知的根“%s” — 请使用 webhook、event、delivery、payload�
 #: admin/src/views/ProView.vue
 msgid "Unlimited conditions and AND / OR groups"
 msgstr "无限条件与 AND / OR 分组"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "Unmapped fields are sent as well."
+msgstr "未映射的字段也会发送。"
 
 #: admin/src/components/TriggerSchemaPanel.vue
 msgid "Unsaved changes"
@@ -6896,11 +6964,11 @@ msgstr ""
 msgid "Update a Code Glue snippet"
 msgstr "更新 Code Glue 代码片段"
 
-#: src/Abilities/AbilityCatalog.php:281
+#: src/Abilities/AbilityCatalog.php:284
 msgid "Update a notification rule"
 msgstr "更新通知规则"
 
-#: src/Abilities/AbilityCatalog.php:142
+#: src/Abilities/AbilityCatalog.php:145
 msgid "Update a webhook"
 msgstr "更新 Webhook"
 
@@ -6913,7 +6981,7 @@ msgstr ""
 "更新现有 Code Glue 代码片段的名称、代码或标签。如果该代码片段已分配并在某个 Webhook "
 "上启用，新代码将在下一次发送时运行——编辑后请用 preview_snippet 重新测试。"
 
-#: src/Abilities/AbilityCatalog.php:143
+#: src/Abilities/AbilityCatalog.php:146
 msgid ""
 "Update an existing webhook (endpoint, method, triggers, headers, "
 "credential)."
@@ -7097,7 +7165,7 @@ msgstr "等待前面的步骤…"
 msgid "Waiting for trigger to capture example payload..."
 msgstr "正在等待触发器以捕获示例数据…"
 
-#: src/Services/Notifications/MessageBuilder.php:118 admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue admin/src/components/notifications/NotificationLogTable.vue
+#: src/Services/Notifications/MessageBuilder.php:118 admin/src/components/AiStepDetails.vue admin/src/components/LogsTable.vue admin/src/components/ShareBuildDialog.vue admin/src/components/notifications/NotificationLogTable.vue
 msgid "Webhook"
 msgstr "Webhook"
 
@@ -7197,6 +7265,14 @@ msgstr "这个 Webhook 有什么作用？支持 Markdown。"
 #: admin/src/components/ShareBuildDialog.vue
 msgid "What this build contains"
 msgstr "此配置包含的内容"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "What this step set up"
+msgstr "此步骤设置了什么"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "What this step will set up"
+msgstr "此步骤将设置什么"
 
 #: src/Services/Notifications/Channels/TwilioWhatsappDriver.php:25
 msgid "WhatsApp (Twilio)"
@@ -7333,7 +7409,7 @@ msgstr "写入 Code Glue 需要“%s”权限。"
 msgid "X-Webhook-Id:"
 msgstr "X-Webhook-Id："
 
-#: admin/src/components/LogsTable.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/LogsTable.vue
 msgid "Yes"
 msgstr "是"
 
@@ -7429,7 +7505,7 @@ msgstr "任意 — 或例如 1, 3"
 msgid "any — or e.g. woocommerce_*, wpcf7_mail_sent"
 msgstr "任意 — 或例如 woocommerce_*, wpcf7_mail_sent"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "array contains"
 msgstr "数组包含"
 
@@ -7469,7 +7545,7 @@ msgstr "然后再创建规则。"
 msgid "bool"
 msgstr "布尔"
 
-#: src/Abilities/WriteAbilities.php:326
+#: src/Abilities/WriteAbilities.php:360
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 
@@ -7477,15 +7553,15 @@ msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 msgid "channel_ids must be a list of channel IDs."
 msgstr "channel_ids 必须是渠道 ID 列表。"
 
-#: src/Abilities/WriteAbilities.php:384
+#: src/Abilities/WriteAbilities.php:418
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions 必须是 {enabled, type, rules: [...]} 对象。"
 
-#: src/Abilities/WriteAbilities.php:393
+#: src/Abilities/WriteAbilities.php:427
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules 必须是规则对象数组。"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "contains"
 msgstr "包含"
 
@@ -7513,11 +7589,11 @@ msgstr "已禁用"
 msgid "dispatch"
 msgstr "投递"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "does not contain"
 msgstr "不包含"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "does not equal"
 msgstr "不等于"
 
@@ -7541,7 +7617,7 @@ msgstr "例如 订单同步到 HubSpot"
 msgid "empty"
 msgstr "为空"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "equals"
 msgstr "等于"
 
@@ -7597,7 +7673,7 @@ msgstr "来自已捕获的数据"
 msgid "global_max_attempts must be between 1 and 100."
 msgstr "global_max_attempts 必须介于 1 到 100 之间。"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "greater than"
 msgstr "大于"
 
@@ -7659,11 +7735,11 @@ msgstr "。"
 msgid "is %1$d; this plugin imports version %2$d builds."
 msgstr "为 %1$d；此插件可导入版本 %2$d 的配置。"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "is empty"
 msgstr "为空"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "is false"
 msgstr "为假"
 
@@ -7673,7 +7749,7 @@ msgstr "为假"
 msgid "is missing required key \"%s\"."
 msgstr "缺少必需的键“%s”。"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "is not empty"
 msgstr "不为空"
 
@@ -7685,11 +7761,11 @@ msgstr "为必填项，且必须是整数。"
 msgid "is required when mode is \"vault\"."
 msgstr "当模式为“vault”时为必填项。"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "is true"
 msgstr "为真"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "less than"
 msgstr "小于"
 
@@ -7700,6 +7776,10 @@ msgstr "库"
 #: admin/src/components/MappingEditor.vue
 msgid "mapped"
 msgstr "已映射"
+
+#: admin/src/components/AiStepDetails.vue
+msgid "mapping applied"
+msgstr "已应用映射"
 
 #: src/Services/Export/BuildSchemaValidator.php:362
 msgid "may only contain letters, numbers, hyphens and underscores."
@@ -7830,7 +7910,7 @@ msgstr "ntfy"
 msgid "number"
 msgstr "数字"
 
-#: admin/src/components/ConditionsEditor.vue
+#: admin/src/components/AiStepDetails.vue admin/src/components/ConditionsEditor.vue
 msgid "object contains"
 msgstr "对象包含"
 
@@ -7962,11 +8042,11 @@ msgstr "已验证 %s"
 msgid "waiting for digest"
 msgstr "等待摘要"
 
-#: src/Abilities/WriteAbilities.php:157
+#: src/Abilities/WriteAbilities.php:191
 msgid "webhook_id, trigger and conditions are required."
 msgstr "webhook_id、trigger 和 conditions 为必填项。"
 
-#: src/Abilities/WriteAbilities.php:144
+#: src/Abilities/WriteAbilities.php:178
 msgid "webhook_id, trigger and field_mapping are required."
 msgstr "webhook_id、trigger 和 field_mapping 为必填项。"
 

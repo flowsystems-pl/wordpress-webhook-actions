@@ -1,12 +1,12 @@
 <script setup>
 import { ref, watch } from 'vue';
-import { CheckCircle2, XCircle, AlertCircle, Circle, Loader2, ChevronDown, Undo2, Library } from 'lucide-vue-next';
+import { CheckCircle2, XCircle, AlertCircle, Circle, Loader2, ChevronRight, Undo2, Library } from 'lucide-vue-next';
 import { shortLabel } from '@/lib/aiLabels';
 import { __ } from '@/i18n';
 
 // Compact vertical progress list for the aside. Shows a short, laconic name per
-// step; clicking a row reveals the full detail (the model's summary) in an
-// accordion and focuses that step in the main panel. Steps animate as they run
+// step; clicking a row opens that step in the panel below the composer, which
+// shows what it set up (AiStepDetails) — the aside stays a list. Steps animate as they run
 // (ping ring), complete (icon pop + green row flash) and enter (staggered slide).
 const props = defineProps({
   steps: { type: Array, default: () => [] },
@@ -19,8 +19,6 @@ const props = defineProps({
 
 const emit = defineEmits(['select']);
 
-const openIndex = ref(null);
-
 function isActive(i) {
   return i === props.cursor && !props.finished;
 }
@@ -29,8 +27,7 @@ function isRunning(i) {
   return props.running && isActive(i) && props.steps[i]?.status === 'pending';
 }
 
-function toggle(i) {
-  openIndex.value = openIndex.value === i ? null : i;
+function select(i) {
   emit('select', i);
 }
 
@@ -64,7 +61,9 @@ watch(
       <li v-for="(step, i) in steps" :key="step.id"
         class="fswa-step-enter" :style="{ animationDelay: `${i * 60}ms` }">
         <button
-          @click="toggle(i)"
+          @click="select(i)"
+          :aria-current="i === selected ? 'step' : undefined"
+          :title="step.summary"
           :class="['w-full text-left flex items-center gap-2 rounded-md px-2 py-2 transition-colors',
             flashIndex === i && 'fswa-flash',
             i === selected ? 'bg-primary/10' : 'hover:bg-muted']">
@@ -95,14 +94,10 @@ watch(
             :title="__('WP Webhooks Payload Library')">
             <Library class="w-3 h-3" /> {{ __('library') }}
           </span>
-          <ChevronDown class="w-3.5 h-3.5 shrink-0 text-muted-foreground transition-transform"
-            :class="openIndex === i && 'rotate-180'" />
+          <ChevronRight :class="['w-3.5 h-3.5 shrink-0 transition-colors',
+            i === selected ? 'text-primary' : 'text-muted-foreground/60']" />
         </button>
 
-        <!-- Accordion: full detail for this step -->
-        <div v-if="openIndex === i" class="pl-8 pr-2 pb-2 pt-0.5 text-xs text-muted-foreground">
-          {{ step.summary }}
-        </div>
       </li>
     </ol>
   </div>
