@@ -14,7 +14,7 @@ Describe an integration and the AI builds it — no API key needed. Outgoing web
 
 **Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
 
-🤖 **Verified by WPVibe — works with Claude, ChatGPT and Cursor.** WPVibe ran 28 of the plugin's 31 abilities on a live install and lists Webhook Actions in its [Works with AI directory](https://wpvibe.ai/works-with/flowsystems-webhook-actions/). From Claude, the AI finds the plugin's abilities, builds a WPForms → n8n webhook and sends a test delivery, and reads the delivery log to explain why a HubSpot webhook failed.
+🤖 **Verified by WPVibe — works with Claude, ChatGPT and Cursor.** WPVibe ran 28 of the plugin's 31 abilities on a live install, lists Webhook Actions in its [Works with AI directory](https://wpvibe.ai/works-with/flowsystems-webhook-actions/) and publishes five tested recipes for it — see *Ready-made AI recipes (WPVibe)* below.
 
 **It reads the API before it builds.** Name HubSpot, OpenAI, Slack, Stripe, Notion or any of the 300+ services in the [WP Webhooks API Docs Library](https://wpwebhooks.org/api-library/) and the agent works from that vendor's *current* API reference — endpoint, auth header, body envelope, the errors people actually hit — not from the model's memory of it. A service the library has never seen is researched from the vendor's own docs on the spot, and every reply built this way says so.
 
@@ -41,6 +41,16 @@ That makes it a no-code way to sync WordPress data outward: describe what you wa
 = What the AI works from =
 
 The agent doesn't guess — it works from real payloads. It maps fields against actually captured payloads, edits existing webhooks by name or id instead of duplicating them, validates endpoints with a guarded probe (SSRF-protected, secrets always redacted), and verifies the result with a real test delivery. Every operation is also published as a WordPress Ability, so external AI tools (Claude Code, Cursor) can drive the same toolset over the Model Context Protocol (MCP) with scoped API tokens.
+
+= Ready-made AI recipes (WPVibe) =
+
+[WPVibe](https://wpvibe.ai/works-with/flowsystems-webhook-actions/) publishes these tested recipes for Webhook Actions. On a site connected to WPVibe, ask your AI to run a recipe by its name.
+
+- [See What Data Your Webhooks Send with Webhook Actions and AI](https://wpvibe.ai/cookbook/see-what-data-your-webhooks-send-with-webhook-actions-with-ai/) — where every webhook sends your data and exactly which fields leave your site, in one read-only report. Beginner, about 5 minutes.
+- [Get Alerted When a Webhook Fails with Webhook Actions and AI](https://wpvibe.ai/cookbook/get-alerted-when-a-webhook-fails-with-webhook-actions-with-ai/) — a message to Slack, email or another channel when a webhook gives up on a delivery, with one test message after your approval. Beginner, about 5 minutes.
+- [Find Out Why a Webhook Failed with Webhook Actions and AI](https://wpvibe.ai/cookbook/find-out-why-a-webhook-failed-with-webhook-actions-with-ai/) — the webhook and its delivery log read, your endpoint checked, and the cause and fix explained before anything changes. Beginner, about 10 minutes.
+- [Send Contact Form 7 Submissions to Zapier, Make or n8n with Webhook Actions and AI](https://wpvibe.ai/cookbook/send-contact-form-7-submissions-to-zapier-make-or-n8n-with-webhook-actions-with-ai/) — each submission of one Contact Form 7 form goes to your Zapier, Make or n8n webhook, with only the fields you pick. Intermediate, about 15 minutes.
+- [Send WooCommerce Orders to Zapier, Make or n8n with Webhook Actions and AI](https://wpvibe.ai/cookbook/send-woocommerce-orders-to-zapier-make-or-n8n-with-webhook-actions-with-ai/) — a tested webhook sends the order fields you choose to Zapier, Make or n8n; it's created switched off and turned on only after you approve. Intermediate, about 15 minutes.
 
 = The Payload Library =
 
