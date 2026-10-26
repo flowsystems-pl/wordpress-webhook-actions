@@ -304,7 +304,7 @@ class Dispatcher {
    * Process a batch of queued jobs
    *
    * @param int $batchSize Number of jobs to process
-   * @return array{processed: int, succeeded: int, failed: int, rescheduled: int, stale_cleaned: int}
+   * @return array{processed: int, succeeded: int, failed: int, rescheduled: int, skipped: int, stale_cleaned: int}
    */
   public function process(int $batchSize = 10): array {
     $result = [
@@ -312,6 +312,7 @@ class Dispatcher {
       'succeeded'      => 0,
       'failed'         => 0,
       'rescheduled'    => 0,
+      'skipped'        => 0,
       'stale_cleaned'  => 0,
       'orphans_closed' => 0,
     ];
@@ -354,6 +355,13 @@ class Dispatcher {
       if ($resultData['success']) {
         $this->queueService->markCompleted($jobId);
         $result['succeeded']++;
+      } elseif (!empty($resultData['skipped'])) {
+        // Skipped at run time (conditions not met, webhook switched off): the
+        // job is done and processJob() already set the log to 'skipped' and
+        // fired its event. Not a delivery failure, so it must not be
+        // rewritten to permanently_failed below.
+        $this->queueService->markCompleted($jobId);
+        $result['skipped']++;
       } elseif ($resultData['shouldRetry']) {
         $rescheduleResult = $this->queueService->rescheduleWithBackoff($jobId);
         if ($rescheduleResult['rescheduled']) {
@@ -399,14 +407,10 @@ class Dispatcher {
         }
         $result['failed']++;
 
-        // A skipped job (conditions failed at run time) already fired its own
-        // event and is not a delivery failure.
-        if (empty($resultData['skipped'])) {
-          DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
-            'max_attempts' => (int) ($job['max_attempts'] ?? 0),
-            'reason'       => DeliveryEvents::REASON_NON_RETRYABLE,
-          ]);
-        }
+        DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
+          'max_attempts' => (int) ($job['max_attempts'] ?? 0),
+          'reason'       => DeliveryEvents::REASON_NON_RETRYABLE,
+        ]);
       }
     }
 
@@ -480,6 +484,30 @@ class Dispatcher {
 
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
+
+    // A webhook switched off after this job was queued stops sending, retries
+    // included — reading the current webhook above is what makes this visible.
+    // Test sends still go out: testing a disabled webhook is how it gets set up.
+    if (!$isTest && empty($webhook['is_enabled'])) {
+      $skipMessage = 'Webhook is disabled. Pending deliveries are skipped while it is off.';
+      if ($logId) {
+        $this->logService->updateLog($logId, [
+          'status'          => 'skipped',
+          'error_message'   => $skipMessage,
+          'next_attempt_at' => null,
+        ]);
+      }
+      DeliveryEvents::fire(DeliveryEvents::SKIPPED, [
+        'webhook'          => $webhook,
+        'trigger'          => $trigger,
+        'log_id'           => $logId,
+        'attempt'          => $attemptNumber + 1,
+        'error_message'    => $skipMessage,
+        'payload'          => $payload,
+        'original_payload' => $originalPayload ?: $payload,
+      ]);
+      return ['success' => false, 'shouldRetry' => false, 'skipped' => true];
+    }
 
     /**
      * Filter the final payload per-webhook before delivery.
