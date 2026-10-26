@@ -314,7 +314,9 @@ const urlLocalOnlyBlocked = computed(() => !localSite && urlLocalOnlyReasons.val
 const urlLocalOnlyList = computed(() => {
   const reasons = urlLocalOnlyReasons.value
   if (reasons.length < 2) return reasons[0] || ''
-  return sprintf(__('%1$s and %2$s'), reasons.slice(0, -1).join(', '), reasons[reasons.length - 1])
+  // List punctuation is translatable: Chinese joins with 、, not a comma.
+  const head = reasons.slice(0, -1).reduce((acc, item) => sprintf(__('%1$s, %2$s'), acc, item))
+  return sprintf(__('%1$s and %2$s'), head, reasons[reasons.length - 1])
 })
 
 const urlLocalOnlyText = computed(() =>

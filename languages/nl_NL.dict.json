@@ -1772,5 +1772,15 @@
   "Unmapped fields are sent as well.": "Niet-gekoppelde velden worden ook verzonden.",
   "What this step set up": "Wat deze stap heeft ingesteld",
   "What this step will set up": "Wat deze stap gaat instellen",
-  "mapping applied": "koppeling toegepast"
+  "mapping applied": "koppeling toegepast",
+  "%1$s and %2$s": "%1$s en %2$s",
+  "Plain http:// URLs only work on a local development site. Use https:// here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "Gewone http://-URL's werken alleen op een lokale ontwikkelsite. Gebruik hier https://, of markeer deze site als lokaal door define( 'WP_ENVIRONMENT_TYPE', 'local' ); toe te voegen aan wp-config.php.",
+  "This URL uses %s, which only works on a local development site.": "Deze URL gebruikt %s, wat alleen werkt op een lokale ontwikkelsite.",
+  "This URL uses %s. That is allowed because this site is a local development site (WP_ENVIRONMENT_TYPE is local). A staging or production site will refuse it.": "Deze URL gebruikt %s. Dat is toegestaan omdat deze site een lokale ontwikkelsite is (WP_ENVIRONMENT_TYPE is local). Een staging- of productiesite weigert deze.",
+  "This endpoint URL only works on a local development site: it points to a private or local address, uses a port other than 80, 443 or 8080, or its host does not resolve. Use a public https:// URL here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "Deze eindpunt-URL werkt alleen op een lokale ontwikkelsite: hij verwijst naar een privé- of lokaal adres, gebruikt een andere poort dan 80, 443 of 8080, of de host kan niet worden gevonden. Gebruik hier een openbare https://-URL, of markeer deze site als lokaal door define( 'WP_ENVIRONMENT_TYPE', 'local' ); toe te voegen aan wp-config.php.",
+  "To use it, mark this site as local by adding %s to wp-config.php. On staging and production sites, use an https:// URL on a public host (port 443 or 8080).": "Om deze te gebruiken, markeer je deze site als lokaal door %s toe te voegen aan wp-config.php. Gebruik op staging- en productiesites een https://-URL op een openbare host (poort 443 of 8080).",
+  "a local or private network address": "een lokaal of privénetwerkadres",
+  "plain http://": "gewone http://",
+  "port %s": "poort %s",
+  "%1$s, %2$s": "%1$s, %2$s"
 }

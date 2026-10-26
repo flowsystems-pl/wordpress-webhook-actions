@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.3.4\n"
+"with AI help 3.4.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T22:52:29+00:00\n"
+"POT-Creation-Date: 2026-10-26T16:10:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -57,11 +57,19 @@ msgstr "%1$s %2$d 分"
 msgid "%1$s %2$ds"
 msgstr "%1$s %2$d 秒"
 
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s and %2$s"
+msgstr "%1$s和%2$s"
+
 #: src/Services/RestRouteInspector.php:74
 #. translators: 1: HTTP method, 2: route path, 3: comma-separated allowed methods
 #, php-format
 msgid "%1$s is not supported on %2$s. Supported methods: %3$s."
 msgstr "%2$s 不支持 %1$s。支持的方法：%3$s。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s, %2$s"
+msgstr "%1$s、%2$s"
 
 #: admin/src/views/ExternalCronView.vue
 msgid ""
@@ -395,7 +403,7 @@ msgstr "此文件中有一条链没有名称，未被导入。"
 msgid "A chain with that name already exists."
 msgstr "已存在同名的链。"
 
-#: src/Abilities/WriteAbilities.php:346
+#: src/Abilities/WriteAbilities.php:354
 msgid "A chain with this name already exists."
 msgstr "已存在同名的链。"
 
@@ -419,7 +427,7 @@ msgstr ""
 msgid "A channel with this name already exists."
 msgstr "已存在同名渠道。"
 
-#: src/Abilities/WriteAbilities.php:470
+#: src/Abilities/WriteAbilities.php:478
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -484,7 +492,7 @@ msgstr "某个通知渠道持续失败："
 msgid "A notification rule on \"%1$s\" was left out: %2$s"
 msgstr "“%1$s”上的一条通知规则被略过：%2$s"
 
-#: src/Api/WebhooksController.php:570
+#: src/Api/WebhooksController.php:565
 msgid "A payload object is required for custom source."
 msgstr "自定义源需要一个数据对象。"
 
@@ -510,7 +518,7 @@ msgid ""
 "to allow it."
 msgstr "能做到这一点的令牌就能在本站点运行任意 PHP，因此默认关闭。要允许，请在“设置”中开启“允许 API 令牌写入 Code Glue”。"
 
-#: src/Abilities/TestAbilities.php:110
+#: src/Abilities/TestAbilities.php:111
 msgid "A url or webhook_id is required."
 msgstr "必须提供 url 或 webhook_id。"
 
@@ -1040,7 +1048,7 @@ msgstr ""
 msgid "Authorization (optional)"
 msgstr "授权（可选）"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:32
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
 msgid "Authorization (vault credential)"
 msgstr "Authorization（保险库凭据）"
 
@@ -1360,7 +1368,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "链名称"
 
-#: src/Abilities/WriteAbilities.php:342
+#: src/Abilities/WriteAbilities.php:350
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -1864,7 +1872,7 @@ msgstr "创建日期。"
 msgid "Credential"
 msgstr "凭据"
 
-#: src/Abilities/TestAbilities.php:329
+#: src/Abilities/TestAbilities.php:331
 msgid "Credential could not be decrypted."
 msgstr "无法解密凭据。"
 
@@ -1885,8 +1893,8 @@ msgstr "凭据名称（例如 n8n auth）"
 msgid "Credential name is required."
 msgstr "凭据名称为必填项。"
 
-#: src/Abilities/TestAbilities.php:325
-#: src/Abilities/WriteAbilities.php:222
+#: src/Abilities/TestAbilities.php:327
+#: src/Abilities/WriteAbilities.php:230
 #: src/Api/CredentialsController.php:472
 msgid "Credential not found."
 msgstr "未找到凭据。"
@@ -1951,7 +1959,7 @@ msgstr "自定义请求标头"
 msgid "Custom header"
 msgstr "自定义标头"
 
-#: src/Api/WebhooksController.php:124
+#: src/Api/WebhooksController.php:125
 msgid "Custom payload JSON (required when payload_source is custom)."
 msgstr "自定义数据 JSON（当 payload_source 为 custom 时必填）。"
 
@@ -2169,7 +2177,7 @@ msgid "Description (optional)"
 msgstr "说明（可选）"
 
 #: src/Api/ChainsController.php:141
-#: src/Api/WebhooksController.php:314
+#: src/Api/WebhooksController.php:312
 #. translators: %d: maximum character count
 #, php-format
 msgid "Description must be %d characters or fewer."
@@ -2181,7 +2189,7 @@ msgid ""
 "makes a shared build understandable to someone else."
 msgstr "说明会随配置一同传递，也会保存在这里——正是它让别人能看懂你分享的配置。"
 
-#: src/Abilities/TestAbilities.php:126
+#: src/Abilities/TestAbilities.php:128
 msgid "Destructive probe methods (PUT, PATCH, DELETE) require confirmation."
 msgstr "破坏性探测方法（PUT、PATCH、DELETE）需要确认。"
 
@@ -2297,7 +2305,7 @@ msgstr "耗时"
 msgid "Dynamic URL templates resolved from the payload"
 msgstr "从载荷解析的动态 URL 模板"
 
-#: src/Abilities/WriteAbilities.php:462
+#: src/Abilities/WriteAbilities.php:470
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "每条条件规则必须是 {field, operator, value} 对象。"
 
@@ -2381,7 +2389,7 @@ msgstr "端点 URL"
 msgid "Endpoint URL is required"
 msgstr "端点 URL 为必填项"
 
-#: src/Api/WebhooksController.php:244
+#: src/Api/WebhooksController.php:245
 msgid "Endpoint URL is required."
 msgstr "端点 URL 为必填项。"
 
@@ -2574,7 +2582,7 @@ msgstr "外部 Cron 历史"
 msgid "Extra credits (never expire)"
 msgstr "额外积分（永不过期）"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:33
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "Extra headers"
 msgstr "额外标头"
 
@@ -2598,11 +2606,11 @@ msgstr "创建 API 令牌失败。"
 msgid "Failed to create chain link (it may already exist)."
 msgstr "创建链接失败（它可能已存在）。"
 
-#: src/Abilities/WriteAbilities.php:368
+#: src/Abilities/WriteAbilities.php:376
 msgid "Failed to create chain link."
 msgstr "创建链环节失败。"
 
-#: src/Abilities/WriteAbilities.php:350
+#: src/Abilities/WriteAbilities.php:358
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "创建链失败。"
@@ -2624,8 +2632,8 @@ msgstr "创建规则失败。"
 msgid "Failed to create snippet."
 msgstr "创建代码片段失败。"
 
-#: src/Abilities/WriteAbilities.php:72
-#: src/Api/WebhooksController.php:270
+#: src/Abilities/WriteAbilities.php:76
+#: src/Api/WebhooksController.php:268
 msgid "Failed to create webhook."
 msgstr "创建 Webhook 失败。"
 
@@ -2657,8 +2665,8 @@ msgstr "删除规则失败。"
 msgid "Failed to delete schema."
 msgstr "删除架构失败。"
 
-#: src/Abilities/WriteAbilities.php:395
-#: src/Api/WebhooksController.php:470
+#: src/Abilities/WriteAbilities.php:403
+#: src/Api/WebhooksController.php:465
 msgid "Failed to delete webhook."
 msgstr "删除 Webhook 失败。"
 
@@ -2710,11 +2718,11 @@ msgstr "重试队列任务失败。"
 msgid "Failed to rotate API token."
 msgstr "轮换 API 令牌失败。"
 
-#: src/Abilities/WriteAbilities.php:206
+#: src/Abilities/WriteAbilities.php:214
 msgid "Failed to save conditions."
 msgstr "保存条件失败。"
 
-#: src/Abilities/WriteAbilities.php:182
+#: src/Abilities/WriteAbilities.php:190
 msgid "Failed to save mapping."
 msgstr "保存映射失败。"
 
@@ -2730,7 +2738,7 @@ msgstr "启动对话失败。"
 msgid "Failed to store the provider key."
 msgstr "存储提供商密钥失败。"
 
-#: src/Api/WebhooksController.php:512
+#: src/Api/WebhooksController.php:507
 msgid "Failed to toggle webhook status."
 msgstr "切换 Webhook 状态失败。"
 
@@ -2746,8 +2754,8 @@ msgstr "更新规则失败。"
 msgid "Failed to update schema."
 msgstr "更新架构失败。"
 
-#: src/Abilities/WriteAbilities.php:138
-#: src/Api/WebhooksController.php:412
+#: src/Abilities/WriteAbilities.php:146
+#: src/Api/WebhooksController.php:407
 msgid "Failed to update webhook."
 msgstr "更新 Webhook 失败。"
 
@@ -2939,7 +2947,7 @@ msgstr "GET Webhook、日志、队列、健康状况、触发器、架构"
 msgid "Generate a new API token for programmatic access."
 msgstr "生成新的 API 令牌以进行程序化访问。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:22
+#: src/Services/Notifications/Channels/WebhookDriver.php:23
 msgid "Generic webhook"
 msgstr "通用 Webhook"
 
@@ -3120,7 +3128,7 @@ msgstr "重试之间的等待时间如何增长。Null 继承站点设置，否�
 msgid "How to calculate the wait between retries. Overrides the global setting."
 msgstr "如何计算重试之间的等待时间。覆盖全局设置。"
 
-#: src/Api/WebhooksController.php:128
+#: src/Api/WebhooksController.php:129
 msgid "How to run the test: now (synchronous) or queue (async)."
 msgstr "如何运行测试：now（同步）或 queue（异步）。"
 
@@ -3265,8 +3273,7 @@ msgstr "无效的凭据类型。"
 msgid "Invalid cron token."
 msgstr "无效的 cron 令牌。"
 
-#: src/Api/WebhooksController.php:252
-#: src/Api/WebhooksController.php:357
+#: src/Support/UrlTemplate.php:58
 msgid "Invalid endpoint URL."
 msgstr "无效的端点 URL。"
 
@@ -3934,9 +3941,9 @@ msgstr "此配置无需授权。"
 msgid "No body sent"
 msgstr "未发送主体"
 
-#: src/Api/WebhooksController.php:584
-#: src/Api/WebhooksController.php:601
-#: src/Api/WebhooksController.php:620
+#: src/Api/WebhooksController.php:579
+#: src/Api/WebhooksController.php:596
+#: src/Api/WebhooksController.php:615
 msgid ""
 "No captured payload found for this trigger. Fire the trigger at least once "
 "first."
@@ -4051,7 +4058,7 @@ msgstr ""
 "set_"
 "conditions。要么从该列表中选一个触发器，要么停下来用平实的语言告诉用户该触发哪个事件（例如“发布一篇测试文章”）以捕获载荷——然后再读取一次。"
 
-#: src/Abilities/TestAbilities.php:229
+#: src/Abilities/TestAbilities.php:231
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr "未提供数据，且此触发器尚无已捕获的示例。"
 
@@ -4245,7 +4252,7 @@ msgstr ""
 "当这些 Webhook 中任意一个返回成功（2xx）响应时，该 Webhook 将被触发，上游响应、已发送数据和原始映射前数据均可通过 "
 "%1$sargs[0]%2$s 获得。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:33
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "One \"Name: value\" per line."
 msgstr "每行一个“名称: 值”。"
 
@@ -4291,7 +4298,7 @@ msgstr "仅用于受保护的主题。"
 msgid "Only pending or permanently failed jobs can be retried."
 msgstr "只有待处理或永久失败的任务才能重试。"
 
-#: src/Api/WebhooksController.php:724
+#: src/Api/WebhooksController.php:710
 msgid "Only return enabled webhooks."
 msgstr "仅返回已启用的 Webhook。"
 
@@ -4359,7 +4366,7 @@ msgstr "可选覆盖，例如 town-square。"
 msgid "Optional, e.g. @here or <@&roleId>, prepended to the message."
 msgstr "可选，例如 @here 或 <@&roleId>，加在消息开头。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:32
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
 msgid ""
 "Optional. Pick a Credentials Vault entry; its header is added to every "
 "request."
@@ -4371,7 +4378,7 @@ msgid ""
 "webhook."
 msgstr "可选。相同的键 = 同一会话串；使用 {{ webhook.id }} 可按 Webhook 分串。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:34
+#: src/Services/Notifications/Channels/WebhookDriver.php:35
 msgid ""
 "Optional. When set, the body is signed as HMAC-SHA256 in the "
 "X-FSWA-Signature header."
@@ -4439,7 +4446,7 @@ msgid ""
 "%1$s$originalPayload%2$s available"
 msgstr "PHP 在成功投递后运行；可使用 %1$s$responseBody%2$s 和 %1$s$originalPayload%2$s"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:26
+#: src/Services/Notifications/Channels/WebhookDriver.php:27
 msgid ""
 "POSTs the notification as JSON to any URL — Zapier, Make, n8n, your own "
 "service."
@@ -4595,6 +4602,15 @@ msgstr ""
 "payload.order.id }}、{{ args.1.email "
 "}}。修饰符：upper、lower、truncate:N、json、default:'…'、date:'Y-m-d "
 "H:i'、number:N、money、count、join:', '。"
+
+#: src/Support/UrlTemplate.php:62
+msgid ""
+"Plain http:// URLs only work on a local development site. Use https:// "
+"here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', "
+"'local' ); to wp-config.php."
+msgstr ""
+"普通 http:// URL 仅在本地开发站点上可用。请在此使用 https://，或在 wp-config.php 中添加 define( "
+"'WP_ENVIRONMENT_TYPE', 'local' ); 将此站点标记为本地站点。"
 
 #: admin/src/views/SettingsView.vue
 msgid "Plugin Info"
@@ -5663,7 +5679,7 @@ msgstr "在列表中显示“%s”"
 msgid "Showing %1$d to %2$d of %3$d"
 msgstr "显示第 %1$d 至 %2$d 项，共 %3$d 项"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:34
+#: src/Services/Notifications/Channels/WebhookDriver.php:35
 msgid "Signing secret"
 msgstr "签名密钥"
 
@@ -5907,7 +5923,7 @@ msgstr "分类法"
 msgid "Telegram"
 msgstr "Telegram"
 
-#: src/Abilities/WriteAbilities.php:317
+#: src/Abilities/WriteAbilities.php:325
 #. translators: %s: lint problems
 #, php-format
 msgid ""
@@ -5977,7 +5993,7 @@ msgid ""
 "text of the template."
 msgstr "通过你的 Twilio 账户发送短信。发送模板的单行“short”文本。"
 
-#: src/Abilities/TestAbilities.php:116
+#: src/Abilities/TestAbilities.php:118
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "不允许该 URL（私有、保留或无效的主机）。"
 
@@ -5991,7 +6007,7 @@ msgid ""
 "integrations take two or three to plan, build and test."
 msgstr "这大约相当于 %s 次智能体运行。一次运行就是你发送的一条消息；大多数集成需要两到三次来规划、构建和测试。"
 
-#: src/Abilities/WriteAbilities.php:364
+#: src/Abilities/WriteAbilities.php:372
 msgid "That link would create a cycle across an existing chain."
 msgstr "该环节会在现有链中产生循环。"
 
@@ -6111,7 +6127,7 @@ msgid ""
 "→ Channels."
 msgstr "无法解密渠道密钥。请在“通知 → 渠道”中重新输入。"
 
-#: src/Abilities/WriteAbilities.php:485
+#: src/Abilities/WriteAbilities.php:493
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -6266,7 +6282,7 @@ msgstr "发布服务拒绝了这个构建。"
 msgid "The publishing service returned an unexpected error (HTTP %d)."
 msgstr "发布服务返回了意外错误（HTTP %d）。"
 
-#: src/Abilities/WriteAbilities.php:245
+#: src/Abilities/WriteAbilities.php:253
 msgid "The rule could not be saved."
 msgstr "无法保存规则。"
 
@@ -6288,7 +6304,7 @@ msgid ""
 "minutes."
 msgstr "试用服务目前没有响应。请几分钟后重试。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:60
+#: src/Services/Notifications/Channels/WebhookDriver.php:61
 msgid "The vault credential could not be decrypted."
 msgstr "无法解密保险库凭据。"
 
@@ -6296,7 +6312,7 @@ msgstr "无法解密保险库凭据。"
 msgid "The verification challenge could not be completed. Please try again."
 msgstr "无法完成验证挑战。请重试。"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:44
+#: src/Services/Notifications/Channels/WebhookDriver.php:45
 msgid "The webhook URL is not valid."
 msgstr "Webhook URL 无效。"
 
@@ -6304,7 +6320,7 @@ msgstr "Webhook URL 无效。"
 msgid "The webhook did not run because its conditions were not met."
 msgstr "由于条件未满足，Webhook 未运行。"
 
-#: src/Abilities/TestAbilities.php:204
+#: src/Abilities/TestAbilities.php:206
 msgid "The webhook has no triggers; provide one."
 msgstr "该 Webhook 没有触发器；请提供一个。"
 
@@ -6348,6 +6364,17 @@ msgstr "思考中…"
 #: src/Services/GluePermissions.php:192
 msgid "This API token cannot write Code Glue."
 msgstr "此 API 令牌无法写入 Code Glue。"
+
+#: admin/src/components/WebhookForm.vue
+msgid "This URL uses %s, which only works on a local development site."
+msgstr "此 URL 使用了%s，仅在本地开发站点上可用。"
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This URL uses %s. That is allowed because this site is a local development "
+"site (WP_ENVIRONMENT_TYPE is local). A staging or production site will "
+"refuse it."
+msgstr "此 URL 使用了%s。由于此站点是本地开发站点（WP_ENVIRONMENT_TYPE 为 local），因此允许使用。预发布或生产站点会拒绝它。"
 
 #: admin/src/components/LogsTable.vue
 msgid "This action cannot be undone."
@@ -6412,6 +6439,17 @@ msgstr[0] "此渠道被 %d 条规则使用。请先将其从规则中移除，�
 msgid "This credential is used by %d webhook. Detach it or delete with force."
 msgid_plural "This credential is used by %d webhooks. Detach them or delete with force."
 msgstr[0] "该凭据被 %d 个 Webhook 使用。请将其分离或强制删除。"
+
+#: src/Support/UrlTemplate.php:67
+msgid ""
+"This endpoint URL only works on a local development site: it points to a "
+"private or local address, uses a port other than 80, 443 or 8080, or its "
+"host does not resolve. Use a public https:// URL here, or mark this site as "
+"local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php."
+msgstr ""
+"此端点 URL 仅在本地开发站点上可用：它指向私有或本地地址、使用了 80、443 或 8080 以外的端口，或其主机无法解析。请在此使用公共 "
+"https:// URL，或在 wp-config.php 中添加 define( 'WP_ENVIRONMENT_TYPE', 'local' ); "
+"将此站点标记为本地站点。"
 
 #: src/Api/NotificationRulesController.php:335
 msgid "This entry has no stored message to resend."
@@ -6537,7 +6575,7 @@ msgid ""
 "a new one — the secret stays in the vault and is injected only at dispatch."
 msgstr "此步骤需要已存储的身份验证凭据。从保险库中选择一个或新建一个 — 密钥保留在保险库中，仅在投递时注入。"
 
-#: src/Abilities/TestAbilities.php:312
+#: src/Abilities/TestAbilities.php:314
 #. translators: %s: plugin slug and version the reference payload was captured on, e.g. "contact-form-7 6.1.7".
 #, php-format
 msgid ""
@@ -6555,7 +6593,7 @@ msgid ""
 "the endpoint accepts the shape, not the values."
 msgstr "此测试发送的是我们的参考载荷，而不是本站点的数据——它证明端点接受该结构，而不是这些值。"
 
-#: src/Abilities/TestAbilities.php:309
+#: src/Abilities/TestAbilities.php:311
 msgid ""
 "This test sent our reference payload, not data from this site: a 2xx proves "
 "the endpoint accepts the shape the mapping produces, not that the field "
@@ -6677,6 +6715,15 @@ msgstr "结束日期"
 msgid "To date & time"
 msgstr "结束日期和时间"
 
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"To use it, mark this site as local by adding %s to wp-config.php. On "
+"staging and production sites, use an https:// URL on a public host (port "
+"443 or 8080)."
+msgstr ""
+"要使用它，请在 wp-config.php 中添加 %s，将此站点标记为本地站点。在预发布和生产站点上，请使用公共主机上的 https:// "
+"URL（端口 443 或 8080）。"
+
 #: admin/src/components/HealthStatusBar.vue
 msgid "Today"
 msgstr "今天"
@@ -6715,7 +6762,7 @@ msgstr "令牌允许外部系统无需浏览器会话即可访问 REST API。无
 msgid "Too many builds published from this license — wait a moment and try again."
 msgstr "此许可证发布的构建过多——请稍等片刻再试。"
 
-#: src/Abilities/TestAbilities.php:130
+#: src/Abilities/TestAbilities.php:132
 msgid "Too many probe calls — try again in a minute."
 msgstr "探测调用过多——请一分钟后重试。"
 
@@ -6785,7 +6832,7 @@ msgstr "触发器"
 msgid "Trigger matches"
 msgstr "触发器匹配"
 
-#: src/Api/WebhooksController.php:120
+#: src/Api/WebhooksController.php:121
 msgid "Trigger name to use for the test."
 msgstr "用于测试的触发器名称。"
 
@@ -6820,7 +6867,7 @@ msgstr "触发器"
 msgid "Type"
 msgstr "类型"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:31 src/Services/Notifications/Channels/WebhookDriver.php:39 admin/src/components/notifications/ChannelsPanel.vue
+#: src/Services/Notifications/Channels/WebhookDriver.php:32 src/Services/Notifications/Channels/WebhookDriver.php:40 admin/src/components/notifications/ChannelsPanel.vue
 msgid "URL"
 msgstr "URL"
 
@@ -6849,9 +6896,9 @@ msgid "Undo last change"
 msgstr "撤销上次更改"
 
 #: src/Api/WebhookSchema.php:27
-#: src/Api/WebhooksController.php:73
-#: src/Api/WebhooksController.php:98
-#: src/Api/WebhooksController.php:110
+#: src/Api/WebhooksController.php:74
+#: src/Api/WebhooksController.php:99
+#: src/Api/WebhooksController.php:111
 msgid "Unique identifier for the webhook."
 msgstr "Webhook 的唯一标识符。"
 
@@ -6876,7 +6923,7 @@ msgstr "未知能力：%s"
 msgid "Unknown channel id(s): %s"
 msgstr "未知的渠道 id：%s"
 
-#: src/Abilities/WriteAbilities.php:286
+#: src/Abilities/WriteAbilities.php:294
 #. translators: %s: comma-separated ids
 #, php-format
 msgid ""
@@ -6895,7 +6942,7 @@ msgstr "未知的渠道类型“%s”。"
 msgid "Unknown channel type."
 msgstr "未知的渠道类型。"
 
-#: src/Abilities/WriteAbilities.php:475
+#: src/Abilities/WriteAbilities.php:483
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -7174,10 +7221,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:44
 #: src/Controllers/AdminController.php:45
-#: src/Controllers/AdminController.php:52
+#: src/Controllers/AdminController.php:46
 #: src/Controllers/AdminController.php:53
+#: src/Controllers/AdminController.php:54
 msgid "Webhook Actions"
 msgstr ""
 
@@ -7186,7 +7233,7 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — 借助 AI 构建自动化与集成"
 
-#: src/Controllers/AdminController.php:254
+#: src/Controllers/AdminController.php:259
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -7215,7 +7262,7 @@ msgstr "Webhook 认证"
 msgid "Webhook delivery logs older than this will be automatically deleted."
 msgstr "早于此期限的 Webhook 投递日志将被自动删除。"
 
-#: src/Api/WebhooksController.php:549
+#: src/Api/WebhooksController.php:544
 msgid "Webhook has no triggers configured."
 msgstr "该 Webhook 未配置触发器。"
 
@@ -7223,7 +7270,7 @@ msgstr "该 Webhook 未配置触发器。"
 msgid "Webhook is live."
 msgstr "Webhook 已上线。"
 
-#: src/Api/WebhooksController.php:236
+#: src/Api/WebhooksController.php:237
 msgid "Webhook name is required."
 msgstr "Webhook 名称为必填项。"
 
@@ -7234,11 +7281,11 @@ msgstr "Webhook 名称为必填项。"
 #: src/Api/SchemasController.php:279
 #: src/Api/SchemasController.php:361
 #: src/Api/SchemasController.php:393
-#: src/Api/WebhooksController.php:201
-#: src/Api/WebhooksController.php:336
-#: src/Api/WebhooksController.php:448
-#: src/Api/WebhooksController.php:500
-#: src/Api/WebhooksController.php:540
+#: src/Api/WebhooksController.php:202
+#: src/Api/WebhooksController.php:334
+#: src/Api/WebhooksController.php:443
+#: src/Api/WebhooksController.php:495
+#: src/Api/WebhooksController.php:535
 msgid "Webhook not found."
 msgstr "未找到 Webhook。"
 
@@ -7319,7 +7366,7 @@ msgstr "当 Webhook 被触发时，任务将显示在此处以供处理。"
 msgid "Where does this belong?"
 msgstr "它属于哪一类？"
 
-#: src/Api/WebhooksController.php:114
+#: src/Api/WebhooksController.php:115
 msgid "Where to source the test payload from."
 msgstr "测试数据的来源。"
 
@@ -7417,7 +7464,7 @@ msgstr "是"
 msgid "You do not have permission."
 msgstr "你没有权限。"
 
-#: src/Api/WebhooksController.php:168
+#: src/Api/WebhooksController.php:169
 msgid "You don't have permissions to see it."
 msgstr "你没有查看它的权限。"
 
@@ -7497,6 +7544,10 @@ msgid ""
 "instead. (%3$s) Pick a different model with Change model."
 msgstr "您选择的模型 %1$s 无法响应，因此本条回复来自 %2$s。（%3$s）可通过“更换模型”选择其他模型。"
 
+#: admin/src/components/WebhookForm.vue
+msgid "a local or private network address"
+msgstr "本地或私有网络地址"
+
 #: admin/src/components/notifications/RuleEditor.vue
 msgid "any — or e.g. 1, 3"
 msgstr "任意 — 或例如 1, 3"
@@ -7545,7 +7596,7 @@ msgstr "然后再创建规则。"
 msgid "bool"
 msgstr "布尔"
 
-#: src/Abilities/WriteAbilities.php:360
+#: src/Abilities/WriteAbilities.php:368
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 
@@ -7553,11 +7604,11 @@ msgstr "chain_id、source_webhook_id 和 target_webhook_id 为必填项。"
 msgid "channel_ids must be a list of channel IDs."
 msgstr "channel_ids 必须是渠道 ID 列表。"
 
-#: src/Abilities/WriteAbilities.php:418
+#: src/Abilities/WriteAbilities.php:426
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions 必须是 {enabled, type, rules: [...]} 对象。"
 
-#: src/Abilities/WriteAbilities.php:427
+#: src/Abilities/WriteAbilities.php:435
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules 必须是规则对象数组。"
 
@@ -7938,6 +7989,14 @@ msgstr "待处理"
 msgid "perm. failed"
 msgstr "永久失败"
 
+#: admin/src/components/WebhookForm.vue
+msgid "plain http://"
+msgstr "普通 http://"
+
+#: admin/src/components/WebhookForm.vue
+msgid "port %s"
+msgstr "端口 %s"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "property name (optional)"
 msgstr "属性名称（可选）"
@@ -8042,11 +8101,11 @@ msgstr "已验证 %s"
 msgid "waiting for digest"
 msgstr "等待摘要"
 
-#: src/Abilities/WriteAbilities.php:191
+#: src/Abilities/WriteAbilities.php:199
 msgid "webhook_id, trigger and conditions are required."
 msgstr "webhook_id、trigger 和 conditions 为必填项。"
 
-#: src/Abilities/WriteAbilities.php:178
+#: src/Abilities/WriteAbilities.php:186
 msgid "webhook_id, trigger and field_mapping are required."
 msgstr "webhook_id、trigger 和 field_mapping 为必填项。"
 

@@ -1791,5 +1791,15 @@
   "Unmapped fields are sent as well.": "Niezmapowane pola też są wysyłane.",
   "What this step set up": "Co skonfigurował ten krok",
   "What this step will set up": "Co skonfiguruje ten krok",
-  "mapping applied": "zastosowano mapowanie"
+  "mapping applied": "zastosowano mapowanie",
+  "%1$s and %2$s": "%1$s i %2$s",
+  "Plain http:// URLs only work on a local development site. Use https:// here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "Zwykłe adresy http:// działają tylko na lokalnej stronie deweloperskiej. Użyj tutaj https:// albo oznacz tę stronę jako lokalną, dodając define( 'WP_ENVIRONMENT_TYPE', 'local' ); do pliku wp-config.php.",
+  "This URL uses %s, which only works on a local development site.": "Ten adres URL ma %s, a to działa tylko na lokalnej stronie deweloperskiej.",
+  "This URL uses %s. That is allowed because this site is a local development site (WP_ENVIRONMENT_TYPE is local). A staging or production site will refuse it.": "Ten adres URL ma %s. Jest to dozwolone, bo ta strona działa jako lokalna strona deweloperska (WP_ENVIRONMENT_TYPE to local). Strona testowa lub produkcyjna go odrzuci.",
+  "This endpoint URL only works on a local development site: it points to a private or local address, uses a port other than 80, 443 or 8080, or its host does not resolve. Use a public https:// URL here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "Ten adres URL punktu końcowego działa tylko na lokalnej stronie deweloperskiej: wskazuje na adres prywatny lub lokalny, używa portu innego niż 80, 443 lub 8080 albo jego nazwy hosta nie da się odnaleźć. Użyj tutaj publicznego adresu https:// albo oznacz tę stronę jako lokalną, dodając define( 'WP_ENVIRONMENT_TYPE', 'local' ); do pliku wp-config.php.",
+  "To use it, mark this site as local by adding %s to wp-config.php. On staging and production sites, use an https:// URL on a public host (port 443 or 8080).": "Aby go użyć, oznacz tę stronę jako lokalną, dodając %s do pliku wp-config.php. Na stronach testowych i produkcyjnych użyj adresu https:// na publicznym hoście (port 443 lub 8080).",
+  "a local or private network address": "adres lokalny lub z sieci prywatnej",
+  "plain http://": "zwykłe http://",
+  "port %s": "port %s",
+  "%1$s, %2$s": "%1$s, %2$s"
 }
