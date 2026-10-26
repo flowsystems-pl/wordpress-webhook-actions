@@ -125,7 +125,7 @@ class AbilityCatalog {
           'type'       => 'object',
           'properties' => [
             'name'               => ['type' => 'string'],
-            'endpoint_url'       => ['type' => 'string', 'description' => 'Must be https:// on a public host (port 443 or 8080); anything else is refused on save. May carry {{ dot.path }} placeholders (double braces) expanded at dispatch from the payload the pre-dispatch snippet returned, then the original captured payload — e.g. https://api.github.com/repos/{{ __repo }}/issues. Single braces are sent literally.'],
+            'endpoint_url'       => ['type' => 'string', 'description' => 'Must be https:// on a public host (port 443 or 8080); anything else is refused on save, except on a local development site (WP_ENVIRONMENT_TYPE local), which also accepts http://, local hosts and any port. May carry {{ dot.path }} placeholders (double braces) expanded at dispatch from the payload the pre-dispatch snippet returned, then the original captured payload — e.g. https://api.github.com/repos/{{ __repo }}/issues. Single braces are sent literally.'],
             'http_method'        => ['type' => 'string', 'enum' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], 'default' => 'POST'],
             'triggers'           => ['type' => 'array', 'items' => ['type' => 'string']],
             'auth_credential_id' => ['type' => 'integer'],
@@ -152,7 +152,7 @@ class AbilityCatalog {
           'properties' => [
             'id'                 => ['type' => 'integer'],
             'name'               => ['type' => 'string'],
-            'endpoint_url'       => ['type' => 'string', 'description' => 'Must be https:// on a public host (port 443 or 8080); anything else is refused on save. May carry {{ dot.path }} placeholders (double braces) expanded at dispatch from the payload the pre-dispatch snippet returned, then the original captured payload — e.g. https://api.github.com/repos/{{ __repo }}/issues. Single braces are sent literally.'],
+            'endpoint_url'       => ['type' => 'string', 'description' => 'Must be https:// on a public host (port 443 or 8080); anything else is refused on save, except on a local development site (WP_ENVIRONMENT_TYPE local), which also accepts http://, local hosts and any port. May carry {{ dot.path }} placeholders (double braces) expanded at dispatch from the payload the pre-dispatch snippet returned, then the original captured payload — e.g. https://api.github.com/repos/{{ __repo }}/issues. Single braces are sent literally.'],
             'http_method'        => ['type' => 'string', 'enum' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']],
             'triggers'           => ['type' => 'array', 'items' => ['type' => 'string']],
             'auth_credential_id' => ['type' => 'integer'],

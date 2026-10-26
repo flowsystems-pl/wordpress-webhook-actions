@@ -174,8 +174,10 @@ class AdminController {
       'nonce' => wp_create_nonce('wp_rest'),
       'adminUrl' => admin_url(),
       'pluginUrl' => App::$url,
-      // Lets the webhook form reject http:// up front, matching the server rule.
-      'requireHttps' => UrlTemplate::requiresHttps(),
+      // Lets the webhook form flag local-only URLs up front, matching the server rule.
+      'requireHttps'   => UrlTemplate::requiresHttps(),
+      'localEndpoints' => UrlTemplate::isLocalEnvironment(),
+      'allowedPorts'   => array_values(array_map('intval', (array) apply_filters('http_allowed_safe_ports', [80, 443, 8080], '', ''))),
     ]);
 
     // Load JS translations. wp_set_script_translations() resolves a filename

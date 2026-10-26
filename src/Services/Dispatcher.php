@@ -966,11 +966,11 @@ class Dispatcher {
    */
   private function deliveryUrlError(string $url): ?string {
     if (UrlTemplate::requiresHttps() && !str_starts_with(strtolower($url), 'https://')) {
-      return 'HTTPS required: plain http:// endpoints are not delivered';
+      return 'HTTPS required: plain http:// endpoints are only delivered on a local site (WP_ENVIRONMENT_TYPE local)';
     }
 
-    if (!wp_http_validate_url($url)) {
-      return 'URL not allowed: private or local address, a port other than 80, 443 or 8080, or a host that does not resolve';
+    if (!UrlTemplate::hostAllowed($url)) {
+      return 'URL not allowed: private or local address, a port other than 80, 443 or 8080, or a host that does not resolve (only allowed on a local site, WP_ENVIRONMENT_TYPE local)';
     }
 
     return null;

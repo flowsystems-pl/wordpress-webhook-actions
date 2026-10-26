@@ -269,6 +269,59 @@ const resolveByPath = (obj, path) => {
 
 const urlHasTemplates = computed(() => form.value.endpoint_url.includes('{{'))
 
+// Mirrors UrlTemplate::endpointError() on the server: plain http://, a port
+// outside the allowed list and a local or private host only work on a local
+// development site (WP_ENVIRONMENT_TYPE 'local'). Flagged while typing.
+const fswaSettings = window.fswaSettings || {}
+// wp_localize_script() turns booleans into '1' / ''.
+const settingOn = (value) => value === true || value === '1' || value === 1
+const localSite = settingOn(fswaSettings.localEndpoints)
+const requireHttps = fswaSettings.requireHttps === undefined || settingOn(fswaSettings.requireHttps)
+const allowedPorts = fswaSettings.allowedPorts || [80, 443, 8080]
+const LOCAL_HOST = /^(localhost|.+\.localhost|.+\.local|.+\.test|host\.docker\.internal|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|\[::1\])$/i
+const localDefine = "define( 'WP_ENVIRONMENT_TYPE', 'local' );"
+
+const urlLocalOnlyReasons = computed(() => {
+  const raw = form.value.endpoint_url.trim()
+  if (!raw) return []
+  let url
+  try {
+    url = new URL(raw.replace(/\{\{[^}]+\}\}/g, '0'))
+  } catch {
+    return []
+  }
+  const reasons = []
+  if (url.protocol === 'http:' && (localSite || requireHttps)) {
+    reasons.push(__('plain http://'))
+  }
+  if (url.port && !allowedPorts.includes(Number(url.port))) {
+    reasons.push(sprintf(__('port %s'), url.port))
+  }
+  if (LOCAL_HOST.test(url.hostname)) {
+    reasons.push(__('a local or private network address'))
+  }
+  return reasons
+})
+
+const urlLocalOnlyBlocked = computed(() => !localSite && urlLocalOnlyReasons.value.length > 0)
+
+const urlLocalOnlyList = computed(() => {
+  const reasons = urlLocalOnlyReasons.value
+  if (reasons.length < 2) return reasons[0] || ''
+  return sprintf(__('%1$s and %2$s'), reasons.slice(0, -1).join(', '), reasons[reasons.length - 1])
+})
+
+const urlLocalOnlyText = computed(() =>
+  sprintf(__('This URL uses %s, which only works on a local development site.'), urlLocalOnlyList.value)
+)
+
+const urlLocalOnlyHowTo = computed(() =>
+  sprintf(
+    __('To use it, mark this site as local by adding %s to wp-config.php. On staging and production sites, use an https:// URL on a public host (port 443 or 8080).'),
+    '<code class="font-mono text-xs">' + localDefine + '</code>'
+  )
+)
+
 const urlTemplatePreview = computed(() => {
   if (!urlHasTemplates.value) return null
   if (!props.gluePayload && !props.examplePayload) return null
@@ -354,9 +407,9 @@ const validate = () => {
       const url = new URL(urlForValidation);
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.value.endpoint_url = __('URL must be HTTP or HTTPS');
-      } else if (url.protocol === 'http:' && window.fswaSettings?.requireHttps !== false) {
-        // The server refuses http:// on save and never delivers to it.
-        errors.value.endpoint_url = __('The endpoint URL must start with https://. Webhooks are only delivered over HTTPS.');
+      } else if (urlLocalOnlyBlocked.value) {
+        // The server refuses these on save and never delivers to them.
+        errors.value.endpoint_url = urlLocalOnlyText.value;
       }
     } catch {
       errors.value.endpoint_url = __('Invalid URL format');
@@ -518,7 +571,15 @@ const handleSubmit = () => {
         placeholder="https://example.com/webhook"
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
-      <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <p v-if="errors.endpoint_url && !urlLocalOnlyBlocked" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <div v-if="urlLocalOnlyBlocked" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 space-y-1 text-sm">
+        <p class="text-destructive">{{ urlLocalOnlyText }}</p>
+        <p class="text-muted-foreground" v-html="urlLocalOnlyHowTo"></p>
+      </div>
+      <div v-else-if="localSite && urlLocalOnlyReasons.length" class="flex items-start gap-2 rounded-md bg-muted px-3 py-2.5 text-sm text-muted-foreground">
+        <Info class="h-4 w-4 mt-0.5 shrink-0" />
+        <p>{{ sprintf(__('This URL uses %s. That is allowed because this site is a local development site (WP_ENVIRONMENT_TYPE is local). A staging or production site will refuse it.'), urlLocalOnlyList) }}</p>
+      </div>
       <div class="flex items-start gap-2">
         <p class="text-sm text-muted-foreground">
           <span v-html="sprintf(__('The URL where webhook payloads will be sent. Supports %1$s{{ field.path }}%2$s templates — resolved against the final payload, after code glue applied.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></span>
