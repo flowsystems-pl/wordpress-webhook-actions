@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { ArrowLeft, FlaskConical } from 'lucide-vue-next';
 import { Button, Card, Alert } from '@/components/ui';
@@ -65,6 +65,7 @@ const webhook = ref(null);
 const loading = ref(false);
 const saving = ref(false);
 const error = ref(null);
+const errorEl = ref(null);
 const showTest = ref(false);
 const hasUnsavedChanges = ref(false);
 
@@ -163,6 +164,8 @@ const handleSubmit = async (data) => {
   } catch (e) {
     error.value = e.message;
     console.error('Failed to save webhook:', e);
+    // The server's reason shows above the form, far from the Save button.
+    nextTick(() => errorEl.value?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   } finally {
     saving.value = false;
   }
@@ -236,9 +239,11 @@ watch(() => route.params.id, (newId) => {
           </Button>
         </div>
 
-        <Alert v-if="error" variant="destructive" class="mb-4">
-          {{ error }}
-        </Alert>
+        <div v-if="error" ref="errorEl">
+          <Alert variant="destructive" class="mb-4">
+            {{ error }}
+          </Alert>
+        </div>
 
         <WebhookForm
           :webhook="webhook"

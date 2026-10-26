@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { Button, Input, Label, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox, Badge } from '@/components/ui';
 import { Info, Link2, Network, ShieldCheck } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
@@ -398,6 +398,20 @@ const backoffPreview = computed(() => {
 
 // ── form logic ────────────────────────────────────────────────────────────────
 
+const formEl = ref(null);
+
+// After a blocked save, bring the first problem into view (the button sits far
+// below the fields, so the message is otherwise off-screen) and put the cursor
+// in its field.
+const revealFirstError = async () => {
+  await nextTick();
+  const target = formEl.value?.querySelector('[data-form-error]');
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const field = document.getElementById(target.dataset.formError);
+  if (field && typeof field.focus === 'function') field.focus({ preventScroll: true });
+};
+
 const validate = () => {
   errors.value = {};
 
@@ -459,6 +473,7 @@ const handleSaveFirstAndContinue = () => {
   // want for the initial save.
   if (!validate()) {
     showChainSaveFirstDialog.value = false;
+    revealFirstError();
     return;
   }
   showChainSaveFirstDialog.value = false;
@@ -502,36 +517,38 @@ const cancelSyncToggle = () => {
 };
 
 const handleSubmit = () => {
-  if (validate()) {
-    const data = { ...form.value };
-    data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
-    data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
-    data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
-    data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
-    data.custom_headers     = data.custom_headers ?? [];
-    data.url_params         = data.url_params ?? [];
-    normalizeAuth(data);
-
-    // Chain config: tells the parent (WebhookEdit) how to sync chain links
-    // after the webhook save. When useChainTrigger is OFF and webhook
-    // currently has chain links, parent should call clearTargetLinks.
-    data.__chain_config = useChainTrigger.value
-      ? {
-          enabled: true,
-          chain_id: chainConfig.value.chain_id,
-          new_chain_name: chainConfig.value.new_chain_name?.trim() || '',
-          new_chain_description: chainConfig.value.new_chain_description?.trim() || '',
-          source_webhook_ids: chainConfig.value.source_webhook_ids || [],
-        }
-      : { enabled: false };
-
-    emit('submit', data);
+  if (!validate()) {
+    revealFirstError();
+    return;
   }
+  const data = { ...form.value };
+  data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+  data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
+  data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
+  data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
+  data.custom_headers     = data.custom_headers ?? [];
+  data.url_params         = data.url_params ?? [];
+  normalizeAuth(data);
+
+  // Chain config: tells the parent (WebhookEdit) how to sync chain links
+  // after the webhook save. When useChainTrigger is OFF and webhook
+  // currently has chain links, parent should call clearTargetLinks.
+  data.__chain_config = useChainTrigger.value
+    ? {
+        enabled: true,
+        chain_id: chainConfig.value.chain_id,
+        new_chain_name: chainConfig.value.new_chain_name?.trim() || '',
+        new_chain_description: chainConfig.value.new_chain_description?.trim() || '',
+        source_webhook_ids: chainConfig.value.source_webhook_ids || [],
+      }
+    : { enabled: false };
+
+  emit('submit', data);
 };
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="handleSubmit">
+  <form ref="formEl" class="space-y-6" @submit.prevent="handleSubmit">
     <!-- Chain involvement banner (top of form) -->
     <div
       v-if="chainInvolvement.length"
@@ -556,7 +573,7 @@ const handleSubmit = () => {
         :placeholder="__('My Webhook')"
         :class="{ 'border-destructive': errors.name }"
       />
-      <p v-if="errors.name" class="text-sm text-destructive">{{ errors.name }}</p>
+      <p v-if="errors.name" data-form-error="name" class="text-sm text-destructive">{{ errors.name }}</p>
     </div>
 
     <!-- Description (markdown) -->
@@ -577,8 +594,8 @@ const handleSubmit = () => {
         placeholder="https://example.com/webhook"
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
-      <p v-if="errors.endpoint_url && !urlLocalOnlyBlocked" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
-      <div v-if="urlLocalOnlyBlocked" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 space-y-1 text-sm">
+      <p v-if="errors.endpoint_url && !urlLocalOnlyBlocked" data-form-error="endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <div v-if="urlLocalOnlyBlocked" data-form-error="endpoint_url" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 space-y-1 text-sm">
         <p class="text-destructive">{{ urlLocalOnlyText }}</p>
         <p class="text-muted-foreground" v-html="urlLocalOnlyHowTo"></p>
       </div>
@@ -778,7 +795,7 @@ const handleSubmit = () => {
         />
       </template>
 
-      <p v-if="errors.triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
+      <p v-if="errors.triggers" data-form-error="triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
     </div>
 
     <!-- Max Attempts -->
