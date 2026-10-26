@@ -270,6 +270,11 @@ class LogRepository {
     if (isset($data['error_message'])) {
       $updateData['error_message'] = $data['error_message'];
       $format[] = '%s';
+    } elseif (($data['status'] ?? null) === 'success') {
+      // A delivery that succeeds after failing (a retry) must not keep the last
+      // failure's message next to its 200. The attempts stay in attempt_history.
+      $updateData['error_message'] = null;
+      $format[] = '%s';
     }
 
     if (isset($data['duration_ms'])) {
