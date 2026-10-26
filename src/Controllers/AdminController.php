@@ -5,6 +5,7 @@ namespace FlowSystems\WebhookActions\Controllers;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\App;
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 use FlowSystems\WebhookActions\Api\WebhooksController;
 use FlowSystems\WebhookActions\Api\LogsController;
 use FlowSystems\WebhookActions\Api\TriggersController;
@@ -173,6 +174,8 @@ class AdminController {
       'nonce' => wp_create_nonce('wp_rest'),
       'adminUrl' => admin_url(),
       'pluginUrl' => App::$url,
+      // Lets the webhook form reject http:// up front, matching the server rule.
+      'requireHttps' => UrlTemplate::requiresHttps(),
     ]);
 
     // Load JS translations. wp_set_script_translations() resolves a filename

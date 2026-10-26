@@ -53,6 +53,10 @@ class WriteAbilities {
     if ($name === '' || $url === '') {
       return $this->invalid(__('name and endpoint_url are required.', 'flowsystems-webhook-actions'));
     }
+    $urlError = UrlTemplate::endpointError($url);
+    if ($urlError !== null) {
+      return $this->invalid($urlError);
+    }
 
     $repo = new WebhookRepository();
     $id   = $repo->create([
@@ -121,6 +125,10 @@ class WriteAbilities {
     }
     if (isset($data['endpoint_url'])) {
       $data['endpoint_url'] = UrlTemplate::sanitize((string) $data['endpoint_url']);
+      $urlError = UrlTemplate::endpointError($data['endpoint_url']);
+      if ($urlError !== null) {
+        return $this->invalid($urlError);
+      }
     }
     foreach (['custom_headers', 'url_params'] as $pairs) {
       if (array_key_exists($pairs, $data)) {

@@ -43,6 +43,46 @@ class UrlTemplate {
   }
 
   /**
+   * Why an endpoint URL could never be delivered, or null when it can be.
+   *
+   * The same rule the dispatcher applies at send time (deliveryUrlError()),
+   * checked on save. Before this a plain http:// URL saved fine and then failed
+   * every delivery with a generic "Invalid URL format" (found by WPVibe's
+   * verification run on 3.3.4). Placeholders count as "0"; one inside the host
+   * skips the host check, since the real host is only known at dispatch.
+   */
+  public static function endpointError(string $url): ?string {
+    $skeleton = (string) preg_replace('/\{\{[^}]+\}\}/', '0', $url);
+    if (!filter_var($skeleton, FILTER_VALIDATE_URL)) {
+      return __('Invalid endpoint URL.', 'flowsystems-webhook-actions');
+    }
+
+    if (self::requiresHttps() && !str_starts_with(strtolower($skeleton), 'https://')) {
+      return __('The endpoint URL must start with https://. Webhooks are only delivered over HTTPS.', 'flowsystems-webhook-actions');
+    }
+
+    $templatedHost = (bool) preg_match('#^[a-z][a-z0-9+.-]*://[^/?\#]*\{\{#i', $url);
+    if (!$templatedHost && !wp_http_validate_url($skeleton)) {
+      return __('This endpoint URL cannot receive webhooks: it points to a private or local address, uses a port other than 80, 443 or 8080, or its host does not resolve.', 'flowsystems-webhook-actions');
+    }
+
+    return null;
+  }
+
+  /**
+   * Whether endpoint URLs must use HTTPS. Shared by save-time validation and
+   * the dispatcher so the two can never disagree.
+   */
+  public static function requiresHttps(): bool {
+    /**
+     * Filter whether HTTPS is required for webhook URLs.
+     *
+     * @param bool $require_https Whether to require HTTPS (default true)
+     */
+    return (bool) apply_filters('fswa_require_https', true);
+  }
+
+  /**
    * Does the URL carry at least one placeholder?
    */
   public static function hasPlaceholders(string $url): bool {

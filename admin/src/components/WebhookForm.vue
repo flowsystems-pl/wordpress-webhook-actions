@@ -354,6 +354,9 @@ const validate = () => {
       const url = new URL(urlForValidation);
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.value.endpoint_url = __('URL must be HTTP or HTTPS');
+      } else if (url.protocol === 'http:' && window.fswaSettings?.requireHttps !== false) {
+        // The server refuses http:// on save and never delivers to it.
+        errors.value.endpoint_url = __('The endpoint URL must start with https://. Webhooks are only delivered over HTTPS.');
       }
     } catch {
       errors.value.endpoint_url = __('Invalid URL format');

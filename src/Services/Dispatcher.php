@@ -422,6 +422,27 @@ class Dispatcher {
   }
 
   /**
+   * The webhook as it is configured now, falling back to the copy stored in
+   * the queue job when the webhook has since been deleted.
+   *
+   * A job carries a snapshot of the webhook taken when it was queued. Sending
+   * from that snapshot meant a retry kept going to the old URL, credential and
+   * headers after the user had fixed them — the usual reason for retrying in
+   * the first place (found by WPVibe's verification run on 3.3.4).
+   *
+   * @param array<string, mixed> $snapshot
+   * @return array<string, mixed>
+   */
+  public function currentWebhook(array $snapshot): array {
+    $webhookId = isset($snapshot['id']) ? (int) $snapshot['id'] : 0;
+    if ($webhookId <= 0) {
+      return $snapshot;
+    }
+
+    return $this->webhookRepository->find($webhookId) ?? $snapshot;
+  }
+
+  /**
    * Process a single job from the queue
    *
    * @param array $job Job data from queue
@@ -434,12 +455,13 @@ class Dispatcher {
       return ['success' => false, 'shouldRetry' => false];
     }
 
-    $webhook = $jobData['webhook'];
+    $webhook = $this->currentWebhook($jobData['webhook']);
     $payload = $jobData['payload'];
     $trigger = $job['trigger_name'];
     $logId = $this->extractLogIdFromJob($job);
     $mappingApplied = (bool) ($jobData['mapping_applied'] ?? false);
     $originalPayload = $jobData['original_payload'] ?? null;
+    $webhookId     = isset($webhook['id']) ? (int) $webhook['id'] : 0;
 
     if ($logId === null) {
       if ($webhookId > 0) {
@@ -456,7 +478,6 @@ class Dispatcher {
       }
     }
 
-    $webhookId     = isset($webhook['id']) ? (int) $webhook['id'] : 0;
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
 
@@ -591,9 +612,10 @@ class Dispatcher {
       ? (string) $webhook['auth_header']
       : '';
 
-    if (!$this->isValidUrl($url)) {
-      $this->logError($trigger, $url, 'Invalid URL format', $webhookId, $payload, null, null, null, $logId);
-      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => 'Invalid URL format', 'request_url' => $url];
+    $urlError = $this->deliveryUrlError($url);
+    if ($urlError !== null) {
+      $this->logError($trigger, $url, $urlError, $webhookId, $payload, null, null, null, $logId);
+      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => $urlError, 'request_url' => $url];
     }
 
     $headers = [
@@ -936,27 +958,22 @@ class Dispatcher {
   }
 
   /**
-   * Validate if a URL is properly formatted and secure
-   *
-   * @param string $url The URL to validate
-   * @return bool True if valid, false otherwise
+   * Why the final (template-expanded) URL cannot be sent to, or null when it
+   * can. Save-time validation applies the same rule (UrlTemplate::endpointError),
+   * so this mostly catches webhooks saved before that check existed and URLs
+   * whose placeholders expanded into something unusable. The message says
+   * which rule failed rather than a generic "Invalid URL format".
    */
-  private function isValidUrl(string $url): bool {
+  private function deliveryUrlError(string $url): ?string {
+    if (UrlTemplate::requiresHttps() && !str_starts_with(strtolower($url), 'https://')) {
+      return 'HTTPS required: plain http:// endpoints are not delivered';
+    }
+
     if (!wp_http_validate_url($url)) {
-      return false;
+      return 'URL not allowed: private or local address, a port other than 80, 443 or 8080, or a host that does not resolve';
     }
 
-    /**
-     * Filter whether HTTPS is required for webhook URLs.
-     *
-     * @param bool $require_https Whether to require HTTPS (default true)
-     */
-    $requireHttps = apply_filters('fswa_require_https', true);
-    if ($requireHttps && !str_starts_with($url, 'https://')) {
-      return false;
-    }
-
-    return true;
+    return null;
   }
 
   /**

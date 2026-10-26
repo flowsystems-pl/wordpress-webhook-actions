@@ -272,7 +272,6 @@ class QueueController extends WP_REST_Controller {
       );
     }
 
-    $webhook = $jobData['webhook'];
     $payload = $jobData['payload'];
     $trigger = $job['trigger_name'];
     $logId = !empty($job['log_id']) ? (int) $job['log_id'] : (!empty($jobData['log_id']) ? (int) $jobData['log_id'] : null);
@@ -280,6 +279,7 @@ class QueueController extends WP_REST_Controller {
 
     $transport = new WPHttpTransport();
     $dispatcher = new Dispatcher($transport, $this->queueService);
+    $webhook = $dispatcher->currentWebhook($jobData['webhook']);
 
     $result = $dispatcher->sendToWebhook($webhook, $payload, $trigger, $logId, $attempts);
 
