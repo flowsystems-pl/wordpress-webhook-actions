@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -191,8 +191,11 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.4.0 — 2026-10-24 =
-- New: in Build with AI, clicking a step under Build progress shows what it set up: the endpoint and triggers, each mapped field, each condition, the credential, and the test delivery's HTTP status and response. A failed step shows its error, and "Raw data" holds the full input and result
-- Improved: Build with AI chooses a trigger by what it means rather than by which hook already has a captured payload. For posts it uses `wp_after_insert_post`, which fires after the featured image, terms and meta are saved, and conditions on the post before the save to fire once when a post moves to a status
-- Fixed: a payload captured on a trigger with no example yet could be a revision or an auto-draft instead of the real post event. Those are now skipped, so the first capture is the post itself
-- Fixed: when the payload library could not be reached, the plugin remembered the trigger as having no example for a day. It now tries again after the five-minute back-off
+= 3.4.1 — 2026-10-26 =
+- Fixed: retrying a failed delivery, automatically or from the log, sent it with the webhook settings saved when the event was queued. After you fixed the URL, credential or headers, the retry still went to the old ones. Retries now use the webhook as it is configured when they run
+- Fixed: a plain `http://` endpoint URL could be saved but every delivery then failed with "Invalid URL format". URLs that can never be delivered (plain http, private or local addresses, ports other than 80, 443 or 8080) are now refused when you save, in the editor, the REST API and the AI abilities, with a message that says why
+- New: on a local development site (`WP_ENVIRONMENT_TYPE` set to `local` in wp-config.php) webhooks may use `http://`, `localhost`, Docker and LAN addresses and any port, such as a local n8n on port 5678. Staging and production sites keep requiring https on a public host. The webhook editor explains this as you type the URL
+- Fixed: switching a webhook off now stops its queued deliveries and retries. They are logged as skipped with the reason. Test sends still go out
+- Fixed: a delivery skipped at send time because its conditions were not met was shown as permanently failed. It now stays skipped
+- Fixed: a delivery that succeeded on retry kept the previous attempt's error message next to its 200
+- Improved: when a webhook can't be saved, the editor scrolls to the problem and puts the cursor in the field
