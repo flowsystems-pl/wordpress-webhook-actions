@@ -43,6 +43,74 @@ class UrlTemplate {
   }
 
   /**
+   * Why an endpoint URL could never be delivered, or null when it can be.
+   *
+   * The same rule the dispatcher applies at send time (deliveryUrlError()),
+   * checked on save. Before this a plain http:// URL saved fine and then failed
+   * every delivery with a generic "Invalid URL format" (found by WPVibe's
+   * verification run on 3.3.4). Placeholders count as "0"; one inside the host
+   * skips the host check, since the real host is only known at dispatch.
+   */
+  public static function endpointError(string $url): ?string {
+    $skeleton = (string) preg_replace('/\{\{[^}]+\}\}/', '0', $url);
+    $scheme   = strtolower((string) wp_parse_url($skeleton, PHP_URL_SCHEME));
+    if (!filter_var($skeleton, FILTER_VALIDATE_URL) || !in_array($scheme, ['http', 'https'], true)) {
+      return __('Invalid endpoint URL.', 'flowsystems-webhook-actions');
+    }
+
+    if (self::requiresHttps() && $scheme !== 'https') {
+      return __('Plain http:// URLs only work on a local development site. Use https:// here, or mark this site as local by adding define( \'WP_ENVIRONMENT_TYPE\', \'local\' ); to wp-config.php.', 'flowsystems-webhook-actions');
+    }
+
+    $templatedHost = (bool) preg_match('#^[a-z][a-z0-9+.-]*://[^/?\#]*\{\{#i', $url);
+    if (!$templatedHost && !self::hostAllowed($skeleton)) {
+      return __('This endpoint URL only works on a local development site: it points to a private or local address, uses a port other than 80, 443 or 8080, or its host does not resolve. Use a public https:// URL here, or mark this site as local by adding define( \'WP_ENVIRONMENT_TYPE\', \'local\' ); to wp-config.php.', 'flowsystems-webhook-actions');
+    }
+
+    return null;
+  }
+
+  /**
+   * A local development site may send to http://, to localhost, Docker and LAN
+   * addresses, and to any port — a local n8n on :5678, a dev server on :3000.
+   * Off everywhere else: on a real server a webhook (or an AI agent creating
+   * one) could otherwise reach the server's own internal services.
+   *
+   * Same gate as LocalDevHttp: wp_get_environment_type() is 'production' unless
+   * the developer sets WP_ENVIRONMENT_TYPE on their own machine.
+   */
+  public static function isLocalEnvironment(): bool {
+    /**
+     * Filter whether endpoint URLs may use http://, private or local hosts and
+     * any port. Default: true only when wp_get_environment_type() is 'local'.
+     *
+     * @param bool $allow Whether local-only endpoints are allowed.
+     */
+    return (bool) apply_filters('fswa_allow_local_endpoints', wp_get_environment_type() === 'local');
+  }
+
+  /**
+   * Whether endpoint URLs must use HTTPS. Shared by save-time validation and
+   * the dispatcher so the two can never disagree.
+   */
+  public static function requiresHttps(): bool {
+    /**
+     * Filter whether HTTPS is required for webhook URLs.
+     *
+     * @param bool $require_https Whether to require HTTPS (default true, false on a local site)
+     */
+    return (bool) apply_filters('fswa_require_https', !self::isLocalEnvironment());
+  }
+
+  /**
+   * Host and port check for an outbound URL: WordPress's own SSRF guard
+   * (public host, port 80/443/8080), skipped on a local development site.
+   */
+  public static function hostAllowed(string $url): bool {
+    return self::isLocalEnvironment() || (bool) wp_http_validate_url($url);
+  }
+
+  /**
    * Does the URL carry at least one placeholder?
    */
   public static function hasPlaceholders(string $url): bool {

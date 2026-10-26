@@ -13,6 +13,7 @@ use FlowSystems\WebhookActions\Services\Dispatcher;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Services\CredentialCipher;
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 use WP_Error;
 
 /**
@@ -112,7 +113,8 @@ class TestAbilities {
 
     // SSRF guard: WordPress rejects loopback / private / reserved hosts unless a
     // filter opts in. This also blocks link-local cloud-metadata endpoints.
-    if (!wp_http_validate_url($url)) {
+    // Relaxed only on a local development site, same as webhook delivery.
+    if (!UrlTemplate::hostAllowed($url)) {
       return new WP_Error('fswa_probe_blocked', __('That URL is not allowed (private, reserved or invalid host).', 'flowsystems-webhook-actions'), ['status' => 422]);
     }
 

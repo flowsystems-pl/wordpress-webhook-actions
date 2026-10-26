@@ -304,7 +304,7 @@ class Dispatcher {
    * Process a batch of queued jobs
    *
    * @param int $batchSize Number of jobs to process
-   * @return array{processed: int, succeeded: int, failed: int, rescheduled: int, stale_cleaned: int}
+   * @return array{processed: int, succeeded: int, failed: int, rescheduled: int, skipped: int, stale_cleaned: int}
    */
   public function process(int $batchSize = 10): array {
     $result = [
@@ -312,6 +312,7 @@ class Dispatcher {
       'succeeded'      => 0,
       'failed'         => 0,
       'rescheduled'    => 0,
+      'skipped'        => 0,
       'stale_cleaned'  => 0,
       'orphans_closed' => 0,
     ];
@@ -354,6 +355,13 @@ class Dispatcher {
       if ($resultData['success']) {
         $this->queueService->markCompleted($jobId);
         $result['succeeded']++;
+      } elseif (!empty($resultData['skipped'])) {
+        // Skipped at run time (conditions not met, webhook switched off): the
+        // job is done and processJob() already set the log to 'skipped' and
+        // fired its event. Not a delivery failure, so it must not be
+        // rewritten to permanently_failed below.
+        $this->queueService->markCompleted($jobId);
+        $result['skipped']++;
       } elseif ($resultData['shouldRetry']) {
         $rescheduleResult = $this->queueService->rescheduleWithBackoff($jobId);
         if ($rescheduleResult['rescheduled']) {
@@ -399,14 +407,10 @@ class Dispatcher {
         }
         $result['failed']++;
 
-        // A skipped job (conditions failed at run time) already fired its own
-        // event and is not a delivery failure.
-        if (empty($resultData['skipped'])) {
-          DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
-            'max_attempts' => (int) ($job['max_attempts'] ?? 0),
-            'reason'       => DeliveryEvents::REASON_NON_RETRYABLE,
-          ]);
-        }
+        DeliveryEvents::fire(DeliveryEvents::PERMANENTLY_FAILED, ($resultData['ctx'] ?? []) + $resultData + [
+          'max_attempts' => (int) ($job['max_attempts'] ?? 0),
+          'reason'       => DeliveryEvents::REASON_NON_RETRYABLE,
+        ]);
       }
     }
 
@@ -422,6 +426,27 @@ class Dispatcher {
   }
 
   /**
+   * The webhook as it is configured now, falling back to the copy stored in
+   * the queue job when the webhook has since been deleted.
+   *
+   * A job carries a snapshot of the webhook taken when it was queued. Sending
+   * from that snapshot meant a retry kept going to the old URL, credential and
+   * headers after the user had fixed them — the usual reason for retrying in
+   * the first place (found by WPVibe's verification run on 3.3.4).
+   *
+   * @param array<string, mixed> $snapshot
+   * @return array<string, mixed>
+   */
+  public function currentWebhook(array $snapshot): array {
+    $webhookId = isset($snapshot['id']) ? (int) $snapshot['id'] : 0;
+    if ($webhookId <= 0) {
+      return $snapshot;
+    }
+
+    return $this->webhookRepository->find($webhookId) ?? $snapshot;
+  }
+
+  /**
    * Process a single job from the queue
    *
    * @param array $job Job data from queue
@@ -434,12 +459,13 @@ class Dispatcher {
       return ['success' => false, 'shouldRetry' => false];
     }
 
-    $webhook = $jobData['webhook'];
+    $webhook = $this->currentWebhook($jobData['webhook']);
     $payload = $jobData['payload'];
     $trigger = $job['trigger_name'];
     $logId = $this->extractLogIdFromJob($job);
     $mappingApplied = (bool) ($jobData['mapping_applied'] ?? false);
     $originalPayload = $jobData['original_payload'] ?? null;
+    $webhookId     = isset($webhook['id']) ? (int) $webhook['id'] : 0;
 
     if ($logId === null) {
       if ($webhookId > 0) {
@@ -456,9 +482,32 @@ class Dispatcher {
       }
     }
 
-    $webhookId     = isset($webhook['id']) ? (int) $webhook['id'] : 0;
     $attemptNumber = (int) ($job['attempts'] ?? 0);
     $isTest        = (bool) ($job['is_test'] ?? false);
+
+    // A webhook switched off after this job was queued stops sending, retries
+    // included — reading the current webhook above is what makes this visible.
+    // Test sends still go out: testing a disabled webhook is how it gets set up.
+    if (!$isTest && empty($webhook['is_enabled'])) {
+      $skipMessage = 'Webhook is disabled. Pending deliveries are skipped while it is off.';
+      if ($logId) {
+        $this->logService->updateLog($logId, [
+          'status'          => 'skipped',
+          'error_message'   => $skipMessage,
+          'next_attempt_at' => null,
+        ]);
+      }
+      DeliveryEvents::fire(DeliveryEvents::SKIPPED, [
+        'webhook'          => $webhook,
+        'trigger'          => $trigger,
+        'log_id'           => $logId,
+        'attempt'          => $attemptNumber + 1,
+        'error_message'    => $skipMessage,
+        'payload'          => $payload,
+        'original_payload' => $originalPayload ?: $payload,
+      ]);
+      return ['success' => false, 'shouldRetry' => false, 'skipped' => true];
+    }
 
     /**
      * Filter the final payload per-webhook before delivery.
@@ -591,9 +640,10 @@ class Dispatcher {
       ? (string) $webhook['auth_header']
       : '';
 
-    if (!$this->isValidUrl($url)) {
-      $this->logError($trigger, $url, 'Invalid URL format', $webhookId, $payload, null, null, null, $logId);
-      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => 'Invalid URL format', 'request_url' => $url];
+    $urlError = $this->deliveryUrlError($url);
+    if ($urlError !== null) {
+      $this->logError($trigger, $url, $urlError, $webhookId, $payload, null, null, null, $logId);
+      return ['success' => false, 'shouldRetry' => false, 'http_code' => null, 'error_message' => $urlError, 'request_url' => $url];
     }
 
     $headers = [
@@ -936,27 +986,22 @@ class Dispatcher {
   }
 
   /**
-   * Validate if a URL is properly formatted and secure
-   *
-   * @param string $url The URL to validate
-   * @return bool True if valid, false otherwise
+   * Why the final (template-expanded) URL cannot be sent to, or null when it
+   * can. Save-time validation applies the same rule (UrlTemplate::endpointError),
+   * so this mostly catches webhooks saved before that check existed and URLs
+   * whose placeholders expanded into something unusable. The message says
+   * which rule failed rather than a generic "Invalid URL format".
    */
-  private function isValidUrl(string $url): bool {
-    if (!wp_http_validate_url($url)) {
-      return false;
+  private function deliveryUrlError(string $url): ?string {
+    if (UrlTemplate::requiresHttps() && !str_starts_with(strtolower($url), 'https://')) {
+      return 'HTTPS required: plain http:// endpoints are only delivered on a local site (WP_ENVIRONMENT_TYPE local)';
     }
 
-    /**
-     * Filter whether HTTPS is required for webhook URLs.
-     *
-     * @param bool $require_https Whether to require HTTPS (default true)
-     */
-    $requireHttps = apply_filters('fswa_require_https', true);
-    if ($requireHttps && !str_starts_with($url, 'https://')) {
-      return false;
+    if (!UrlTemplate::hostAllowed($url)) {
+      return 'URL not allowed: private or local address, a port other than 80, 443 or 8080, or a host that does not resolve (only allowed on a local site, WP_ENVIRONMENT_TYPE local)';
     }
 
-    return true;
+    return null;
   }
 
   /**

@@ -1715,5 +1715,15 @@
   "Unmapped fields are sent as well.": "未映射的字段也会发送。",
   "What this step set up": "此步骤设置了什么",
   "What this step will set up": "此步骤将设置什么",
-  "mapping applied": "已应用映射"
+  "mapping applied": "已应用映射",
+  "%1$s and %2$s": "%1$s和%2$s",
+  "Plain http:// URLs only work on a local development site. Use https:// here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "普通 http:// URL 仅在本地开发站点上可用。请在此使用 https://，或在 wp-config.php 中添加 define( 'WP_ENVIRONMENT_TYPE', 'local' ); 将此站点标记为本地站点。",
+  "This URL uses %s, which only works on a local development site.": "此 URL 使用了%s，仅在本地开发站点上可用。",
+  "This URL uses %s. That is allowed because this site is a local development site (WP_ENVIRONMENT_TYPE is local). A staging or production site will refuse it.": "此 URL 使用了%s。由于此站点是本地开发站点（WP_ENVIRONMENT_TYPE 为 local），因此允许使用。预发布或生产站点会拒绝它。",
+  "This endpoint URL only works on a local development site: it points to a private or local address, uses a port other than 80, 443 or 8080, or its host does not resolve. Use a public https:// URL here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php.": "此端点 URL 仅在本地开发站点上可用：它指向私有或本地地址、使用了 80、443 或 8080 以外的端口，或其主机无法解析。请在此使用公共 https:// URL，或在 wp-config.php 中添加 define( 'WP_ENVIRONMENT_TYPE', 'local' ); 将此站点标记为本地站点。",
+  "To use it, mark this site as local by adding %s to wp-config.php. On staging and production sites, use an https:// URL on a public host (port 443 or 8080).": "要使用它，请在 wp-config.php 中添加 %s，将此站点标记为本地站点。在预发布和生产站点上，请使用公共主机上的 https:// URL（端口 443 或 8080）。",
+  "a local or private network address": "本地或私有网络地址",
+  "plain http://": "普通 http://",
+  "port %s": "端口 %s",
+  "%1$s, %2$s": "%1$s、%2$s"
 }

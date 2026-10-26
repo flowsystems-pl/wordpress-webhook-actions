@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { Button, Input, Label, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, RadioGroup, RadioGroupItem, Dialog, Checkbox, Badge } from '@/components/ui';
 import { Info, Link2, Network, ShieldCheck } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
@@ -255,6 +255,12 @@ watch(() => form.value.backoff_strategy, (val) => {
 
 watch(form, () => emit('change'), { deep: true })
 
+// A URL error from the last submit describes the old value; drop it once the
+// URL is edited so it can't contradict the live note below the field.
+watch(() => form.value.endpoint_url, () => {
+  if (errors.value.endpoint_url) delete errors.value.endpoint_url
+})
+
 // ── computed ──────────────────────────────────────────────────────────────────
 
 const isDotPath = (val) => val && val.includes('.') && !/\s/.test(val)
@@ -268,6 +274,61 @@ const resolveByPath = (obj, path) => {
 }
 
 const urlHasTemplates = computed(() => form.value.endpoint_url.includes('{{'))
+
+// Mirrors UrlTemplate::endpointError() on the server: plain http://, a port
+// outside the allowed list and a local or private host only work on a local
+// development site (WP_ENVIRONMENT_TYPE 'local'). Flagged while typing.
+const fswaSettings = window.fswaSettings || {}
+// wp_localize_script() turns booleans into '1' / ''.
+const settingOn = (value) => value === true || value === '1' || value === 1
+const localSite = settingOn(fswaSettings.localEndpoints)
+const requireHttps = fswaSettings.requireHttps === undefined || settingOn(fswaSettings.requireHttps)
+const allowedPorts = fswaSettings.allowedPorts || [80, 443, 8080]
+const LOCAL_HOST = /^(localhost|.+\.localhost|.+\.local|.+\.test|host\.docker\.internal|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|\[::1\])$/i
+const localDefine = "define( 'WP_ENVIRONMENT_TYPE', 'local' );"
+
+const urlLocalOnlyReasons = computed(() => {
+  const raw = form.value.endpoint_url.trim()
+  if (!raw) return []
+  let url
+  try {
+    url = new URL(raw.replace(/\{\{[^}]+\}\}/g, '0'))
+  } catch {
+    return []
+  }
+  const reasons = []
+  if (url.protocol === 'http:' && (localSite || requireHttps)) {
+    reasons.push(__('plain http://'))
+  }
+  if (url.port && !allowedPorts.includes(Number(url.port))) {
+    reasons.push(sprintf(__('port %s'), url.port))
+  }
+  if (LOCAL_HOST.test(url.hostname)) {
+    reasons.push(__('a local or private network address'))
+  }
+  return reasons
+})
+
+const urlLocalOnlyBlocked = computed(() => !localSite && urlLocalOnlyReasons.value.length > 0)
+
+const urlLocalOnlyList = computed(() => {
+  const reasons = urlLocalOnlyReasons.value
+  if (reasons.length < 2) return reasons[0] || ''
+  // List punctuation is translatable: Chinese joins with 、, not a comma.
+  const head = reasons.slice(0, -1).reduce((acc, item) => sprintf(__('%1$s, %2$s'), acc, item))
+  return sprintf(__('%1$s and %2$s'), head, reasons[reasons.length - 1])
+})
+
+const urlLocalOnlyText = computed(() =>
+  sprintf(__('This URL uses %s, which only works on a local development site.'), urlLocalOnlyList.value)
+)
+
+const urlLocalOnlyHowTo = computed(() =>
+  sprintf(
+    __('To use it, mark this site as local by adding %s to wp-config.php. On staging and production sites, use an https:// URL on a public host (port 443 or 8080).'),
+    '<code class="font-mono text-xs">' + localDefine + '</code>'
+  )
+)
 
 const urlTemplatePreview = computed(() => {
   if (!urlHasTemplates.value) return null
@@ -339,6 +400,20 @@ const backoffPreview = computed(() => {
 
 // ── form logic ────────────────────────────────────────────────────────────────
 
+const formEl = ref(null);
+
+// After a blocked save, bring the first problem into view (the button sits far
+// below the fields, so the message is otherwise off-screen) and put the cursor
+// in its field.
+const revealFirstError = async () => {
+  await nextTick();
+  const target = formEl.value?.querySelector('[data-form-error]');
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const field = document.getElementById(target.dataset.formError);
+  if (field && typeof field.focus === 'function') field.focus({ preventScroll: true });
+};
+
 const validate = () => {
   errors.value = {};
 
@@ -354,6 +429,9 @@ const validate = () => {
       const url = new URL(urlForValidation);
       if (!['http:', 'https:'].includes(url.protocol)) {
         errors.value.endpoint_url = __('URL must be HTTP or HTTPS');
+      } else if (urlLocalOnlyBlocked.value) {
+        // The server refuses these on save and never delivers to them.
+        errors.value.endpoint_url = urlLocalOnlyText.value;
       }
     } catch {
       errors.value.endpoint_url = __('Invalid URL format');
@@ -397,6 +475,7 @@ const handleSaveFirstAndContinue = () => {
   // want for the initial save.
   if (!validate()) {
     showChainSaveFirstDialog.value = false;
+    revealFirstError();
     return;
   }
   showChainSaveFirstDialog.value = false;
@@ -440,36 +519,38 @@ const cancelSyncToggle = () => {
 };
 
 const handleSubmit = () => {
-  if (validate()) {
-    const data = { ...form.value };
-    data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
-    data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
-    data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
-    data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
-    data.custom_headers     = data.custom_headers ?? [];
-    data.url_params         = data.url_params ?? [];
-    normalizeAuth(data);
-
-    // Chain config: tells the parent (WebhookEdit) how to sync chain links
-    // after the webhook save. When useChainTrigger is OFF and webhook
-    // currently has chain links, parent should call clearTargetLinks.
-    data.__chain_config = useChainTrigger.value
-      ? {
-          enabled: true,
-          chain_id: chainConfig.value.chain_id,
-          new_chain_name: chainConfig.value.new_chain_name?.trim() || '',
-          new_chain_description: chainConfig.value.new_chain_description?.trim() || '',
-          source_webhook_ids: chainConfig.value.source_webhook_ids || [],
-        }
-      : { enabled: false };
-
-    emit('submit', data);
+  if (!validate()) {
+    revealFirstError();
+    return;
   }
+  const data = { ...form.value };
+  data.retry_limit        = data.retry_limit !== '' ? parseInt(data.retry_limit, 10) : null;
+  data.backoff_strategy   = data.backoff_strategy !== 'default' ? data.backoff_strategy : null;
+  data.backoff_base_delay = data.backoff_base_delay !== '' ? parseInt(data.backoff_base_delay, 10) : null;
+  data.backoff_max_delay  = data.backoff_max_delay !== '' ? parseInt(data.backoff_max_delay, 10) : null;
+  data.custom_headers     = data.custom_headers ?? [];
+  data.url_params         = data.url_params ?? [];
+  normalizeAuth(data);
+
+  // Chain config: tells the parent (WebhookEdit) how to sync chain links
+  // after the webhook save. When useChainTrigger is OFF and webhook
+  // currently has chain links, parent should call clearTargetLinks.
+  data.__chain_config = useChainTrigger.value
+    ? {
+        enabled: true,
+        chain_id: chainConfig.value.chain_id,
+        new_chain_name: chainConfig.value.new_chain_name?.trim() || '',
+        new_chain_description: chainConfig.value.new_chain_description?.trim() || '',
+        source_webhook_ids: chainConfig.value.source_webhook_ids || [],
+      }
+    : { enabled: false };
+
+  emit('submit', data);
 };
 </script>
 
 <template>
-  <form class="space-y-6" @submit.prevent="handleSubmit">
+  <form ref="formEl" class="space-y-6" @submit.prevent="handleSubmit">
     <!-- Chain involvement banner (top of form) -->
     <div
       v-if="chainInvolvement.length"
@@ -494,7 +575,7 @@ const handleSubmit = () => {
         :placeholder="__('My Webhook')"
         :class="{ 'border-destructive': errors.name }"
       />
-      <p v-if="errors.name" class="text-sm text-destructive">{{ errors.name }}</p>
+      <p v-if="errors.name" data-form-error="name" class="text-sm text-destructive">{{ errors.name }}</p>
     </div>
 
     <!-- Description (markdown) -->
@@ -515,7 +596,15 @@ const handleSubmit = () => {
         placeholder="https://example.com/webhook"
         :class="{ 'border-destructive': errors.endpoint_url }"
       />
-      <p v-if="errors.endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <p v-if="errors.endpoint_url && !urlLocalOnlyBlocked" data-form-error="endpoint_url" class="text-sm text-destructive">{{ errors.endpoint_url }}</p>
+      <div v-if="urlLocalOnlyBlocked" data-form-error="endpoint_url" class="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2.5 space-y-1 text-sm">
+        <p class="text-destructive">{{ urlLocalOnlyText }}</p>
+        <p class="text-muted-foreground" v-html="urlLocalOnlyHowTo"></p>
+      </div>
+      <div v-else-if="localSite && urlLocalOnlyReasons.length" class="flex items-start gap-2 rounded-md bg-muted px-3 py-2.5 text-sm text-muted-foreground">
+        <Info class="h-4 w-4 mt-0.5 shrink-0" />
+        <p>{{ sprintf(__('This URL uses %s. That is allowed because this site is a local development site (WP_ENVIRONMENT_TYPE is local). A staging or production site will refuse it.'), urlLocalOnlyList) }}</p>
+      </div>
       <div class="flex items-start gap-2">
         <p class="text-sm text-muted-foreground">
           <span v-html="sprintf(__('The URL where webhook payloads will be sent. Supports %1$s{{ field.path }}%2$s templates — resolved against the final payload, after code glue applied.'), '<code class=&quot;font-mono text-xs&quot;>', '</code>')"></span>
@@ -708,7 +797,7 @@ const handleSubmit = () => {
         />
       </template>
 
-      <p v-if="errors.triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
+      <p v-if="errors.triggers" data-form-error="triggers" class="text-sm text-destructive">{{ errors.triggers }}</p>
     </div>
 
     <!-- Max Attempts -->

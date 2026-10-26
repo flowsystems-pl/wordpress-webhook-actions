@@ -7,6 +7,7 @@ defined('ABSPATH') || exit;
 use WP_Error;
 use FlowSystems\WebhookActions\Repositories\CredentialRepository;
 use FlowSystems\WebhookActions\Services\CredentialCipher;
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 
 /**
  * Generic JSON POST: the whole message object to any URL. The escape hatch
@@ -40,7 +41,7 @@ class WebhookDriver extends AbstractHttpDriver {
     if (is_wp_error($url)) {
       return $url;
     }
-    if (!wp_http_validate_url($url)) {
+    if (!UrlTemplate::hostAllowed($url)) {
       return new WP_Error('fswa_notification_config', __('The webhook URL is not valid.', 'flowsystems-webhook-actions'));
     }
 

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.3.4\n"
+"with AI help 3.4.0\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-23T22:52:29+00:00\n"
+"POT-Creation-Date: 2026-10-26T16:10:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -60,11 +60,19 @@ msgstr "%1$s %2$d min"
 msgid "%1$s %2$ds"
 msgstr "%1$s %2$ds"
 
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s and %2$s"
+msgstr "%1$s en %2$s"
+
 #: src/Services/RestRouteInspector.php:74
 #. translators: 1: HTTP method, 2: route path, 3: comma-separated allowed methods
 #, php-format
 msgid "%1$s is not supported on %2$s. Supported methods: %3$s."
 msgstr "%1$s wordt niet ondersteund voor %2$s. Ondersteunde methoden: %3$s."
+
+#: admin/src/components/WebhookForm.vue
+msgid "%1$s, %2$s"
+msgstr "%1$s, %2$s"
 
 #: admin/src/views/ExternalCronView.vue
 msgid ""
@@ -435,7 +443,7 @@ msgstr "Een keten in dit bestand heeft geen naam en is niet geïmporteerd."
 msgid "A chain with that name already exists."
 msgstr "Er bestaat al een keten met die naam."
 
-#: src/Abilities/WriteAbilities.php:346
+#: src/Abilities/WriteAbilities.php:354
 msgid "A chain with this name already exists."
 msgstr "Er bestaat al een keten met deze naam."
 
@@ -462,7 +470,7 @@ msgstr ""
 msgid "A channel with this name already exists."
 msgstr "Er bestaat al een kanaal met deze naam."
 
-#: src/Abilities/WriteAbilities.php:470
+#: src/Abilities/WriteAbilities.php:478
 msgid ""
 "A condition rule is missing \"field\" — a dot-path into the trigger payload "
 "(use get_trigger_schema to see the available fields)."
@@ -542,7 +550,7 @@ msgstr "Een meldingskanaal faalt:"
 msgid "A notification rule on \"%1$s\" was left out: %2$s"
 msgstr "Een meldingsregel op \"%1$s\" is weggelaten: %2$s"
 
-#: src/Api/WebhooksController.php:570
+#: src/Api/WebhooksController.php:565
 msgid "A payload object is required for custom source."
 msgstr "Voor een aangepaste bron is een payloadobject vereist."
 
@@ -574,7 +582,7 @@ msgstr ""
 "daarom staat dit standaard uit. Zet \"API-tokens Code Glue laten "
 "schrijven\" aan in Instellingen om het toe te staan."
 
-#: src/Abilities/TestAbilities.php:110
+#: src/Abilities/TestAbilities.php:111
 msgid "A url or webhook_id is required."
 msgstr "Een url of webhook_id is verplicht."
 
@@ -1159,7 +1167,7 @@ msgstr ""
 msgid "Authorization (optional)"
 msgstr "Autorisatie (optioneel)"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:32
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
 msgid "Authorization (vault credential)"
 msgstr "Authorization (kluisreferentie)"
 
@@ -1508,7 +1516,7 @@ msgstr ""
 msgid "Chain name"
 msgstr "Ketennaam"
 
-#: src/Abilities/WriteAbilities.php:342
+#: src/Abilities/WriteAbilities.php:350
 #: src/Api/ChainsController.php:159
 #: src/Api/ChainsController.php:194
 msgid "Chain name is required."
@@ -2053,7 +2061,7 @@ msgstr "Aanmaakdatum."
 msgid "Credential"
 msgstr "Referentie"
 
-#: src/Abilities/TestAbilities.php:329
+#: src/Abilities/TestAbilities.php:331
 msgid "Credential could not be decrypted."
 msgstr "Referentie kon niet worden ontsleuteld."
 
@@ -2074,8 +2082,8 @@ msgstr "Referentienaam (bijv. n8n auth)"
 msgid "Credential name is required."
 msgstr "Referentienaam is verplicht."
 
-#: src/Abilities/TestAbilities.php:325
-#: src/Abilities/WriteAbilities.php:222
+#: src/Abilities/TestAbilities.php:327
+#: src/Abilities/WriteAbilities.php:230
 #: src/Api/CredentialsController.php:472
 msgid "Credential not found."
 msgstr "Referentie niet gevonden."
@@ -2140,7 +2148,7 @@ msgstr "Aangepaste verzoekheaders"
 msgid "Custom header"
 msgstr "Aangepaste header"
 
-#: src/Api/WebhooksController.php:124
+#: src/Api/WebhooksController.php:125
 msgid "Custom payload JSON (required when payload_source is custom)."
 msgstr "Aangepaste payload-JSON (vereist wanneer payload_source custom is)."
 
@@ -2374,7 +2382,7 @@ msgid "Description (optional)"
 msgstr "Omschrijving (optioneel)"
 
 #: src/Api/ChainsController.php:141
-#: src/Api/WebhooksController.php:314
+#: src/Api/WebhooksController.php:312
 #. translators: %d: maximum character count
 #, php-format
 msgid "Description must be %d characters or fewer."
@@ -2388,7 +2396,7 @@ msgstr ""
 "Omschrijvingen reizen mee met de build en worden hier ook opgeslagen — ze "
 "maken een gedeelde build begrijpelijk voor iemand anders."
 
-#: src/Abilities/TestAbilities.php:126
+#: src/Abilities/TestAbilities.php:128
 msgid "Destructive probe methods (PUT, PATCH, DELETE) require confirmation."
 msgstr "Destructieve probe-methoden (PUT, PATCH, DELETE) vereisen bevestiging."
 
@@ -2513,7 +2521,7 @@ msgstr "Duur"
 msgid "Dynamic URL templates resolved from the payload"
 msgstr "Dynamische URL-sjablonen opgelost uit de payload"
 
-#: src/Abilities/WriteAbilities.php:462
+#: src/Abilities/WriteAbilities.php:470
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "Elke voorwaarderegel moet een object {field, operator, value} zijn."
 
@@ -2597,7 +2605,7 @@ msgstr "Eindpunt-URL"
 msgid "Endpoint URL is required"
 msgstr "Eindpunt-URL is verplicht"
 
-#: src/Api/WebhooksController.php:244
+#: src/Api/WebhooksController.php:245
 msgid "Endpoint URL is required."
 msgstr "Eindpunt-URL is verplicht."
 
@@ -2801,7 +2809,7 @@ msgstr "Geschiedenis externe cron"
 msgid "Extra credits (never expire)"
 msgstr "Extra credits (verlopen nooit)"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:33
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "Extra headers"
 msgstr "Extra headers"
 
@@ -2825,11 +2833,11 @@ msgstr "Maken van API-token mislukt."
 msgid "Failed to create chain link (it may already exist)."
 msgstr "Maken van ketenkoppeling mislukt (deze bestaat mogelijk al)."
 
-#: src/Abilities/WriteAbilities.php:368
+#: src/Abilities/WriteAbilities.php:376
 msgid "Failed to create chain link."
 msgstr "Maken van ketenschakel mislukt."
 
-#: src/Abilities/WriteAbilities.php:350
+#: src/Abilities/WriteAbilities.php:358
 #: src/Api/ChainsController.php:167
 msgid "Failed to create chain."
 msgstr "Maken van keten mislukt."
@@ -2851,8 +2859,8 @@ msgstr "Regel aanmaken mislukt."
 msgid "Failed to create snippet."
 msgstr "Snippet maken mislukt."
 
-#: src/Abilities/WriteAbilities.php:72
-#: src/Api/WebhooksController.php:270
+#: src/Abilities/WriteAbilities.php:76
+#: src/Api/WebhooksController.php:268
 msgid "Failed to create webhook."
 msgstr "Maken van webhook mislukt."
 
@@ -2884,8 +2892,8 @@ msgstr "Regel verwijderen mislukt."
 msgid "Failed to delete schema."
 msgstr "Verwijderen van schema mislukt."
 
-#: src/Abilities/WriteAbilities.php:395
-#: src/Api/WebhooksController.php:470
+#: src/Abilities/WriteAbilities.php:403
+#: src/Api/WebhooksController.php:465
 msgid "Failed to delete webhook."
 msgstr "Verwijderen van webhook mislukt."
 
@@ -2937,11 +2945,11 @@ msgstr "Opnieuw proberen van wachtrijtaak mislukt."
 msgid "Failed to rotate API token."
 msgstr "Roteren van API-token mislukt."
 
-#: src/Abilities/WriteAbilities.php:206
+#: src/Abilities/WriteAbilities.php:214
 msgid "Failed to save conditions."
 msgstr "Opslaan van voorwaarden mislukt."
 
-#: src/Abilities/WriteAbilities.php:182
+#: src/Abilities/WriteAbilities.php:190
 msgid "Failed to save mapping."
 msgstr "Opslaan van mapping mislukt."
 
@@ -2957,7 +2965,7 @@ msgstr "Starten van gesprek mislukt."
 msgid "Failed to store the provider key."
 msgstr "Opslaan van providersleutel mislukt."
 
-#: src/Api/WebhooksController.php:512
+#: src/Api/WebhooksController.php:507
 msgid "Failed to toggle webhook status."
 msgstr "Wijzigen van webhookstatus mislukt."
 
@@ -2973,8 +2981,8 @@ msgstr "Regel bijwerken mislukt."
 msgid "Failed to update schema."
 msgstr "Bijwerken van schema mislukt."
 
-#: src/Abilities/WriteAbilities.php:138
-#: src/Api/WebhooksController.php:412
+#: src/Abilities/WriteAbilities.php:146
+#: src/Api/WebhooksController.php:407
 msgid "Failed to update webhook."
 msgstr "Bijwerken van webhook mislukt."
 
@@ -3184,7 +3192,7 @@ msgstr "GET webhooks, logboeken, wachtrij, status, triggers, schema's"
 msgid "Generate a new API token for programmatic access."
 msgstr "Genereer een nieuw API-token voor programmatische toegang."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:22
+#: src/Services/Notifications/Channels/WebhookDriver.php:23
 msgid "Generic webhook"
 msgstr "Generieke webhook"
 
@@ -3377,7 +3385,7 @@ msgstr ""
 "Hoe de wachttijd tussen pogingen wordt berekend. Overschrijft de globale "
 "instelling."
 
-#: src/Api/WebhooksController.php:128
+#: src/Api/WebhooksController.php:129
 msgid "How to run the test: now (synchronous) or queue (async)."
 msgstr "Hoe de test wordt uitgevoerd: now (synchroon) of queue (asynchroon)."
 
@@ -3526,8 +3534,7 @@ msgstr "Ongeldig referentietype."
 msgid "Invalid cron token."
 msgstr "Ongeldig cron-token."
 
-#: src/Api/WebhooksController.php:252
-#: src/Api/WebhooksController.php:357
+#: src/Support/UrlTemplate.php:58
 msgid "Invalid endpoint URL."
 msgstr "Ongeldige eindpunt-URL."
 
@@ -4238,9 +4245,9 @@ msgstr "Deze build heeft geen autorisatie nodig."
 msgid "No body sent"
 msgstr "Geen body verzonden"
 
-#: src/Api/WebhooksController.php:584
-#: src/Api/WebhooksController.php:601
-#: src/Api/WebhooksController.php:620
+#: src/Api/WebhooksController.php:579
+#: src/Api/WebhooksController.php:596
+#: src/Api/WebhooksController.php:615
 msgid ""
 "No captured payload found for this trigger. Fire the trigger at least once "
 "first."
@@ -4370,7 +4377,7 @@ msgstr ""
 "welke gebeurtenis af te vuren (bijv. \"publiceer een testbericht\") zodat "
 "de payload wordt vastgelegd — en lees dit dan opnieuw."
 
-#: src/Abilities/TestAbilities.php:229
+#: src/Abilities/TestAbilities.php:231
 msgid "No payload provided and no captured example exists yet for this trigger."
 msgstr ""
 "Geen payload opgegeven en er bestaat nog geen vastgelegd voorbeeld voor "
@@ -4582,7 +4589,7 @@ msgstr ""
 "de oorspronkelijke payload vóór mapping beschikbaar zijn als "
 "%1$sargs[0]%2$s."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:33
+#: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "One \"Name: value\" per line."
 msgstr "Eén \"Naam: waarde\" per regel."
 
@@ -4633,7 +4640,7 @@ msgstr ""
 "Alleen taken die in behandeling zijn of permanent zijn mislukt, kunnen "
 "opnieuw worden geprobeerd."
 
-#: src/Api/WebhooksController.php:724
+#: src/Api/WebhooksController.php:710
 msgid "Only return enabled webhooks."
 msgstr "Alleen ingeschakelde webhooks retourneren."
 
@@ -4707,7 +4714,7 @@ msgstr "Optionele overschrijving, bijv. town-square."
 msgid "Optional, e.g. @here or <@&roleId>, prepended to the message."
 msgstr "Optioneel, bijv. @here of <@&roleId>, vóór het bericht geplaatst."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:32
+#: src/Services/Notifications/Channels/WebhookDriver.php:33
 msgid ""
 "Optional. Pick a Credentials Vault entry; its header is added to every "
 "request."
@@ -4723,7 +4730,7 @@ msgstr ""
 "Optioneel. Dezelfde sleutel = dezelfde thread; gebruik {{ webhook.id }} om "
 "per webhook een thread te maken."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:34
+#: src/Services/Notifications/Channels/WebhookDriver.php:35
 msgid ""
 "Optional. When set, the body is signed as HMAC-SHA256 in the "
 "X-FSWA-Signature header."
@@ -4801,7 +4808,7 @@ msgstr ""
 "PHP draait na geslaagde verzending; %1$s$responseBody%2$s en "
 "%1$s$originalPayload%2$s beschikbaar"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:26
+#: src/Services/Notifications/Channels/WebhookDriver.php:27
 msgid ""
 "POSTs the notification as JSON to any URL — Zapier, Make, n8n, your own "
 "service."
@@ -4968,6 +4975,16 @@ msgstr ""
 "}}, {{ payload.order.id }}, {{ args.1.email }}. Modifiers: upper, lower, "
 "truncate:N, json, default:'…', date:'Y-m-d H:i', number:N, money, count, "
 "join:', '."
+
+#: src/Support/UrlTemplate.php:62
+msgid ""
+"Plain http:// URLs only work on a local development site. Use https:// "
+"here, or mark this site as local by adding define( 'WP_ENVIRONMENT_TYPE', "
+"'local' ); to wp-config.php."
+msgstr ""
+"Gewone http://-URL's werken alleen op een lokale ontwikkelsite. Gebruik "
+"hier https://, of markeer deze site als lokaal door define( "
+"'WP_ENVIRONMENT_TYPE', 'local' ); toe te voegen aan wp-config.php."
 
 #: admin/src/views/SettingsView.vue
 msgid "Plugin Info"
@@ -6117,7 +6134,7 @@ msgstr "“%s” in de lijst tonen"
 msgid "Showing %1$d to %2$d of %3$d"
 msgstr "%1$d tot %2$d van %3$d weergegeven"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:34
+#: src/Services/Notifications/Channels/WebhookDriver.php:35
 msgid "Signing secret"
 msgstr "Ondertekeningsgeheim"
 
@@ -6371,7 +6388,7 @@ msgstr "Taxonomie"
 msgid "Telegram"
 msgstr "Telegram"
 
-#: src/Abilities/WriteAbilities.php:317
+#: src/Abilities/WriteAbilities.php:325
 #. translators: %s: lint problems
 #, php-format
 msgid ""
@@ -6450,7 +6467,7 @@ msgstr ""
 "Sms-berichten via je Twilio-account. Verzendt de éénregelige "
 "\"short\"-tekst van de template."
 
-#: src/Abilities/TestAbilities.php:116
+#: src/Abilities/TestAbilities.php:118
 msgid "That URL is not allowed (private, reserved or invalid host)."
 msgstr "Die URL is niet toegestaan (privé, gereserveerde of ongeldige host)."
 
@@ -6467,7 +6484,7 @@ msgstr ""
 "meeste integraties hebben er twee of drie nodig om te plannen, bouwen en "
 "testen."
 
-#: src/Abilities/WriteAbilities.php:364
+#: src/Abilities/WriteAbilities.php:372
 msgid "That link would create a cycle across an existing chain."
 msgstr "Die schakel zou een cyclus in een bestaande keten veroorzaken."
 
@@ -6611,7 +6628,7 @@ msgstr ""
 "De kanaalgeheimen konden niet worden ontsleuteld. Voer ze opnieuw in onder "
 "Meldingen → Kanalen."
 
-#: src/Abilities/WriteAbilities.php:485
+#: src/Abilities/WriteAbilities.php:493
 #. translators: 1: rule field path, 2: operator
 #, php-format
 msgid ""
@@ -6802,7 +6819,7 @@ msgstr "De publicatiedienst heeft deze build geweigerd."
 msgid "The publishing service returned an unexpected error (HTTP %d)."
 msgstr "De publicatiedienst gaf een onverwachte fout terug (HTTP %d)."
 
-#: src/Abilities/WriteAbilities.php:245
+#: src/Abilities/WriteAbilities.php:253
 msgid "The rule could not be saved."
 msgstr "De regel kon niet worden opgeslagen."
 
@@ -6830,7 +6847,7 @@ msgstr ""
 "De proefperiodedienst reageert op dit moment niet. Probeer het over een "
 "paar minuten opnieuw."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:60
+#: src/Services/Notifications/Channels/WebhookDriver.php:61
 msgid "The vault credential could not be decrypted."
 msgstr "De kluisreferentie kon niet worden ontsleuteld."
 
@@ -6838,7 +6855,7 @@ msgstr "De kluisreferentie kon niet worden ontsleuteld."
 msgid "The verification challenge could not be completed. Please try again."
 msgstr "De verificatie-uitdaging kon niet worden voltooid. Probeer het opnieuw."
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:44
+#: src/Services/Notifications/Channels/WebhookDriver.php:45
 msgid "The webhook URL is not valid."
 msgstr "De webhook-URL is ongeldig."
 
@@ -6846,7 +6863,7 @@ msgstr "De webhook-URL is ongeldig."
 msgid "The webhook did not run because its conditions were not met."
 msgstr "De webhook is niet uitgevoerd omdat aan de voorwaarden niet was voldaan."
 
-#: src/Abilities/TestAbilities.php:204
+#: src/Abilities/TestAbilities.php:206
 msgid "The webhook has no triggers; provide one."
 msgstr "De webhook heeft geen triggers; geef er een op."
 
@@ -6898,6 +6915,20 @@ msgstr "Aan het denken…"
 #: src/Services/GluePermissions.php:192
 msgid "This API token cannot write Code Glue."
 msgstr "Dit API-token kan geen Code Glue schrijven."
+
+#: admin/src/components/WebhookForm.vue
+msgid "This URL uses %s, which only works on a local development site."
+msgstr "Deze URL gebruikt %s, wat alleen werkt op een lokale ontwikkelsite."
+
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"This URL uses %s. That is allowed because this site is a local development "
+"site (WP_ENVIRONMENT_TYPE is local). A staging or production site will "
+"refuse it."
+msgstr ""
+"Deze URL gebruikt %s. Dat is toegestaan omdat deze site een lokale "
+"ontwikkelsite is (WP_ENVIRONMENT_TYPE is local). Een staging- of "
+"productiesite weigert deze."
 
 #: admin/src/components/LogsTable.vue
 msgid "This action cannot be undone."
@@ -6978,6 +7009,19 @@ msgstr[0] ""
 msgstr[1] ""
 "Deze referentie wordt gebruikt door %d webhooks. Koppel deze los of "
 "verwijder geforceerd."
+
+#: src/Support/UrlTemplate.php:67
+msgid ""
+"This endpoint URL only works on a local development site: it points to a "
+"private or local address, uses a port other than 80, 443 or 8080, or its "
+"host does not resolve. Use a public https:// URL here, or mark this site as "
+"local by adding define( 'WP_ENVIRONMENT_TYPE', 'local' ); to wp-config.php."
+msgstr ""
+"Deze eindpunt-URL werkt alleen op een lokale ontwikkelsite: hij verwijst "
+"naar een privé- of lokaal adres, gebruikt een andere poort dan 80, 443 of "
+"8080, of de host kan niet worden gevonden. Gebruik hier een openbare "
+"https://-URL, of markeer deze site als lokaal door define( "
+"'WP_ENVIRONMENT_TYPE', 'local' ); toe te voegen aan wp-config.php."
 
 #: src/Api/NotificationRulesController.php:335
 msgid "This entry has no stored message to resend."
@@ -7135,7 +7179,7 @@ msgstr ""
 "kluis of maak een nieuwe — het geheim blijft in de kluis en wordt pas bij "
 "verzending geïnjecteerd."
 
-#: src/Abilities/TestAbilities.php:312
+#: src/Abilities/TestAbilities.php:314
 #. translators: %s: plugin slug and version the reference payload was captured on, e.g. "contact-form-7 6.1.7".
 #, php-format
 msgid ""
@@ -7158,7 +7202,7 @@ msgstr ""
 "Deze test stuurde onze referentiepayload, geen gegevens van deze site — hij "
 "bewijst dat het endpoint de vorm accepteert, niet de waarden."
 
-#: src/Abilities/TestAbilities.php:309
+#: src/Abilities/TestAbilities.php:311
 msgid ""
 "This test sent our reference payload, not data from this site: a 2xx proves "
 "the endpoint accepts the shape the mapping produces, not that the field "
@@ -7303,6 +7347,16 @@ msgstr "Tot datum"
 msgid "To date & time"
 msgstr "Tot datum en tijd"
 
+#: admin/src/components/WebhookForm.vue
+msgid ""
+"To use it, mark this site as local by adding %s to wp-config.php. On "
+"staging and production sites, use an https:// URL on a public host (port "
+"443 or 8080)."
+msgstr ""
+"Om deze te gebruiken, markeer je deze site als lokaal door %s toe te voegen "
+"aan wp-config.php. Gebruik op staging- en productiesites een https://-URL "
+"op een openbare host (poort 443 of 8080)."
+
 #: admin/src/components/HealthStatusBar.vue
 msgid "Today"
 msgstr "Vandaag"
@@ -7346,7 +7400,7 @@ msgstr ""
 "Te veel builds gepubliceerd vanaf deze licentie — wacht even en probeer het "
 "opnieuw."
 
-#: src/Abilities/TestAbilities.php:130
+#: src/Abilities/TestAbilities.php:132
 msgid "Too many probe calls — try again in a minute."
 msgstr "Te veel testaanroepen — probeer het over een minuut opnieuw."
 
@@ -7425,7 +7479,7 @@ msgstr "Trigger"
 msgid "Trigger matches"
 msgstr "Trigger komt overeen met"
 
-#: src/Api/WebhooksController.php:120
+#: src/Api/WebhooksController.php:121
 msgid "Trigger name to use for the test."
 msgstr "Triggernaam om te gebruiken voor de test."
 
@@ -7462,7 +7516,7 @@ msgstr "Triggers"
 msgid "Type"
 msgstr "Type"
 
-#: src/Services/Notifications/Channels/WebhookDriver.php:31 src/Services/Notifications/Channels/WebhookDriver.php:39 admin/src/components/notifications/ChannelsPanel.vue
+#: src/Services/Notifications/Channels/WebhookDriver.php:32 src/Services/Notifications/Channels/WebhookDriver.php:40 admin/src/components/notifications/ChannelsPanel.vue
 msgid "URL"
 msgstr "URL"
 
@@ -7491,9 +7545,9 @@ msgid "Undo last change"
 msgstr "Laatste wijziging ongedaan maken"
 
 #: src/Api/WebhookSchema.php:27
-#: src/Api/WebhooksController.php:73
-#: src/Api/WebhooksController.php:98
-#: src/Api/WebhooksController.php:110
+#: src/Api/WebhooksController.php:74
+#: src/Api/WebhooksController.php:99
+#: src/Api/WebhooksController.php:111
 msgid "Unique identifier for the webhook."
 msgstr "Unieke identificatie voor de webhook."
 
@@ -7518,7 +7572,7 @@ msgstr "Onbekende vaardigheid: %s"
 msgid "Unknown channel id(s): %s"
 msgstr "Onbekend(e) kanaal-id('s): %s"
 
-#: src/Abilities/WriteAbilities.php:286
+#: src/Abilities/WriteAbilities.php:294
 #. translators: %s: comma-separated ids
 #, php-format
 msgid ""
@@ -7539,7 +7593,7 @@ msgstr "Onbekend kanaaltype \"%s\"."
 msgid "Unknown channel type."
 msgstr "Onbekend kanaaltype."
 
-#: src/Abilities/WriteAbilities.php:475
+#: src/Abilities/WriteAbilities.php:483
 #. translators: 1: the rejected operator, 2: list of valid operators
 #, php-format
 msgid "Unknown condition operator \"%1$s\". Valid operators: %2$s."
@@ -7841,10 +7895,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:44
 #: src/Controllers/AdminController.php:45
-#: src/Controllers/AdminController.php:52
+#: src/Controllers/AdminController.php:46
 #: src/Controllers/AdminController.php:53
+#: src/Controllers/AdminController.php:54
 msgid "Webhook Actions"
 msgstr ""
 
@@ -7853,7 +7907,7 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — bouw automatiseringen en integraties met AI-hulp"
 
-#: src/Controllers/AdminController.php:254
+#: src/Controllers/AdminController.php:259
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -7884,7 +7938,7 @@ msgstr "Webhook-authenticatie"
 msgid "Webhook delivery logs older than this will be automatically deleted."
 msgstr "Webhookbezorglogboeken ouder dan dit worden automatisch verwijderd."
 
-#: src/Api/WebhooksController.php:549
+#: src/Api/WebhooksController.php:544
 msgid "Webhook has no triggers configured."
 msgstr "Voor de webhook zijn geen triggers geconfigureerd."
 
@@ -7892,7 +7946,7 @@ msgstr "Voor de webhook zijn geen triggers geconfigureerd."
 msgid "Webhook is live."
 msgstr "Webhook is live."
 
-#: src/Api/WebhooksController.php:236
+#: src/Api/WebhooksController.php:237
 msgid "Webhook name is required."
 msgstr "Webhook-naam is verplicht."
 
@@ -7903,11 +7957,11 @@ msgstr "Webhook-naam is verplicht."
 #: src/Api/SchemasController.php:279
 #: src/Api/SchemasController.php:361
 #: src/Api/SchemasController.php:393
-#: src/Api/WebhooksController.php:201
-#: src/Api/WebhooksController.php:336
-#: src/Api/WebhooksController.php:448
-#: src/Api/WebhooksController.php:500
-#: src/Api/WebhooksController.php:540
+#: src/Api/WebhooksController.php:202
+#: src/Api/WebhooksController.php:334
+#: src/Api/WebhooksController.php:443
+#: src/Api/WebhooksController.php:495
+#: src/Api/WebhooksController.php:535
 msgid "Webhook not found."
 msgstr "Webhook niet gevonden."
 
@@ -8001,7 +8055,7 @@ msgstr "Wanneer webhooks worden getriggerd, verschijnen taken hier ter verwerkin
 msgid "Where does this belong?"
 msgstr "Waar hoort dit thuis?"
 
-#: src/Api/WebhooksController.php:114
+#: src/Api/WebhooksController.php:115
 msgid "Where to source the test payload from."
 msgstr "Waar de testpayload vandaan moet komen."
 
@@ -8102,7 +8156,7 @@ msgstr "Ja"
 msgid "You do not have permission."
 msgstr "Je hebt geen toestemming."
 
-#: src/Api/WebhooksController.php:168
+#: src/Api/WebhooksController.php:169
 msgid "You don't have permissions to see it."
 msgstr "Je hebt geen rechten om het te bekijken."
 
@@ -8193,6 +8247,10 @@ msgstr ""
 "Je gekozen model %1$s kon niet antwoorden, dus dit antwoord kwam van %2$s. "
 "(%3$s) Kies een ander model via 'Model wijzigen'."
 
+#: admin/src/components/WebhookForm.vue
+msgid "a local or private network address"
+msgstr "een lokaal of privénetwerkadres"
+
 #: admin/src/components/notifications/RuleEditor.vue
 msgid "any — or e.g. 1, 3"
 msgstr "elke — of bijv. 1, 3"
@@ -8241,7 +8299,7 @@ msgstr "voordat je regels aanmaakt."
 msgid "bool"
 msgstr "bool"
 
-#: src/Abilities/WriteAbilities.php:360
+#: src/Abilities/WriteAbilities.php:368
 msgid "chain_id, source_webhook_id and target_webhook_id are required."
 msgstr "chain_id, source_webhook_id en target_webhook_id zijn verplicht."
 
@@ -8249,11 +8307,11 @@ msgstr "chain_id, source_webhook_id en target_webhook_id zijn verplicht."
 msgid "channel_ids must be a list of channel IDs."
 msgstr "channel_ids moet een lijst van kanaal-ID's zijn."
 
-#: src/Abilities/WriteAbilities.php:418
+#: src/Abilities/WriteAbilities.php:426
 msgid "conditions must be an object {enabled, type, rules: [...]}."
 msgstr "conditions moet een object {enabled, type, rules: [...]} zijn."
 
-#: src/Abilities/WriteAbilities.php:427
+#: src/Abilities/WriteAbilities.php:435
 msgid "conditions.rules must be an array of rule objects."
 msgstr "conditions.rules moet een array van regelobjecten zijn."
 
@@ -8636,6 +8694,14 @@ msgstr "in behandeling"
 msgid "perm. failed"
 msgstr "perm. mislukt"
 
+#: admin/src/components/WebhookForm.vue
+msgid "plain http://"
+msgstr "gewone http://"
+
+#: admin/src/components/WebhookForm.vue
+msgid "port %s"
+msgstr "poort %s"
+
 #: admin/src/components/ConditionsEditor.vue
 msgid "property name (optional)"
 msgstr "eigenschapsnaam (optioneel)"
@@ -8740,11 +8806,11 @@ msgstr "geverifieerd %s"
 msgid "waiting for digest"
 msgstr "wacht op samenvatting"
 
-#: src/Abilities/WriteAbilities.php:191
+#: src/Abilities/WriteAbilities.php:199
 msgid "webhook_id, trigger and conditions are required."
 msgstr "webhook_id, trigger en conditions zijn verplicht."
 
-#: src/Abilities/WriteAbilities.php:178
+#: src/Abilities/WriteAbilities.php:186
 msgid "webhook_id, trigger and field_mapping are required."
 msgstr "webhook_id, trigger en field_mapping zijn verplicht."
 

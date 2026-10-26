@@ -19,6 +19,7 @@ use FlowSystems\WebhookActions\Services\RetryPolicy;
 use FlowSystems\WebhookActions\Services\WPHttpTransport;
 use FlowSystems\WebhookActions\Api\AuthHelper;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
+use FlowSystems\WebhookActions\Support\UrlTemplate;
 
 class WebhooksController extends WP_REST_Controller {
   /** Max markdown description length, in characters. Mirrored in ChainsController + the SPA MarkdownField + BuildSchemaValidator. */
@@ -246,12 +247,9 @@ class WebhooksController extends WP_REST_Controller {
       );
     }
 
-    if (!$this->validateTemplateUrl($data['endpoint_url'])) {
-      return new WP_Error(
-        'rest_invalid_endpoint_url',
-        __('Invalid endpoint URL.', 'flowsystems-webhook-actions'),
-        ['status' => 400]
-      );
+    $urlError = UrlTemplate::endpointError($data['endpoint_url']);
+    if ($urlError !== null) {
+      return new WP_Error('rest_invalid_endpoint_url', $urlError, ['status' => 400]);
     }
 
     // Sanitize triggers and strip synthetic chain-link names. Empty is OK —
@@ -351,12 +349,9 @@ class WebhooksController extends WP_REST_Controller {
     if ($request->has_param('endpoint_url')) {
       $data['endpoint_url'] = $this->sanitizeTemplateUrl($request->get_param('endpoint_url') ?? '');
 
-      if (!$this->validateTemplateUrl($data['endpoint_url'])) {
-        return new WP_Error(
-          'rest_invalid_endpoint_url',
-          __('Invalid endpoint URL.', 'flowsystems-webhook-actions'),
-          ['status' => 400]
-        );
+      $urlError = UrlTemplate::endpointError($data['endpoint_url']);
+      if ($urlError !== null) {
+        return new WP_Error('rest_invalid_endpoint_url', $urlError, ['status' => 400]);
       }
     }
 
@@ -690,15 +685,6 @@ class WebhooksController extends WP_REST_Controller {
       $sanitized = str_replace($placeholder . $idx, $tpl, $sanitized);
     }
     return $sanitized;
-  }
-
-  /**
-   * Validates a webhook endpoint URL that may contain {{ $payload.field }} template markers.
-   * Templates are replaced with '0' before FILTER_VALIDATE_URL so the structure can be checked.
-   */
-  private function validateTemplateUrl(string $url): bool {
-    $skeleton = preg_replace('/\{\{[^}]+\}\}/', '0', $url) ?? $url;
-    return (bool) filter_var($skeleton, FILTER_VALIDATE_URL);
   }
 
   private function sanitizeKvArray(array $pairs): array {
