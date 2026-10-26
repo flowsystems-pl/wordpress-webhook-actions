@@ -255,6 +255,12 @@ watch(() => form.value.backoff_strategy, (val) => {
 
 watch(form, () => emit('change'), { deep: true })
 
+// A URL error from the last submit describes the old value; drop it once the
+// URL is edited so it can't contradict the live note below the field.
+watch(() => form.value.endpoint_url, () => {
+  if (errors.value.endpoint_url) delete errors.value.endpoint_url
+})
+
 // ── computed ──────────────────────────────────────────────────────────────────
 
 const isDotPath = (val) => val && val.includes('.') && !/\s/.test(val)
