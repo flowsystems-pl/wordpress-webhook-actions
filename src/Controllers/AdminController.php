@@ -25,6 +25,7 @@ use FlowSystems\WebhookActions\Api\NotificationChannelsController;
 use FlowSystems\WebhookActions\Api\NotificationRulesController;
 use FlowSystems\WebhookActions\Api\SnippetsController;
 use FlowSystems\WebhookActions\Api\PublishBuildController;
+use FlowSystems\WebhookActions\Api\RestPayloadRedaction;
 use FlowSystems\WebhookActions\Services\ProCompatibility;
 
 class AdminController {
@@ -237,6 +238,10 @@ class AdminController {
     (new RetrySettingsController())->registerRoutes();
     (new NotificationChannelsController())->registerRoutes();
     (new NotificationRulesController())->registerRoutes();
+
+    // Payload data leaves raw only for the admin screen; agents and tokens get
+    // it scrubbed the way the abilities scrub it.
+    (new RestPayloadRedaction())->register();
 
     // Code Glue and publishing moved here from the Pro plugin. A Pro older than
     // 1.9.0 still registers the same routes; leaving ours out keeps exactly one
