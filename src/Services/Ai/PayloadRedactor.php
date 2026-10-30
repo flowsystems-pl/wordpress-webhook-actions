@@ -50,6 +50,16 @@ class PayloadRedactor {
   }
 
   /**
+   * Redact a value of any shape: arrays by key, strings when they hold JSON.
+   */
+  public static function redactValue(mixed $value): mixed {
+    if (is_array($value)) {
+      return self::redact($value);
+    }
+    return is_string($value) ? self::redactJsonString($value) : $value;
+  }
+
+  /**
    * Scrub secrets inside a value that is itself encoded JSON.
    *
    * Response bodies are stored as strings, and an endpoint that echoes the
