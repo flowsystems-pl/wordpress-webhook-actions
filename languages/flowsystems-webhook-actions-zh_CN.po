@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.4.0\n"
+"with AI help 3.4.3\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T16:10:19+00:00\n"
+"POT-Creation-Date: 2026-11-14T16:18:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -830,7 +830,7 @@ msgstr "所有链"
 msgid "All logs have been cleared"
 msgstr "所有日志已清除"
 
-#: src/Api/SettingsController.php:255
+#: src/Api/SettingsController.php:289
 msgid "All logs have been cleared."
 msgstr "所有日志已清除。"
 
@@ -2309,6 +2309,20 @@ msgstr "从载荷解析的动态 URL 模板"
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "每条条件规则必须是 {field, operator, value} 对象。"
 
+#: src/Services/SecurityNotice.php:81
+msgid ""
+"Earlier versions also stored the password of a new account, and could send "
+"it to the endpoint, when a webhook was attached to a trigger that carries "
+"one, such as user_register or woocommerce_created_customer. Passwords are "
+"no longer stored or sent: the field stays in the payload with an empty "
+"(null) value. Passwords already stored in captured examples, delivery logs "
+"and archive files are being removed in the background."
+msgstr ""
+"当 Webhook 绑定到会携带密码的触发器（例如 user_register 或 "
+"woocommerce_created_"
+"customer）时，早期版本还会保存新账户的密码，并可能把它发送到端点。现在密码不再被保存或发送：该字段保留在数据中，值为空（null）。此前已保存在"
+"捕获示例、投递日志和归档文件中的密码正在后台清除。"
+
 #: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue
 msgid "Edit"
 msgstr "编辑"
@@ -2451,7 +2465,7 @@ msgid ""
 "resolves it."
 msgstr "Events API v2 集成密钥。失败会创建事件（incident）；之后的成功会将其解决。"
 
-#: src/App.php:137
+#: src/App.php:149
 msgid "Every Minute"
 msgstr "每分钟"
 
@@ -2923,6 +2937,10 @@ msgstr "完整"
 msgid "Full REST API with API token authentication"
 msgstr "完整的 REST API，支持 API 令牌身份验证"
 
+#: src/Services/SecurityNotice.php:104
+msgid "Full details in the changelog"
+msgstr "完整说明见更新日志"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid ""
 "Full pipeline in dispatch order — post-dispatch Code Glue fires after "
@@ -3135,6 +3153,10 @@ msgstr "如何运行测试：now（同步）或 queue（异步）。"
 #: admin/src/components/AiStepControls.vue
 msgid "I fired it — retry"
 msgstr "我已触发——重试"
+
+#: src/Services/SecurityNotice.php:106
+msgid "I have read this, dismiss"
+msgstr "我已阅读，关闭"
 
 #: admin/src/components/TokenCreatedDialog.vue
 msgid "I've saved it elsewhere"
@@ -3921,7 +3943,7 @@ msgstr "当前未配置任何 WordPress AI 连接器。请在“设置 → 连�
 msgid "No activity recorded yet."
 msgstr "尚未记录任何活动。"
 
-#: src/Api/SettingsController.php:226
+#: src/Api/SettingsController.php:247
 msgid "No archive files found or failed to create ZIP."
 msgstr "未找到归档文件或创建 ZIP 失败。"
 
@@ -4251,6 +4273,22 @@ msgid ""
 msgstr ""
 "当这些 Webhook 中任意一个返回成功（2xx）响应时，该 Webhook 将被触发，上游响应、已发送数据和原始映射前数据均可通过 "
 "%1$sargs[0]%2$s 获得。"
+
+#: src/Services/SecurityNotice.php:74
+msgid "On this site the update found no such files."
+msgstr "在本站，此次更新没有发现此类文件。"
+
+#: src/Services/SecurityNotice.php:68
+#. translators: 1: number of archive files, 2: number of AI trace files, 3: number of ZIP files.
+#, php-format
+msgid ""
+"On this site the update moved %1$d archive files and %2$d AI trace files to "
+"a folder with a random name, and deleted %3$d archive ZIPs. If this site "
+"runs on one of those servers, treat what was in those files (the data your "
+"webhooks sent) as possibly read by others."
+msgstr ""
+"在本站，此次更新已将 %1$d 个归档文件和 %2$d 个 AI 追踪文件移到一个随机命名的文件夹，并删除了 %3$d 个归档 "
+"ZIP。如果本站运行在上述某种服务器上，请视这些文件中的内容（你的 Webhook 发送的数据）为可能已被他人读取。"
 
 #: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "One \"Name: value\" per line."
@@ -4939,12 +4977,12 @@ msgstr "收件人"
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Records the exact prompts and raw responses exchanged with the AI model to "
-"a protected log file, so support can diagnose a build you report. On by "
-"default; API keys are always redacted and entries older than 30 days are "
-"pruned automatically. Turn this off if you would rather not keep the log."
+"a protected log file, so support can diagnose a build you report. Off by "
+"default: turn it on, then repeat the build you want to report. API keys are "
+"always redacted and entries older than 30 days are pruned automatically."
 msgstr ""
-"把与 AI 模型往来的完整提示词和原始响应记录到受保护的日志文件，便于支持人员诊断你反馈的问题。默认开启；API 密钥始终会被遮蔽，超过 30 "
-"天的记录会自动清理。若不希望保留日志，可关闭此项。"
+"把与 AI 模型往来的完整提示词和原始响应记录到受保护的日志文件，便于支持人员诊断你反馈的问题。默认关闭：开启后，重新执行一遍你要反馈的构建。API "
+"密钥始终会被遮蔽，超过 30 天的记录会自动清理。"
 
 #: src/Services/Notifications/TemplateContext.php:116
 msgid "Recovered"
@@ -5763,6 +5801,14 @@ msgid ""
 "or to grant your role that capability."
 msgstr "代码片段是在本站点运行的 PHP，因此 WordPress 对它们的限制与编辑插件代码相同。请管理员进行更改，或为你的角色授予该权限。"
 
+#: src/Services/SecurityNotice.php:78
+msgid ""
+"Some old files could not be moved. Delete the folders "
+"wp-content/uploads/fswa-logs and wp-content/uploads/fswa-ai-logs by hand."
+msgstr ""
+"部分旧文件无法移动。请手动删除 wp-content/uploads/fswa-logs 和 "
+"wp-content/uploads/fswa-ai-logs 这两个文件夹。"
+
 #: admin/src/components/ImportDialog.vue
 msgid "Some parts were left out"
 msgstr "部分内容已被略过"
@@ -6243,6 +6289,10 @@ msgstr ""
 #: src/Services/Builds/PublishBuildClient.php:148
 msgid "The library already has a build like this one."
 msgstr "库中已经有一个类似的构建。"
+
+#: src/Api/SettingsController.php:236
+msgid "The log archive can only be downloaded from the settings screen."
+msgstr "日志归档只能从设置页面下载。"
 
 #: src/Services/Export/BuildImporter.php:242
 #. translators: 1: rule name or event, 2: webhook name
@@ -6979,6 +7029,18 @@ msgstr "未映射的字段也会发送。"
 msgid "Unsaved changes"
 msgstr "未保存的更改"
 
+#: src/Services/SecurityNotice.php:63
+msgid ""
+"Until this version, archived delivery logs and the AI Builder trace log "
+"were kept in fixed folders under wp-content/uploads, protected only by an "
+".htaccess file. Web servers that do not read .htaccess (nginx, Caddy, IIS) "
+"served those files to anyone who knew or guessed the address. Download ZIPs "
+"of the archive were left in a folder that was reachable on Apache too."
+msgstr ""
+"在此版本之前，已归档的投递日志和 AI 构建器的追踪日志存放在 wp-content/uploads 下的固定文件夹中，仅靠 .htaccess "
+"文件保护。不读取 .htaccess 的 Web 服务器（nginx、Caddy、IIS）会把这些文件提供给任何知道或猜到地址的人。归档的下载 ZIP "
+"则留在一个在 Apache 上同样可以访问的文件夹里。"
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Untitled"
 msgstr "无标题"
@@ -7221,10 +7283,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:45
 #: src/Controllers/AdminController.php:46
-#: src/Controllers/AdminController.php:53
+#: src/Controllers/AdminController.php:47
 #: src/Controllers/AdminController.php:54
+#: src/Controllers/AdminController.php:55
 msgid "Webhook Actions"
 msgstr ""
 
@@ -7233,7 +7295,11 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — 借助 AI 构建自动化与集成"
 
-#: src/Controllers/AdminController.php:259
+#: src/Services/SecurityNotice.php:94
+msgid "Webhook Actions 3.4.3 is a security update. Please read this once."
+msgstr "Webhook Actions 3.4.3 是一次安全更新，请阅读一次。"
+
+#: src/Controllers/AdminController.php:264
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -7292,6 +7358,15 @@ msgstr "未找到 Webhook。"
 #: admin/src/App.vue admin/src/components/ExportDialog.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
 msgid "Webhooks"
 msgstr "Webhook"
+
+#: src/Services/SecurityNotice.php:86
+#. translators: %s: comma-separated list of trigger names.
+#, php-format
+msgid ""
+"Webhooks on this site use these triggers: %s. Ask the users who registered "
+"or changed a password while those webhooks were active to choose a new "
+"password."
+msgstr "本站的 Webhook 使用了这些触发器：%s。请让在这些 Webhook 启用期间注册或修改过密码的用户重新设置密码。"
 
 #: admin/src/components/BuildPublishFields.vue
 msgid "Website"

@@ -1148,7 +1148,7 @@
   "Publishing…": "正在发布…",
   "Reading this build…": "正在读取此配置…",
   "Reading…": "正在读取…",
-  "Records the exact prompts and raw responses exchanged with the AI model to a protected log file, so support can diagnose a build you report. On by default; API keys are always redacted and entries older than 30 days are pruned automatically. Turn this off if you would rather not keep the log.": "把与 AI 模型往来的完整提示词和原始响应记录到受保护的日志文件，便于支持人员诊断你反馈的问题。默认开启；API 密钥始终会被遮蔽，超过 30 天的记录会自动清理。若不希望保留日志，可关闭此项。",
+  "Records the exact prompts and raw responses exchanged with the AI model to a protected log file, so support can diagnose a build you report. Off by default: turn it on, then repeat the build you want to report. API keys are always redacted and entries older than 30 days are pruned automatically.": "把与 AI 模型往来的完整提示词和原始响应记录到受保护的日志文件，便于支持人员诊断你反馈的问题。默认关闭：开启后，重新执行一遍你要反馈的构建。API 密钥始终会被遮蔽，超过 30 天的记录会自动清理。",
   "Replaces your site URL with example.com everywhere it appears — the export header, endpoint URLs, Code Glue and the AI conversation. Whoever imports the build re-points those endpoints at their own site.": "把出现过站点网址的地方全部替换为 example.com——包括导出头信息、端点地址、Code Glue 和 AI 对话。导入者会把这些端点改指向自己的站点。",
   "Runs a process end to end — a chain of steps, a scheduled job, a workflow.": "端到端地跑完一个流程——一串步骤、一个定时任务或一条工作流。",
   "Search chains…": "搜索链…",
@@ -1725,5 +1725,15 @@
   "a local or private network address": "本地或私有网络地址",
   "plain http://": "普通 http://",
   "port %s": "端口 %s",
-  "%1$s, %2$s": "%1$s、%2$s"
+  "%1$s, %2$s": "%1$s、%2$s",
+  "Webhook Actions 3.4.3 is a security update. Please read this once.": "Webhook Actions 3.4.3 是一次安全更新，请阅读一次。",
+  "Until this version, archived delivery logs and the AI Builder trace log were kept in fixed folders under wp-content/uploads, protected only by an .htaccess file. Web servers that do not read .htaccess (nginx, Caddy, IIS) served those files to anyone who knew or guessed the address. Download ZIPs of the archive were left in a folder that was reachable on Apache too.": "在此版本之前，已归档的投递日志和 AI 构建器的追踪日志存放在 wp-content/uploads 下的固定文件夹中，仅靠 .htaccess 文件保护。不读取 .htaccess 的 Web 服务器（nginx、Caddy、IIS）会把这些文件提供给任何知道或猜到地址的人。归档的下载 ZIP 则留在一个在 Apache 上同样可以访问的文件夹里。",
+  "On this site the update moved %1$d archive files and %2$d AI trace files to a folder with a random name, and deleted %3$d archive ZIPs. If this site runs on one of those servers, treat what was in those files (the data your webhooks sent) as possibly read by others.": "在本站，此次更新已将 %1$d 个归档文件和 %2$d 个 AI 追踪文件移到一个随机命名的文件夹，并删除了 %3$d 个归档 ZIP。如果本站运行在上述某种服务器上，请视这些文件中的内容（你的 Webhook 发送的数据）为可能已被他人读取。",
+  "On this site the update found no such files.": "在本站，此次更新没有发现此类文件。",
+  "Some old files could not be moved. Delete the folders wp-content/uploads/fswa-logs and wp-content/uploads/fswa-ai-logs by hand.": "部分旧文件无法移动。请手动删除 wp-content/uploads/fswa-logs 和 wp-content/uploads/fswa-ai-logs 这两个文件夹。",
+  "Earlier versions also stored the password of a new account, and could send it to the endpoint, when a webhook was attached to a trigger that carries one, such as user_register or woocommerce_created_customer. Passwords are no longer stored or sent: the field stays in the payload with an empty (null) value. Passwords already stored in captured examples, delivery logs and archive files are being removed in the background.": "当 Webhook 绑定到会携带密码的触发器（例如 user_register 或 woocommerce_created_customer）时，早期版本还会保存新账户的密码，并可能把它发送到端点。现在密码不再被保存或发送：该字段保留在数据中，值为空（null）。此前已保存在捕获示例、投递日志和归档文件中的密码正在后台清除。",
+  "Webhooks on this site use these triggers: %s. Ask the users who registered or changed a password while those webhooks were active to choose a new password.": "本站的 Webhook 使用了这些触发器：%s。请让在这些 Webhook 启用期间注册或修改过密码的用户重新设置密码。",
+  "Full details in the changelog": "完整说明见更新日志",
+  "I have read this, dismiss": "我已阅读，关闭",
+  "The log archive can only be downloaded from the settings screen.": "日志归档只能从设置页面下载。"
 }

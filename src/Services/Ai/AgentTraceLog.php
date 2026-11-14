@@ -4,37 +4,47 @@ namespace FlowSystems\WebhookActions\Services\Ai;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Support\PrivateStorage;
+
 /**
  * Developer trace log for the AI Builder.
  *
  * When enabled, records the exact input/output of every LLM call — the system
  * prompt, the conversation turns we sent, and the model's raw response — as one
- * JSON object per line (JSONL), in a per-day file under the uploads directory.
+ * JSON object per line (JSONL), in a per-day file in the plugin's private
+ * storage folder (see PrivateStorage).
  * This is the window you need to iterate on prompts: you cannot tune what the
  * model does until you can see what it received and returned.
  *
- * On by default so a build's history is already captured when a user reports a
- * problem (support does not have to ask them to flip a switch and reproduce).
+ * Off by default since 3.4.3. It used to be on, so that a build's history was
+ * already there when a user reported a problem. But a trace holds prompts and
+ * payload data, and most sites never open a support request: keeping that for
+ * everyone, unasked, is not worth one saved round trip. Support now asks for
+ * the switch to be turned on and the build repeated. A site that turned
+ * logging on itself keeps it on.
  * Toggled via the `fswa_ai_debug` option (set from the trace panel's "Logging"
  * switch) or forced by defining the `FSWA_AI_DEBUG` constant. The panel that
  * surfaces the log is still shown only under the Vite dev server, or in
  * production when the site enables "AI Dev Trace" in Settings (the separate
- * `fswa_ai_trace_enabled` option). The log dir is protected from web access;
- * even so, traces can contain prompt/payload data — a site can opt out from the
- * panel's "Logging" switch, and old day files are pruned by {@see self::prune()}.
+ * `fswa_ai_trace_enabled` option). The folder name is random and stored only in
+ * the database — until 3.4.3 the files sat at `uploads/fswa-ai-logs/<date>.jsonl`
+ * behind an .htaccess, which nginx and Caddy do not read. Traces can contain
+ * prompt/payload data — a site can opt out from the panel's "Logging" switch,
+ * and old day files are pruned by {@see self::prune()}.
  */
 class AgentTraceLog {
-  private const DIR_NAME     = 'fswa-ai-logs';
+  /** Folder inside the plugin's private storage. */
+  public const STORAGE_DIR   = 'ai-traces';
   private const OPTION       = 'fswa_ai_debug';
   private const TAIL_BYTES   = 512 * 1024; // Read at most the last 512 KB per file.
   private const RETAIN_DAYS  = 30;         // Prune day files older than this.
 
   /** Default for the logging option when the site has never set it. */
-  public const DEFAULT_ENABLED = true;
+  public const DEFAULT_ENABLED = false;
 
   /**
    * Is trace logging on? True if the constant is set, or the option is enabled.
-   * On by default (see class docblock) until a site explicitly turns it off.
+   * Off (see class docblock) until a site turns it on.
    */
   public function isEnabled(): bool {
     if (defined('FSWA_AI_DEBUG') && FSWA_AI_DEBUG) {
@@ -47,7 +57,9 @@ class AgentTraceLog {
    * Turn trace logging on or off (persists in the option).
    */
   public function setEnabled(bool $enabled): void {
-    update_option(self::OPTION, $enabled, false);
+    // 1/0, not a boolean: update_option() skips writing `false` to an option
+    // that does not exist yet.
+    update_option(self::OPTION, $enabled ? 1 : 0, false);
   }
 
   /**
@@ -73,8 +85,9 @@ class AgentTraceLog {
     }
 
     $file = $dir . '/' . gmdate('Y-m-d') . '.jsonl';
-    // First trace of the day: prune stale files so on-by-default logging can't
-    // grow the uploads dir without bound. Cheap — runs at most once per day.
+    // First trace of the day: prune stale files so the folder can't grow
+    // without bound. Cheap — runs at most once per day. The daily cleanup cron
+    // prunes too, which is what covers a site where logging is now off.
     if (!file_exists($file)) {
       $this->prune();
     }
@@ -88,6 +101,7 @@ class AgentTraceLog {
       $file = $dir . '/' . gmdate('Y-m-d') . '-u' . $uid . '.jsonl';
     }
     file_put_contents($file, $line . "\n", FILE_APPEND | LOCK_EX);
+    PrivateStorage::adopt($file);
   }
 
   /**
@@ -146,7 +160,7 @@ class AgentTraceLog {
    * Delete day files older than RETAIN_DAYS, keyed off the date in the filename
    * (robust against filemtime being touched). Best-effort; never throws.
    */
-  private function prune(): void {
+  public function prune(): void {
     $dir = $this->dir();
     if (!is_dir($dir)) {
       return;
@@ -169,25 +183,17 @@ class AgentTraceLog {
    * Absolute path of the trace directory (may not exist yet).
    */
   public function dir(): string {
-    $uploads = wp_upload_dir();
-    return rtrim($uploads['basedir'], '/') . '/' . self::DIR_NAME;
+    return PrivateStorage::path(self::STORAGE_DIR);
   }
 
   /**
-   * Create the trace directory (once) and drop in web-access guards. Returns the
-   * path, or null if it could not be created.
+   * Create the trace directory with its web-access guards. Returns the path,
+   * or null if it could not be created.
    */
   private function ensureDir(): ?string {
     $dir = $this->dir();
-    if (!is_dir($dir)) {
-      if (!wp_mkdir_p($dir)) {
-        return null;
-      }
-      // Block directory listing / direct file access where the server honours it.
-      @file_put_contents($dir . '/index.html', '');
-      @file_put_contents($dir . '/.htaccess', "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n");
-    }
-    return $dir;
+
+    return is_dir($dir) ? $dir : PrivateStorage::ensure(self::STORAGE_DIR);
   }
 
   /**

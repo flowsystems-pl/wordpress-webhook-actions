@@ -5,10 +5,16 @@ namespace FlowSystems\WebhookActions\Services;
 defined('ABSPATH') || exit;
 
 use FlowSystems\WebhookActions\Repositories\LogRepository;
+use FlowSystems\WebhookActions\Support\PrivateStorage;
 use ZipArchive;
 
 class LogArchiver {
-  private const ARCHIVE_DIR = 'fswa-logs/archive';
+  /** Folder inside the plugin's private storage. See PrivateStorage. */
+  public const STORAGE_DIR = 'log-archive';
+
+  /** Where a download ZIP is built before it is streamed and deleted. */
+  private const TEMP_DIR = 'tmp';
+
   private LogRepository $repository;
   private StatsService $statsService;
 
@@ -23,8 +29,7 @@ class LogArchiver {
    * @return string
    */
   public function getArchiveDir(): string {
-    $uploadDir = wp_upload_dir();
-    return $uploadDir['basedir'] . '/' . self::ARCHIVE_DIR;
+    return PrivateStorage::path(self::STORAGE_DIR);
   }
 
   /**
@@ -36,6 +41,10 @@ class LogArchiver {
   public function archiveLogs(int $days): int {
     $date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
     $totalArchived = 0;
+
+    // Archives written before 3.4.3 sat at a fixed, guessable path. The upgrade
+    // moves them; this repeats the move for a site where it could not finish.
+    LegacyStorage::migrate();
 
     // Aggregate stats from logs that will be deleted BEFORE deleting them
     $this->aggregateStatsBeforeDeletion($date);
@@ -58,16 +67,28 @@ class LogArchiver {
         $logsByDate[$logDate][] = $log;
       }
 
-      // Write to archive files
+      // Write to archive files. Only rows that made it into a file are deleted:
+      // until 3.4.3 the write was never checked, so a folder that could not be
+      // written to lost the logs instead of keeping them.
+      $logIds = [];
       foreach ($logsByDate as $logDate => $dateLogs) {
-        $this->writeToArchive($logDate, $dateLogs);
+        if ($this->writeToArchive($logDate, $dateLogs)) {
+          $logIds = array_merge($logIds, array_column($dateLogs, 'id'));
+        }
       }
 
-      // Delete archived logs
-      $logIds = array_column($logs, 'id');
-      $this->deleteLogs($logIds);
+      // Nothing could be written. The same rows would come back next time
+      // round, so stop and leave them for the next run.
+      if (empty($logIds)) {
+        break;
+      }
 
-      $totalArchived += count($logs);
+      $this->deleteLogs($logIds);
+      $totalArchived += count($logIds);
+
+      if (count($logIds) < count($logs)) {
+        break;
+      }
     }
 
     return $totalArchived;
@@ -134,65 +155,30 @@ class LogArchiver {
    *
    * @param string $date Y-m-d format
    * @param array $logs
+   * @return bool Whether the rows are in the file.
    */
-  private function writeToArchive(string $date, array $logs): void {
-    $yearMonth = gmdate('Y-m', strtotime($date));
-    $archiveDir = $this->getArchiveDir() . '/' . $yearMonth;
+  private function writeToArchive(string $date, array $logs): bool {
+    $yearMonth  = gmdate('Y-m', strtotime($date));
+    $archiveDir = PrivateStorage::ensure(self::STORAGE_DIR . '/' . $yearMonth);
 
-    // Create directory if not exists
-    if (!file_exists($archiveDir)) {
-      wp_mkdir_p($archiveDir);
-      $this->createHtaccess();
-    }
-
-    $filePath = $archiveDir . '/' . $date . '.json';
-
-    // Append to existing file using WP_Filesystem
-    global $wp_filesystem;
-    $this->initFilesystem();
-
-    $existingContent = '';
-    if ($wp_filesystem->exists($filePath)) {
-      $existingContent = $wp_filesystem->get_contents($filePath);
+    if ($archiveDir === null) {
+      return false;
     }
 
     $newContent = '';
     foreach ($logs as $log) {
+      // A row written before 3.4.3 may not have been reached by the stored-data
+      // cleanup yet. Nothing goes into a file with a password in it.
+      $log = array_merge($log, StoredCredentialCleanup::scrubLogRow($log));
       $newContent .= wp_json_encode($log) . "\n";
     }
 
-    $wp_filesystem->put_contents($filePath, $existingContent . $newContent, FS_CHMOD_FILE);
-  }
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Appending: WP_Filesystem can only rewrite a whole file, which meant reading a full day of logs into memory for every batch.
+    $file    = $archiveDir . '/' . $date . '.json';
+    $written = @file_put_contents($file, $newContent, FILE_APPEND | LOCK_EX);
+    PrivateStorage::adopt($file);
 
-  /**
-   * Initialize WP_Filesystem
-   */
-  private function initFilesystem(): void {
-    global $wp_filesystem;
-
-    if (!$wp_filesystem) {
-      require_once ABSPATH . 'wp-admin/includes/file.php';
-      WP_Filesystem();
-    }
-  }
-
-  /**
-   * Create .htaccess to block direct access
-   */
-  private function createHtaccess(): void {
-    global $wp_filesystem;
-    $this->initFilesystem();
-
-    $htaccessPath = $this->getArchiveDir() . '/.htaccess';
-
-    if (!$wp_filesystem->exists($htaccessPath)) {
-      $baseDir = dirname($htaccessPath);
-      if (!$wp_filesystem->exists($baseDir)) {
-        wp_mkdir_p($baseDir);
-      }
-
-      $wp_filesystem->put_contents($htaccessPath, "Deny from all\n", FS_CHMOD_FILE);
-    }
+    return $written !== false && $written === strlen($newContent);
   }
 
   /**
@@ -279,80 +265,71 @@ class LogArchiver {
   }
 
   /**
-   * Create a ZIP archive of all archive files
+   * Build a ZIP of all archive files for a download.
+   *
+   * The file is written inside the private storage folder under a random name
+   * and is the caller's to delete once it has been sent. It is never given a
+   * URL: until 3.4.3 the ZIP was left in uploads and handed out as a link.
    *
    * @return string|null Path to ZIP file or null on failure
    */
   public function createArchiveZip(): ?string {
     $archiveDir = $this->getArchiveDir();
 
-    if (!file_exists($archiveDir)) {
+    if (!file_exists($archiveDir) || !class_exists('ZipArchive')) {
       return null;
     }
 
-    $uploadDir = wp_upload_dir();
-    $zipFilename = 'fswa-logs-archive-' . gmdate('Y-m-d-His') . '.zip';
-    $zipPath = $uploadDir['basedir'] . '/fswa-logs/' . $zipFilename;
+    $this->cleanupTempFiles();
 
-    // Ensure directory exists
-    $zipDir = dirname($zipPath);
-    if (!file_exists($zipDir)) {
-      wp_mkdir_p($zipDir);
-    }
-
-    if (!class_exists('ZipArchive')) {
+    $tempDir = PrivateStorage::ensure(self::TEMP_DIR);
+    if ($tempDir === null) {
       return null;
     }
 
-    $zip = new ZipArchive();
+    $zipPath = $tempDir . '/' . wp_generate_password(32, false) . '.zip';
+    $zip     = new ZipArchive();
 
     if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
       return null;
     }
 
-    // Add all archive files
-    $monthDirs = glob($archiveDir . '/????-??', GLOB_ONLYDIR);
+    $added     = 0;
+    $monthDirs = glob($archiveDir . '/????-??', GLOB_ONLYDIR) ?: [];
 
     foreach ($monthDirs as $monthDir) {
       $month = basename($monthDir);
-      $files = glob($monthDir . '/*.json');
 
-      foreach ($files as $file) {
-        $zip->addFile($file, $month . '/' . basename($file));
+      foreach (glob($monthDir . '/*.json') ?: [] as $file) {
+        if ($zip->addFile($file, $month . '/' . basename($file))) {
+          $added++;
+        }
       }
+    }
+
+    // An empty ZipArchive writes no file at all.
+    if ($added === 0) {
+      $zip->close();
+      wp_delete_file($zipPath);
+      return null;
     }
 
     $zip->close();
 
-    // Schedule cleanup of old ZIP files
-    $this->cleanupOldZips();
-
-    return $zipPath;
+    return file_exists($zipPath) ? $zipPath : null;
   }
 
   /**
-   * Delete old ZIP files (keep only last 5)
+   * Remove download ZIPs a request left behind (a dropped connection, a
+   * fatal error mid-stream). Anything older than an hour is not in use.
    */
-  private function cleanupOldZips(): void {
-    $uploadDir = wp_upload_dir();
-    $logsDir = $uploadDir['basedir'] . '/fswa-logs';
+  public function cleanupTempFiles(): void {
+    $tempDir = PrivateStorage::path(self::TEMP_DIR);
 
-    $zips = glob($logsDir . '/fswa-logs-archive-*.zip');
-
-    if (count($zips) <= 5) {
-      return;
-    }
-
-    // Sort by modification time
-    usort($zips, function ($a, $b) {
-      return filemtime($a) - filemtime($b);
-    });
-
-    // Delete oldest files
-    $toDelete = array_slice($zips, 0, count($zips) - 5);
-
-    foreach ($toDelete as $file) {
-      wp_delete_file($file);
+    foreach (glob($tempDir . '/*.zip') ?: [] as $file) {
+      if ((int) @filemtime($file) < time() - HOUR_IN_SECONDS) {
+        wp_delete_file($file);
+      }
     }
   }
 
@@ -360,42 +337,8 @@ class LogArchiver {
    * Delete all archive files
    */
   public function clearArchive(): void {
-    $archiveDir = $this->getArchiveDir();
-
-    if (!file_exists($archiveDir)) {
-      return;
-    }
-
-    $this->recursiveDelete($archiveDir);
-  }
-
-  /**
-   * Recursively delete a directory
-   *
-   * @param string $dir
-   */
-  private function recursiveDelete(string $dir): void {
-    global $wp_filesystem;
-    $this->initFilesystem();
-
-    if (!$wp_filesystem->exists($dir)) {
-      return;
-    }
-
-    $files = $wp_filesystem->dirlist($dir);
-
-    if (is_array($files)) {
-      foreach ($files as $filename => $fileinfo) {
-        $path = $dir . '/' . $filename;
-        if ('d' === $fileinfo['type']) {
-          $this->recursiveDelete($path);
-        } else {
-          wp_delete_file($path);
-        }
-      }
-    }
-
-    $wp_filesystem->rmdir($dir);
+    PrivateStorage::deleteTree($this->getArchiveDir());
+    PrivateStorage::deleteTree(PrivateStorage::path(self::TEMP_DIR));
   }
 
   /**

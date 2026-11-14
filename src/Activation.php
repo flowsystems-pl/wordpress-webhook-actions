@@ -4,7 +4,11 @@ namespace FlowSystems\WebhookActions;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Services\LegacyStorage;
 use FlowSystems\WebhookActions\Services\Scheduler;
+use FlowSystems\WebhookActions\Services\SecurityNotice;
+use FlowSystems\WebhookActions\Services\StoredCredentialCleanup;
+use FlowSystems\WebhookActions\Support\PrivateStorage;
 
 class Activation {
   /**
@@ -252,6 +256,13 @@ class Activation {
     delete_option('fswa_db_version');
     delete_option('fswa_log_retention_days');
     delete_option('fswa_archive_logs');
+    delete_option(StoredCredentialCleanup::OPTION);
+    delete_option(SecurityNotice::OPTION);
+
+    // Archived logs and AI trace files, and anything an earlier version left
+    // at the old fixed paths.
+    LegacyStorage::purge();
+    PrivateStorage::destroy();
     delete_option('fswa_archived_stats');
     delete_option('fswa_vault_key');
     delete_option('fswa_glue_token_writes');

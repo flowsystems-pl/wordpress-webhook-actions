@@ -7,7 +7,12 @@ defined('ABSPATH') || exit;
 use FlowSystems\WebhookActions\Controllers\DispatcherController;
 use FlowSystems\WebhookActions\Controllers\AdminController;
 use FlowSystems\WebhookActions\Database\Migrator;
+use FlowSystems\WebhookActions\Api\SettingsController;
+use FlowSystems\WebhookActions\Services\Ai\AgentTraceLog;
+use FlowSystems\WebhookActions\Services\LegacyStorage;
 use FlowSystems\WebhookActions\Services\LogArchiver;
+use FlowSystems\WebhookActions\Services\SecurityNotice;
+use FlowSystems\WebhookActions\Services\StoredCredentialCleanup;
 use FlowSystems\WebhookActions\Services\QueueService;
 use FlowSystems\WebhookActions\Services\ActivityLogService;
 use FlowSystems\WebhookActions\Services\HookDiscoveryService;
@@ -105,6 +110,13 @@ class App {
     // Register cleanup cron
     add_action('fswa_cleanup_logs', [$this, 'runLogCleanup']);
 
+    // 3.4.3 security release: finish removing passwords earlier versions stored
+    // (a slice per queue tick until done), and tell the admin what happened.
+    add_action('fswa_process_queue', [StoredCredentialCleanup::class, 'tick'], 20);
+    if (is_admin()) {
+      (new SecurityNotice())->register();
+    }
+
     // Bust hook discovery cache when plugins or theme change.
     add_action('activated_plugin', [HookDiscoveryService::class, 'clearCache']);
     add_action('deactivated_plugin', [HookDiscoveryService::class, 'clearCache']);
@@ -153,9 +165,13 @@ class App {
    */
   public function runLogCleanup(): void {
     $retentionDays = (int) get_option('fswa_log_retention_days', 30);
-    $archiveEnabled = (bool) get_option('fswa_archive_logs', true);
+    $archiveEnabled = (bool) get_option('fswa_archive_logs', SettingsController::DEFAULT_ARCHIVE_LOGS);
 
     $archiver = new LogArchiver();
+
+    // Whether or not this site archives: nothing stays at the old fixed paths.
+    LegacyStorage::migrate();
+    $archiver->cleanupTempFiles();
 
     if ($archiveEnabled) {
       // Archive logs before deleting
@@ -168,6 +184,10 @@ class App {
     // Also cleanup old completed queue jobs (keep for 7 days)
     $queueService = new QueueService();
     $queueService->cleanupCompletedJobs(7);
+
+    // AI Builder trace files past their 30 days. The trace log only prunes
+    // when it writes, and it is off by default, so it cannot be left to that.
+    (new AgentTraceLog())->prune();
 
     // Prune activity logs
     $activityRetentionDays = (int) get_option('fswa_activity_log_retention_days', 90);
