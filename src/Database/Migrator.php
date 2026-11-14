@@ -2,15 +2,28 @@
 
 namespace FlowSystems\WebhookActions\Database;
 
+use FlowSystems\WebhookActions\Services\LegacyStorage;
+use FlowSystems\WebhookActions\Services\SecurityNotice;
+use FlowSystems\WebhookActions\Services\StoredCredentialCleanup;
+use FlowSystems\WebhookActions\Support\CredentialScrubber;
+
 class Migrator {
   private const OPTION_KEY = 'fswa_db_version';
-  private const CURRENT_VERSION = '2.5.0';
+  private const CURRENT_VERSION = '2.6.0';
+
+  /**
+   * True while migrating a site that already had the plugin, false on a first
+   * install. A migration that cleans up after an earlier version has nothing
+   * to do on a new site.
+   */
+  private static bool $isUpgrade = false;
 
   /**
    * Run pending migrations
    */
   public static function migrate(): void {
     $currentVersion = get_option(self::OPTION_KEY, '0.0.0');
+    self::$isUpgrade = get_option(self::OPTION_KEY, null) !== null;
 
     // Check if critical tables are missing (handles flattened migrations)
     if (self::hasMissingTables()) {
@@ -96,6 +109,7 @@ class Migrator {
       '2.3.0'  => [self::class, 'migration_2_3_0'],
       '2.4.0'  => [self::class, 'migration_2_4_0'],
       '2.5.0'  => [self::class, 'migration_2_5_0'],
+      '2.6.0'  => [self::class, 'migration_2_6_0'],
     ];
   }
 
@@ -913,6 +927,65 @@ class Migrator {
       $wpdb->query("ALTER TABLE {$webhooksTable} ADD COLUMN muted_rule_ids TEXT NULL DEFAULT NULL");
     }
     // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
+  }
+
+  /**
+   * Migration 2.6.0 - Security release 3.4.3. No schema change.
+   *
+   * Moves archived logs and AI trace files out of the fixed folders they could
+   * be downloaded from, starts removing passwords that earlier versions stored,
+   * and records what it found for the admin notice. Each part is independent:
+   * a failure in one must not stop the others or leave the site half migrated.
+   */
+  public static function migration_2_6_0(): void {
+    global $wpdb;
+
+    if (!self::$isUpgrade) {
+      return;
+    }
+
+    // Archiving is off by default from this version. A site that never touched
+    // the setting was archiving, so say so explicitly and keep it that way.
+    if (get_option('fswa_archive_logs', null) === null) {
+      add_option('fswa_archive_logs', 1);
+    }
+
+    $facts = ['archive_files' => 0, 'trace_files' => 0, 'zips' => 0, 'leftover' => false, 'triggers' => []];
+
+    try {
+      $facts = array_merge($facts, LegacyStorage::migrate());
+    } catch (\Throwable $e) {
+      $facts['leftover'] = LegacyStorage::exists();
+    }
+
+    try {
+      StoredCredentialCleanup::start();
+    } catch (\Throwable $e) {
+      // The state option is written first, so the queue tick picks it up.
+      unset($e);
+    }
+
+    // Which webhooks on this site were on a trigger that carries a password.
+    try {
+      $names = array_merge(
+        ['user_register', 'wp_update_user', 'woocommerce_created_customer', 'woocommerce_checkout_order_processed', 'woocommerce_checkout_update_order_meta'],
+        CredentialScrubber::positionalHooks()
+      );
+      $placeholders = implode(',', array_fill(0, count($names), '%s'));
+      // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
+      $found = $wpdb->get_col(
+        $wpdb->prepare(
+          "SELECT DISTINCT trigger_name FROM {$wpdb->prefix}fswa_webhook_triggers WHERE trigger_name IN ({$placeholders})",
+          $names
+        )
+      );
+      // phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
+      $facts['triggers'] = array_values(array_filter((array) $found, 'is_string'));
+    } catch (\Throwable $e) {
+      unset($e);
+    }
+
+    SecurityNotice::raise($facts);
   }
 
   /**

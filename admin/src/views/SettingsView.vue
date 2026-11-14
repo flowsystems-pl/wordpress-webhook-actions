@@ -11,11 +11,11 @@ const { proActive } = usePro()
 
 const settings = ref({
   log_retention_days: 30,
-  archive_logs: true,
+  archive_logs: false,
   menu_under_tools: false,
   activity_log_retention_days: 90,
   ai_trace_enabled: false,
-  ai_debug_enabled: true,
+  ai_debug_enabled: false,
   mcp_expose_writes: true,
   glue_token_writes: false,
   glue: { can_write: true, reason: '', headline: '', detail: '', message: '', fixable_in_settings: false },
@@ -209,10 +209,17 @@ const saveSettings = async () => {
 
 const downloadArchive = async () => {
   try {
-    const result = await api.settings.downloadArchive()
-    if (result.download_url) {
-      window.open(result.download_url, '_blank')
-    }
+    // The ZIP comes back in the response and is saved from memory. It has no
+    // URL of its own: nothing is left on the server to link to.
+    const { blob, filename } = await api.settings.downloadArchive()
+    const url = URL.createObjectURL(blob)
+    const a = window.document.createElement('a')
+    a.href = url
+    a.download = filename || 'fswa-logs-archive.zip'
+    window.document.body.appendChild(a)
+    a.click()
+    window.document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   } catch (e) {
     error.value = e.message
     console.error('Failed to download archive:', e)
@@ -508,7 +515,7 @@ onMounted(loadData)
                 <Label>{{ __('Log AI Dev Trace') }}</Label>
               </div>
               <p class="text-sm text-muted-foreground">
-                {{ __('Records the exact prompts and raw responses exchanged with the AI model to a protected log file, so support can diagnose a build you report. On by default; API keys are always redacted and entries older than 30 days are pruned automatically. Turn this off if you would rather not keep the log.') }}
+                {{ __('Records the exact prompts and raw responses exchanged with the AI model to a protected log file, so support can diagnose a build you report. Off by default: turn it on, then repeat the build you want to report. API keys are always redacted and entries older than 30 days are pruned automatically.') }}
               </p>
 
               <div class="flex items-center space-x-2 pt-2">

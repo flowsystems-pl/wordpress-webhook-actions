@@ -100,6 +100,33 @@ export function get(endpoint, params = {}) {
 }
 
 /**
+ * GET a file. The response body is the file itself, not JSON, so it is read as
+ * a blob; an error response is still JSON and is thrown like any other.
+ *
+ * @returns {Promise<{blob: Blob, filename: string}>}
+ */
+export async function download(endpoint) {
+  const settings = getSettings()
+  const response = await fetch(buildUrl(settings.restUrl || '', endpoint), {
+    method: 'GET',
+    headers: { 'X-WP-Nonce': settings.nonce },
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    const err = new Error(errorData.message || `HTTP ${response.status}`)
+    err.code = errorData.code
+    err.data = errorData
+    throw err
+  }
+
+  const disposition = response.headers.get('Content-Disposition') || ''
+  const match = disposition.match(/filename="?([^";]+)"?/)
+
+  return { blob: await response.blob(), filename: match ? match[1] : '' }
+}
+
+/**
  * POST request
  */
 export function post(endpoint, data = {}) {
@@ -176,7 +203,7 @@ export const api = {
     update: (data) => put('settings', data),
     info: () => get('settings/info'),
     archive: () => get('settings/archive'),
-    downloadArchive: () => get('settings/archive/download'),
+    downloadArchive: () => download('settings/archive/download'),
     clearLogs: () => post('settings/clear-logs'),
   },
   queue: {

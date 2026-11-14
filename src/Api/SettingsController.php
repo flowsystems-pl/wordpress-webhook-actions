@@ -19,7 +19,11 @@ class SettingsController extends WP_REST_Controller {
   protected $rest_base = 'settings';
 
   private const DEFAULT_RETENTION_DAYS = 30;
-  private const DEFAULT_ARCHIVE_LOGS = true;
+  /**
+   * Off for a new install since 3.4.3. A site that was archiving before the
+   * update has the option written explicitly by migration 2.6.0 and keeps it.
+   */
+  public const DEFAULT_ARCHIVE_LOGS = false;
   private const DEFAULT_MENU_UNDER_TOOLS = false;
   private const DEFAULT_ACTIVITY_RETENTION_DAYS = 90;
   private const DEFAULT_AI_TRACE_ENABLED = false;
@@ -147,7 +151,9 @@ class SettingsController extends WP_REST_Controller {
     if ($request->has_param('archive_logs')) {
       $val = (bool) $request->get_param('archive_logs');
       $oldValues['archive_logs'] = (bool) get_option('fswa_archive_logs', self::DEFAULT_ARCHIVE_LOGS);
-      update_option('fswa_archive_logs', $val);
+      // Stored as 1/0: update_option() silently skips writing `false` to an
+      // option that does not exist yet, so "off" never saved on a fresh install.
+      update_option('fswa_archive_logs', $val ? 1 : 0);
       $newValues['archive_logs'] = $val;
     }
 
@@ -175,7 +181,7 @@ class SettingsController extends WP_REST_Controller {
     if ($request->has_param('ai_debug_enabled')) {
       $val = (bool) $request->get_param('ai_debug_enabled');
       $oldValues['ai_debug_enabled'] = (bool) get_option('fswa_ai_debug', AgentTraceLog::DEFAULT_ENABLED);
-      update_option('fswa_ai_debug', $val, false);
+      update_option('fswa_ai_debug', $val ? 1 : 0, false);
       $newValues['ai_debug_enabled'] = $val;
     }
 
@@ -215,8 +221,23 @@ class SettingsController extends WP_REST_Controller {
 
   /**
    * Download archive as ZIP
+   *
+   * The ZIP is built in the plugin's private folder, sent in this response and
+   * deleted. Until 3.4.3 it was left in uploads and its URL returned, which
+   * made every archived log a public file.
    */
   public function downloadArchive($request) {
+    // Raw log rows leave the site here, so this is for an administrator in the
+    // browser only. An application password or API token gets its log data
+    // through the routes that scrub it (see RestPayloadRedaction).
+    if (!RestPayloadRedaction::isAdminScreen($request)) {
+      return new WP_Error(
+        'rest_forbidden',
+        __('The log archive can only be downloaded from the settings screen.', 'flowsystems-webhook-actions'),
+        ['status' => 403]
+      );
+    }
+
     $archiver = new LogArchiver();
     $zipPath = $archiver->createArchiveZip();
 
@@ -228,16 +249,29 @@ class SettingsController extends WP_REST_Controller {
       );
     }
 
-    // Return download URL
-    $uploadDir = wp_upload_dir();
-    $relativePath = str_replace($uploadDir['basedir'], '', $zipPath);
-    $downloadUrl = $uploadDir['baseurl'] . $relativePath;
+    // Deleted even when the browser drops the connection halfway through.
+    ignore_user_abort(true);
+    register_shutdown_function(static function () use ($zipPath): void {
+      if (file_exists($zipPath)) {
+        wp_delete_file($zipPath);
+      }
+    });
 
-    return rest_ensure_response([
-      'download_url' => $downloadUrl,
-      'filename' => basename($zipPath),
-      'size' => filesize($zipPath),
-    ]);
+    while (ob_get_level() > 0) {
+      ob_end_clean();
+    }
+
+    nocache_headers();
+    header('Content-Type: application/zip');
+    header('Content-Disposition: attachment; filename="fswa-logs-archive-' . gmdate('Y-m-d-His') . '.zip"');
+    header('Content-Length: ' . (string) filesize($zipPath));
+    header('X-Content-Type-Options: nosniff');
+    header('X-Robots-Tag: noindex, nofollow', true);
+
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streams the file; WP_Filesystem would load the whole archive into memory.
+    readfile($zipPath);
+    wp_delete_file($zipPath);
+    exit;
   }
 
   /**

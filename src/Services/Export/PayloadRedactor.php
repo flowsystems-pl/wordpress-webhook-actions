@@ -4,6 +4,8 @@ namespace FlowSystems\WebhookActions\Services\Export;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Support\CredentialScrubber;
+
 /**
  * Replaces personal data in captured example payloads with stable placeholders.
  *
@@ -172,6 +174,14 @@ class PayloadRedactor {
    * The placeholder for a key, or null when the key carries nothing personal.
    */
   private function placeholderFor(string $key): ?string {
+    // Passwords first, by the same rule that keeps them out of deliveries. The
+    // patterns below match `password` but not `user_pass`: stripping the
+    // `user_` prefix leaves a bare `pass`, which nothing here recognised, so a
+    // build exported from a user_register capture carried the password.
+    if (CredentialScrubber::isCredentialKey($key)) {
+      return self::REDACTED;
+    }
+
     $normalized = ltrim(strtolower($key), '_');
 
     // Whole key first, then the prefix-stripped form. Order matters: stripping

@@ -4,7 +4,7 @@ Tags: webhooks, automation, zapier, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.4.2
+Stable tag: 3.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -191,5 +191,19 @@ Yes. Create a token from the API Tokens screen and pass it as `X-FSWA-Token: <to
 
 For the full release history see [wpwebhooks.org/changelog/](https://wpwebhooks.org/changelog/)
 
-= 3.4.2 — 2026-10-30 =
-- Security: the plugin's REST API returned captured example payloads, delivery logs and response bodies unscrubbed. The AI abilities already redacted them, but an AI agent, script or integration calling the REST routes directly with an application password or an API token got values such as a WooCommerce order key, a password echoed back by an endpoint, or the Authorization header a delivery sent. For every caller other than the plugin's own admin screen, those fields now come back with secret values replaced by `[redacted]`, using the same rule as the abilities. The admin screen still shows the full data, and webhook settings are unaffected. Thanks to WPVibe for reporting it
+= 3.4.3 — 2026-11-14 =
+- Security: archived delivery logs could be downloaded without logging in on web servers that do not read .htaccess files (nginx, Caddy, IIS). Logs older than the retention period were written to `wp-content/uploads/fswa-logs/archive/` under file names made of the date, and the only protection was an .htaccess file. The AI Builder trace log in `wp-content/uploads/fswa-ai-logs/` had the same weakness, and the ZIP made by "Download Archive" was left in a folder that was reachable on Apache as well. All of these now live in a folder with a random name that is stored only in the database. On update the existing files are moved there, the old ZIPs are deleted and the old folders are removed. "Download Archive" sends the ZIP straight to the browser of a logged-in administrator and keeps no copy on the server
+- Security: a webhook on a trigger that carries a password stored that password and could send it. `user_register` and `woocommerce_created_customer` pass the new account's password as plain text, `wp_set_password`, `password_reset` and `wp_authenticate` pass it as a bare argument, and any hook that passes a user object carried the password hash and the activation key. The value went into the captured example and into every delivery log, and reached the endpoint unless a field mapping left it out. Password fields now arrive as `null`: the key stays, so field paths do not change, and the value never enters the payload. This covers password-named keys (`user_pass`, `password`, `pass1`, `account_password` and similar), form fields declared as type password, and the known password arguments of WordPress and WooCommerce hooks. Tokens, API keys and order keys in your payloads are not touched. Passwords already stored in captured examples, delivery logs, queued jobs and archive files are removed after the update, in the background on large sites
+- If you had a webhook on one of those triggers, ask the users who registered or changed a password while it was active to choose a new one. If your site runs on nginx, Caddy or IIS and had archived logs, treat the data in them as possibly read by others. An admin notice after the update says what was found on your site
+- Changed: "Archive logs before deletion" is off by default on new installs. Sites that were archiving keep archiving
+- Changed: "Log AI Dev Trace" is off by default. It recorded the prompts and responses of every Build with AI conversation so support could look at a build you reported. Sites that never touched the switch stop recording after this update, and trace files older than 30 days are now deleted daily. Turn it on in Settings before repeating a build you want to report
+- Fixed: turning "Archive logs before deletion" off on a site that had never saved that setting did not stick
+- Fixed: archived logs were deleted from the database even when the archive file could not be written
+- Fixed: exporting or publishing a build made from a `user_register` capture left `user_pass` in the example payload
+- New filters: `fswa_scrub_credentials` (turn the password scrub off for one trigger), `fswa_credential_arg_positions` (name more hooks that pass a password as an argument), `fswa_private_storage_dir` (keep the plugin's files outside the web root)
+- Uninstalling the plugin now deletes its archive and trace files
+
+== Upgrade Notice ==
+
+= 3.4.3 =
+Security release, update now. Archived logs could be read without logging in on nginx, Caddy and IIS servers, and webhooks on user_register stored the new account's password.

@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.4.0\n"
+"with AI help 3.4.3\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T16:10:19+00:00\n"
+"POT-Creation-Date: 2026-11-14T16:18:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -809,7 +809,7 @@ msgstr ""
 msgid "All logs have been cleared"
 msgstr ""
 
-#: src/Api/SettingsController.php:255
+#: src/Api/SettingsController.php:289
 msgid "All logs have been cleared."
 msgstr ""
 
@@ -2250,6 +2250,16 @@ msgstr ""
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr ""
 
+#: src/Services/SecurityNotice.php:81
+msgid ""
+"Earlier versions also stored the password of a new account, and could send "
+"it to the endpoint, when a webhook was attached to a trigger that carries "
+"one, such as user_register or woocommerce_created_customer. Passwords are "
+"no longer stored or sent: the field stays in the payload with an empty "
+"(null) value. Passwords already stored in captured examples, delivery logs "
+"and archive files are being removed in the background."
+msgstr ""
+
 #: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue
 msgid "Edit"
 msgstr ""
@@ -2392,7 +2402,7 @@ msgid ""
 "resolves it."
 msgstr ""
 
-#: src/App.php:137
+#: src/App.php:149
 msgid "Every Minute"
 msgstr ""
 
@@ -2862,6 +2872,10 @@ msgstr ""
 msgid "Full REST API with API token authentication"
 msgstr ""
 
+#: src/Services/SecurityNotice.php:104
+msgid "Full details in the changelog"
+msgstr ""
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid ""
 "Full pipeline in dispatch order — post-dispatch Code Glue fires after "
@@ -3072,6 +3086,10 @@ msgstr ""
 
 #: admin/src/components/AiStepControls.vue
 msgid "I fired it — retry"
+msgstr ""
+
+#: src/Services/SecurityNotice.php:106
+msgid "I have read this, dismiss"
 msgstr ""
 
 #: admin/src/components/TokenCreatedDialog.vue
@@ -3840,7 +3858,7 @@ msgstr ""
 msgid "No activity recorded yet."
 msgstr ""
 
-#: src/Api/SettingsController.php:226
+#: src/Api/SettingsController.php:247
 msgid "No archive files found or failed to create ZIP."
 msgstr ""
 
@@ -4161,6 +4179,20 @@ msgid ""
 "On a successful (2xx) response from any of these webhooks, this webhook "
 "fires with the upstream response, sent payload, and original pre-mapping "
 "payload available as %1$sargs[0]%2$s."
+msgstr ""
+
+#: src/Services/SecurityNotice.php:74
+msgid "On this site the update found no such files."
+msgstr ""
+
+#: src/Services/SecurityNotice.php:68
+#. translators: 1: number of archive files, 2: number of AI trace files, 3: number of ZIP files.
+#, php-format
+msgid ""
+"On this site the update moved %1$d archive files and %2$d AI trace files to "
+"a folder with a random name, and deleted %3$d archive ZIPs. If this site "
+"runs on one of those servers, treat what was in those files (the data your "
+"webhooks sent) as possibly read by others."
 msgstr ""
 
 #: src/Services/Notifications/Channels/WebhookDriver.php:34
@@ -4843,9 +4875,9 @@ msgstr ""
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Records the exact prompts and raw responses exchanged with the AI model to "
-"a protected log file, so support can diagnose a build you report. On by "
-"default; API keys are always redacted and entries older than 30 days are "
-"pruned automatically. Turn this off if you would rather not keep the log."
+"a protected log file, so support can diagnose a build you report. Off by "
+"default: turn it on, then repeat the build you want to report. API keys are "
+"always redacted and entries older than 30 days are pruned automatically."
 msgstr ""
 
 #: src/Services/Notifications/TemplateContext.php:116
@@ -5627,6 +5659,12 @@ msgid ""
 "or to grant your role that capability."
 msgstr ""
 
+#: src/Services/SecurityNotice.php:78
+msgid ""
+"Some old files could not be moved. Delete the folders "
+"wp-content/uploads/fswa-logs and wp-content/uploads/fswa-ai-logs by hand."
+msgstr ""
+
 #: admin/src/components/ImportDialog.vue
 msgid "Some parts were left out"
 msgstr ""
@@ -6089,6 +6127,10 @@ msgstr ""
 
 #: src/Services/Builds/PublishBuildClient.php:148
 msgid "The library already has a build like this one."
+msgstr ""
+
+#: src/Api/SettingsController.php:236
+msgid "The log archive can only be downloaded from the settings screen."
 msgstr ""
 
 #: src/Services/Export/BuildImporter.php:242
@@ -6804,6 +6846,15 @@ msgstr ""
 msgid "Unsaved changes"
 msgstr ""
 
+#: src/Services/SecurityNotice.php:63
+msgid ""
+"Until this version, archived delivery logs and the AI Builder trace log "
+"were kept in fixed folders under wp-content/uploads, protected only by an "
+".htaccess file. Web servers that do not read .htaccess (nginx, Caddy, IIS) "
+"served those files to anyone who knew or guessed the address. Download ZIPs "
+"of the archive were left in a folder that was reachable on Apache too."
+msgstr ""
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Untitled"
 msgstr ""
@@ -7040,10 +7091,10 @@ msgid "Webhook #%s"
 msgstr ""
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:45
 #: src/Controllers/AdminController.php:46
-#: src/Controllers/AdminController.php:53
+#: src/Controllers/AdminController.php:47
 #: src/Controllers/AdminController.php:54
+#: src/Controllers/AdminController.php:55
 msgid "Webhook Actions"
 msgstr ""
 
@@ -7052,7 +7103,11 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr ""
 
-#: src/Controllers/AdminController.php:259
+#: src/Services/SecurityNotice.php:94
+msgid "Webhook Actions 3.4.3 is a security update. Please read this once."
+msgstr ""
+
+#: src/Controllers/AdminController.php:264
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -7110,6 +7165,15 @@ msgstr ""
 
 #: admin/src/App.vue admin/src/components/ExportDialog.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
 msgid "Webhooks"
+msgstr ""
+
+#: src/Services/SecurityNotice.php:86
+#. translators: %s: comma-separated list of trigger names.
+#, php-format
+msgid ""
+"Webhooks on this site use these triggers: %s. Ask the users who registered "
+"or changed a password while those webhooks were active to choose a new "
+"password."
 msgstr ""
 
 #: admin/src/components/BuildPublishFields.vue

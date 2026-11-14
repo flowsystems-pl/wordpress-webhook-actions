@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Webhook Actions - build automations and integrations "
-"with AI help 3.4.0\n"
+"with AI help 3.4.3\n"
 "Report-Msgid-Bugs-To: "
 "https://wordpress.org/support/plugin/flowsystems-webhook-actions\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-26T16:10:19+00:00\n"
+"POT-Creation-Date: 2026-11-14T16:18:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: flowsystems-webhook-actions\n"
@@ -917,7 +917,7 @@ msgstr "Alle ketens"
 msgid "All logs have been cleared"
 msgstr "Alle logboeken zijn gewist"
 
-#: src/Api/SettingsController.php:255
+#: src/Api/SettingsController.php:289
 msgid "All logs have been cleared."
 msgstr "Alle logboeken zijn gewist."
 
@@ -2525,6 +2525,23 @@ msgstr "Dynamische URL-sjablonen opgelost uit de payload"
 msgid "Each condition rule must be an object {field, operator, value}."
 msgstr "Elke voorwaarderegel moet een object {field, operator, value} zijn."
 
+#: src/Services/SecurityNotice.php:81
+msgid ""
+"Earlier versions also stored the password of a new account, and could send "
+"it to the endpoint, when a webhook was attached to a trigger that carries "
+"one, such as user_register or woocommerce_created_customer. Passwords are "
+"no longer stored or sent: the field stays in the payload with an empty "
+"(null) value. Passwords already stored in captured examples, delivery logs "
+"and archive files are being removed in the background."
+msgstr ""
+"Eerdere versies sloegen ook het wachtwoord van een nieuw account op, en "
+"konden het naar het eindpunt sturen, wanneer een webhook was gekoppeld aan "
+"een trigger die er een meegeeft, zoals user_register of "
+"woocommerce_created_customer. Wachtwoorden worden niet meer opgeslagen of "
+"verstuurd: het veld blijft in de payload staan met een lege waarde (null). "
+"Wachtwoorden die al zijn opgeslagen in vastgelegde voorbeelden, "
+"bezorglogboeken en archiefbestanden worden op de achtergrond verwijderd."
+
 #: admin/src/components/TriggerSchemaPanel.vue admin/src/components/WebhookCardContent.vue admin/src/components/notifications/ChannelsPanel.vue admin/src/components/notifications/RulesPanel.vue
 msgid "Edit"
 msgstr "Bewerken"
@@ -2669,7 +2686,7 @@ msgstr ""
 "Events API v2-integratiesleutel. Mislukkingen openen een incident; een "
 "later succes lost het op."
 
-#: src/App.php:137
+#: src/App.php:149
 msgid "Every Minute"
 msgstr "Elke minuut"
 
@@ -3162,6 +3179,10 @@ msgstr "Volledig"
 msgid "Full REST API with API token authentication"
 msgstr "Volledige REST API met API-tokenauthenticatie"
 
+#: src/Services/SecurityNotice.php:104
+msgid "Full details in the changelog"
+msgstr "Alle details in de changelog"
+
 #: admin/src/components/TestWebhookDrawer.vue
 msgid ""
 "Full pipeline in dispatch order — post-dispatch Code Glue fires after "
@@ -3392,6 +3413,10 @@ msgstr "Hoe de test wordt uitgevoerd: now (synchroon) of queue (asynchroon)."
 #: admin/src/components/AiStepControls.vue
 msgid "I fired it — retry"
 msgstr "Ik heb hem afgevuurd — opnieuw"
+
+#: src/Services/SecurityNotice.php:106
+msgid "I have read this, dismiss"
+msgstr "Ik heb dit gelezen, sluiten"
 
 #: admin/src/components/TokenCreatedDialog.vue
 msgid "I've saved it elsewhere"
@@ -4225,7 +4250,7 @@ msgstr ""
 msgid "No activity recorded yet."
 msgstr "Nog geen activiteit vastgelegd."
 
-#: src/Api/SettingsController.php:226
+#: src/Api/SettingsController.php:247
 msgid "No archive files found or failed to create ZIP."
 msgstr "Geen archiefbestanden gevonden of maken van ZIP mislukt."
 
@@ -4588,6 +4613,25 @@ msgstr ""
 "webhook geactiveerd, waarbij de upstream-respons, de verzonden payload en "
 "de oorspronkelijke payload vóór mapping beschikbaar zijn als "
 "%1$sargs[0]%2$s."
+
+#: src/Services/SecurityNotice.php:74
+msgid "On this site the update found no such files."
+msgstr "Op deze site heeft de update geen dergelijke bestanden gevonden."
+
+#: src/Services/SecurityNotice.php:68
+#. translators: 1: number of archive files, 2: number of AI trace files, 3: number of ZIP files.
+#, php-format
+msgid ""
+"On this site the update moved %1$d archive files and %2$d AI trace files to "
+"a folder with a random name, and deleted %3$d archive ZIPs. If this site "
+"runs on one of those servers, treat what was in those files (the data your "
+"webhooks sent) as possibly read by others."
+msgstr ""
+"Op deze site heeft de update %1$d archiefbestanden en %2$d "
+"AI-tracebestanden verplaatst naar een map met een willekeurige naam en %3$d "
+"archief-ZIP's verwijderd. Draait deze site op een van die servers, ga er "
+"dan van uit dat anderen de inhoud van die bestanden (de gegevens die je "
+"webhooks verstuurden) hebben kunnen lezen."
 
 #: src/Services/Notifications/Channels/WebhookDriver.php:34
 msgid "One \"Name: value\" per line."
@@ -5344,15 +5388,15 @@ msgstr "Ontvangers"
 #: admin/src/views/SettingsView.vue
 msgid ""
 "Records the exact prompts and raw responses exchanged with the AI model to "
-"a protected log file, so support can diagnose a build you report. On by "
-"default; API keys are always redacted and entries older than 30 days are "
-"pruned automatically. Turn this off if you would rather not keep the log."
+"a protected log file, so support can diagnose a build you report. Off by "
+"default: turn it on, then repeat the build you want to report. API keys are "
+"always redacted and entries older than 30 days are pruned automatically."
 msgstr ""
 "Legt de exacte prompts en ruwe antwoorden van het AI-model vast in een "
 "beveiligd logbestand, zodat support een door jou gemelde build kan "
-"onderzoeken. Standaard aan; API-sleutels worden altijd verwijderd en items "
-"ouder dan 30 dagen worden automatisch opgeruimd. Zet dit uit als je het log "
-"liever niet bewaart."
+"onderzoeken. Standaard uit: zet het aan en herhaal daarna de build die je "
+"wilt melden. API-sleutels worden altijd verwijderd en items ouder dan 30 "
+"dagen worden automatisch opgeruimd."
 
 #: src/Services/Notifications/TemplateContext.php:116
 msgid "Recovered"
@@ -6223,6 +6267,14 @@ msgstr ""
 "het bewerken van plugincode. Vraag een beheerder de wijziging te doen, of "
 "je rol die bevoegdheid te geven."
 
+#: src/Services/SecurityNotice.php:78
+msgid ""
+"Some old files could not be moved. Delete the folders "
+"wp-content/uploads/fswa-logs and wp-content/uploads/fswa-ai-logs by hand."
+msgstr ""
+"Sommige oude bestanden konden niet worden verplaatst. Verwijder de mappen "
+"wp-content/uploads/fswa-logs en wp-content/uploads/fswa-ai-logs handmatig."
+
 #: admin/src/components/ImportDialog.vue
 msgid "Some parts were left out"
 msgstr "Sommige onderdelen zijn weggelaten"
@@ -6770,6 +6822,12 @@ msgstr ""
 #: src/Services/Builds/PublishBuildClient.php:148
 msgid "The library already has a build like this one."
 msgstr "De bibliotheek heeft al een build zoals deze."
+
+#: src/Api/SettingsController.php:236
+msgid "The log archive can only be downloaded from the settings screen."
+msgstr ""
+"Het logboekarchief kan alleen vanaf het instellingenscherm worden "
+"gedownload."
 
 #: src/Services/Export/BuildImporter.php:242
 #. translators: 1: rule name or event, 2: webhook name
@@ -7632,6 +7690,21 @@ msgstr "Niet-gekoppelde velden worden ook verzonden."
 msgid "Unsaved changes"
 msgstr "Niet-opgeslagen wijzigingen"
 
+#: src/Services/SecurityNotice.php:63
+msgid ""
+"Until this version, archived delivery logs and the AI Builder trace log "
+"were kept in fixed folders under wp-content/uploads, protected only by an "
+".htaccess file. Web servers that do not read .htaccess (nginx, Caddy, IIS) "
+"served those files to anyone who knew or guessed the address. Download ZIPs "
+"of the archive were left in a folder that was reachable on Apache too."
+msgstr ""
+"Tot deze versie stonden gearchiveerde bezorglogboeken en het tracelog van "
+"de AI Builder in vaste mappen onder wp-content/uploads, alleen beschermd "
+"door een .htaccess-bestand. Webservers die .htaccess niet lezen (nginx, "
+"Caddy, IIS) gaven die bestanden aan iedereen die het adres kende of raadde. "
+"Download-ZIP's van het archief bleven achter in een map die ook op Apache "
+"bereikbaar was."
+
 #: admin/src/components/PayloadGlueDrawer.vue
 msgid "Untitled"
 msgstr "Naamloos"
@@ -7895,10 +7968,10 @@ msgid "Webhook #%s"
 msgstr "Webhook #%s"
 
 #: src/Abilities/AbilityRegistrar.php:92
-#: src/Controllers/AdminController.php:45
 #: src/Controllers/AdminController.php:46
-#: src/Controllers/AdminController.php:53
+#: src/Controllers/AdminController.php:47
 #: src/Controllers/AdminController.php:54
+#: src/Controllers/AdminController.php:55
 msgid "Webhook Actions"
 msgstr ""
 
@@ -7907,7 +7980,11 @@ msgstr ""
 msgid "Webhook Actions - build automations and integrations with AI help"
 msgstr "Webhook Actions — bouw automatiseringen en integraties met AI-hulp"
 
-#: src/Controllers/AdminController.php:259
+#: src/Services/SecurityNotice.php:94
+msgid "Webhook Actions 3.4.3 is a security update. Please read this once."
+msgstr "Webhook Actions 3.4.3 is een beveiligingsupdate. Lees dit één keer."
+
+#: src/Controllers/AdminController.php:264
 msgid ""
 "Webhook Actions by Flow Systems: Your webhooks have been migrated to the "
 "new database format."
@@ -7968,6 +8045,18 @@ msgstr "Webhook niet gevonden."
 #: admin/src/App.vue admin/src/components/ExportDialog.vue admin/src/views/ActivityView.vue admin/src/views/WebhooksList.vue
 msgid "Webhooks"
 msgstr "Webhooks"
+
+#: src/Services/SecurityNotice.php:86
+#. translators: %s: comma-separated list of trigger names.
+#, php-format
+msgid ""
+"Webhooks on this site use these triggers: %s. Ask the users who registered "
+"or changed a password while those webhooks were active to choose a new "
+"password."
+msgstr ""
+"Webhooks op deze site gebruiken deze triggers: %s. Vraag gebruikers die "
+"zich registreerden of hun wachtwoord wijzigden terwijl die webhooks actief "
+"waren om een nieuw wachtwoord te kiezen."
 
 #: admin/src/components/BuildPublishFields.vue
 msgid "Website"

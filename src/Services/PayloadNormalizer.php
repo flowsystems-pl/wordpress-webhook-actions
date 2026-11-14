@@ -4,6 +4,8 @@ namespace FlowSystems\WebhookActions\Services;
 
 defined('ABSPATH') || exit;
 
+use FlowSystems\WebhookActions\Support\CredentialScrubber;
+
 /**
  * Builds the payload envelope a trigger fires with, and normalizes the raw
  * do_action arguments inside it into something JSON can carry.
@@ -47,6 +49,15 @@ class PayloadNormalizer {
     ?string $eventId = null,
     ?string $eventTimestamp = null
   ): array {
+    // Passwords come out here, before the payload exists anywhere else: the
+    // captured example, the queue, the delivery log, the wire and Code Glue all
+    // start from this array. See CredentialScrubber for what counts.
+    $scrub      = CredentialScrubber::enabledFor($hook);
+    $normalized = self::args($args);
+    if ($scrub) {
+      $normalized = (new CredentialScrubber())->args($hook, $normalized);
+    }
+
     /**
      * Filter the webhook payload before dispatching.
      *
@@ -54,7 +65,7 @@ class PayloadNormalizer {
      * @param string $hook    The trigger event name
      * @param array  $args    Original arguments passed to the trigger
      */
-    return apply_filters(
+    $payload = apply_filters(
       'fswa_payload',
       [
         'event' => [
@@ -63,7 +74,7 @@ class PayloadNormalizer {
           'version'   => self::VERSION,
         ],
         'hook'      => $hook,
-        'args'      => self::args($args),
+        'args'      => $normalized,
         'timestamp' => time(),
         'site'      => [
           'url' => home_url(),
@@ -72,6 +83,14 @@ class PayloadNormalizer {
       $hook,
       $args
     );
+
+    // Again after the filter, which is handed the raw arguments and can put a
+    // password back without meaning to.
+    if ($scrub && is_array($payload)) {
+      $payload = (new CredentialScrubber())->envelope($payload, $hook);
+    }
+
+    return $payload;
   }
 
   /**
