@@ -1,6 +1,6 @@
 === Webhook Actions - build automations and integrations with AI help ===
 Contributors: mateuszflowsystems
-Tags: webhooks, automation, zapier, n8n, ai
+Tags: webhooks, automation, mcp, n8n, ai
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -8,13 +8,13 @@ Stable tag: 3.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Describe an integration and the AI builds it — no API key needed. Outgoing webhooks from any WordPress or WooCommerce action, queued and retried.
+Verified by WPVibe — Claude, ChatGPT or Cursor build your integrations, or the built-in AI does. Webhooks from any WordPress or WooCommerce action.
 
 == Description ==
 
-**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
-
 🤖 **Verified by WPVibe — works with Claude, ChatGPT and Cursor.** WPVibe ran 28 of the plugin's 31 abilities on a live install, lists Webhook Actions in its [Works with AI directory](https://wpvibe.ai/works-with/flowsystems-webhook-actions/) and publishes five tested recipes for it — see *Ready-made AI recipes (WPVibe)* below.
+
+**Describe the integration you want. The AI builds it.** Webhook Actions ships with **Build with AI** — an in-admin agent that turns a plain-language request like *"When a Contact Form 7 form is submitted, send it as JSON to my n8n webhook"* into a working, tested automation. The agent proposes a plan you can review and edit, then creates the webhook, works from a real example payload — your site's own capture, or the Payload Library for an event your site has never fired — maps the fields, sets dispatch conditions, probes your endpoint, and sends a test delivery. Nothing goes live without your confirmation — new webhooks are always created disabled, and you can undo the last change with one click.
 
 **It reads the API before it builds.** Name HubSpot, OpenAI, Slack, Stripe, Notion or any of the 300+ services in the [WP Webhooks API Docs Library](https://wpwebhooks.org/api-library/) and the agent works from that vendor's *current* API reference — endpoint, auth header, body envelope, the errors people actually hit — not from the model's memory of it. A service the library has never seen is researched from the vendor's own docs on the spot, and every reply built this way says so.
 
